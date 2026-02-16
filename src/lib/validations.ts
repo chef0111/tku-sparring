@@ -54,3 +54,15 @@ export const AdvanceSettingsSchema = StandardSettingsSchema.extend({
   group: z.string().min(1, 'Group is required'),
   match: z.string().min(1, 'Match is required'),
 });
+
+const AthleteSchema = z.object({
+  code: z.string().min(1, 'Code is required'),
+  name: z.string().min(1, 'Name is required'),
+  beltLevel: z.string().min(1, 'Belt level is required'),
+  weight: z.string().min(1, 'Weight is required'),
+  affiliation: z.string().min(1, 'Affiliation is required'),
+});
+
+export const AddAthletesSchema = z.object({
+  athletes: z.array(AthleteSchema).min(1, 'At least one athlete is required'),
+});

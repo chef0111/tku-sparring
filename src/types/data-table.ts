@@ -1,16 +1,18 @@
 import type { ColumnSort, Row, RowData } from '@tanstack/react-table';
 import type { DataTableConfig } from '@/config/data-table';
-import type {
-  DataTableSearchParams,
-  FilterItemSchema,
-} from '@/lib/table/search-params';
+import type { FilterItemSchema } from '@/lib/table/search-params';
+
+export interface QueryKeys {
+  page: string;
+  perPage: string;
+  sort: string;
+  filters: string;
+  joinOperator: string;
+}
 
 declare module '@tanstack/react-table' {
   interface TableMeta<TData extends RowData> {
-    search?: DataTableSearchParams;
-    onSearchChange?: (
-      updater: (prev: DataTableSearchParams) => DataTableSearchParams
-    ) => void;
+    queryKeys?: Partial<QueryKeys>;
   }
 
   interface ColumnMeta<TData extends RowData, TValue> {

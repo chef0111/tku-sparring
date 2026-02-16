@@ -1,11 +1,11 @@
-import {
-  ArrowDownUp,
-  ChevronsUpDown,
-  GripVertical,
-  Trash2,
-} from 'lucide-react';
 import * as React from 'react';
-import type { ColumnSort, SortDirection, Table } from '@tanstack/react-table';
+import {
+  IconArrowsSort,
+  IconGripVertical,
+  IconSelector,
+  IconTrash,
+} from '@tabler/icons-react';
+import type { ColumnSort, Table } from '@tanstack/react-table';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -58,6 +58,7 @@ export function DataTableSortList<TData>({
   const labelId = React.useId();
   const descriptionId = React.useId();
   const [open, setOpen] = React.useState(false);
+  const addButtonRef = React.useRef<HTMLButtonElement>(null);
 
   const sorting = table.getState().sorting;
   const onSortingChange = table.setSorting;
@@ -174,7 +175,7 @@ export function DataTableSortList<TData>({
               onKeyDown={onTriggerKeyDown}
               disabled={disabled}
             >
-              <ArrowDownUp className="text-muted-foreground" />
+              <IconArrowsSort className="text-muted-foreground size-4" />
               Sort
               {sorting.length > 0 && (
                 <Badge
@@ -233,6 +234,7 @@ export function DataTableSortList<TData>({
             <Button
               size="sm"
               className="rounded"
+              ref={addButtonRef}
               onClick={onSortAdd}
               disabled={columns.length === 0}
             >
@@ -329,7 +331,7 @@ function DataTableSortItem({
                 className="w-44 justify-between rounded font-normal"
               >
                 <span className="truncate">{columnLabels.get(sort.id)}</span>
-                <ChevronsUpDown className="opacity-50" />
+                <IconSelector className="size-4 opacity-50" />
               </Button>
             }
           />
@@ -345,7 +347,9 @@ function DataTableSortItem({
                   {columns.map((column) => (
                     <CommandItem
                       key={column.id}
-                      value={column.id}
+                      value={column.id ?? undefined}
+                      data-checked={sort.id === column.id}
+                      className="hover:bg-accent! bg-transparent!"
                       onSelect={(value) => onSortUpdate(sort.id, { id: value })}
                     >
                       <span className="truncate">{column.label}</span>
@@ -360,8 +364,8 @@ function DataTableSortItem({
           open={showDirectionSelector}
           onOpenChange={setShowDirectionSelector}
           value={sort.desc ? 'desc' : 'asc'}
-          onValueChange={(value: string | null) =>
-            onSortUpdate(sort.id, { desc: value === ('desc' as SortDirection) })
+          onValueChange={(value) =>
+            onSortUpdate(sort.id, { desc: value === 'desc' })
           }
         >
           <SelectTrigger
@@ -389,7 +393,7 @@ function DataTableSortItem({
           className="size-8 shrink-0 rounded"
           onClick={() => onSortRemove(sort.id)}
         >
-          <Trash2 />
+          <IconTrash className="size-4" />
         </Button>
         <SortableItemHandle asChild>
           <Button
@@ -397,7 +401,7 @@ function DataTableSortItem({
             size="icon"
             className="size-8 shrink-0 rounded"
           >
-            <GripVertical />
+            <IconGripVertical className="size-4" />
           </Button>
         </SortableItemHandle>
       </div>

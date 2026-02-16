@@ -128,15 +128,21 @@ model Athlete {
   beltLevel    String
   weight       Float
   affiliation  String
-  groupId      String   @db.ObjectId
-  tournamentId String   @db.ObjectId
+  order        Int      @default(0)
+  groupId      String?  @db.ObjectId
+  tournamentId String?  @db.ObjectId
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  group      Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  group      Group?      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  tournament Tournament? @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
 
   @@index([groupId])
   @@index([tournamentId])
+  @@index([name])
+  @@index([beltLevel])
+  @@index([affiliation])
+  @@index([code])
+  @@index([order])
   @@map("athlete")
 }

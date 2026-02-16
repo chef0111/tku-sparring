@@ -46,7 +46,7 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
         )}
       </AnimatePresence>
 
-      <div className="z-20 flex flex-col items-center justify-center gap-4 shadow-md">
+      <div className="z-20 flex flex-col items-center justify-center gap-4">
         <div className="bg-primary/10 ring-primary/10 flex size-10 items-center justify-center rounded-lg border backdrop-blur-xs transition duration-200 group-hover:-translate-y-2 group-hover:ring-3">
           <Trophy className="text-primary size-5" />
         </div>

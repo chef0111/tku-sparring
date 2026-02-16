@@ -14,6 +14,7 @@ export interface TournamentData {
 export interface GroupData {
   id: string;
   name: string;
+  athletes: Array<AthleteData>;
   _count: { athletes: number; matches: number };
 }
 
@@ -27,6 +28,7 @@ export interface TournamentListItem {
 export interface AthleteData {
   id: string;
   name: string;
+  code: string;
   beltLevel: string;
   weight: number;
   affiliation: string;

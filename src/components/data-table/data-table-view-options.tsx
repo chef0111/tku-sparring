@@ -1,6 +1,7 @@
-import { Check, Settings2 } from 'lucide-react';
 import * as React from 'react';
+import { Settings2 } from 'lucide-react';
 import type { Table } from '@tanstack/react-table';
+
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -15,7 +16,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
 
 interface DataTableViewOptionsProps<TData> extends React.ComponentProps<
   typeof PopoverContent
@@ -29,6 +29,8 @@ export function DataTableViewOptions<TData>({
   disabled,
   ...props
 }: DataTableViewOptionsProps<TData>) {
+  const columnVisibility = table.getState().columnVisibility;
+
   const columns = React.useMemo(
     () =>
       table
@@ -37,7 +39,7 @@ export function DataTableViewOptions<TData>({
           (column) =>
             typeof column.accessorFn !== 'undefined' && column.getCanHide()
         ),
-    [table]
+    [table, columnVisibility]
   );
 
   return (
@@ -46,7 +48,6 @@ export function DataTableViewOptions<TData>({
         render={
           <Button
             aria-label="Toggle columns"
-            role="combobox"
             variant="outline"
             size="sm"
             className="ml-auto hidden h-8 font-normal lg:flex"
@@ -66,6 +67,8 @@ export function DataTableViewOptions<TData>({
               {columns.map((column) => (
                 <CommandItem
                   key={column.id}
+                  data-checked={column.getIsVisible()}
+                  className="hover:bg-accent! bg-transparent!"
                   onSelect={() =>
                     column.toggleVisibility(!column.getIsVisible())
                   }
@@ -73,12 +76,6 @@ export function DataTableViewOptions<TData>({
                   <span className="truncate">
                     {column.columnDef.meta?.label ?? column.id}
                   </span>
-                  <Check
-                    className={cn(
-                      'ml-auto size-4 shrink-0',
-                      column.getIsVisible() ? 'opacity-100' : 'opacity-0'
-                    )}
-                  />
                 </CommandItem>
               ))}
             </CommandGroup>

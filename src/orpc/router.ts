@@ -18,8 +18,11 @@ import { createMatch, listMatches, removeMatch, updateMatch } from './matches';
 
 import {
   createAthlete,
+  createAthletes,
   listAthletes,
   removeAthlete,
+  removeAthletes,
+  reorderAthletes,
   updateAthlete,
 } from './athletes';
 
@@ -47,7 +50,10 @@ export default {
   athlete: {
     list: listAthletes,
     create: createAthlete,
+    createMany: createAthletes,
     update: updateAthlete,
     delete: removeAthlete,
+    deleteMany: removeAthletes,
+    reorder: reorderAthletes,
   },
 };

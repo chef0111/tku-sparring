@@ -8,12 +8,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 export function FormSelect({
   children,
   descPosition,
+  className,
+  placeholder,
   ...props
-}: FormControlProps & { children: ReactNode }) {
+}: FormControlProps & {
+  children: ReactNode;
+  className?: string;
+  placeholder?: string;
+}) {
   const field = useFieldContext<string>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
@@ -27,8 +34,9 @@ export function FormSelect({
           aria-invalid={isInvalid}
           id={field.name}
           onBlur={field.handleBlur}
+          className={cn('w-full', className)}
         >
-          <SelectValue />
+          <SelectValue>{field.state.value || placeholder}</SelectValue>
         </SelectTrigger>
         <SelectContent>{children}</SelectContent>
       </Select>

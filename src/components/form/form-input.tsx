@@ -34,6 +34,7 @@ export function FormInput({
   description,
   fieldClassName,
   descPosition,
+  errorMessage,
   tooltip,
   tooltipSide,
   ...inputProps
@@ -57,6 +58,7 @@ export function FormInput({
       label={label}
       description={description}
       descPosition={descPosition}
+      errorMessage={errorMessage}
       className={fieldClassName}
     >
       {tooltip ? (
@@ -78,6 +80,7 @@ export function FormPasswordInput({
   description,
   fieldClassName,
   descPosition,
+  errorMessage,
   ...inputProps
 }: FormInputProps) {
   const field = useFieldContext<string>();
@@ -90,6 +93,7 @@ export function FormPasswordInput({
       description={description}
       descPosition={descPosition}
       className={fieldClassName}
+      errorMessage={errorMessage}
     >
       <div className="relative">
         <Input
@@ -135,6 +139,7 @@ export function FormNumberInput({
   description,
   fieldClassName,
   descPosition,
+  errorMessage,
   step = 1,
   min,
   max,
@@ -162,6 +167,7 @@ export function FormNumberInput({
       label={label}
       description={description}
       descPosition={descPosition}
+      errorMessage={errorMessage}
       className={fieldClassName}
     >
       <div className="relative">

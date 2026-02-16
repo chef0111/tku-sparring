@@ -1,10 +1,11 @@
+import * as React from 'react';
 import {
-  ChevronDown,
-  ChevronUp,
-  ChevronsUpDown,
-  EyeOff,
-  X,
-} from 'lucide-react';
+  IconChevronDown,
+  IconChevronUp,
+  IconEyeOff,
+  IconSelector,
+  IconX,
+} from '@tabler/icons-react';
 import type { Column } from '@tanstack/react-table';
 
 import {
@@ -19,7 +20,7 @@ import { cn } from '@/lib/utils';
 interface DataTableColumnHeaderProps<
   TData,
   TValue,
-> extends React.ComponentProps<typeof DropdownMenuTrigger> {
+> extends React.ComponentProps<'button'> {
   column: Column<TData, TValue>;
   label: string;
 }
@@ -38,7 +39,7 @@ export function DataTableColumnHeader<TData, TValue>({
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn(
-          'hover:bg-accent focus:ring-ring data-[state=open]:bg-accent [&_svg]:text-muted-foreground -ml-1.5 flex h-8 items-center gap-1.5 rounded-md px-2 py-1.5 focus:ring-1 focus:outline-none [&_svg]:size-4 [&_svg]:shrink-0',
+          'hover:bg-accent focus:ring-ring data-open:bg-accent [&_svg]:text-muted-foreground -ml-1.5 flex h-8 items-center gap-1.5 rounded-md px-2 py-1.5 focus:ring-1 focus:outline-none [&_svg]:size-4 [&_svg]:shrink-0',
           className
         )}
         {...props}
@@ -46,11 +47,11 @@ export function DataTableColumnHeader<TData, TValue>({
         {label}
         {column.getCanSort() &&
           (column.getIsSorted() === 'desc' ? (
-            <ChevronDown />
+            <IconChevronDown />
           ) : column.getIsSorted() === 'asc' ? (
-            <ChevronUp />
+            <IconChevronUp />
           ) : (
-            <ChevronsUpDown />
+            <IconSelector />
           ))}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-28">
@@ -61,7 +62,7 @@ export function DataTableColumnHeader<TData, TValue>({
               checked={column.getIsSorted() === 'asc'}
               onClick={() => column.toggleSorting(false)}
             >
-              <ChevronUp />
+              <IconChevronUp />
               Asc
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
@@ -69,7 +70,7 @@ export function DataTableColumnHeader<TData, TValue>({
               checked={column.getIsSorted() === 'desc'}
               onClick={() => column.toggleSorting(true)}
             >
-              <ChevronDown />
+              <IconChevronDown />
               Desc
             </DropdownMenuCheckboxItem>
             {column.getIsSorted() && (
@@ -77,7 +78,7 @@ export function DataTableColumnHeader<TData, TValue>({
                 className="[&_svg]:text-muted-foreground pl-2"
                 onClick={() => column.clearSorting()}
               >
-                <X />
+                <IconX />
                 Reset
               </DropdownMenuItem>
             )}
@@ -89,7 +90,7 @@ export function DataTableColumnHeader<TData, TValue>({
             checked={!column.getIsVisible()}
             onClick={() => column.toggleVisibility(false)}
           >
-            <EyeOff />
+            <IconEyeOff />
             Hide
           </DropdownMenuCheckboxItem>
         )}

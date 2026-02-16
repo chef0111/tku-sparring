@@ -14,6 +14,7 @@ export type FormControlProps = {
   description?: string;
   fieldClassName?: string;
   descPosition?: 'after-label' | 'after-field';
+  errorMessage?: boolean;
 };
 
 type FormBaseProps = FormControlProps & {
@@ -31,14 +32,17 @@ export function FormBase({
   controlFirst,
   orientation,
   descPosition = 'after-label',
+  errorMessage = true,
 }: FormBaseProps) {
   const field = useFieldContext();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-  const labelElement = <FieldLabel htmlFor={field.name}>{label}</FieldLabel>;
+  const labelElement = label && (
+    <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+  );
   const descElement = description && (
     <FieldDescription>{description}</FieldDescription>
   );
-  const errorElem = isInvalid && (
+  const errorElem = isInvalid && errorMessage === true && (
     <FieldError
       errors={[field.state.meta.errors[0]]}
       className="-mt-1 w-full text-left"
@@ -53,11 +57,11 @@ export function FormBase({
     >
       {controlFirst ? (
         <>
-          {children}
+          <FieldContent>{children}</FieldContent>
           <FieldContent>
-            {labelElement}
+            {label && labelElement}
             {descPosition === 'after-label' && descElement}
-            {errorElem}
+            {errorMessage && errorElem}
           </FieldContent>
         </>
       ) : (
@@ -66,9 +70,11 @@ export function FormBase({
             {labelElement}
             {descPosition === 'after-label' && descElement}
           </FieldContent>
-          {children}
-          {descPosition === 'after-field' && descElement}
-          {errorElem}
+          <FieldContent>
+            {children}
+            {descPosition === 'after-field' && descElement}
+            {errorMessage && errorElem}
+          </FieldContent>
         </>
       )}
     </Field>

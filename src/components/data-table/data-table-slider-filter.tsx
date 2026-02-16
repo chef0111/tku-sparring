@@ -174,7 +174,7 @@ export function DataTableSliderFilter<TData>({
             ) : null}
           </Button>
         }
-      ></PopoverTrigger>
+      />
       <PopoverContent align="start" className="flex w-auto flex-col gap-4">
         <div className="flex flex-col gap-3">
           <p className="leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -197,10 +197,13 @@ export function DataTableSliderFilter<TData>({
                 max={max}
                 value={range[0]?.toString()}
                 onChange={onFromInputChange}
-                className={cn('h-8 w-24', unit && 'pr-8')}
+                className={cn(
+                  'h-8 w-24 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none',
+                  unit && 'pr-8'
+                )}
               />
               {unit && (
-                <span className="bg-accent text-muted-foreground absolute top-0 right-0 bottom-0 flex items-center rounded-r-md px-2 text-sm">
+                <span className="bg-accent text-muted-foreground absolute top-0 right-0 bottom-0 m-px flex items-center rounded-r-md px-2 text-sm">
                   {unit}
                 </span>
               )}
@@ -221,10 +224,13 @@ export function DataTableSliderFilter<TData>({
                 max={max}
                 value={range[1]?.toString()}
                 onChange={onToInputChange}
-                className={cn('h-8 w-24', unit && 'pr-8')}
+                className={cn(
+                  'h-8 w-24 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none',
+                  unit && 'pr-8'
+                )}
               />
               {unit && (
-                <span className="bg-accent text-muted-foreground absolute top-0 right-0 bottom-0 flex items-center rounded-r-md px-2 text-sm">
+                <span className="bg-accent text-muted-foreground absolute top-0 right-0 bottom-0 m-px flex items-center rounded-r-md px-2 text-sm">
                   {unit}
                 </span>
               )}
