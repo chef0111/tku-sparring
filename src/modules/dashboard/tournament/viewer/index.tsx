@@ -21,7 +21,7 @@ export function TournamentViewer({
       <SiteHeader
         title={
           <Link
-            to="/dashboard/tournament"
+            to="/dashboard/tournaments"
             className="text-muted-foreground hover:text-foreground"
           >
             Tournaments
