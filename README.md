@@ -4,21 +4,66 @@ A modern, user-friendly web application for managing Taekwondo sparring matches 
 
 ## Installation Guide
 
-### Option 1: Direct Access (Recommended)
+### Option 1: Direct access (Recommended)
 
 Simply visit [TKU Sparring App](https://tku-sparring.netlify.app/) in your web browser to start using the application immediately.
 
-### Option 2: Local Installation
+### Option 2: Setup the project locally
+
+**Prerequisites:**
+
+- [Node.js](https://nodejs.org/) (Latest LTS version recommended)
+- [bun](https://bun.sh/)
+- [MongoDB Atlas](https://cloud.mongodb.com/)
+- [Git](https://git-scm.com/)
+
+**Setup Steps:**
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/chef0111/tku-sparring-app.git
-   ```
-2. Navigate to the project directory:
-   ```bash
    cd tku-sparring-app
    ```
-3. Open `index.html` in your preferred web browser
+
+2. Install dependencies:
+
+   ```bash
+   bun install
+   ```
+
+3. Configure environment variables:
+   - Copy `.env.example` to `.env.local`:
+     ```bash
+     cp .env.example .env.local
+     ```
+   - Update the environment variables:
+     ```env
+     DATABASE_URL=<your-mongodb-connection-string>
+     BETTER_AUTH_URL=http://localhost:3000
+     BETTER_AUTH_SECRET=<generate-a-random-secret>
+     ```
+
+4. Set up the database:
+
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
+
+5. Start the development server:
+
+   ```bash
+   bun run dev
+   ```
+
+The application should now be available at `http://localhost:3000`
+
+6. Build for production
+
+   ```bash
+   bun run start
+   ```
 
 ## Features
 
@@ -63,52 +108,6 @@ Simply visit [TKU Sparring App](https://tku-sparring.netlify.app/) in your web b
 - Match result display
 - Support for multiple matches
 
-## Usage Instructions
-
-### Starting a Match
-
-1. Click the menu button (☰) to open the configuration panel
-2. Configure player names, avatars, and match settings
-3. Click "OK" to save settings and start a new match
-
-### Match Controls
-
-- **Space**: Start/Pause the match timer
-- **Ctrl + M**: Reset the entire match
-- **Ctrl + E**: Reset the current round
-- **Ctrl + F**: Force end the current round
-- **Ctrl + Z**: Undo the last action
-
-### Scoring Controls
-
-**Red Player (Left Side)**
-
-- **E**: 5-point critical head hit
-- **Q**: 4-point critical trunk hit
-- **D**: 3-point head hit
-- **S**: 1-point punch
-- **A**: 2-point trunk hit
-- **W**: Add penalty to red player
-
-**Blue Player (Right Side)**
-
-- **U**: 5-point critical head hit
-- **O**: 4-point critical trunk hit
-- **J**: 3-point head hit
-- **K**: 1-point punch
-- **L**: 2-point trunk hit
-- **I**: Add penalty to blue player
-
-### Penalty Controls
-
-- Left-click on penalty box: Add penalty point
-- Right-click on penalty box: Remove penalty point
-
-### Quick Winner Selection
-
-- Double-click on player avatar: Select round winner
-- Ctrl + click on player avatar: Select winner by KO
-
 ## Requirements and Restrictions
 
 ### Scoring Restrictions
@@ -146,15 +145,20 @@ Winner is determined in the following order:
 5. Higher technique points
 6. More 3-point hits
 
-### Additional notes
+<br>
 
-- User can still operate a match without configuration
-- Timer must be started before using any feature
-- User cannot reset the previous round's stat during break time
+> [!NOTE]
+>
+> - User can still operate a match without configuration
+> - Timer must be started before using any feature
+> - User cannot reset the previous round's stat during break time
+> - The system is web-base and **only supports PC resolution**.
 
-## Technical Requirements
+<br>
 
-- The system is web-base and only supports PC resolution.
+## Stats
+
+![Stats](https://repobeats.axiom.co/api/embed/66da04f4e2d5d29f7e1307ff183de30486fed782.svg 'Repobeats analytics image')
 
 ---
 
