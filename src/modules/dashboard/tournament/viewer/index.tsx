@@ -27,30 +27,24 @@ export function TournamentViewer({
     <div className="flex h-full flex-col">
       <Header
         action={
-          <Button
-            variant="ghost"
-            size="sm"
-            render={<Link to="/dashboard/tournament" />}
-          >
-            <ArrowLeft className="mr-1 size-4" />
-            Tournaments
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/dashboard/tournament">
+              <ArrowLeft className="mr-1 size-4" />
+              Tournaments
+            </Link>
           </Button>
         }
         title={tournament.name}
       >
         <div className="ml-auto flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            render={
-              <Link
-                to="/dashboard/tournament/$id/builder"
-                params={{ id: tournamentId }}
-              />
-            }
-          >
-            <Edit className="mr-1 size-4" />
-            Edit Tournament
+          <Button variant="outline" size="sm" asChild>
+            <Link
+              to="/dashboard/tournament/$id/builder"
+              params={{ id: tournamentId }}
+            >
+              <Edit className="mr-1 size-4" />
+              Edit Tournament
+            </Link>
           </Button>
         </div>
       </Header>
@@ -84,18 +78,13 @@ export function TournamentViewer({
                 <p className="text-muted-foreground text-sm">
                   No groups yet. Switch to builder mode to add groups.
                 </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-4"
-                  render={
-                    <Link
-                      to="/dashboard/tournament/$id/builder"
-                      params={{ id: tournamentId }}
-                    />
-                  }
-                >
-                  Open Builder
+                <Button variant="outline" size="sm" className="mt-4" asChild>
+                  <Link
+                    to="/dashboard/tournament/$id/builder"
+                    params={{ id: tournamentId }}
+                  >
+                    Open Builder
+                  </Link>
                 </Button>
               </div>
             ) : (

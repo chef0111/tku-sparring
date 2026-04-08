@@ -143,29 +143,29 @@
   [role='button'] {
     cursor: pointer;
   }
-}
 
-::-webkit-scrollbar {
-  width: 5px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 5px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--muted);
-  cursor: pointer;
-}
-::-webkit-scrollbar-thumb:active {
-  background: var(--border);
-  cursor: pointer;
-}
-* {
-  scrollbar-width: thin;
-  scrollbar-color: oklch(0.274 0.006 286.033) transparent;
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+    cursor: pointer;
+  }
+  ::-webkit-scrollbar-thumb:active {
+    background: var(--border);
+    cursor: pointer;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.274 0.006 286.033) transparent;
+  }
 }
 
 @utility no-focus {

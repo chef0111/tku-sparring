@@ -40,7 +40,7 @@ export function CreateTournamentDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={children as React.ReactElement} />
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader>

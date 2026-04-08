@@ -140,18 +140,20 @@ export const ComboboxTrigger = ({
 
   return (
     <div ref={containerRef} style={{ display: 'contents' }}>
-      <PopoverTrigger render={<Button variant="outline" {...props} />}>
-        {children ?? (
-          <span className="flex w-full items-center justify-between gap-2">
-            {value
-              ? data.find((item) => item.value === value)?.label
-              : `Select ${type}...`}
-            <ChevronsUpDownIcon
-              className="text-muted-foreground shrink-0"
-              size={16}
-            />
-          </span>
-        )}
+      <PopoverTrigger asChild>
+        <Button variant="outline" {...props}>
+          {children ?? (
+            <span className="flex w-full items-center justify-between gap-2">
+              {value
+                ? data.find((item) => item.value === value)?.label
+                : `Select ${type}...`}
+              <ChevronsUpDownIcon
+                className="text-muted-foreground shrink-0"
+                size={16}
+              />
+            </span>
+          )}
+        </Button>
       </PopoverTrigger>
     </div>
   );

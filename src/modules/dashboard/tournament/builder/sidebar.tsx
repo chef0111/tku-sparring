@@ -86,17 +86,17 @@ export function BuilderSidebar({
               variant="outline"
               size="sm"
               className="bg-accent h-8 w-full justify-center"
-              render={
-                <Link
-                  to="/dashboard/tournament/$id"
-                  params={{ id: tournamentId }}
-                />
-              }
+              asChild
             >
-              <ArrowLeft className="size-4" />
-              <p className="truncate group-data-[collapsible=icon]:hidden">
-                Back to Detail
-              </p>
+              <Link
+                to="/dashboard/tournament/$id"
+                params={{ id: tournamentId }}
+              >
+                <ArrowLeft className="size-4" />
+                <span className="truncate group-data-[collapsible=icon]:hidden">
+                  Back to Detail
+                </span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

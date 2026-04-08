@@ -40,13 +40,11 @@ export function DashboardHome() {
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Recent Tournaments</h3>
               {tournaments.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  render={<Link to="/dashboard/tournament" />}
-                >
-                  View all
-                  <ArrowRight className="ml-1 size-4" />
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/dashboard/tournament">
+                    View all
+                    <ArrowRight className="ml-1 size-4" />
+                  </Link>
                 </Button>
               )}
             </div>

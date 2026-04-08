@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { authClient } from '@/lib/auth-client';
 import { AppSidebar } from '@/modules/dashboard';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { LoadingScreen } from '@/components/navigation/loading';
+import LoadingScreen from '@/components/navigation/loading';
 
 export const Route = createFileRoute('/dashboard')({
   component: DashboardLayout,
