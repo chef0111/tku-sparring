@@ -57,7 +57,7 @@ Simply visit [TKU Sparring App](https://tku-sparring.netlify.app/) in your web b
    bun run dev
    ```
 
-The application should now be available at `http://localhost:3000`
+   The application should now be available at `http://localhost:3000`
 
 6. Build for production
 
