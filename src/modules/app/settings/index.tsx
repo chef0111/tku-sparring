@@ -14,7 +14,7 @@ import {
   TabsContents,
   TabsList,
   TabsTrigger,
-} from '@/components/ui/tabs';
+} from '@/components/ui/animated-tabs';
 import { authClient } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
 

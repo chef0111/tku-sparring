@@ -64,15 +64,15 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
         <div className="relative flex h-8 items-center justify-center">
           <Button
             className="z-10 -translate-y-2 opacity-0 transition duration-200 group-hover:translate-y-0 group-hover:opacity-100 hover:bg-white"
-            render={
-              <Link
-                to="/dashboard/tournament/$id"
-                params={{ id: tournament.id }}
-              />
-            }
+            asChild
           >
-            View Tournament
-            <ArrowRight />
+            <Link
+              to="/dashboard/tournaments/$id"
+              params={{ id: tournament.id }}
+            >
+              View Tournament
+              <ArrowRight />
+            </Link>
           </Button>
           <p className="text-muted-foreground absolute bottom-0 text-xs transition duration-200 group-hover:translate-y-6 group-hover:opacity-0">
             {new Date(tournament.createdAt).toLocaleDateString(undefined, {

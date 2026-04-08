@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import { Plus, Search, Trophy } from 'lucide-react';
+import { SiteHeader } from '../site-header';
 import { TournamentCard } from './tournament-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Separator } from '@/components/ui/separator';
 import { CreateTournamentDialog } from '@/modules/dashboard/tournament/create-tournament-dialog';
 import { useTournaments } from '@/queries/tournaments';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function TournamentListPage() {
   const [search, setSearch] = useState('');
@@ -21,14 +21,7 @@ export function TournamentListPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
-        <SidebarTrigger className="-ml-2" />
-        <Separator
-          orientation="vertical"
-          className="mr-2 data-[orientation=vertical]:h-full"
-        />
-        <h1 className="text-lg font-semibold">Tournaments</h1>
-      </header>
+      <SiteHeader title="Tournaments" />
 
       <div className="flex-1 overflow-auto p-6">
         <div className="mx-auto max-w-7xl space-y-6">
@@ -53,10 +46,7 @@ export function TournamentListPage() {
           {tournamentsQuery.isPending ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="bg-muted/50 h-36 animate-pulse rounded-lg border"
-                />
+                <Skeleton key={i} className="h-64 rounded-lg" />
               ))}
             </div>
           ) : filtered.length === 0 ? (

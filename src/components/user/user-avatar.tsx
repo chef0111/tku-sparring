@@ -23,7 +23,10 @@ const UserAvatar = ({
     .slice(0, 2);
 
   return (
-    <Avatar className={cn('relative', className)} {...props}>
+    <Avatar
+      className={cn('after:no-focus no-focus relative', className)}
+      {...props}
+    >
       <AvatarImage src={image ?? ''} alt={name} className="object-cover" />
       <AvatarFallback
         className={cn(

@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
-import { Trophy } from 'lucide-react';
-import { Tabs, TabsList, TabsTrigger } from '../components/tabs';
+import { ArrowLeft, Trophy } from 'lucide-react';
 import { BuilderSidebar } from './sidebar';
 import {
   AddGroupDialog,
@@ -10,7 +9,8 @@ import {
 } from './dialogs';
 import { Header } from './header';
 import type { GroupData, TournamentData } from '@/modules/dashboard/types';
-import { LoadingScreen } from '@/components/navigation/loading';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import LoadingScreen from '@/components/navigation/loading';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { useTournament } from '@/queries/tournaments';
@@ -37,8 +37,11 @@ export function TournamentBuilderPage({ id }: TournamentBuilderPageProps) {
       <div className="flex h-dvh flex-col items-center justify-center gap-4">
         <Trophy className="text-muted-foreground size-12" />
         <h2 className="text-lg font-semibold">Tournament not found</h2>
-        <Button variant="outline" render={<Link to="/dashboard/tournament" />}>
-          Back to tournaments
+        <Button variant="outline" asChild>
+          <Link to="/dashboard/tournament">
+            <ArrowLeft />
+            Back to tournaments
+          </Link>
         </Button>
       </div>
     );

@@ -104,9 +104,10 @@ export function FormPasswordInput({
           {...inputProps}
         />
         <Button
+          type="button"
           variant="ghost"
           size="icon-sm"
-          className="absolute top-1/2 right-1.5 -translate-y-1/2 hover:bg-transparent!"
+          className="absolute top-1/2 right-1.5 -translate-y-1/2 scale-100! hover:bg-transparent!"
           onClick={() => setShowPassword(!showPassword)}
         >
           {showPassword ? (

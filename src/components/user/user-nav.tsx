@@ -34,26 +34,25 @@ export function UserNav() {
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <SidebarMenuButton
-                size="lg"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-              >
-                <UserAvatar
-                  name={user.name}
-                  image={user.image}
-                  className="size-12 rounded-lg max-sm:size-8 lg:size-8"
-                  fallbackClassName="rounded-lg max-sm:text-sm text-xl lg:text-sm"
-                />
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
-                </div>
-                <ChevronsUpDown className="ml-auto size-4" />
-              </SidebarMenuButton>
-            }
-          />
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton
+              size="lg"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            >
+              <UserAvatar
+                name={user.name}
+                image={user.image}
+                className="size-12 rounded-lg max-sm:size-8 lg:size-8"
+                fallbackClassName="rounded-lg max-sm:text-sm text-xl lg:text-sm"
+              />
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate text-xs">{user.email}</span>
+              </div>
+              <ChevronsUpDown className="ml-auto size-4" />
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) rounded-lg border"
             side={isMobile ? 'bottom' : 'right'}
@@ -86,9 +85,11 @@ export function UserNav() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem render={<Link to="/" target="_blank" />}>
-                <Home />
-                Home
+              <DropdownMenuItem asChild>
+                <Link to="/" target="_blank">
+                  <Home />
+                  Home
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

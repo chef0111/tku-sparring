@@ -6,7 +6,7 @@ import {
 } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { ChevronLeftIcon } from 'lucide-react';
-import { LoadingScreen } from '@/components/navigation/loading';
+import LoadingScreen from '@/components/navigation/loading';
 import { LogoIcon } from '@/components/ui/logo';
 import { FloatingPaths } from '@/components/ui/floating-paths';
 import { authClient } from '@/lib/auth-client';
@@ -65,16 +65,12 @@ function AuthLayout() {
           <div className="bg-[radial-gradient(50%_50%_at_50%_50%,--theme(--color-foreground/.04)_0,--theme(--color-foreground/.01)_80%,transparent_100%)] absolute top-0 right-0 h-320 w-60 [translate:5%_-50%] rounded-full" />
           <div className="bg-[radial-gradient(50%_50%_at_50%_50%,--theme(--color-foreground/.04)_0,--theme(--color-foreground/.01)_80%,transparent_100%)] absolute top-0 right-0 h-320 w-60 -translate-y-87.5 rounded-full" />
         </div>
-        <Button
-          className="absolute top-7 left-5"
-          variant="ghost"
-          render={
-            <Link to="/">
-              <ChevronLeftIcon />
-              Home
-            </Link>
-          }
-        />
+        <Button className="absolute top-7 left-5" variant="ghost" asChild>
+          <Link to="/">
+            <ChevronLeftIcon />
+            Home
+          </Link>
+        </Button>
         <div className="mx-auto space-y-4 sm:w-sm">
           <div className="flex size-fit items-center justify-center gap-1 lg:hidden">
             <LogoIcon className="mr-auto h-5" />

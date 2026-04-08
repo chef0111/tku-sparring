@@ -21,8 +21,8 @@ export const Unauthorized = () => {
           Sign in to access tournament settings and athlete information.
         </EmptyDescription>
       </EmptyHeader>
-      <Button className="hover:bg-white" render={<Link to="/login" />}>
-        Login to Continue
+      <Button className="hover:bg-white" asChild>
+        <Link to="/login">Login to Continue</Link>
       </Button>
     </Empty>
   );
