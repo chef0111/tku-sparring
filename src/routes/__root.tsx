@@ -10,6 +10,7 @@ import appCss from '../styles.css?url';
 import type { QueryClient } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { NotFound } from '@/components/not-found';
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -45,6 +46,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   }),
 
   shellComponent: RootDocument,
+  notFoundComponent: NotFound,
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {

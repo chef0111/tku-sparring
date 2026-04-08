@@ -24,8 +24,8 @@ import {
 
 const navMain = [
   { title: 'Home', icon: Home, to: '/dashboard' },
-  { title: 'Tournaments', icon: Trophy, to: '/dashboard/tournament' },
-  { title: 'Athletes', icon: UserCog, to: '/dashboard/athlete' },
+  { title: 'Tournaments', icon: Trophy, to: '/dashboard/tournaments' },
+  { title: 'Athletes', icon: UserCog, to: '/dashboard/athletes' },
 ];
 const navSecondary = [
   {

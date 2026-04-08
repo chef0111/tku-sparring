@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { TournamentBuilderPage } from '@/modules/dashboard/tournament/builder';
 
-export const Route = createFileRoute('/dashboard_/tournament/$id/builder')({
+export const Route = createFileRoute('/dashboard_/tournaments/$id/builder')({
   component: TournamentBuilder,
 });
 

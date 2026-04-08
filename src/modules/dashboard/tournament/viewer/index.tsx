@@ -32,7 +32,7 @@ export function TournamentViewer({
         <div className="ml-auto flex items-center gap-2">
           <Button variant="outline" size="sm" asChild>
             <Link
-              to="/dashboard/tournament/$id/builder"
+              to="/dashboard/tournaments/$id/builder"
               params={{ id: tournamentId }}
             >
               <Edit className="mr-1 size-4" />
@@ -73,7 +73,7 @@ export function TournamentViewer({
                 </p>
                 <Button variant="outline" size="sm" className="mt-4" asChild>
                   <Link
-                    to="/dashboard/tournament/$id/builder"
+                    to="/dashboard/tournaments/$id/builder"
                     params={{ id: tournamentId }}
                   >
                     Open Builder

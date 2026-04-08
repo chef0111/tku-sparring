@@ -89,7 +89,7 @@ export function BuilderSidebar({
               asChild
             >
               <Link
-                to="/dashboard/tournament/$id"
+                to="/dashboard/tournaments/$id"
                 params={{ id: tournamentId }}
               >
                 <ArrowLeft className="size-4" />

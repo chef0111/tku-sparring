@@ -66,7 +66,10 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
             className="z-10 -translate-y-2 opacity-0 transition duration-200 group-hover:translate-y-0 group-hover:opacity-100 hover:bg-white"
             asChild
           >
-            <Link to="/dashboard/tournament/$id" params={{ id: tournament.id }}>
+            <Link
+              to="/dashboard/tournaments/$id"
+              params={{ id: tournament.id }}
+            >
               View Tournament
               <ArrowRight />
             </Link>
