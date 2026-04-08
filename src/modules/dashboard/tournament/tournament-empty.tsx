@@ -3,7 +3,7 @@ import { CreateTournamentDialog } from './create-tournament-dialog';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
-export const NoTournaments = () => {
+export const TournamentEmpty = () => {
   return (
     <Card className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16">
       <Trophy className="text-muted-foreground mb-4 size-12" />

@@ -1,15 +1,8 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
-import {
-  ArrowLeft,
-  Edit,
-  Layers,
-  LayoutGrid,
-  Trophy,
-  Users,
-} from 'lucide-react';
-import { Header } from '../../header';
-import type { GroupData, TournamentData } from '../../types';
+import { Edit, Layers, LayoutGrid, Trophy, Users } from 'lucide-react';
+import type { GroupData, TournamentData } from '@/modules/dashboard/types';
+import { SiteHeader } from '@/modules/dashboard/site-header';
 import { Button } from '@/components/ui/button';
 
 interface TournamentViewerProps {
@@ -25,16 +18,16 @@ export function TournamentViewer({
 }: TournamentViewerProps) {
   return (
     <div className="flex h-full flex-col">
-      <Header
-        action={
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/dashboard/tournament">
-              <ArrowLeft className="mr-1 size-4" />
-              Tournaments
-            </Link>
-          </Button>
+      <SiteHeader
+        title={
+          <Link
+            to="/dashboard/tournament"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Tournaments
+          </Link>
         }
-        title={tournament.name}
+        action={tournament.name}
       >
         <div className="ml-auto flex items-center gap-2">
           <Button variant="outline" size="sm" asChild>
@@ -47,7 +40,7 @@ export function TournamentViewer({
             </Link>
           </Button>
         </div>
-      </Header>
+      </SiteHeader>
 
       <div className="flex-1 overflow-auto p-6">
         <div className="mx-auto max-w-7xl space-y-6">

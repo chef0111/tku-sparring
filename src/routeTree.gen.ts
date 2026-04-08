@@ -17,6 +17,7 @@ import { Route as DashboardTournamentRouteImport } from './routes/dashboard/tour
 import { Route as ApiSplatRouteImport } from './routes/api.$'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as DashboardTournamentIndexRouteImport } from './routes/dashboard/tournament/index'
+import { Route as DashboardAthleteIndexRouteImport } from './routes/dashboard/athlete/index'
 import { Route as DashboardTournamentIdRouteImport } from './routes/dashboard/tournament/$id'
 import { Route as ApiRpcSplatRouteImport } from './routes/api.rpc.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -62,6 +63,11 @@ const DashboardTournamentIndexRoute =
     path: '/',
     getParentRoute: () => DashboardTournamentRoute,
   } as any)
+const DashboardAthleteIndexRoute = DashboardAthleteIndexRouteImport.update({
+  id: '/athlete/',
+  path: '/athlete/',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardTournamentIdRoute = DashboardTournamentIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dashboard/tournament/$id': typeof DashboardTournamentIdRoute
+  '/dashboard/athlete': typeof DashboardAthleteIndexRoute
   '/dashboard/tournament/': typeof DashboardTournamentIndexRoute
   '/dashboard/tournament/$id/builder': typeof DashboardTournamentIdBuilderRoute
 }
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dashboard/tournament/$id': typeof DashboardTournamentIdRoute
+  '/dashboard/athlete': typeof DashboardAthleteIndexRoute
   '/dashboard/tournament': typeof DashboardTournamentIndexRoute
   '/dashboard/tournament/$id/builder': typeof DashboardTournamentIdBuilderRoute
 }
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dashboard/tournament/$id': typeof DashboardTournamentIdRoute
+  '/dashboard/athlete/': typeof DashboardAthleteIndexRoute
   '/dashboard/tournament/': typeof DashboardTournamentIndexRoute
   '/dashboard_/tournament/$id/builder': typeof DashboardTournamentIdBuilderRoute
 }
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/dashboard/tournament/$id'
+    | '/dashboard/athlete'
     | '/dashboard/tournament/'
     | '/dashboard/tournament/$id/builder'
   fileRoutesByTo: FileRoutesByTo
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/dashboard/tournament/$id'
+    | '/dashboard/athlete'
     | '/dashboard/tournament'
     | '/dashboard/tournament/$id/builder'
   id:
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/dashboard/tournament/$id'
+    | '/dashboard/athlete/'
     | '/dashboard/tournament/'
     | '/dashboard_/tournament/$id/builder'
   fileRoutesById: FileRoutesById
@@ -232,6 +244,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardTournamentIndexRouteImport
       parentRoute: typeof DashboardTournamentRoute
     }
+    '/dashboard/athlete/': {
+      id: '/dashboard/athlete/'
+      path: '/athlete'
+      fullPath: '/dashboard/athlete'
+      preLoaderRoute: typeof DashboardAthleteIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/tournament/$id': {
       id: '/dashboard/tournament/$id'
       path: '/$id'
@@ -289,11 +308,13 @@ const DashboardTournamentRouteWithChildren =
 interface DashboardRouteChildren {
   DashboardTournamentRoute: typeof DashboardTournamentRouteWithChildren
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardAthleteIndexRoute: typeof DashboardAthleteIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardTournamentRoute: DashboardTournamentRouteWithChildren,
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardAthleteIndexRoute: DashboardAthleteIndexRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(

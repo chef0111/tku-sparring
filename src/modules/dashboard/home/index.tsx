@@ -1,8 +1,8 @@
 import { Link } from '@tanstack/react-router';
 import { ArrowRight, Plus } from 'lucide-react';
 import { TournamentCard } from '../tournament/tournament-card';
-import { NoTournaments } from '../tournament/empty';
-import { Header } from '../header';
+import { TournamentEmpty } from '../tournament/tournament-empty';
+import { SiteHeader } from '../site-header';
 import { Button } from '@/components/ui/button';
 import { CreateTournamentDialog } from '@/modules/dashboard/tournament/create-tournament-dialog';
 import { useTournaments } from '@/queries/tournaments';
@@ -15,7 +15,7 @@ export function DashboardHome() {
 
   return (
     <div className="flex h-full flex-col">
-      <Header title="Dashboard" />
+      <SiteHeader title="Dashboard" />
 
       <div className="flex-1 overflow-auto py-6">
         <div className="mx-auto max-w-6xl space-y-8">
@@ -52,11 +52,11 @@ export function DashboardHome() {
             {isPending ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton key={i} className="h-36 rounded-lg" />
+                  <Skeleton key={i} className="h-64 rounded-lg" />
                 ))}
               </div>
             ) : tournaments.length === 0 ? (
-              <NoTournaments />
+              <TournamentEmpty />
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {tournaments.slice(0, 6).map((tournament) => (
