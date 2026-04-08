@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
 import { Trophy } from 'lucide-react';
-import { Tabs, TabsList, TabsTrigger } from '../components/tabs';
 import { BuilderSidebar } from './sidebar';
 import {
   AddGroupDialog,
@@ -10,7 +9,8 @@ import {
 } from './dialogs';
 import { Header } from './header';
 import type { GroupData, TournamentData } from '@/modules/dashboard/types';
-import { LoadingScreen } from '@/components/navigation/loading';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import LoadingScreen from '@/components/navigation/loading';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { useTournament } from '@/queries/tournaments';

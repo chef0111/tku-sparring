@@ -6,7 +6,7 @@ import {
 } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { ChevronLeftIcon } from 'lucide-react';
-import { LoadingScreen } from '@/components/navigation/loading';
+import LoadingScreen from '@/components/navigation/loading';
 import { LogoIcon } from '@/components/ui/logo';
 import { FloatingPaths } from '@/components/ui/floating-paths';
 import { authClient } from '@/lib/auth-client';

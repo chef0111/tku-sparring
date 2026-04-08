@@ -5,10 +5,10 @@ interface LoadingScreenProps {
   description?: string;
 }
 
-export const LoadingScreen = ({
+export default function LoadingScreen({
   title = 'Configuring your app...',
   description = 'Please wait while we prepare everything for you',
-}: LoadingScreenProps) => {
+}: LoadingScreenProps) {
   return (
     <section className="flex h-dvh w-screen items-center justify-center">
       <div className="flex flex-col items-center justify-center gap-4">
@@ -23,4 +23,4 @@ export const LoadingScreen = ({
       </div>
     </section>
   );
-};
+}
