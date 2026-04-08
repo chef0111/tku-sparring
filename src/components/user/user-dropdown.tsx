@@ -1,6 +1,6 @@
 import { LayoutDashboard, LogOutIcon } from 'lucide-react';
 import { toast } from 'sonner';
-import { Link, useRouter } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import UserAvatar from './user-avatar';
 import type { User } from '@/lib/auth';
 import { authClient } from '@/lib/auth-client';
@@ -16,12 +16,13 @@ import {
 
 interface UserDropdownProps {
   user: User;
+  className?: string;
 }
 
-export function UserDropdown({ user }: UserDropdownProps) {
+export function UserDropdown({ user, className }: UserDropdownProps) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger className={className}>
         <UserAvatar
           name={user.name}
           image={user.image}
@@ -31,7 +32,7 @@ export function UserDropdown({ user }: UserDropdownProps) {
       <DropdownMenuGroup>
         <DropdownMenuContent align="end" className="w-35 border">
           <DropdownMenuLabel className="flex items-center gap-2">
-            <div className="relative flex flex-col items-center gap-3">
+            <div className="relative flex items-center">
               <UserAvatar
                 name={user.name}
                 image={user.image}
@@ -62,7 +63,7 @@ export function UserDropdown({ user }: UserDropdownProps) {
 }
 
 function SignOutItem() {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   async function handleSignOut() {
     const { error } = await authClient.signOut();
@@ -70,7 +71,7 @@ function SignOutItem() {
       toast.error(error.message || 'Something went wrong');
     } else {
       toast.success('Signed out successfully');
-      router.invalidate();
+      navigate({ to: '/' });
     }
   }
 

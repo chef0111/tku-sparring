@@ -14,7 +14,7 @@ import {
   TabsContents,
   TabsList,
   TabsTrigger,
-} from '@/components/ui/tabs';
+} from '@/components/ui/animated-tabs';
 import { authClient } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
 
@@ -71,8 +71,8 @@ export const AppSettings = () => {
                   key={tab.value}
                   value={tab.value}
                   className={cn(
-                    'h-full w-full overflow-y-auto px-4 py-4',
-                    disabled ? 'overflow-hidden' : ''
+                    'h-full w-full px-4 py-4',
+                    disabled ? 'overflow-hidden' : 'overflow-auto'
                   )}
                 >
                   {disabled && (
@@ -94,7 +94,7 @@ export const AppSettings = () => {
         <Button
           variant="outline"
           size="xl"
-          className="px-4 text-xl"
+          className="px-4 text-xl hover:bg-white"
           onClick={() => setIsOpen(false)}
         >
           Cancel

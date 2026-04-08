@@ -44,16 +44,14 @@ const Navbar = () => {
         )}
 
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger
-            render={
-              <Button
-                variant="ghost"
-                className="no-focus cursor-pointer hover:bg-transparent! [&_svg:not([class*='size-'])]:size-10!"
-              >
-                <MenuIcon className="size-12" />
-              </Button>
-            }
-          />
+          <DialogTrigger asChild>
+            <Button
+              variant="ghost"
+              className="no-focus cursor-pointer hover:bg-transparent! [&_svg:not([class*='size-'])]:size-10!"
+            >
+              <MenuIcon className="size-12" />
+            </Button>
+          </DialogTrigger>
           <AppSettings />
         </Dialog>
       </div>

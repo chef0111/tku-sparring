@@ -21,7 +21,7 @@ export function useCreateTournament() {
       queryClient.invalidateQueries({ queryKey: ['tournament'] });
       toast.success('Tournament created successfully');
       navigate({
-        to: '/dashboard/tournament/$id/builder',
+        to: '/dashboard/tournaments/$id/builder',
         params: { id: tournament.id },
       });
     },

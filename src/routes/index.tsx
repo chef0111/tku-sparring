@@ -19,9 +19,7 @@ function App() {
 
   return (
     <div className="h-dvh w-dvw">
-      <Activity mode={isDesktop ? 'visible' : 'hidden'}>
-        <AppHome />
-      </Activity>
+      <AppHome />
 
       <Activity mode={!isDesktop ? 'visible' : 'hidden'}>
         <div className="flex h-full w-full items-center justify-center p-8">

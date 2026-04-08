@@ -48,6 +48,7 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
+  --skeleton-highlight: oklch(1 0 0 / 64%);
 }
 
 .dark {
@@ -82,6 +83,7 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
+  --skeleton-highlight: oklch(1 0 0 / 4%);
 }
 
 @theme inline {
@@ -127,6 +129,18 @@
   --radius-4xl: calc(var(--radius) + 16px);
   --color-red-player: rgba(255, 0, 0, 0.2);
   --color-blue-player: rgba(0, 0, 255, 0.2);
+  --color-skeleton-highlight: var(--skeleton-highlight);
+  --animate-skeleton: skeleton 2s -1s infinite linear;
+}
+
+@keyframes skeleton {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@utility animate-skeleton {
+  animation: skeleton 2s -1s infinite linear;
 }
 
 @layer base {
@@ -143,29 +157,29 @@
   [role='button'] {
     cursor: pointer;
   }
-}
 
-::-webkit-scrollbar {
-  width: 5px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 5px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--muted);
-  cursor: pointer;
-}
-::-webkit-scrollbar-thumb:active {
-  background: var(--border);
-  cursor: pointer;
-}
-* {
-  scrollbar-width: thin;
-  scrollbar-color: oklch(0.274 0.006 286.033) transparent;
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+    cursor: pointer;
+  }
+  ::-webkit-scrollbar-thumb:active {
+    background: var(--border);
+    cursor: pointer;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.274 0.006 286.033) transparent;
+  }
 }
 
 @utility no-focus {

@@ -21,13 +21,13 @@ export const StatsCard = ({ hits, wins, side, className }: StatsCardProps) => {
     >
       {side === 'blue' ? (
         <>
-          <StatItem label="HITS" value={hits} variant="blue" />
-          <StatItem label="#WON" value={wins} variant="blue" />
+          <StatItem label="HITS" value={hits} />
+          <StatItem label="#WON" value={wins} />
         </>
       ) : (
         <>
-          <StatItem label="#WON" value={wins} variant="red" />
-          <StatItem label="HITS" value={hits} variant="red" />
+          <StatItem label="#WON" value={wins} />
+          <StatItem label="HITS" value={hits} />
         </>
       )}
     </Card>
@@ -37,18 +37,10 @@ export const StatsCard = ({ hits, wins, side, className }: StatsCardProps) => {
 interface StatItemProps {
   label: string;
   value: number;
-  variant: 'red' | 'blue';
   className?: string;
 }
 
-export const StatItem = ({
-  label,
-  value,
-  variant,
-  className,
-}: StatItemProps) => {
-  const textColor = variant === 'red' ? 'text-yellow-300' : 'text-[#9f6]';
-
+export const StatItem = ({ label, value, className }: StatItemProps) => {
   return (
     <div
       className={cn(
@@ -56,10 +48,10 @@ export const StatItem = ({
         className
       )}
     >
-      <Label className={cn('metrics text-3xl max-xl:text-2xl', textColor)}>
+      <Label className="metrics text-foreground/85 text-3xl max-xl:text-2xl">
         {label}
       </Label>
-      <p className={cn('metrics text-5xl', textColor)}>{value}</p>
+      <p className="metrics text-5xl">{value}</p>
     </div>
   );
 };

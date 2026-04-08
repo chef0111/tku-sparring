@@ -12,6 +12,12 @@ import type { Transition } from 'motion/react';
 
 import { cn } from '@/lib/utils';
 
+type PolymorphicContainer = React.ComponentType<
+  React.PropsWithChildren<
+    React.HTMLAttributes<HTMLElement> & { ref?: React.Ref<HTMLElement> }
+  >
+>;
+
 export type HighlightValue = string | number | null;
 
 export interface BoundsOffset {
@@ -85,7 +91,7 @@ export interface HighlightProps {
 
 function Highlight({ ref, ...props }: HighlightProps) {
   const {
-    as: Component = 'div',
+    as: ComponentProp = 'div',
     children,
     value,
     defaultValue,
@@ -101,6 +107,8 @@ function Highlight({ ref, ...props }: HighlightProps) {
     exitDelay = 200,
     mode = 'children',
   } = props;
+
+  const Component = ComponentProp as PolymorphicContainer;
 
   const localRef = React.useRef<HTMLElement>(null);
   React.useImperativeHandle(ref, () => localRef.current as HTMLElement);
@@ -367,7 +375,7 @@ function HighlightItem({
     setActiveClassName,
   } = useHighlight();
 
-  const Component = as ?? 'div';
+  const Component = (as ?? 'div') as PolymorphicContainer;
   const element = children;
   const childValue: HighlightValue =
     id ?? value ?? element.props?.['data-value'] ?? element.props?.id ?? itemId;
@@ -531,7 +539,7 @@ function HighlightItem({
       data-slot="motion-highlight-item-container"
       className={cn(mode === 'children' && 'relative', className)}
       {...dataAttributes}
-      {...props}
+      {...(props as React.HTMLAttributes<HTMLElement>)}
       {...commonHandlers}
     >
       {mode === 'children' && (

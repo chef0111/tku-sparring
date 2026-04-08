@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Avatar as AvatarPrimitive } from '@base-ui/react/avatar';
+import { Avatar as AvatarPrimitive } from 'radix-ui';
 
 import { cn } from '@/lib/utils';
 
@@ -7,7 +7,7 @@ function Avatar({
   className,
   size = 'default',
   ...props
-}: AvatarPrimitive.Root.Props & {
+}: React.ComponentProps<typeof AvatarPrimitive.Root> & {
   size?: 'default' | 'sm' | 'lg';
 }) {
   return (
@@ -15,7 +15,7 @@ function Avatar({
       data-slot="avatar"
       data-size={size}
       className={cn(
-        'after:border-border group/avatar relative flex size-8 shrink-0 rounded-full select-none after:absolute after:inset-0 after:rounded-full after:border after:mix-blend-darken data-[size=lg]:size-10 data-[size=sm]:size-6 dark:after:mix-blend-lighten',
+        'group/avatar after:border-border relative flex size-8 shrink-0 rounded-full select-none after:absolute after:inset-0 after:rounded-full after:border after:mix-blend-darken data-[size=lg]:size-10 data-[size=sm]:size-6 dark:after:mix-blend-lighten',
         className
       )}
       {...props}
@@ -23,7 +23,10 @@ function Avatar({
   );
 }
 
-function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
+function AvatarImage({
+  className,
+  ...props
+}: React.ComponentProps<typeof AvatarPrimitive.Image>) {
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
@@ -39,7 +42,7 @@ function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
 function AvatarFallback({
   className,
   ...props
-}: AvatarPrimitive.Fallback.Props) {
+}: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
   return (
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
@@ -73,7 +76,7 @@ function AvatarGroup({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="avatar-group"
       className={cn(
-        '*:data-[slot=avatar]:ring-background group/avatar-group flex -space-x-2 *:data-[slot=avatar]:ring-2',
+        'group/avatar-group *:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2',
         className
       )}
       {...props}

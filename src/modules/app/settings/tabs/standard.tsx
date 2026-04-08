@@ -99,24 +99,25 @@ export const StandardSettings = () => {
                       <Button
                         variant="outline"
                         className="relative h-auto w-full items-center gap-3 overflow-visible px-2 py-3 shadow-sm"
-                        render={
-                          <Label className="flex w-full cursor-pointer items-center">
-                            <Plus className="ml-2 size-6" />
-                            <div className="flex flex-col items-start text-center text-lg leading-tight tracking-wider">
-                              <span>Choose</span>
-                              <span>Avatar</span>
-                            </div>
-                            <field.Input
-                              type="file"
-                              accept="image/*"
-                              className="absolute inset-0 cursor-pointer opacity-0"
-                              onChangeCapture={(
-                                e: React.ChangeEvent<HTMLInputElement>
-                              ) => handleFileChange(e, player.name)}
-                            />
-                          </Label>
-                        }
-                      />
+                        asChild
+                      >
+                        <Label className="flex w-full cursor-pointer items-center">
+                          <Plus className="ml-2 size-6" />
+                          <div className="flex flex-col items-start text-center text-lg leading-tight tracking-wider">
+                            <span>Choose</span>
+                            <span>Avatar</span>
+                          </div>
+                          <field.Input
+                            type="file"
+                            accept="image/*"
+                            className="absolute inset-0 cursor-pointer opacity-0"
+                            onChangeCapture={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) => handleFileChange(e, player.name)}
+                          />
+                        </Label>
+                      </Button>
+
                       <FieldDescription className="w-full truncate">
                         {(player.name === 'redPlayerAvatar'
                           ? standard.redPlayerAvatarName

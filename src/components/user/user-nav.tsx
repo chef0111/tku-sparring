@@ -1,16 +1,10 @@
-import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOutIcon,
-  Sparkles,
-} from 'lucide-react';
+import { ChevronsUpDown, Home, LogOutIcon, Shield } from 'lucide-react';
 
 import { toast } from 'sonner';
-import { useRouter } from '@tanstack/react-router';
-import { Skeleton } from '../ui/skeleton';
+import { Link, useRouter } from '@tanstack/react-router';
 import UserAvatar from './user-avatar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,66 +34,62 @@ export function UserNav() {
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <SidebarMenuButton
-                size="lg"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-              >
-                <UserAvatar
-                  name={user.name}
-                  image={user.image}
-                  className="size-12 rounded-lg max-sm:size-8 lg:size-8"
-                  fallbackClassName="rounded-lg max-sm:text-sm text-xl lg:text-sm"
-                />
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
-                </div>
-                <ChevronsUpDown className="ml-auto size-4" />
-              </SidebarMenuButton>
-            }
-          />
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton
+              size="lg"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            >
+              <UserAvatar
+                name={user.name}
+                image={user.image}
+                className="size-12 rounded-lg max-sm:size-8 lg:size-8"
+                fallbackClassName="rounded-lg max-sm:text-sm text-xl lg:text-sm"
+              />
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate text-xs">{user.email}</span>
+              </div>
+              <ChevronsUpDown className="ml-auto size-4" />
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            className="w-(--radix-dropdown-menu-trigger-width) rounded-lg border"
             side={isMobile ? 'bottom' : 'right'}
             align="end"
             sideOffset={4}
           >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <UserAvatar
-                  name={user.name}
-                  image={user.image}
-                  className="size-12 rounded-lg max-sm:size-8 lg:size-8"
-                  fallbackClassName="rounded-lg max-sm:text-sm text-xl lg:text-sm"
-                />
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
-                </div>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
+              <DropdownMenuLabel className="flex items-center gap-2">
+                <div className="relative flex items-center">
+                  <UserAvatar
+                    name={user.name}
+                    image={user.image}
+                    className="bg-foreground size-8"
+                  />
+                  <div className="absolute right-0 bottom-0">
+                    <span className="relative flex items-center justify-center">
+                      <span className="relative inline-flex size-2 rounded-full bg-green-500" />
+                      <span className="sr-only">Online</span>
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <span className="mb-0.5">{user.name}</span>
+                  <Badge className="-ml-1 scale-90 border border-blue-500/50 bg-blue-500/20 text-blue-500">
+                    <Shield />
+                    Admin
+                  </Badge>
+                </div>
+              </DropdownMenuLabel>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
+              <DropdownMenuItem asChild>
+                <Link to="/" target="_blank">
+                  <Home />
+                  Home
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

@@ -5,9 +5,40 @@ import viteReact from '@vitejs/plugin-react';
 import viteTsConfigPaths from 'vite-tsconfig-paths';
 import tailwindcss from '@tailwindcss/vite';
 import { nitro } from 'nitro/vite';
+import type { Plugin } from 'vite';
+
+/**
+ * Prevents the dev server from crashing on the Node.js v24+ undici
+ * "Response body object should not be disturbed or locked" error.
+ * This is a known race condition in the SSR streaming pipeline
+ * (TanStack Start + Nitro + undici) that is non-critical in dev.
+ */
+function ssrStreamErrorGuard(): Plugin {
+  return {
+    name: 'ssr-stream-error-guard',
+    apply: 'serve',
+    configureServer() {
+      const ignoredMessages = [
+        'Response body object should not be disturbed or locked',
+      ];
+
+      process.on('uncaughtException', (err) => {
+        if (ignoredMessages.some((msg) => err.message?.includes(msg))) {
+          console.warn(
+            '\x1b[33m[ssr] Suppressed non-critical stream error:\x1b[0m',
+            err.message
+          );
+          return;
+        }
+        throw err;
+      });
+    },
+  };
+}
 
 const config = defineConfig({
   plugins: [
+    ssrStreamErrorGuard(),
     devtools(),
     nitro(),
     viteTsConfigPaths({

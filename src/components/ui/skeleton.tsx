@@ -1,13 +1,19 @@
+import type React from 'react';
 import { cn } from '@/lib/utils';
 
-function Skeleton({ className, ...props }: React.ComponentProps<'div'>) {
+export function Skeleton({
+  className,
+  ...props
+}: React.ComponentProps<'div'>): React.ReactElement {
   return (
     <div
+      className={cn(
+        'animate-skeleton bg-muted/50 relative overflow-hidden rounded-sm',
+        'before:animate-skeleton before:absolute before:inset-0 before:bg-[linear-gradient(120deg,transparent_30%,var(--skeleton-highlight),transparent_60%)] before:bg-size-[200%_100%]',
+        className
+      )}
       data-slot="skeleton"
-      className={cn('bg-muted animate-pulse rounded-md', className)}
       {...props}
     />
   );
 }
-
-export { Skeleton };
