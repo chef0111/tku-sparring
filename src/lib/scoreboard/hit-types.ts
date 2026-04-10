@@ -15,14 +15,6 @@ export const hitDamage: Record<HitType, number> = {
   punch: 5,
 };
 
-export const hitPoints: Record<HitType, number> = {
-  headCrit: 6,
-  trunkCrit: 4,
-  head: 3,
-  trunk: 2,
-  punch: 1,
-};
-
 export const hitCooldown = 300;
 
 export const getHitIconPath = (player: Player, hitType: HitType): string => {
