@@ -63,7 +63,7 @@ export type PlayerStore = PlayerState & PlayerActions;
 
 const createInitialPlayerData = (
   name: string,
-  maxHealth = 120,
+  maxHealth = 130,
   maxMana = 5
 ): PlayerData => ({
   name,
@@ -81,7 +81,7 @@ const createInitialPlayerData = (
 const initializer: StateCreator<PlayerStore> = (set, get) => ({
   red: createInitialPlayerData('Player A'),
   blue: createInitialPlayerData('Player B'),
-  maxHealth: 120,
+  maxHealth: 130,
   maxMana: 5,
   lastRedHit: null,
   lastBlueHit: null,

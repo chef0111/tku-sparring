@@ -37,7 +37,7 @@ export const defaultStandardFormData: StandardFormData = {
   bluePlayerName: 'PLAYER B',
   roundDuration: 60,
   breakDuration: 30,
-  maxHealth: 120,
+  maxHealth: 130,
 };
 
 export const defaultAdvanceFormData: AdvanceFormData = {
