@@ -63,7 +63,7 @@ export type PlayerStore = PlayerState & PlayerActions;
 
 const createInitialPlayerData = (
   name: string,
-  maxHealth = 120,
+  maxHealth = 130,
   maxMana = 5
 ): PlayerData => ({
   name,
@@ -81,7 +81,7 @@ const createInitialPlayerData = (
 const initializer: StateCreator<PlayerStore> = (set, get) => ({
   red: createInitialPlayerData('Player A'),
   blue: createInitialPlayerData('Player B'),
-  maxHealth: 120,
+  maxHealth: 130,
   maxMana: 5,
   lastRedHit: null,
   lastBlueHit: null,
@@ -102,10 +102,9 @@ const initializer: StateCreator<PlayerStore> = (set, get) => ({
 
     const opponent: Player = player === 'red' ? 'blue' : 'red';
     const damage = hitDamage[hitType];
-    const points = damage;
 
     const opponentHealth = Math.max(0, state[opponent].health - damage);
-    const playerScore = Math.min(state.maxHealth, state[player].score + points);
+    const playerScore = Math.min(state.maxHealth, state[player].score + damage);
 
     const technique =
       damage >= 20 ? state[player].technique + damage : state[player].technique;

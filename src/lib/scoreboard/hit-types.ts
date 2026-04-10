@@ -1,5 +1,5 @@
 export type HitType =
-  | 'headCrit' // 5 points - 25 damage
+  | 'headCrit' // 6 points - 30 damage
   | 'trunkCrit' // 4 points - 20 damage
   | 'head' // 3 points - 15 damage
   | 'trunk' // 2 points - 10 damage
@@ -8,19 +8,11 @@ export type HitType =
 export type Player = 'red' | 'blue';
 
 export const hitDamage: Record<HitType, number> = {
-  headCrit: 25,
+  headCrit: 30,
   trunkCrit: 20,
   head: 15,
   trunk: 10,
   punch: 5,
-};
-
-export const hitPoints: Record<HitType, number> = {
-  headCrit: 5,
-  trunkCrit: 4,
-  head: 3,
-  trunk: 2,
-  punch: 1,
 };
 
 export const hitCooldown = 300;
