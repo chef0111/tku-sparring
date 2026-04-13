@@ -72,7 +72,7 @@
     "tailwindcss": "^4.2.2",
     "three": "^0.182.0",
     "vite-tsconfig-paths": "^6.1.1",
-    "zod": "4.2.1",
+    "zod": "^4.3.6",
     "zundo": "^2.3.0",
     "zustand": "^5.0.12"
   },
@@ -99,5 +99,10 @@
     "vite": "^8.0.8",
     "vitest": "^4.1.4",
     "web-vitals": "^5.1.0"
+  },
+  "overrides": {
+    "@tanstack/router-generator/zod": "3.25.76",
+    "@tanstack/router-plugin/zod": "3.25.76",
+    "@tanstack/start-plugin-core/zod": "3.25.76"
   }
 }
