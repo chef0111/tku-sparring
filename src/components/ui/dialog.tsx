@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Dialog as DialogPrimitive } from 'radix-ui';
 
+import { IconX } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { IconX } from '@tabler/icons-react';
 
 function Dialog({
   ...props
@@ -49,9 +49,11 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  closeButtonClassName,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
+  closeButtonClassName?: string;
 }) {
   return (
     <DialogPortal>
@@ -69,7 +71,7 @@ function DialogContent({
           <DialogPrimitive.Close data-slot="dialog-close" asChild>
             <Button
               variant="ghost"
-              className="absolute top-4 right-4"
+              className={cn('absolute top-4 right-4', closeButtonClassName)}
               size="icon-sm"
             >
               <IconX />
