@@ -24,7 +24,7 @@ export function TournamentPage({ id }: TournamentPageProps) {
         <Trophy className="text-muted-foreground size-12" />
         <h2 className="text-lg font-semibold">Tournament not found</h2>
         <Button variant="outline" asChild>
-          <Link to="/dashboard/tournament">
+          <Link to="/dashboard/tournaments">
             <ArrowLeft />
             Back to tournaments
           </Link>

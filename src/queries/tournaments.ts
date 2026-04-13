@@ -53,7 +53,7 @@ export function useDeleteTournament() {
     mutationFn: (data: { id: string }) => client.tournament.delete(data),
     onSuccess: () => {
       toast.success('Tournament deleted');
-      navigate({ to: '/dashboard/tournament' });
+      navigate({ to: '/dashboard/tournaments' });
     },
     onError: (err) => toast.error(err.message),
   });
