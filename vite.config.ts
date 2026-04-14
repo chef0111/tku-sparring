@@ -38,11 +38,11 @@ function ssrStreamErrorGuard(): Plugin {
 
 const config = defineConfig({
   plugins: [
+    tanstackStart(),
     ssrStreamErrorGuard(),
     devtools(),
     nitro(),
     tailwindcss(),
-    tanstackStart(),
     viteReact(),
     babel({ presets: [reactCompilerPreset()] }),
   ],
