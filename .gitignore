@@ -12,6 +12,7 @@ count.txt
 .vinxi
 todos.json
 .cursor
+*.log
 
 /generated/prisma
 /generated

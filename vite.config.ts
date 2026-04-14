@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite';
 import { devtools } from '@tanstack/devtools-vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
-import viteReact from '@vitejs/plugin-react';
-import viteTsConfigPaths from 'vite-tsconfig-paths';
+import babel from '@rolldown/plugin-babel';
+import viteReact, { reactCompilerPreset } from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { nitro } from 'nitro/vite';
 import type { Plugin } from 'vite';
@@ -38,19 +38,13 @@ function ssrStreamErrorGuard(): Plugin {
 
 const config = defineConfig({
   plugins: [
+    tanstackStart(),
     ssrStreamErrorGuard(),
     devtools(),
     nitro(),
-    viteTsConfigPaths({
-      projects: ['./tsconfig.json'],
-    }),
     tailwindcss(),
-    tanstackStart(),
-    viteReact({
-      babel: {
-        plugins: ['babel-plugin-react-compiler'],
-      },
-    }),
+    viteReact(),
+    babel({ presets: [reactCompilerPreset()] }),
   ],
   optimizeDeps: {
     include: ['lucide-react', '@tabler/icons-react'],
@@ -71,6 +65,9 @@ const config = defineConfig({
         'node:buffer',
       ],
     },
+  },
+  resolve: {
+    tsconfigPaths: true,
   },
 });
 

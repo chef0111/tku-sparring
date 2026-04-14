@@ -98,8 +98,8 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dashboard/tournaments/$id': typeof DashboardTournamentsIdRoute
-  '/dashboard/athletes': typeof DashboardAthletesIndexRoute
-  '/dashboard/tournaments': typeof DashboardTournamentsIndexRoute
+  '/dashboard/athletes/': typeof DashboardAthletesIndexRoute
+  '/dashboard/tournaments/': typeof DashboardTournamentsIndexRoute
   '/dashboard/tournaments/$id/builder': typeof DashboardTournamentsIdBuilderRoute
 }
 export interface FileRoutesByTo {
@@ -141,8 +141,8 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/dashboard/tournaments/$id'
-    | '/dashboard/athletes'
-    | '/dashboard/tournaments'
+    | '/dashboard/athletes/'
+    | '/dashboard/tournaments/'
     | '/dashboard/tournaments/$id/builder'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -195,7 +195,7 @@ declare module '@tanstack/react-router' {
     '/_auth': {
       id: '/_auth'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -237,14 +237,14 @@ declare module '@tanstack/react-router' {
     '/dashboard/tournaments/': {
       id: '/dashboard/tournaments/'
       path: '/tournaments'
-      fullPath: '/dashboard/tournaments'
+      fullPath: '/dashboard/tournaments/'
       preLoaderRoute: typeof DashboardTournamentsIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/athletes/': {
       id: '/dashboard/athletes/'
       path: '/athletes'
-      fullPath: '/dashboard/athletes'
+      fullPath: '/dashboard/athletes/'
       preLoaderRoute: typeof DashboardAthletesIndexRouteImport
       parentRoute: typeof DashboardRoute
     }

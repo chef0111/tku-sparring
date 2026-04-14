@@ -33,7 +33,7 @@ export const StandardSettings = () => {
   });
 
   useEffect(() => {
-    const unsubscribe = form.store.subscribe(() => {
+    const subscription = form.store.subscribe(() => {
       const state = form.store.state;
       const values = state.values;
 
@@ -51,7 +51,7 @@ export const StandardSettings = () => {
         isValid: validation.success,
       });
     });
-    return unsubscribe;
+    return () => subscription.unsubscribe();
   }, [form.store, updateStandardForm, setStandardFormState]);
 
   const handleFileChange = (

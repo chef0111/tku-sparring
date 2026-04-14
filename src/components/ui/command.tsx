@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
 
+import { IconCheck, IconSearch } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
 import {
   Dialog,
@@ -12,7 +13,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { InputGroup, InputGroupAddon } from '@/components/ui/input-group';
-import { IconSearch, IconCheck } from '@tabler/icons-react';
 
 function Command({
   className,
