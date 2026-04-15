@@ -3,3 +3,5 @@ pnpm-lock.yaml
 yarn.lock
 node_modules
 .tanstack
+.agents
+routeTree.gen.ts

@@ -13,9 +13,9 @@ Optimistic updates immediately reflect changes in the UI before the server confi
 const mutation = useMutation({
   mutationFn: toggleTodoComplete,
   onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['todos'] })
+    queryClient.invalidateQueries({ queryKey: ['todos'] });
   },
-})
+});
 
 // User clicks checkbox, waits 200-500ms for visual feedback
 ```
@@ -27,30 +27,30 @@ const mutation = useMutation({
   mutationFn: toggleTodoComplete,
   onMutate: async (todoId) => {
     // 1. Cancel outgoing refetches to prevent overwriting optimistic update
-    await queryClient.cancelQueries({ queryKey: ['todos'] })
+    await queryClient.cancelQueries({ queryKey: ['todos'] });
 
     // 2. Snapshot previous value for potential rollback
-    const previousTodos = queryClient.getQueryData(['todos'])
+    const previousTodos = queryClient.getQueryData(['todos']);
 
     // 3. Optimistically update the cache
     queryClient.setQueryData(['todos'], (old: Todo[]) =>
       old.map((todo) =>
         todo.id === todoId ? { ...todo, completed: !todo.completed } : todo
       )
-    )
+    );
 
     // 4. Return context for rollback
-    return { previousTodos }
+    return { previousTodos };
   },
   onError: (err, todoId, context) => {
     // Rollback on error
-    queryClient.setQueryData(['todos'], context?.previousTodos)
+    queryClient.setQueryData(['todos'], context?.previousTodos);
   },
   onSettled: () => {
     // Refetch to ensure consistency regardless of success/failure
-    queryClient.invalidateQueries({ queryKey: ['todos'] })
+    queryClient.invalidateQueries({ queryKey: ['todos'] });
   },
-})
+});
 ```
 
 ## Good Example: Via UI Variables (Simpler)
@@ -61,14 +61,14 @@ function TodoItem({ todo }: { todo: Todo }) {
   const mutation = useMutation({
     mutationFn: toggleTodoComplete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['todos'] })
+      queryClient.invalidateQueries({ queryKey: ['todos'] });
     },
-  })
+  });
 
   // Show optimistic state while pending
   const displayCompleted = mutation.isPending
-    ? !todo.completed  // Optimistic: show toggled state
-    : todo.completed   // Settled: show actual state
+    ? !todo.completed // Optimistic: show toggled state
+    : todo.completed; // Settled: show actual state
 
   return (
     <div>
@@ -82,7 +82,7 @@ function TodoItem({ todo }: { todo: Todo }) {
         {todo.title}
       </span>
     </div>
-  )
+  );
 }
 ```
 
@@ -92,8 +92,8 @@ function TodoItem({ todo }: { todo: Todo }) {
 const createTodo = useMutation({
   mutationFn: (newTodo: CreateTodoInput) => api.createTodo(newTodo),
   onMutate: async (newTodo) => {
-    await queryClient.cancelQueries({ queryKey: ['todos'] })
-    const previousTodos = queryClient.getQueryData(['todos'])
+    await queryClient.cancelQueries({ queryKey: ['todos'] });
+    const previousTodos = queryClient.getQueryData(['todos']);
 
     // Add with temporary ID
     const optimisticTodo = {
@@ -101,32 +101,33 @@ const createTodo = useMutation({
       ...newTodo,
       completed: false,
       createdAt: new Date().toISOString(),
-    }
+    };
 
-    queryClient.setQueryData(['todos'], (old: Todo[]) => [...old, optimisticTodo])
+    queryClient.setQueryData(['todos'], (old: Todo[]) => [
+      ...old,
+      optimisticTodo,
+    ]);
 
-    return { previousTodos, optimisticTodo }
+    return { previousTodos, optimisticTodo };
   },
   onError: (err, newTodo, context) => {
-    queryClient.setQueryData(['todos'], context?.previousTodos)
+    queryClient.setQueryData(['todos'], context?.previousTodos);
   },
   onSuccess: (data, variables, context) => {
     // Replace temp todo with real one
     queryClient.setQueryData(['todos'], (old: Todo[]) =>
-      old.map((todo) =>
-        todo.id === context?.optimisticTodo.id ? data : todo
-      )
-    )
+      old.map((todo) => (todo.id === context?.optimisticTodo.id ? data : todo))
+    );
   },
-})
+});
 ```
 
 ## When to Use Each Approach
 
-| Approach | Use When |
-|----------|----------|
-| Cache Manipulation | Update appears in multiple places, complex data structures |
-| UI Variables | Update only visible in one component, simpler implementation |
+| Approach           | Use When                                                     |
+| ------------------ | ------------------------------------------------------------ |
+| Cache Manipulation | Update appears in multiple places, complex data structures   |
+| UI Variables       | Update only visible in one component, simpler implementation |
 
 ## Context
 

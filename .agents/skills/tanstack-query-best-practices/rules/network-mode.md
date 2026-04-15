@@ -15,7 +15,7 @@ const { data } = useQuery({
   queryFn: fetchTodos,
   // Default networkMode: 'online'
   // Query pauses with no feedback when offline
-})
+});
 
 // User goes offline, sees stale data with no indication
 // Mutations silently queue with no UI feedback
@@ -29,8 +29,8 @@ function TodoList() {
   const { data, fetchStatus, status } = useQuery({
     queryKey: ['todos'],
     queryFn: fetchTodos,
-    networkMode: 'online',  // Default - pauses when offline
-  })
+    networkMode: 'online', // Default - pauses when offline
+  });
 
   // fetchStatus: 'fetching' | 'paused' | 'idle'
   // 'paused' means waiting for network
@@ -42,7 +42,7 @@ function TodoList() {
       )}
       <TodoItems todos={data} />
     </div>
-  )
+  );
 }
 ```
 
@@ -55,16 +55,16 @@ const { data, error } = useQuery({
   queryFn: async () => {
     // Try network first
     try {
-      const todos = await fetchTodosFromServer()
-      await saveToLocalDB(todos)  // Sync to local
-      return todos
+      const todos = await fetchTodosFromServer();
+      await saveToLocalDB(todos); // Sync to local
+      return todos;
     } catch (e) {
       // Fall back to local data
-      return getFromLocalDB()
+      return getFromLocalDB();
     }
   },
-  networkMode: 'always',  // Always runs queryFn, even offline
-})
+  networkMode: 'always', // Always runs queryFn, even offline
+});
 
 // Or set globally
 const queryClient = new QueryClient({
@@ -76,7 +76,7 @@ const queryClient = new QueryClient({
       networkMode: 'always',
     },
   },
-})
+});
 ```
 
 ## Good Example: Offline-First Mode
@@ -89,84 +89,79 @@ const { data } = useQuery({
   networkMode: 'offlineFirst',
   // Runs queryFn once, then waits for network if it fails
   // Good for: data that's useful to attempt offline
-})
+});
 ```
 
 ## Good Example: Mutation Offline Queue
 
 ```tsx
 function TodoApp() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   const addTodo = useMutation({
     mutationFn: createTodo,
-    networkMode: 'online',  // Pauses when offline
+    networkMode: 'online', // Pauses when offline
     onMutate: async (newTodo) => {
       // Optimistic update works offline
-      await queryClient.cancelQueries({ queryKey: ['todos'] })
-      const previous = queryClient.getQueryData(['todos'])
-      queryClient.setQueryData(['todos'], (old: Todo[]) => [...old, newTodo])
-      return { previous }
+      await queryClient.cancelQueries({ queryKey: ['todos'] });
+      const previous = queryClient.getQueryData(['todos']);
+      queryClient.setQueryData(['todos'], (old: Todo[]) => [...old, newTodo]);
+      return { previous };
     },
     onError: (err, newTodo, context) => {
-      queryClient.setQueryData(['todos'], context?.previous)
+      queryClient.setQueryData(['todos'], context?.previous);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['todos'] })
+      queryClient.invalidateQueries({ queryKey: ['todos'] });
     },
-  })
+  });
 
   // Track paused mutations
   const pendingMutations = useMutationState({
     filters: { status: 'pending' },
-  })
+  });
 
-  const pausedMutations = pendingMutations.filter(
-    m => m.state.isPaused
-  )
+  const pausedMutations = pendingMutations.filter((m) => m.state.isPaused);
 
   return (
     <div>
       {pausedMutations.length > 0 && (
-        <Banner>
-          {pausedMutations.length} changes waiting to sync
-        </Banner>
+        <Banner>{pausedMutations.length} changes waiting to sync</Banner>
       )}
       <TodoList />
     </div>
-  )
+  );
 }
 ```
 
 ## Network Mode Comparison
 
-| Mode | Behavior | Use Case |
-|------|----------|----------|
-| `'online'` (default) | Pauses when offline, resumes when online | Most apps, show offline state |
-| `'always'` | Always runs queryFn regardless of network | Offline-first apps, local-only data |
-| `'offlineFirst'` | Tries once, then waits for network if fails | Best-effort offline |
+| Mode                 | Behavior                                    | Use Case                            |
+| -------------------- | ------------------------------------------- | ----------------------------------- |
+| `'online'` (default) | Pauses when offline, resumes when online    | Most apps, show offline state       |
+| `'always'`           | Always runs queryFn regardless of network   | Offline-first apps, local-only data |
+| `'offlineFirst'`     | Tries once, then waits for network if fails | Best-effort offline                 |
 
 ## Good Example: Online Status Detection
 
 ```tsx
-import { onlineManager } from '@tanstack/react-query'
+import { onlineManager } from '@tanstack/react-query';
 
 // React to online/offline changes
 function NetworkStatus() {
-  const isOnline = useSyncExternalStore(
-    onlineManager.subscribe,
-    () => onlineManager.isOnline(),
-  )
+  const isOnline = useSyncExternalStore(onlineManager.subscribe, () =>
+    onlineManager.isOnline()
+  );
 
   return (
     <div className={isOnline ? 'online' : 'offline'}>
       {isOnline ? 'Connected' : 'Offline'}
     </div>
-  )
+  );
 }
 
 // Manually override online detection (for testing)
-onlineManager.setOnline(false)
+onlineManager.setOnline(false);
 ```
 
 ## Context

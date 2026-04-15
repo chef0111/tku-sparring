@@ -11,9 +11,11 @@
 ## Workflow
 
 1. **[Step Name]**
+
    ```bash
    lsp <command> ...
    ```
+
    **Why**: [Brief explanation]
 
 2. **[Step Name]**

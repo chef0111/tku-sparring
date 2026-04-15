@@ -14,14 +14,14 @@ TanStack Start uses deployment adapters to target different hosting platforms. E
 export default defineConfig({
   // No adapter specified
   // May not work correctly on your deployment platform
-})
+});
 
 // Or using wrong adapter for platform
 export default defineConfig({
   server: {
-    preset: 'node-server',  // But deploying to Vercel Edge
+    preset: 'node-server', // But deploying to Vercel Edge
   },
-})
+});
 ```
 
 ## Good Example: Vercel Deployment
@@ -49,46 +49,42 @@ export default defineConfig({
 
 ```tsx
 // app.config.ts
-import { defineConfig } from '@tanstack/react-start/config'
+import { defineConfig } from '@tanstack/react-start/config';
 
 export default defineConfig({
   server: {
     preset: 'cloudflare-pages',
   },
-})
+});
 
 // wrangler.toml
-name = "my-tanstack-app"
-compatibility_date = "2024-01-01"
-pages_build_output_dir = ".output/public"
+name = 'my-tanstack-app';
+compatibility_date = '2024-01-01';
+pages_build_output_dir = '.output/public';
 
 // For Cloudflare Workers (full control)
 export default defineConfig({
   server: {
     preset: 'cloudflare',
   },
-})
+});
 ```
 
 ## Good Example: Netlify
 
 ```tsx
 // app.config.ts
-import { defineConfig } from '@tanstack/react-start/config'
+import { defineConfig } from '@tanstack/react-start/config';
 
-export default defineConfig({
+export default // netlify.toml
+defineConfig({
   server: {
     preset: 'netlify',
   },
-})
-
-// netlify.toml
-[build]
-  command = "npm run build"
-  publish = ".output/public"
-
-[functions]
-  directory = ".output/server"
+})[build];
+command = 'npm run build';
+publish = '.output/public'[functions];
+directory = '.output/server';
 ```
 
 ## Good Example: Node.js Server
@@ -121,7 +117,7 @@ CMD ["node", ".output/server/index.mjs"]
 
 ```tsx
 // app.config.ts
-import { defineConfig } from '@tanstack/react-start/config'
+import { defineConfig } from '@tanstack/react-start/config';
 
 export default defineConfig({
   server: {
@@ -131,7 +127,7 @@ export default defineConfig({
       crawlLinks: true,
     },
   },
-})
+});
 
 // Output: .output/public (static files only)
 // Host anywhere: GitHub Pages, S3, any static host
@@ -167,29 +163,29 @@ functions:
 
 ```tsx
 // app.config.ts
-import { defineConfig } from '@tanstack/react-start/config'
+import { defineConfig } from '@tanstack/react-start/config';
 
 export default defineConfig({
   server: {
     preset: 'bun',
   },
-})
+});
 
 // Run with: bun .output/server/index.mjs
 ```
 
 ## Adapter Comparison
 
-| Adapter | Runtime | Edge | Static | Best For |
-|---------|---------|------|--------|----------|
-| `vercel` | Node/Edge | Yes | Yes | Vercel hosting |
-| `cloudflare-pages` | Workers | Yes | Yes | Cloudflare Pages |
-| `cloudflare` | Workers | Yes | No | Cloudflare Workers |
-| `netlify` | Node | Yes | Yes | Netlify hosting |
-| `node-server` | Node | No | No | Docker, VPS, self-host |
-| `static` | None | No | Yes | Any static host |
-| `aws-lambda` | Node | No | No | AWS serverless |
-| `bun` | Bun | No | No | Bun runtime |
+| Adapter            | Runtime   | Edge | Static | Best For               |
+| ------------------ | --------- | ---- | ------ | ---------------------- |
+| `vercel`           | Node/Edge | Yes  | Yes    | Vercel hosting         |
+| `cloudflare-pages` | Workers   | Yes  | Yes    | Cloudflare Pages       |
+| `cloudflare`       | Workers   | Yes  | No     | Cloudflare Workers     |
+| `netlify`          | Node      | Yes  | Yes    | Netlify hosting        |
+| `node-server`      | Node      | No   | No     | Docker, VPS, self-host |
+| `static`           | None      | No   | Yes    | Any static host        |
+| `aws-lambda`       | Node      | No   | No     | AWS serverless         |
+| `bun`              | Bun       | No   | No     | Bun runtime            |
 
 ## Context
 

@@ -1,6 +1,11 @@
 {
   "version": 1,
   "skills": {
+    "finding-duplicate-functions": {
+      "source": "obra/superpowers-lab",
+      "sourceType": "github",
+      "computedHash": "1a4b8322c630677c1e3c934aba450ba5703fc1545769936ac1ddf6d828251fbc"
+    },
     "frontend-design": {
       "source": "anthropics/skills",
       "sourceType": "github",
