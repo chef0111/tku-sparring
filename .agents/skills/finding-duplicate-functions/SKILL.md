@@ -20,13 +20,13 @@ This skill uses a two-phase approach: classical extraction followed by LLM-power
 
 ## Quick Reference
 
-| Phase | Tool | Model | Output |
-|-------|------|-------|--------|
-| 1. Extract | `scripts/extract-functions.sh` | - | `catalog.json` |
-| 2. Categorize | `scripts/categorize-prompt.md` | haiku | `categorized.json` |
-| 3. Split | `scripts/prepare-category-analysis.sh` | - | `categories/*.json` |
-| 4. Detect | `scripts/find-duplicates-prompt.md` | opus | `duplicates/*.json` |
-| 5. Report | `scripts/generate-report.sh` | - | `report.md` |
+| Phase         | Tool                                   | Model | Output              |
+| ------------- | -------------------------------------- | ----- | ------------------- |
+| 1. Extract    | `scripts/extract-functions.sh`         | -     | `catalog.json`      |
+| 2. Categorize | `scripts/categorize-prompt.md`         | haiku | `categorized.json`  |
+| 3. Split      | `scripts/prepare-category-analysis.sh` | -     | `categories/*.json` |
+| 4. Detect     | `scripts/find-duplicates-prompt.md`    | opus  | `duplicates/*.json` |
+| 5. Report     | `scripts/generate-report.sh`           | -     | `report.md`         |
 
 ## Process
 
@@ -53,6 +53,7 @@ digraph duplicate_detection {
 ```
 
 Options:
+
 - `-o FILE`: Output file (default: stdout)
 - `-c N`: Lines of context to capture (default: 15)
 - `-t GLOB`: File types (default: `*.ts,*.tsx,*.js,*.jsx`)
@@ -91,6 +92,7 @@ Produces a prioritized markdown report grouped by confidence level.
 ### Phase 6: Human Review
 
 Review the report. For HIGH confidence duplicates:
+
 1. Verify the recommended survivor has tests
 2. Update callers to use the survivor
 3. Delete the duplicates
@@ -100,15 +102,15 @@ Review the report. For HIGH confidence duplicates:
 
 Focus extraction on these areas first - they accumulate duplicates fastest:
 
-| Zone | Common Duplicates |
-|------|-------------------|
-| `utils/`, `helpers/`, `lib/` | General utilities reimplemented |
-| Validation code | Same checks written multiple ways |
-| Error formatting | Error-to-string conversions |
-| Path manipulation | Joining, resolving, normalizing paths |
-| String formatting | Case conversion, truncation, escaping |
-| Date formatting | Same formats implemented repeatedly |
-| API response shaping | Similar transformations for different endpoints |
+| Zone                         | Common Duplicates                               |
+| ---------------------------- | ----------------------------------------------- |
+| `utils/`, `helpers/`, `lib/` | General utilities reimplemented                 |
+| Validation code              | Same checks written multiple ways               |
+| Error formatting             | Error-to-string conversions                     |
+| Path manipulation            | Joining, resolving, normalizing paths           |
+| String formatting            | Case conversion, truncation, escaping           |
+| Date formatting              | Same formats implemented repeatedly             |
+| API response shaping         | Similar transformations for different endpoints |
 
 ## Common Mistakes
 

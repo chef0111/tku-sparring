@@ -11,39 +11,39 @@ Use `beforeLoad` in route definitions to check authentication before the route l
 ```tsx
 // Checking auth in component - too late, data may have loaded
 function DashboardPage() {
-  const user = useAuth()
+  const user = useAuth();
 
   useEffect(() => {
     if (!user) {
-      navigate({ to: '/login' })  // Redirect after render
+      navigate({ to: '/login' }); // Redirect after render
     }
-  }, [user])
+  }, [user]);
 
-  if (!user) return null  // Flash of content possible
+  if (!user) return null; // Flash of content possible
 
-  return <Dashboard user={user} />
+  return <Dashboard user={user} />;
 }
 
 // No protection on route
 export const Route = createFileRoute('/dashboard')({
   loader: async () => {
     // Fetches sensitive data even for unauthenticated users
-    return await fetchDashboardData()
+    return await fetchDashboardData();
   },
   component: DashboardPage,
-})
+});
 ```
 
 ## Good Example: Route-Level Protection
 
 ```tsx
 // routes/_authenticated.tsx - Layout route for protected area
-import { createFileRoute, redirect, Outlet } from '@tanstack/react-router'
-import { getSessionData } from '@/lib/session.server'
+import { createFileRoute, redirect, Outlet } from '@tanstack/react-router';
+import { getSessionData } from '@/lib/session.server';
 
 export const Route = createFileRoute('/_authenticated')({
   beforeLoad: async ({ location }) => {
-    const session = await getSessionData()
+    const session = await getSessionData();
 
     if (!session) {
       throw redirect({
@@ -51,26 +51,26 @@ export const Route = createFileRoute('/_authenticated')({
         search: {
           redirect: location.href,
         },
-      })
+      });
     }
 
     // Extend context with user for all child routes
     return {
       user: session,
-    }
+    };
   },
   component: AuthenticatedLayout,
-})
+});
 
 function AuthenticatedLayout() {
   return (
     <div>
       <AuthenticatedNav />
       <main>
-        <Outlet />  {/* Child routes render here */}
+        <Outlet /> {/* Child routes render here */}
       </main>
     </div>
-  )
+  );
 }
 
 // routes/_authenticated/dashboard.tsx
@@ -78,16 +78,16 @@ function AuthenticatedLayout() {
 export const Route = createFileRoute('/_authenticated/dashboard')({
   loader: async ({ context }) => {
     // context.user is guaranteed to exist
-    return await fetchDashboardData(context.user.id)
+    return await fetchDashboardData(context.user.id);
   },
   component: DashboardPage,
-})
+});
 
 function DashboardPage() {
-  const data = Route.useLoaderData()
-  const { user } = Route.useRouteContext()
+  const data = Route.useLoaderData();
+  const { user } = Route.useRouteContext();
 
-  return <Dashboard data={data} user={user} />
+  return <Dashboard data={data} user={user} />;
 }
 ```
 
@@ -99,11 +99,11 @@ export const Route = createFileRoute('/_admin')({
   beforeLoad: async ({ context }) => {
     // context.user comes from parent _authenticated route
     if (context.user.role !== 'admin') {
-      throw redirect({ to: '/unauthorized' })
+      throw redirect({ to: '/unauthorized' });
     }
   },
   component: AdminLayout,
-})
+});
 
 // File structure:
 // routes/
@@ -121,26 +121,26 @@ export const Route = createFileRoute('/_admin')({
 
 ```tsx
 // routes/login.tsx
-import { z } from 'zod'
+import { z } from 'zod';
 
 export const Route = createFileRoute('/login')({
   validateSearch: z.object({
     redirect: z.string().optional(),
   }),
   component: LoginPage,
-})
+});
 
 function LoginPage() {
-  const { redirect } = Route.useSearch()
+  const { redirect } = Route.useSearch();
   const loginMutation = useMutation({
     mutationFn: login,
     onSuccess: () => {
       // Redirect to original destination or default
-      navigate({ to: redirect ?? '/dashboard' })
+      navigate({ to: redirect ?? '/dashboard' });
     },
-  })
+  });
 
-  return <LoginForm onSubmit={loginMutation.mutate} />
+  return <LoginForm onSubmit={loginMutation.mutate} />;
 }
 
 // In protected routes
@@ -149,9 +149,9 @@ beforeLoad: async ({ location }) => {
     throw redirect({
       to: '/login',
       search: { redirect: location.href },
-    })
+    });
   }
-}
+};
 ```
 
 ## Good Example: Conditional Content Based on Auth
@@ -160,25 +160,21 @@ beforeLoad: async ({ location }) => {
 // Public route with different content for logged-in users
 export const Route = createFileRoute('/')({
   beforeLoad: async () => {
-    const session = await getSessionData()
-    return { user: session?.user ?? null }
+    const session = await getSessionData();
+    return { user: session?.user ?? null };
   },
   component: HomePage,
-})
+});
 
 function HomePage() {
-  const { user } = Route.useRouteContext()
+  const { user } = Route.useRouteContext();
 
   return (
     <div>
       <Hero />
-      {user ? (
-        <PersonalizedContent user={user} />
-      ) : (
-        <SignUpCTA />
-      )}
+      {user ? <PersonalizedContent user={user} /> : <SignUpCTA />}
     </div>
-  )
+  );
 }
 ```
 

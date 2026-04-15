@@ -6,7 +6,7 @@ Run this prompt **once per category** that has 3+ functions.
 
 ## Prompt Template
 
-```
+````
 You are analyzing functions in the "{CATEGORY}" category for semantic duplicates.
 
 Semantic duplicates are functions that serve the SAME PURPOSE even if:
@@ -46,7 +46,7 @@ Return a JSON array of duplicate groups:
     }
   }
 ]
-```
+````
 
 ## Confidence Levels
 
@@ -76,7 +76,8 @@ Return a JSON array of duplicate groups:
 ## Functions in "{CATEGORY}" Category
 
 <INSERT_CATEGORY_FUNCTIONS_HERE>
-```
+
+````
 
 ## Usage
 
@@ -84,7 +85,8 @@ Return a JSON array of duplicate groups:
 2. Filter categorized.json to get functions for one category:
    ```bash
    jq '[.[] | select(.category == "validation")]' categorized.json > validation-functions.json
-   ```
+````
+
 3. Replace `{CATEGORY}` with the category name
 4. Replace `<INSERT_CATEGORY_FUNCTIONS_HERE>` with the filtered JSON
 5. Dispatch opus subagent with the prompt

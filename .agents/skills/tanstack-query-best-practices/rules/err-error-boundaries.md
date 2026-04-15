@@ -23,7 +23,7 @@ function ErrorBoundary({ children }: { children: React.ReactNode }) {
     >
       {children}
     </ReactErrorBoundary>
-  )
+  );
 }
 
 // Query error persists after retry click
@@ -32,11 +32,11 @@ function ErrorBoundary({ children }: { children: React.ReactNode }) {
 ## Good Example
 
 ```tsx
-import { useQueryErrorResetBoundary } from '@tanstack/react-query'
-import { ErrorBoundary } from 'react-error-boundary'
+import { useQueryErrorResetBoundary } from '@tanstack/react-query';
+import { ErrorBoundary } from 'react-error-boundary';
 
 function QueryErrorBoundary({ children }: { children: React.ReactNode }) {
-  const { reset } = useQueryErrorResetBoundary()
+  const { reset } = useQueryErrorResetBoundary();
 
   return (
     <ErrorBoundary
@@ -45,15 +45,13 @@ function QueryErrorBoundary({ children }: { children: React.ReactNode }) {
         <div className="error-container">
           <h2>Something went wrong</h2>
           <pre>{error.message}</pre>
-          <button onClick={resetErrorBoundary}>
-            Try again
-          </button>
+          <button onClick={resetErrorBoundary}>Try again</button>
         </div>
       )}
     >
       {children}
     </ErrorBoundary>
-  )
+  );
 }
 
 // Usage with Suspense
@@ -64,7 +62,7 @@ function App() {
         <Posts />
       </Suspense>
     </QueryErrorBoundary>
-  )
+  );
 }
 
 function Posts() {
@@ -72,9 +70,9 @@ function Posts() {
   const { data } = useSuspenseQuery({
     queryKey: ['posts'],
     queryFn: fetchPosts,
-  })
+  });
 
-  return <PostList posts={data} />
+  return <PostList posts={data} />;
 }
 ```
 
@@ -82,33 +80,33 @@ function Posts() {
 
 ```tsx
 // Route-level error handling
-import { createFileRoute } from '@tanstack/react-router'
-import { useQueryErrorResetBoundary } from '@tanstack/react-query'
+import { createFileRoute } from '@tanstack/react-router';
+import { useQueryErrorResetBoundary } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/posts')({
   loader: ({ context: { queryClient } }) =>
     queryClient.ensureQueryData(postQueries.list()),
 
   errorComponent: ({ error, reset }) => {
-    const { reset: resetQuery } = useQueryErrorResetBoundary()
+    const { reset: resetQuery } = useQueryErrorResetBoundary();
 
     return (
       <div>
         <p>Failed to load posts: {error.message}</p>
         <button
           onClick={() => {
-            resetQuery()
-            reset()
+            resetQuery();
+            reset();
           }}
         >
           Retry
         </button>
       </div>
-    )
+    );
   },
 
   component: PostsPage,
-})
+});
 ```
 
 ## Error Boundary Placement Strategy
@@ -137,7 +135,7 @@ function Dashboard() {
         </Suspense>
       </QueryErrorBoundary>
     </div>
-  )
+  );
 }
 ```
 

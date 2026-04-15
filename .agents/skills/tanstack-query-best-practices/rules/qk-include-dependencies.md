@@ -14,9 +14,9 @@ function UserPosts({ userId }: { userId: string }) {
   const { data } = useQuery({
     queryKey: ['posts'],
     queryFn: () => fetchPostsByUser(userId),
-  })
+  });
 
-  return <PostList posts={data} />
+  return <PostList posts={data} />;
 }
 
 function FilteredTodos({ status, page }: { status: string; page: number }) {
@@ -24,9 +24,9 @@ function FilteredTodos({ status, page }: { status: string; page: number }) {
   const { data } = useQuery({
     queryKey: ['todos'],
     queryFn: () => fetchTodos({ status, page }),
-  })
+  });
 
-  return <TodoList todos={data} />
+  return <TodoList todos={data} />;
 }
 ```
 
@@ -38,9 +38,9 @@ function UserPosts({ userId }: { userId: string }) {
   const { data } = useQuery({
     queryKey: ['posts', userId],
     queryFn: () => fetchPostsByUser(userId),
-  })
+  });
 
-  return <PostList posts={data} />
+  return <PostList posts={data} />;
 }
 
 function FilteredTodos({ status, page }: { status: string; page: number }) {
@@ -48,9 +48,9 @@ function FilteredTodos({ status, page }: { status: string; page: number }) {
   const { data } = useQuery({
     queryKey: ['todos', { status, page }],
     queryFn: () => fetchTodos({ status, page }),
-  })
+  });
 
-  return <TodoList todos={data} />
+  return <TodoList todos={data} />;
 }
 ```
 

@@ -15,18 +15,18 @@ async function createPost(data: CreatePostInput) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
-  })
-  if (!response.ok) throw new Error('Failed to create post')
-  return response.json()
+  });
+  if (!response.ok) throw new Error('Failed to create post');
+  return response.json();
 }
 
 // Or using API routes - more boilerplate
 // api/posts.ts
 export async function POST(request: Request) {
-  const data = await request.json()
+  const data = await request.json();
   // No type safety from client
-  const post = await db.posts.create({ data })
-  return new Response(JSON.stringify(post))
+  const post = await db.posts.create({ data });
+  return new Response(JSON.stringify(post));
 }
 ```
 
@@ -34,15 +34,15 @@ export async function POST(request: Request) {
 
 ```tsx
 // lib/posts.functions.ts
-import { createServerFn } from '@tanstack/react-start'
-import { z } from 'zod'
-import { db } from './db.server'
+import { createServerFn } from '@tanstack/react-start';
+import { z } from 'zod';
+import { db } from './db.server';
 
 const createPostSchema = z.object({
   title: z.string().min(1).max(200),
   content: z.string().min(1),
   published: z.boolean().default(false),
-})
+});
 
 export const createPost = createServerFn({ method: 'POST' })
   .inputValidator(createPostSchema)
@@ -54,13 +54,13 @@ export const createPost = createServerFn({ method: 'POST' })
         content: data.content,
         published: data.published,
       },
-    })
-    return post
-  })
+    });
+    return post;
+  });
 
 // Usage in component
 function CreatePostForm() {
-  const createPostMutation = useServerFn(createPost)
+  const createPostMutation = useServerFn(createPost);
 
   const handleSubmit = async (formData: FormData) => {
     try {
@@ -70,13 +70,13 @@ function CreatePostForm() {
           content: formData.get('content') as string,
           published: false,
         },
-      })
+      });
       // post is fully typed
-      console.log('Created post:', post.id)
+      console.log('Created post:', post.id);
     } catch (error) {
-      console.error('Failed to create post:', error)
+      console.error('Failed to create post:', error);
     }
-  }
+  };
 }
 ```
 
@@ -84,33 +84,33 @@ function CreatePostForm() {
 
 ```tsx
 // lib/posts.functions.ts
-export const getPosts = createServerFn()  // GET is default
+export const getPosts = createServerFn() // GET is default
   .handler(async () => {
     const posts = await db.posts.findMany({
       orderBy: { createdAt: 'desc' },
       take: 20,
-    })
-    return posts
-  })
+    });
+    return posts;
+  });
 
 export const getPost = createServerFn()
   .validator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const post = await db.posts.findUnique({
       where: { id: data.id },
-    })
+    });
     if (!post) {
-      throw notFound()
+      throw notFound();
     }
-    return post
-  })
+    return post;
+  });
 
 // Usage in route loader
 export const Route = createFileRoute('/posts/$postId')({
   loader: async ({ params }) => {
-    return await getPost({ data: { id: params.postId } })
+    return await getPost({ data: { id: params.postId } });
   },
-})
+});
 ```
 
 ## Good Example: With Context and Dependencies
@@ -123,10 +123,10 @@ export const getPostWithComments = createServerFn()
     const [post, comments] = await Promise.all([
       getPost({ data: { id: data.postId } }),
       getComments({ data: { postId: data.postId } }),
-    ])
+    ]);
 
-    return { post, comments }
-  })
+    return { post, comments };
+  });
 ```
 
 ## Key Benefits
