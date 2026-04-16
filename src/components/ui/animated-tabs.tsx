@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Tabs as BaseTabs } from '@base-ui/react/tabs';
+import { Tabs as TabsPrimitive } from 'radix-ui';
 import { AnimatePresence, motion } from 'motion/react';
 import type { Transition } from 'motion/react';
 
@@ -13,6 +13,10 @@ import { useControlledState } from '@/hooks/use-controlled-state';
 import { cn } from '@/lib/utils';
 
 type TabsValue = string | number | null;
+
+function normalizeTabsValue(value: TabsValue | undefined): string {
+  return value == null ? '' : String(value);
+}
 
 interface TabsContextValue {
   value: TabsValue | undefined;
@@ -42,24 +46,34 @@ const [TabsVariantProvider, useTabsVariant] =
   getStrictContext<TabsVariantContextValue>('TabsVariantContext');
 
 interface PrimitiveTabsProps extends Omit<
-  React.ComponentProps<typeof BaseTabs.Root>,
-  'onValueChange'
+  React.ComponentProps<typeof TabsPrimitive.Root>,
+  'defaultValue' | 'onValueChange' | 'value'
 > {
   value?: TabsValue;
   defaultValue?: TabsValue;
   onValueChange?: (value: TabsValue, ...args: Array<unknown>) => void;
 }
 
-function PrimitiveTabs(props: PrimitiveTabsProps) {
+function PrimitiveTabs({
+  value: valueProp,
+  defaultValue,
+  onValueChange,
+  ...props
+}: PrimitiveTabsProps) {
   const [value, setValue] = useControlledState<TabsValue>({
-    value: props?.value,
-    defaultValue: props?.defaultValue,
-    onChange: props?.onValueChange,
+    value: valueProp,
+    defaultValue,
+    onChange: onValueChange,
   });
 
   return (
     <TabsProvider value={{ value, setValue }}>
-      <BaseTabs.Root data-slot="tabs" {...props} onValueChange={setValue} />
+      <TabsPrimitive.Root
+        data-slot="tabs"
+        value={normalizeTabsValue(value)}
+        onValueChange={setValue}
+        {...props}
+      />
     </TabsProvider>
   );
 }
@@ -94,10 +108,10 @@ function PrimitiveTabsHighlight({
   );
 }
 
-type PrimitiveTabsListProps = React.ComponentProps<typeof BaseTabs.List>;
+type PrimitiveTabsListProps = React.ComponentProps<typeof TabsPrimitive.List>;
 
 function PrimitiveTabsList(props: PrimitiveTabsListProps = {}) {
-  return <BaseTabs.List data-slot="tabs-list" {...props} />;
+  return <TabsPrimitive.List data-slot="tabs-list" {...props} />;
 }
 
 type PrimitiveTabsHighlightItemProps = React.ComponentProps<
@@ -108,10 +122,24 @@ function PrimitiveTabsHighlightItem(props: PrimitiveTabsHighlightItemProps) {
   return <HighlightItem data-slot="tabs-highlight-item" {...props} />;
 }
 
-type PrimitiveTabsTabProps = React.ComponentProps<typeof BaseTabs.Tab>;
+interface PrimitiveTabsTabProps extends Omit<
+  React.ComponentProps<typeof TabsPrimitive.Trigger>,
+  'value'
+> {
+  value?: TabsValue;
+}
 
-function PrimitiveTabsTab(props: PrimitiveTabsTabProps) {
-  return <BaseTabs.Tab data-slot="tabs-tab" {...props} />;
+function PrimitiveTabsTab({
+  value = '',
+  ...props
+}: PrimitiveTabsTabProps = {}) {
+  return (
+    <TabsPrimitive.Trigger
+      data-slot="tabs-tab"
+      value={normalizeTabsValue(value)}
+      {...props}
+    />
+  );
 }
 
 interface PrimitiveTabsPanelProps extends Omit<
@@ -130,29 +158,30 @@ function PrimitiveTabsPanel({
   ...props
 }: PrimitiveTabsPanelProps = {}) {
   const { value: activeValue } = useTabs();
-  const isActive = activeValue === value;
+  const isActive =
+    normalizeTabsValue(activeValue) === normalizeTabsValue(value);
 
   return (
-    <BaseTabs.Panel
-      render={
-        <motion.div
-          data-slot="tabs-panel"
-          data-active={isActive}
-          layout
-          layoutDependency={value}
-          initial={false} // Prevent initial animation
-          animate={{
-            opacity: isActive ? 1 : 0,
-            filter: isActive ? 'blur(0px)' : 'blur(4px)',
-            display: isActive ? 'block' : 'none',
-          }}
-          transition={transition}
-          {...props}
-        />
-      }
-      keepMounted={keepMounted}
-      value={value}
-    />
+    <TabsPrimitive.Content
+      value={normalizeTabsValue(value)}
+      forceMount={keepMounted || undefined}
+      asChild
+    >
+      <motion.div
+        data-slot="tabs-panel"
+        data-active={isActive}
+        layout
+        layoutDependency={normalizeTabsValue(value)}
+        initial={false} // Prevent initial animation
+        animate={{
+          opacity: isActive ? 1 : 0,
+          filter: isActive ? 'blur(0px)' : 'blur(4px)',
+          display: isActive ? 'block' : 'none',
+        }}
+        transition={transition}
+        {...props}
+      />
+    </TabsPrimitive.Content>
   );
 }
 
@@ -284,21 +313,21 @@ const listStyles: Record<TabsVariant, Record<TabsDirection, string>> = {
 const triggerStyles: Record<TabsVariant, Record<TabsDirection, string>> = {
   default: {
     horizontal:
-      "data-[selected]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md w-full px-2 py-1 text-sm font-medium whitespace-nowrap transition-colors duration-500 ease-in-out focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+      "data-active:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md w-full px-2 py-1 text-sm font-medium whitespace-nowrap transition-colors duration-500 ease-in-out focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
     vertical:
-      "data-[selected]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-muted-foreground inline-flex w-full flex-1 items-center justify-start gap-1.5 rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-500 ease-in-out focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+      "data-active:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-muted-foreground inline-flex w-full flex-1 items-center justify-start gap-1.5 rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-500 ease-in-out focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   },
   outline: {
     horizontal:
-      "data-[selected]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md w-full px-2 py-1 text-sm font-medium whitespace-nowrap transition-colors duration-500 ease-in-out focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+      "data-active:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md w-full px-2 py-1 text-sm font-medium whitespace-nowrap transition-colors duration-500 ease-in-out focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
     vertical:
-      "data-[selected]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-muted-foreground inline-flex w-full flex-1 items-center justify-start gap-1.5 rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-500 ease-in-out focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+      "data-active:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-muted-foreground inline-flex w-full flex-1 items-center justify-start gap-1.5 rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-500 ease-in-out focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   },
   underline: {
     horizontal:
-      "data-[selected]:text-foreground text-muted-foreground inline-flex h-full flex-1 items-center justify-center gap-1.5 w-full px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+      "data-active:text-foreground text-muted-foreground inline-flex h-full flex-1 items-center justify-center gap-1.5 w-full px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
     vertical:
-      "data-[selected]:text-foreground text-muted-foreground inline-flex w-full flex-1 items-center justify-start gap-1.5 px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+      "data-active:text-foreground text-muted-foreground inline-flex w-full flex-1 items-center justify-start gap-1.5 px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   },
 } as const;
 
