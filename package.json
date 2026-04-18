@@ -10,7 +10,8 @@
     "test": "vitest run",
     "lint": "eslint",
     "format": "prettier",
-    "check": "prettier --write . && eslint --fix"
+    "check": "prettier --write . && eslint --fix",
+    "prepare": "husky"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -77,6 +78,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
     "@rolldown/plugin-babel": "^0.2.3",
     "@tanstack/devtools-vite": "^0.6.0",
     "@tanstack/eslint-config": "^0.4.0",
@@ -89,7 +92,9 @@
     "@types/three": "^0.182.0",
     "@vitejs/plugin-react": "^6.0.1",
     "babel-plugin-react-compiler": "^1.0.0",
+    "husky": "^9.1.7",
     "jsdom": "^27.0.0",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.5.3",
     "prisma": "6.19",
     "shadcn": "^4.2.0",
@@ -98,5 +103,19 @@
     "vite": "^8.0.8",
     "vitest": "^4.1.4",
     "web-vitals": "^5.1.0"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": [
+      "eslint --max-warnings=0",
+      "prettier --write"
+    ],
+    "**/*.{html,json,css,scss,md,mdx}": [
+      "prettier --write"
+    ]
   }
 }
