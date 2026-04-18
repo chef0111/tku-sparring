@@ -6,64 +6,11 @@ A modern, user-friendly web application for managing Taekwondo sparring matches 
 
 ### Option 1: Direct access (Recommended)
 
-Simply visit [TKU Sparring App](https://tku-sparring.netlify.app/) in your web browser to start using the application immediately.
+Simply visit [TKU Sparring App](https://tku-sparring.vercel.app/) in your web browser to start using the application immediately.
 
 ### Option 2: Setup the project locally
 
-**Prerequisites:**
-
-- [Node.js](https://nodejs.org/) (Latest LTS version recommended)
-- [bun](https://bun.sh/)
-- [MongoDB Atlas](https://cloud.mongodb.com/)
-- [Git](https://git-scm.com/)
-
-**Setup Steps:**
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/chef0111/tku-sparring-app.git
-   cd tku-sparring-app
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   bun install
-   ```
-
-3. Configure environment variables:
-   - Copy `.env.example` to `.env.local`:
-     ```bash
-     cp .env.example .env.local
-     ```
-   - Update the environment variables:
-     ```env
-     DATABASE_URL=<your-mongodb-connection-string>
-     BETTER_AUTH_URL=http://localhost:3000
-     BETTER_AUTH_SECRET=<generate-a-random-secret>
-     ```
-
-4. Set up the database:
-
-   ```bash
-   npx prisma generate
-   npx prisma db push
-   ```
-
-5. Start the development server:
-
-   ```bash
-   bun run dev
-   ```
-
-   The application should now be available at `http://localhost:3000`
-
-6. Build for production
-
-   ```bash
-   bun run start
-   ```
+Refer to [DEVELOPMENT.md](DEVELOPMENT.md) for detailed instructions on how to set up the project locally.
 
 ## Features
 
