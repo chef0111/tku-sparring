@@ -24,8 +24,8 @@ Refer to [DEVELOPMENT.md](DEVELOPMENT.md) for detailed instructions on how to se
 
 ### Scoring System
 
-- 5-point scoring system:
-  - 5 points: Critical head hit (25 health points)
+- 6-point scoring system:
+  - 6 points: Critical head hit (30 health points)
   - 4 points: Critical trunk hit (20 health points)
   - 3 points: Head hit (15 health points)
   - 2 points: Trunk hit (10 health points)
