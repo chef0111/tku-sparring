@@ -1,4 +1,4 @@
-# TKU Sparring System
+# TKU Sparring System • ![License](https://img.shields.io/badge/License-MIT-blue)
 
 A modern, user-friendly web application for managing Taekwondo sparring matches of UIT Taekwondo Tournaments.
 
@@ -105,6 +105,6 @@ Winner is determined in the following order:
 
 ![Stats](https://repobeats.axiom.co/api/embed/66da04f4e2d5d29f7e1307ff183de30486fed782.svg 'Repobeats analytics image')
 
----
+## License
 
-Hope you have a good experience while using the system!
+Licensed under the [MIT License](./LICENSE).
