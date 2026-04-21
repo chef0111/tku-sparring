@@ -10,7 +10,7 @@ Simply visit [TKU Sparring App](https://tku-sparring.vercel.app/) in your web br
 
 ### Option 2: Setup the project locally
 
-Refer to [DEVELOPMENT.md](DEVELOPMENT.md) for detailed instructions on how to set up the project locally.
+Refer to [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed instructions on how to set up the project locally.
 
 ## Features
 
