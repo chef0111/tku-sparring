@@ -177,6 +177,7 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+
     font-synthesis-weight: none;
     text-rendering: optimizeLegibility;
     padding-bottom: env(safe-area-inset-bottom);
