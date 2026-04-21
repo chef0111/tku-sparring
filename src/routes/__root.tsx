@@ -12,6 +12,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { NotFound } from '@/components/not-found';
+import { cn } from '@/lib/utils';
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -43,6 +44,13 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         type: 'font/opentype',
         crossorigin: 'anonymous',
       },
+      {
+        rel: 'preload',
+        href: '/fonts/GeistPixel-Square.ttf',
+        as: 'font',
+        type: 'font/truetype',
+        crossorigin: 'anonymous',
+      },
     ],
   }),
 
@@ -52,11 +60,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={cn('font-sans antialiased')}>
       <head>
         <HeadContent />
       </head>
-      <body className="dark font-sans">
+      <body className="dark">
         <NuqsAdapter>
           <TooltipProvider>{children}</TooltipProvider>
         </NuqsAdapter>

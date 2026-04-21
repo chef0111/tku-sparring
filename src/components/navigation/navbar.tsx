@@ -7,7 +7,7 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { useSettings } from '@/contexts/settings';
 import { AppSettings } from '@/modules/app/settings';
 
-const Navbar = () => {
+export const Navbar = () => {
   const { data, isPending } = authClient.useSession();
   const user = data?.user;
 
@@ -32,7 +32,7 @@ const Navbar = () => {
       <div className="flex w-full grow items-center justify-center">
         <h1 className="text-4xl font-bold select-none">TKU Sparring System</h1>
       </div>
-      <div className="flex w-[13vw] shrink-0 items-center justify-end px-2">
+      <div className="flex w-[13vw] shrink-0 items-center justify-end px-2.5">
         {isPending ? null : user ? (
           <UserDropdown user={user} />
         ) : (
@@ -45,7 +45,10 @@ const Navbar = () => {
 
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button variant="ghost" className="no-focus hover:bg-transparent">
+            <Button
+              variant="ghost"
+              className="no-focus mx-2.5 size-12! hover:bg-transparent"
+            >
               <MenuIcon className="size-12" />
             </Button>
           </DialogTrigger>
@@ -55,5 +58,3 @@ const Navbar = () => {
     </nav>
   );
 };
-
-export { Navbar };
