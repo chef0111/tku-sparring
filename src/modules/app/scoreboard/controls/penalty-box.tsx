@@ -22,7 +22,7 @@ export const PenaltyBox = ({
   return (
     <Card
       className={cn(
-        'py relative flex h-[15.5vh] w-full flex-col items-center justify-center gap-2.5 overflow-hidden rounded-none px-4',
+        'py relative flex h-[18%] w-full flex-col items-center justify-center gap-2.5 overflow-hidden rounded-none px-4',
         'before:pointer-events-none before:absolute before:inset-0 before:bg-linear-to-br before:from-white/10 before:to-transparent',
         side === 'blue'
           ? 'rounded-br-[10px] bg-[#125a9f]'
