@@ -1,6 +1,6 @@
 import { HelpCircle } from 'lucide-react';
-import { StandardSettings } from '../tabs/standard';
-import { AdvanceSettings } from '../tabs/advance';
+import { StandardSettings } from '../tabs/standard-settings';
+import { AdvanceSettings } from '../tabs/advance-settings';
 import { Helps } from '../tabs/helps';
 import type { LucideProps } from 'lucide-react';
 import type { ForwardRefExoticComponent, RefAttributes } from 'react';

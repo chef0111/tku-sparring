@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { IconReload } from '@tabler/icons-react';
 import { PlayerAvatar } from '../../hud/player-avatar';
 import { advancePlayerGroup, getTournamentFields } from '../constant/form';
-import { CommonSettings } from './common';
+import { CommonSettings } from './common-settings';
 import { useSettings } from '@/contexts/settings';
 import { useAppForm } from '@/components/form/hooks';
 import { AdvanceSettingsSchema } from '@/lib/validations';
