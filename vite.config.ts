@@ -69,6 +69,11 @@ const config = defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  server: {
+    port: 3000,
+    host: '0.0.0.0',
+    cors: true,
+  },
 });
 
 export default config;

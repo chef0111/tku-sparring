@@ -1,12 +1,20 @@
 {
   "name": "tku-sparring",
+  "version": "2.0.2",
   "private": true,
   "type": "module",
+  "description": "A modern, user-friendly web application for managing Taekwondo sparring matches.",
+  "homepage": "https://tku-sparring.vercel.app",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chef0111/tku-sparring.git"
+  },
   "scripts": {
-    "dev": "vite dev --port 3000",
+    "dev": "portless tku-sparring vite dev --port 3000",
     "build": "vite build",
-    "preview": "vite preview",
-    "start": "vite build && vite preview",
+    "preview": "portless tku-sparring vite preview",
+    "start": "vite build && portless tku-sparring vite preview",
     "test": "vitest run",
     "lint": "eslint",
     "format": "prettier",
