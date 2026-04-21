@@ -20,7 +20,7 @@ cd tku-sparring
 
 ### 2. Install Portless
 
-Documentation: [port1355.dev](https://port1355.dev)
+Documentation: [portless.sh](https://portless.sh)
 
 ```bash
 bun add -g portless
