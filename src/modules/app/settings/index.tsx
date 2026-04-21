@@ -53,7 +53,7 @@ export const AppSettings = () => {
           >
             {settingTabs.map((tab) => (
               <TabsTrigger
-                className="data-active:text-foreground no-focus max-h-10! text-lg font-light transition-all duration-300 data-active:font-semibold!"
+                className="data-active:text-foreground no-focus max-h-10! text-lg transition-all duration-300 data-active:font-semibold!"
                 key={tab.value}
                 value={tab.value}
               >
