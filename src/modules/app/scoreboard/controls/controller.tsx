@@ -9,7 +9,7 @@ export const Controller = ({ children, className }: ControllerProps) => {
   return (
     <div
       className={cn(
-        'relative flex h-[76.5vh] w-[13vw] flex-col items-center justify-between',
+        'relative flex h-full w-[13vw] flex-col items-center justify-between',
         className
       )}
     >
@@ -32,7 +32,7 @@ export const ControllerContent = ({
   return (
     <div
       className={cn(
-        'relative flex h-full w-full flex-col items-center justify-start overflow-hidden p-2.5',
+        'relative flex h-[82%] w-full flex-col items-center justify-start overflow-hidden p-2.5',
         'before:pointer-events-none before:absolute before:inset-0 before:bg-linear-to-br before:from-white/10 before:to-transparent',
         side === 'blue'
           ? 'rounded-tr-[10px] bg-[#1e68ae]'

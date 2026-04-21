@@ -6,10 +6,16 @@ import { PlayerAvatar } from './player-avatar';
 import { usePlayerStore } from '@/stores/player-store';
 import { useDeclareWinner } from '@/hooks/use-winner';
 import { isCriticalHit } from '@/lib/scoreboard/hit-types';
+import { cn } from '@/lib/utils';
 
-export const AppHUD = () => {
+export const AppHUD = ({ className }: { className?: string }) => {
   return (
-    <section className="flex h-[14vh] w-full max-w-screen items-center justify-between">
+    <section
+      className={cn(
+        'flex h-[14vh] w-full max-w-screen items-center justify-between',
+        className
+      )}
+    >
       <PlayerHUD player="red" />
       <PlayerHUD player="blue" />
     </section>

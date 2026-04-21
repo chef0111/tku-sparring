@@ -13,7 +13,7 @@ export const StatsCard = ({ hits, wins, side, className }: StatsCardProps) => {
   return (
     <Card
       className={cn(
-        'pointers-event-none relative flex h-[15.5vh] w-full flex-row items-center justify-center gap-15 overflow-hidden rounded-none px-4',
+        'pointer-events-none relative flex h-[20.5%] w-full flex-row items-center justify-center gap-15 overflow-hidden rounded-none px-4',
         'before:absolute before:inset-0 before:bg-linear-to-br before:from-white/10 before:to-transparent',
         side === 'blue' ? 'bg-[#155ea4]' : 'bg-[#dc0000]',
         className

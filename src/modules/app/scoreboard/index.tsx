@@ -37,7 +37,7 @@ export const Scoreboard = ({ className }: ScoreboardProps) => {
   return (
     <section
       className={cn(
-        'relative flex h-[76.5vh] max-w-full grow flex-row items-center justify-center',
+        'relative flex h-[calc(100%-14vh-5rem)] max-w-full grow flex-row items-center justify-center',
         className
       )}
     >

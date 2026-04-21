@@ -144,7 +144,7 @@ export const TimerFrame = ({ children, className }: TimerFrameProps) => {
   return (
     <div
       className={cn(
-        'bg-background relative flex h-[76.5vh] w-1/5 flex-col items-center justify-start gap-[8.5vh]',
+        'bg-background relative flex h-full w-1/5 flex-col items-center justify-start gap-[8.5vh]',
         className
       )}
     >

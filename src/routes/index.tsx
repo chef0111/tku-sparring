@@ -18,7 +18,7 @@ function App() {
   const isDesktop = useMediaQuery('(min-width: 1024px)');
 
   return (
-    <div className="h-dvh w-dvw">
+    <div className="h-full w-dvw">
       <AppHome />
 
       <Activity mode={!isDesktop ? 'visible' : 'hidden'}>
