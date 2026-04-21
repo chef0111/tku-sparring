@@ -193,8 +193,9 @@ export function FormNumberInput({
         >
           <Button
             type="button"
+            size="icon-xs"
             variant="outline"
-            className="h-full w-5 p-0 [&]:rounded-tl-none!"
+            className="h-full w-5 p-0 in-data-[slot=button-group]:rounded-tl-none!"
             onClick={handleIncrement}
             disabled={max !== undefined && (field.state.value || 0) >= max}
           >
@@ -202,9 +203,9 @@ export function FormNumberInput({
           </Button>
           <Button
             type="button"
+            size="icon-xs"
             variant="outline"
-            className="h-full w-5 p-0 [&]:rounded-bl-none!"
-            style={{ borderBottomLeftRadius: 0 }}
+            className="h-full w-5 p-0 in-data-[slot=button-group]:rounded-bl-none!"
             onClick={handleDecrement}
             disabled={min !== undefined && (field.state.value || 0) <= min}
           >
