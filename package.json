@@ -1,11 +1,16 @@
 {
   "name": "tku-sparring",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "private": true,
   "type": "module",
   "description": "A modern, user-friendly web application for managing Taekwondo sparring matches.",
   "homepage": "https://tku-sparring.vercel.app",
   "license": "MIT",
+  "author": {
+    "name": "Le Tran Gia Bao",
+    "email": "letrangiabao14@gmail.com",
+    "url": "https://github.com/chef0111"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/chef0111/tku-sparring.git"
