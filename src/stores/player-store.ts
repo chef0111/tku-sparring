@@ -40,7 +40,7 @@ interface PlayerActions {
   recordHit: (
     player: Player,
     hitType: HitType,
-    isTimerRunning: boolean,
+    canScore: boolean,
     isBreakTime: boolean
   ) => boolean; // Returns true if KO occurred
 
@@ -87,7 +87,7 @@ const initializer: StateCreator<PlayerStore> = (set, get) => ({
   lastBlueHit: null,
   lastHitTimes: { red: 0, blue: 0 },
 
-  recordHit: (player, hitType, isTimerRunning, isBreakTime) => {
+  recordHit: (player, hitType, canScore, isBreakTime) => {
     const state = get();
     const currentTime = Date.now();
 
@@ -96,7 +96,7 @@ const initializer: StateCreator<PlayerStore> = (set, get) => ({
       return false;
     }
 
-    if (isBreakTime || !isTimerRunning) {
+    if (isBreakTime || !canScore) {
       return false;
     }
 
