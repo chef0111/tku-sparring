@@ -45,7 +45,7 @@
     "@radix-ui/react-use-controllable-state": "^1.2.2",
     "@react-three/fiber": "^9.5.0",
     "@tabler/icons-react": "^3.36.1",
-    "@tailwindcss/vite": "^4.0.6",
+    "@tailwindcss/vite": "^4.2.4",
     "@tanstack/match-sorter-utils": "^8.19.4",
     "@tanstack/react-devtools": "^0.10.2",
     "@tanstack/react-form": "^1.29.1",
