@@ -40,7 +40,7 @@
     "@orpc/server": "^1.14.0",
     "@orpc/tanstack-query": "^1.14.0",
     "@orpc/zod": "^1.14.0",
-    "@prisma/client": "6.19",
+    "@prisma/client": "7.8",
     "@radix-ui/react-direction": "^1.1.1",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
     "@react-three/fiber": "^9.5.0",
