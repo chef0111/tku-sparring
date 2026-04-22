@@ -19,16 +19,13 @@ interface ControlsProps {
 export const Controls = ({ side = 'red', className }: ControlsProps) => {
   const player: Player = side;
 
-  const { isRunning, isBreakTime, roundStarted, roundEnded, setRoundEnded } =
-    useTimerStore(
-      useShallow((s) => ({
-        isRunning: s.isRunning,
-        isBreakTime: s.isBreakTime,
-        roundStarted: s.roundStarted,
-        roundEnded: s.roundEnded,
-        setRoundEnded: s.setRoundEnded,
-      }))
-    );
+  const { isBreakTime, roundStarted, setRoundEnded } = useTimerStore(
+    useShallow((s) => ({
+      isBreakTime: s.isBreakTime,
+      roundStarted: s.roundStarted,
+      setRoundEnded: s.setRoundEnded,
+    }))
+  );
 
   const { playerName, fouls, recordHit, addPenalty, removePenalty } =
     usePlayerStore(
@@ -44,7 +41,7 @@ export const Controls = ({ side = 'red', className }: ControlsProps) => {
   const { isOpen } = useSettings();
 
   const scoreActive = !isOpen && roundStarted && !isBreakTime;
-  const canRecordHit = isRunning || roundEnded;
+  const canScoreHit = roundStarted && !isBreakTime;
 
   // Track active hit type for keyboard visual feedback
   const [activeHitType, setActiveHitType] = useState<HitType | null>(null);
@@ -52,19 +49,14 @@ export const Controls = ({ side = 'red', className }: ControlsProps) => {
   const handleHit = useCallback(
     (hitType: HitType) => {
       if (scoreActive) {
-        const koOccurred = recordHit(
-          player,
-          hitType,
-          canRecordHit,
-          isBreakTime
-        );
+        const koOccurred = recordHit(player, hitType, canScoreHit, isBreakTime);
 
         if (koOccurred) {
           setRoundEnded(true);
         }
       }
     },
-    [scoreActive, player, recordHit, canRecordHit, isBreakTime, setRoundEnded]
+    [scoreActive, player, recordHit, canScoreHit, isBreakTime, setRoundEnded]
   );
 
   const handleAddFoul = useCallback(() => {
@@ -100,12 +92,7 @@ export const Controls = ({ side = 'red', className }: ControlsProps) => {
       if (hitType) {
         e.preventDefault();
         setActiveHitType(hitType);
-        const koOccurred = recordHit(
-          player,
-          hitType,
-          canRecordHit,
-          isBreakTime
-        );
+        const koOccurred = recordHit(player, hitType, canScoreHit, isBreakTime);
 
         if (koOccurred) {
           setRoundEnded(true);
@@ -119,7 +106,7 @@ export const Controls = ({ side = 'red', className }: ControlsProps) => {
       scoreActive,
       player,
       recordHit,
-      canRecordHit,
+      canScoreHit,
       isBreakTime,
       setRoundEnded,
     ]
