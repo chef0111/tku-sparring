@@ -12,7 +12,7 @@ interface HealthbarProps {
 
 export const Healthbar = ({
   health,
-  maxHealth = 130,
+  maxHealth = 120,
   className,
   side,
 }: HealthbarProps) => {
