@@ -18,87 +18,73 @@ interface ControlsProps {
 
 export const Controls = ({ side = 'red', className }: ControlsProps) => {
   const player: Player = side;
-  const opponent: Player = player === 'red' ? 'blue' : 'red';
 
-  const { isRunning, isBreakTime, roundStarted, setRoundEnded } = useTimerStore(
-    useShallow((s) => ({
-      isRunning: s.isRunning,
-      isBreakTime: s.isBreakTime,
-      roundStarted: s.roundStarted,
-      setRoundEnded: s.setRoundEnded,
-    }))
-  );
+  const { isRunning, isBreakTime, roundStarted, roundEnded, setRoundEnded } =
+    useTimerStore(
+      useShallow((s) => ({
+        isRunning: s.isRunning,
+        isBreakTime: s.isBreakTime,
+        roundStarted: s.roundStarted,
+        roundEnded: s.roundEnded,
+        setRoundEnded: s.setRoundEnded,
+      }))
+    );
 
-  const {
-    playerName,
-    fouls,
-    opponentHealth,
-    opponentMana,
-    recordHit,
-    addPenalty,
-    removePenalty,
-  } = usePlayerStore(
-    useShallow((s) => ({
-      playerName: s[player].name,
-      fouls: s[player].fouls,
-      opponentHealth: s[opponent].health,
-      opponentMana: s[opponent].mana,
-      recordHit: s.recordHit,
-      addPenalty: s.addPenalty,
-      removePenalty: s.removePenalty,
-    }))
-  );
+  const { playerName, fouls, recordHit, addPenalty, removePenalty } =
+    usePlayerStore(
+      useShallow((s) => ({
+        playerName: s[player].name,
+        fouls: s[player].fouls,
+        recordHit: s.recordHit,
+        addPenalty: s.addPenalty,
+        removePenalty: s.removePenalty,
+      }))
+    );
 
   const { isOpen } = useSettings();
 
-  const playerKO = opponentHealth <= 0;
-  const playerDisqualified = opponentMana <= 0;
-  const roundEnded = playerKO || playerDisqualified;
-
-  const canScore = !isOpen && isRunning && !isBreakTime && !roundEnded;
+  const scoreActive = !isOpen && roundStarted && !isBreakTime;
+  const canRecordHit = isRunning || roundEnded;
 
   // Track active hit type for keyboard visual feedback
   const [activeHitType, setActiveHitType] = useState<HitType | null>(null);
 
   const handleHit = useCallback(
     (hitType: HitType) => {
-      if (canScore) {
-        const koOccurred = recordHit(player, hitType, isRunning, isBreakTime);
+      if (scoreActive) {
+        const koOccurred = recordHit(
+          player,
+          hitType,
+          canRecordHit,
+          isBreakTime
+        );
 
         if (koOccurred) {
           setRoundEnded(true);
         }
       }
     },
-    [canScore, player, recordHit, isRunning, isBreakTime, setRoundEnded]
+    [scoreActive, player, recordHit, canRecordHit, isBreakTime, setRoundEnded]
   );
 
   const handleAddFoul = useCallback(() => {
-    if (!isBreakTime && !roundEnded && roundStarted) {
+    if (!isBreakTime && roundStarted) {
       const disqualified = addPenalty(player);
 
       if (disqualified) {
         setRoundEnded(true);
       }
     }
-  }, [
-    isRunning,
-    isBreakTime,
-    roundEnded,
-    roundStarted,
-    player,
-    addPenalty,
-    setRoundEnded,
-  ]);
+  }, [isBreakTime, roundStarted, player, addPenalty, setRoundEnded]);
 
   const handleRemoveFoul = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
-      if (!isBreakTime && !roundEnded) {
+      if (!isBreakTime) {
         removePenalty(player);
       }
     },
-    [isBreakTime, roundEnded, player, removePenalty]
+    [isBreakTime, player, removePenalty]
   );
 
   // Hit scoring keybinds
@@ -106,7 +92,7 @@ export const Controls = ({ side = 'red', className }: ControlsProps) => {
   useHotkeys(
     keys.join(','),
     (e) => {
-      if (!canScore) return;
+      if (!scoreActive) return;
 
       const key = e.key.toLowerCase();
       const hitType = keyboardMappings[player][key];
@@ -114,7 +100,12 @@ export const Controls = ({ side = 'red', className }: ControlsProps) => {
       if (hitType) {
         e.preventDefault();
         setActiveHitType(hitType);
-        const koOccurred = recordHit(player, hitType, isRunning, isBreakTime);
+        const koOccurred = recordHit(
+          player,
+          hitType,
+          canRecordHit,
+          isBreakTime
+        );
 
         if (koOccurred) {
           setRoundEnded(true);
@@ -123,7 +114,15 @@ export const Controls = ({ side = 'red', className }: ControlsProps) => {
         setTimeout(() => setActiveHitType(null), 100);
       }
     },
-    [isOpen, canScore, player, recordHit, isRunning, isBreakTime, setRoundEnded]
+    [
+      isOpen,
+      scoreActive,
+      player,
+      recordHit,
+      canRecordHit,
+      isBreakTime,
+      setRoundEnded,
+    ]
   );
 
   const foulKey = player === 'red' ? 'w' : 'i';
@@ -132,7 +131,7 @@ export const Controls = ({ side = 'red', className }: ControlsProps) => {
     (e) => {
       if (isOpen) return;
 
-      if (!isBreakTime && !roundEnded) {
+      if (!isBreakTime) {
         e.preventDefault();
         const disqualified = addPenalty(player);
 
@@ -141,7 +140,7 @@ export const Controls = ({ side = 'red', className }: ControlsProps) => {
         }
       }
     },
-    [isOpen, isBreakTime, roundEnded, player, addPenalty, setRoundEnded]
+    [isOpen, isBreakTime, player, addPenalty, setRoundEnded]
   );
 
   return (
@@ -152,13 +151,13 @@ export const Controls = ({ side = 'red', className }: ControlsProps) => {
           <CriticalButtons
             player={player}
             onHit={handleHit}
-            disabled={!canScore}
+            disabled={!scoreActive}
             activeHitType={activeHitType}
           />
           <NormalButtons
             player={player}
             onHit={handleHit}
-            disabled={!canScore}
+            disabled={!scoreActive}
             activeHitType={activeHitType}
           />
         </ScoreButtons>
