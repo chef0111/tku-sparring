@@ -13,3 +13,4 @@ updates:
     ignore:
       - dependency-name: 'prisma'
       - dependency-name: '@prisma/client'
+      - dependency-name: 'better-auth'
