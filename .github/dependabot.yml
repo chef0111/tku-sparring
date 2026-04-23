@@ -10,3 +10,6 @@ updates:
     target-branch: 'staging'
     schedule:
       interval: 'daily'
+    ignore:
+      - dependency-name: 'prisma'
+      - dependency-name: '@prisma/client'
