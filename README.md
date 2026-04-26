@@ -2,7 +2,7 @@
 
 A modern, user-friendly web application for managing Taekwondo sparring matches of UIT Taekwondo Tournaments.
 
-## Installation Guide
+## 🚀 Installation Guide
 
 ### Option 1: Direct access (Recommended)
 
@@ -12,7 +12,7 @@ Simply visit [TKU Sparring App](https://tku-sparring.vercel.app/) in your web br
 
 Refer to [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed instructions on how to set up the project locally.
 
-## Features
+## 🔋 Features
 
 ### Match Configuration
 
@@ -55,7 +55,7 @@ Refer to [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed instructions on how to 
 - Match result display
 - Support for multiple matches
 
-## Requirements and Restrictions
+## 📋 Requirements and Restrictions
 
 ### Scoring Restrictions
 
@@ -101,10 +101,10 @@ Winner is determined in the following order:
 > - User cannot reset the previous round's stat during break time
 > - The system is web-base and **only supports PC resolution**.
 
-## Stats
+## 📊 Stats
 
 ![Stats](https://repobeats.axiom.co/api/embed/66da04f4e2d5d29f7e1307ff183de30486fed782.svg 'Repobeats analytics image')
 
-## License
+## 📃 License
 
 Licensed under the [MIT License](./LICENSE).
