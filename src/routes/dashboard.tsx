@@ -1,30 +1,23 @@
-import { Outlet, createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useEffect } from 'react';
-import { authClient } from '@/lib/auth-client';
+import { Outlet, createFileRoute, redirect } from '@tanstack/react-router';
 import { AppSidebar } from '@/features/dashboard';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import LoadingScreen from '@/components/navigation/loading';
+import { getSession } from '@/lib/session';
 
 export const Route = createFileRoute('/dashboard')({
+  beforeLoad: async () => {
+    const session = await getSession();
+
+    if (!session) {
+      throw redirect({ to: '/login' });
+    }
+    return { user: session.user };
+  },
+  pendingComponent: () => <LoadingScreen title="Loading your dashboard..." />,
   component: DashboardLayout,
 });
 
 function DashboardLayout() {
-  const navigate = useNavigate();
-  const { data: session, isPending } = authClient.useSession();
-
-  useEffect(() => {
-    if (!isPending && !session) {
-      navigate({ to: '/login' });
-    }
-  }, [session, isPending, navigate]);
-
-  if (isPending) {
-    return <LoadingScreen title="Configuring your dashboard..." />;
-  }
-
-  if (!session) return null;
-
   return (
     <SidebarProvider>
       <AppSidebar />
