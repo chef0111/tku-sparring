@@ -25,6 +25,9 @@
     "format": "prettier",
     "check": "prettier --write . && eslint --fix",
     "upgrade:auth": "npx auth upgrade",
+    "intent": "npx @tanstack/intent install",
+    "intent:ls": "npx @tanstack/intent@latest list",
+    "intent:load": "npx @tanstack/intent@latest load",
     "prepare": "husky"
   },
   "dependencies": {
@@ -99,6 +102,7 @@
     "@rolldown/plugin-babel": "^0.2.3",
     "@tanstack/devtools-vite": "^0.6.0",
     "@tanstack/eslint-config": "^0.4.0",
+    "@tanstack/intent": "^0.0.36",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
     "@types/babel__core": "^7.20.5",
