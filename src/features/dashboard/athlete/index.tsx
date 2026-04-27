@@ -1,4 +1,4 @@
-import { SiteHeader } from '@/modules/dashboard/site-header';
+import { SiteHeader } from '@/features/dashboard/site-header';
 
 export function AthleteManager() {
   return (

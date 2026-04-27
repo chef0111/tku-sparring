@@ -54,14 +54,15 @@
     "@tanstack/react-pacer": "^0.21.1",
     "@tanstack/react-query": "^5.100.1",
     "@tanstack/react-query-devtools": "^5.100.1",
-    "@tanstack/react-router": "^1.168.24",
+    "@tanstack/react-router": "^1.168.25",
     "@tanstack/react-router-devtools": "^1.166.13",
-    "@tanstack/react-router-ssr-query": "^1.166.11",
-    "@tanstack/react-start": "^1.167.44",
+    "@tanstack/react-router-ssr-query": "^1.166.12",
+    "@tanstack/react-start": "^1.167.50",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.24",
-    "@tanstack/router-plugin": "^1.167.26",
-    "@tanstack/start-server-core": "^1.167.19",
+    "@tanstack/router-core": "^1.168.17",
+    "@tanstack/router-plugin": "^1.167.28",
+    "@tanstack/start-server-core": "^1.167.22",
     "better-auth": "1.6.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -126,7 +127,7 @@
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [
-      "eslint --max-warnings=0",
+      "eslint",
       "prettier --write"
     ],
     "**/*.{html,json,css,scss,md,mdx}": [

@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { TournamentPage } from '@/modules/dashboard';
+import { TournamentPage } from '@/features/dashboard';
 
 export const Route = createFileRoute('/dashboard/tournaments/$id')({
   component: TournamentDetail,

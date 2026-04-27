@@ -1,7 +1,7 @@
 import { Outlet, createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { authClient } from '@/lib/auth-client';
-import { AppSidebar } from '@/modules/dashboard';
+import { AppSidebar } from '@/features/dashboard';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import LoadingScreen from '@/components/navigation/loading';
 

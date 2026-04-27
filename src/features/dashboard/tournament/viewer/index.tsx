@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
 import { Edit, Layers, LayoutGrid, Trophy, Users } from 'lucide-react';
-import type { GroupData, TournamentData } from '@/modules/dashboard/types';
-import { SiteHeader } from '@/modules/dashboard/site-header';
+import type { GroupData, TournamentData } from '@/features/dashboard/types';
+import { SiteHeader } from '@/features/dashboard/site-header';
 import { Button } from '@/components/ui/button';
 
 interface TournamentViewerProps {

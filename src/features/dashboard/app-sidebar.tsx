@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { NavSecondary } from './nav-secondary';
 import { LogoIcon } from '@/components/ui/logo';
-import { NavMain } from '@/modules/dashboard/nav-main';
+import { NavMain } from '@/features/dashboard/nav-main';
 import { UserNav } from '@/components/user/user-nav';
 import {
   Sidebar,

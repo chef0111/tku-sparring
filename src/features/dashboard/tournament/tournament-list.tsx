@@ -4,7 +4,7 @@ import { SiteHeader } from '../site-header';
 import { TournamentCard } from './tournament-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { CreateTournamentDialog } from '@/modules/dashboard/tournament/create-tournament-dialog';
+import { CreateTournamentDialog } from '@/features/dashboard/tournament/create-tournament-dialog';
 import { useTournaments } from '@/queries/tournaments';
 import { Skeleton } from '@/components/ui/skeleton';
 

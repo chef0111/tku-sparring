@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { Activity } from 'react';
 
 import { IconDeviceLaptop } from '@tabler/icons-react';
-import { AppHome } from '@/modules/app';
+import { AppHome } from '@/features/app';
 import {
   Empty,
   EmptyDescription,
