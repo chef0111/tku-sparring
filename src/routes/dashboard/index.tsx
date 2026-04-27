@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { DashboardHome } from '@/modules/dashboard';
+import { DashboardHome } from '@/features/dashboard';
 import { NotFound } from '@/components/not-found';
 
 export const Route = createFileRoute('/dashboard/')({

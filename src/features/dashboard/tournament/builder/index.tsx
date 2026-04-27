@@ -8,7 +8,7 @@ import {
   EditTournamentDialog,
 } from './dialogs';
 import { Header } from './header';
-import type { GroupData, TournamentData } from '@/modules/dashboard/types';
+import type { GroupData, TournamentData } from '@/features/dashboard/types';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import LoadingScreen from '@/components/navigation/loading';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';

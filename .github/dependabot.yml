@@ -11,6 +11,7 @@ updates:
     schedule:
       interval: 'daily'
     ignore:
+      - dependency-name: 'vite'
       - dependency-name: 'prisma'
       - dependency-name: '@prisma/client'
       - dependency-name: 'better-auth'

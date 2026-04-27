@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ArrowRight, Trophy } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { AnimatePresence, motion } from 'motion/react';
-import type { TournamentListItem } from '@/modules/dashboard/types';
+import type { TournamentListItem } from '@/features/dashboard/types';
 import { DecorIcon } from '@/components/ui/decor-icon';
 import { CanvasReveal } from '@/components/ui/canvas-reveal';
 import { Button } from '@/components/ui/button';

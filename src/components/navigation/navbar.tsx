@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth-client';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { useSettings } from '@/contexts/settings';
-import { AppSettings } from '@/modules/app/settings';
+import { AppSettings } from '@/features/app/settings';
 
 export const Navbar = () => {
   const { data, isPending } = authClient.useSession();
