@@ -16,6 +16,14 @@
 }
 
 @font-face {
+  font-family: 'Departure Mono';
+  src: url('/fonts/dearpix-2-01.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'Geist Pixel Square';
   src: url('/fonts/GeistPixel-Square.ttf') format('truetype');
   font-weight: normal;
@@ -146,6 +154,7 @@
   --font-esbuild: 'ESBuild', sans-serif;
   --font-sans: 'Geist Variable', sans-serif;
   --font-mono: 'Geist Mono Variable', monospace;
+  --font-pixel: 'Departure Mono', monospace;
   --font-pixel-square: 'Geist Pixel Square', cursive;
 
   --color-red-player: rgba(255, 0, 0, 0.2);
@@ -160,8 +169,14 @@
   }
 }
 
-@utility animate-skeleton {
-  animation: skeleton 2s -1s infinite linear;
+@keyframes loading-spinner-fade {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.15;
+  }
 }
 
 @layer base {

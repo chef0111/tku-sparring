@@ -46,6 +46,13 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
       {
         rel: 'preload',
+        href: '/fonts/dearpix-2-01.otf',
+        as: 'font',
+        type: 'font/opentype',
+        crossorigin: 'anonymous',
+      },
+      {
+        rel: 'preload',
         href: '/fonts/GeistPixel-Square.ttf',
         as: 'font',
         type: 'font/truetype',

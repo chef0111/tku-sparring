@@ -9,7 +9,7 @@ export function Skeleton({
     <div
       className={cn(
         'animate-skeleton bg-muted/50 relative overflow-hidden rounded-sm',
-        'before:animate-skeleton before:absolute before:inset-0 before:bg-[linear-gradient(120deg,transparent_30%,var(--skeleton-highlight),transparent_60%)] before:bg-size-[200%_100%]',
+        'before:animate-skeleton before:absolute before:inset-0 before:bg-[linear-gradient(120deg,transparent_20%,var(--skeleton-highlight),transparent_60%)] before:bg-size-[200%_100%]',
         className
       )}
       data-slot="skeleton"
