@@ -46,6 +46,10 @@ function extractTextFromChildren(children: Children): string {
   return '';
 }
 
+function formatKbdDisplay(text: string): string {
+  return text.replace(/\benter\b/gi, '⏎').replace(/\bcomma\b/gi, ',');
+}
+
 function normalizeHotkeyString(str: string | undefined | null): string | null {
   if (!str) return null;
   let normalized = str.trim().toLowerCase();
@@ -173,6 +177,16 @@ function Kbd({
 }: KbdProps) {
   const [isPressed, setIsPressed] = useState(false);
   const kbdRef = useRef<HTMLElement>(null);
+
+  const extractedText = useMemo(
+    () => extractTextFromChildren(children),
+    [children]
+  );
+  const isEscDisplay = !!extractedText && extractedText.toLowerCase() === 'esc';
+  const displayText = useMemo(
+    () => formatKbdDisplay(extractedText),
+    [extractedText]
+  );
 
   const hotkey = useMemo(() => {
     if (!useHotkey) return null;
@@ -313,10 +327,14 @@ function Kbd({
       <kbd
         ref={kbdRef}
         data-slot="kbd"
-        className={cn(kbdVariants({ variant }), className)}
+        className={cn(
+          kbdVariants({ variant }),
+          isEscDisplay && 'size-8',
+          className
+        )}
         {...props}
       >
-        {children}
+        {displayText || children}
       </kbd>
     );
   }
@@ -328,6 +346,7 @@ function Kbd({
       className={cn(
         !isCompound && !isSpace && 'aspect-square',
         isSpace && 'w-24',
+        isEscDisplay && 'size-8',
         kbdVariants({ variant }),
         isPressed && 'shadow-none',
         className
@@ -341,7 +360,7 @@ function Kbd({
         )}
       >
         <span className="align-center block text-center text-xs">
-          {children}
+          {displayText || children}
         </span>
       </span>
     </kbd>

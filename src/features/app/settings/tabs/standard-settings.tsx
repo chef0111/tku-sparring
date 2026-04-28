@@ -73,7 +73,7 @@ export const StandardSettings = () => {
   };
 
   return (
-    <FieldSet className="font-esbuild w-full">
+    <FieldSet className="w-full">
       <FieldGroup className="settings-field-group">
         <FieldLabel className="settings-group-label">
           SELECT PLAYER AVATARS

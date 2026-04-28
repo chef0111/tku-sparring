@@ -1,3 +1,4 @@
+import { blueKeys, redKeys, systemKeys } from './data/helps';
 import {
   FieldGroup,
   FieldLabel,
@@ -33,42 +34,25 @@ const KeyRow = ({ label, kbd, className, labelClassName }: KeyRowProps) => (
 
 export const Helps = () => {
   return (
-    <FieldSet className="font-esbuild w-full gap-6">
+    <FieldSet className="w-full gap-6">
       {/* System Controls */}
       <FieldGroup className="bg-card gap-4 rounded-md border p-4">
         <FieldLabel className="flex w-full justify-center text-center text-2xl font-semibold">
           SYSTEM KEY MAPPINGS
         </FieldLabel>
         <div className="flex flex-col gap-4">
-          <KeyRow
-            label="Open settings dialog"
-            kbd={
-              navigator.userAgent.toUpperCase().includes('MAC')
-                ? '⌘ + ,'
-                : 'Ctrl + ,'
-            }
-            labelClassName="text-lg leading-none"
-          />
-          <KeyRow
-            label="Close settings dialog"
-            kbd="Esc"
-            className="size-8"
-            labelClassName="text-lg leading-none"
-          />
-          <KeyRow
-            label="Start/Stop Timer"
-            kbd="Space"
-            labelClassName="text-lg leading-none"
-          />
-          <KeyRow
-            label="Undo player actions"
-            kbd={
-              navigator.userAgent.toUpperCase().includes('MAC')
-                ? '⌘ + Z'
-                : 'Ctrl + Z'
-            }
-            labelClassName="text-lg leading-none"
-          />
+          {systemKeys.map((item, i) => {
+            const kbd = typeof item.kbd === 'function' ? item.kbd() : item.kbd;
+            return (
+              <KeyRow
+                key={item.label ?? `system-${i}`}
+                label={item.label ?? ''}
+                kbd={kbd ?? ''}
+                className={item.className}
+                labelClassName="text-lg leading-none"
+              />
+            );
+          })}
         </div>
       </FieldGroup>
 
@@ -81,13 +65,23 @@ export const Helps = () => {
             RED PLAYER
           </FieldLabel>
           <div className="flex flex-col gap-3">
-            <KeyRow label="Foul (Penalty)" kbd="W" />
-            <Separator />
-            <KeyRow label="Head Kick (Crit) - 5 pts" kbd="E" />
-            <KeyRow label="Trunk Kick (Crit) - 4 pts" kbd="Q" />
-            <KeyRow label="Head Kick - 3 pts" kbd="D" />
-            <KeyRow label="Trunk Kick - 2 pts" kbd="A" />
-            <KeyRow label="Punch - 1 pt" kbd="S" />
+            {redKeys.map((item, i) =>
+              item.isSeparator ? (
+                <Separator key={`red-sep-${i}`} />
+              ) : (
+                <KeyRow
+                  key={item.label ?? `red-${i}`}
+                  label={item.label ?? ''}
+                  kbd={
+                    typeof item.kbd === 'function'
+                      ? item.kbd()
+                      : (item.kbd ?? '')
+                  }
+                  className={item.className}
+                  labelClassName={item.labelClassName}
+                />
+              )
+            )}
           </div>
         </FieldGroup>
 
@@ -97,13 +91,23 @@ export const Helps = () => {
             BLUE PLAYER
           </FieldLabel>
           <div className="flex flex-col gap-3">
-            <KeyRow label="Foul (Penalty)" kbd="I" />
-            <Separator />
-            <KeyRow label="Head Kick (Crit) - 5 pts" kbd="U" />
-            <KeyRow label="Body Kick (Crit) - 4 pts" kbd="O" />
-            <KeyRow label="Head Kick - 3 pts" kbd="J" />
-            <KeyRow label="Body Kick - 2 pts" kbd="L" />
-            <KeyRow label="Punch - 1 pt" kbd="K" />
+            {blueKeys.map((item, i) =>
+              item.isSeparator ? (
+                <Separator key={`blue-sep-${i}`} />
+              ) : (
+                <KeyRow
+                  key={item.label ?? `blue-${i}`}
+                  label={item.label ?? ''}
+                  kbd={
+                    typeof item.kbd === 'function'
+                      ? item.kbd()
+                      : (item.kbd ?? '')
+                  }
+                  className={item.className}
+                  labelClassName={item.labelClassName}
+                />
+              )
+            )}
           </div>
         </FieldGroup>
       </div>

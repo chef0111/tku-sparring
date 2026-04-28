@@ -160,6 +160,21 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     [toggleSettings]
   );
 
+  const isConfirmDisabled = !formState.isDirty || !formState.isValid;
+
+  useHotkeys(
+    'mod+enter',
+    (e) => {
+      e.preventDefault();
+
+      if (!isConfirmDisabled) {
+        applySettings();
+      }
+    },
+    { enabled: isOpen, enableOnFormTags: true },
+    [isConfirmDisabled, applySettings, isOpen]
+  );
+
   const contextValue = useMemo(
     () => ({
       isOpen,
