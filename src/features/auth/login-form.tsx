@@ -21,7 +21,7 @@ const LoginForm = () => {
     defaultValues: {
       username: '',
       password: '',
-    } as FormData,
+    } satisfies FormData,
     validators: {
       onSubmit: LoginSchema,
     },
@@ -99,7 +99,7 @@ const LoginForm = () => {
             >
               {isSubmitting ? (
                 <>
-                  <Spinner />
+                  <Spinner className="text-primary-foreground" />
                   Signing in...
                 </>
               ) : (

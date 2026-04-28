@@ -1,201 +1,36 @@
-import * as React from 'react';
-import { cva } from 'class-variance-authority';
-import type { VariantProps } from 'class-variance-authority';
-
 import { cn } from '@/lib/utils';
 
-const spinnerVariants = cva('inline-block shrink-0', {
-  variants: {
-    size: {
-      xs: 'size-2',
-      sm: 'size-3',
-      default: 'size-4',
-      lg: 'size-6',
-      xl: 'size-8',
-    },
-    variant: {
-      default: '[&_rect]:fill-background',
-      muted: '[&_rect]:fill-muted-foreground',
-      foreground: '[&_rect]:fill-foreground',
-      destructive: '[&_rect]:fill-destructive',
-    },
-  },
-  defaultVariants: {
-    size: 'default',
-    variant: 'default',
-  },
-});
+type SpinnerProps = Omit<React.ComponentProps<'span'>, 'children'>;
 
-export interface SpinnerProps
-  extends React.SVGProps<SVGSVGElement>, VariantProps<typeof spinnerVariants> {
-  label?: string;
-}
-
-const Spinner = React.forwardRef<SVGSVGElement, SpinnerProps>(
-  ({ className, size, variant, label = 'Loading', ...props }, ref) => {
-    return (
-      <svg
-        ref={ref}
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="20 20 60 60"
-        preserveAspectRatio="xMidYMid"
-        className={cn(spinnerVariants({ size, variant, className }))}
+function Spinner({ className, ...props }: SpinnerProps) {
+  return (
+    <>
+      <span
         role="status"
-        aria-label={label}
-        aria-live="polite"
+        className={cn('text-primary box-border inline-block size-5', className)}
         {...props}
       >
-        <g>
-          <g transform="rotate(0 50 50)">
-            <rect height="14" width="6" ry="2.94" rx="2.94" y="23" x="47">
-              <animate
-                repeatCount="indefinite"
-                begin="-0.9166666666666666s"
-                dur="1s"
-                keyTimes="0;1"
-                values="1;0"
-                attributeName="opacity"
-              />
-            </rect>
-          </g>
-          <g transform="rotate(30 50 50)">
-            <rect height="14" width="6" ry="2.94" rx="2.94" y="23" x="47">
-              <animate
-                repeatCount="indefinite"
-                begin="-0.8333333333333334s"
-                dur="1s"
-                keyTimes="0;1"
-                values="1;0"
-                attributeName="opacity"
-              />
-            </rect>
-          </g>
-          <g transform="rotate(60 50 50)">
-            <rect height="14" width="6" ry="2.94" rx="2.94" y="23" x="47">
-              <animate
-                repeatCount="indefinite"
-                begin="-0.75s"
-                dur="1s"
-                keyTimes="0;1"
-                values="1;0"
-                attributeName="opacity"
-              />
-            </rect>
-          </g>
-          <g transform="rotate(90 50 50)">
-            <rect height="14" width="6" ry="2.94" rx="2.94" y="23" x="47">
-              <animate
-                repeatCount="indefinite"
-                begin="-0.6666666666666666s"
-                dur="1s"
-                keyTimes="0;1"
-                values="1;0"
-                attributeName="opacity"
-              />
-            </rect>
-          </g>
-          <g transform="rotate(120 50 50)">
-            <rect height="14" width="6" ry="2.94" rx="2.94" y="23" x="47">
-              <animate
-                repeatCount="indefinite"
-                begin="-0.5833333333333334s"
-                dur="1s"
-                keyTimes="0;1"
-                values="1;0"
-                attributeName="opacity"
-              />
-            </rect>
-          </g>
-          <g transform="rotate(150 50 50)">
-            <rect height="14" width="6" ry="2.94" rx="2.94" y="23" x="47">
-              <animate
-                repeatCount="indefinite"
-                begin="-0.5s"
-                dur="1s"
-                keyTimes="0;1"
-                values="1;0"
-                attributeName="opacity"
-              />
-            </rect>
-          </g>
-          <g transform="rotate(180 50 50)">
-            <rect height="14" width="6" ry="2.94" rx="2.94" y="23" x="47">
-              <animate
-                repeatCount="indefinite"
-                begin="-0.4166666666666667s"
-                dur="1s"
-                keyTimes="0;1"
-                values="1;0"
-                attributeName="opacity"
-              />
-            </rect>
-          </g>
-          <g transform="rotate(210 50 50)">
-            <rect height="14" width="6" ry="2.94" rx="2.94" y="23" x="47">
-              <animate
-                repeatCount="indefinite"
-                begin="-0.3333333333333333s"
-                dur="1s"
-                keyTimes="0;1"
-                values="1;0"
-                attributeName="opacity"
-              />
-            </rect>
-          </g>
-          <g transform="rotate(240 50 50)">
-            <rect height="14" width="6" ry="2.94" rx="2.94" y="23" x="47">
-              <animate
-                repeatCount="indefinite"
-                begin="-0.25s"
-                dur="1s"
-                keyTimes="0;1"
-                values="1;0"
-                attributeName="opacity"
-              />
-            </rect>
-          </g>
-          <g transform="rotate(270 50 50)">
-            <rect height="14" width="6" ry="2.94" rx="2.94" y="23" x="47">
-              <animate
-                repeatCount="indefinite"
-                begin="-0.16666666666666666s"
-                dur="1s"
-                keyTimes="0;1"
-                values="1;0"
-                attributeName="opacity"
-              />
-            </rect>
-          </g>
-          <g transform="rotate(300 50 50)">
-            <rect height="14" width="6" ry="2.94" rx="2.94" y="23" x="47">
-              <animate
-                repeatCount="indefinite"
-                begin="-0.08333333333333333s"
-                dur="1s"
-                keyTimes="0;1"
-                values="1;0"
-                attributeName="opacity"
-              />
-            </rect>
-          </g>
-          <g transform="rotate(330 50 50)">
-            <rect height="14" width="6" ry="2.94" rx="2.94" y="23" x="47">
-              <animate
-                repeatCount="indefinite"
-                begin="0s"
-                dur="1s"
-                keyTimes="0;1"
-                values="1;0"
-                attributeName="opacity"
-              />
-            </rect>
-          </g>
-        </g>
-      </svg>
-    );
-  }
-);
+        <span
+          aria-hidden="true"
+          className="relative top-1/2 left-1/2 block size-full"
+        >
+          {Array.from({ length: 12 }, (_, index) => (
+            <span
+              key={index}
+              className="absolute top-[-3.9%] left-[-10%] block h-[8%] w-[24%] rounded-(--radius) bg-current"
+              style={{
+                transform: `rotate(${index * 30}deg) translate(146%)`,
+                animation:
+                  'loading-spinner-fade var(--duration, 1.2s) linear infinite',
+                animationDelay: `calc(var(--duration, 1.2s) / 12 * ${index - 12})`,
+              }}
+            />
+          ))}
+        </span>
+        <span className="sr-only">Loading</span>
+      </span>
+    </>
+  );
+}
 
-Spinner.displayName = 'Spinner';
-
-export { Spinner, spinnerVariants };
+export { Spinner };

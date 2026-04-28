@@ -160,8 +160,14 @@
   }
 }
 
-@utility animate-skeleton {
-  animation: skeleton 2s -1s infinite linear;
+@keyframes loading-spinner-fade {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.15;
+  }
 }
 
 @layer base {

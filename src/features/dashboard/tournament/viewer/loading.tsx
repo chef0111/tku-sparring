@@ -25,7 +25,7 @@ export const TournamentViewerLoading = () => {
 
       <div className="flex-1 overflow-auto p-6">
         <div className="mt-36 flex w-full flex-col items-center justify-center">
-          <Spinner size="xl" variant="foreground" />
+          <Spinner />
           <p className="text-muted-foreground mt-4 text-lg font-semibold">
             Loading tournament...
           </p>
