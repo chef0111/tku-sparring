@@ -13,10 +13,8 @@ export const MatchInfo = ({ matchId, className }: MatchInfoProps) => {
         className
       )}
     >
-      <h2 className="match-info text-5xl leading-[120%] max-xl:text-4xl">
-        MATCH
-      </h2>
-      <h2 className="match-info text-6xl leading-none max-xl:text-5xl">
+      <h2 className="match-info text-6xl max-xl:text-5xl">MATCH</h2>
+      <h2 className="match-info text-7xl leading-none max-xl:text-6xl">
         {matchId.padStart(3, '0')}
       </h2>
     </div>
@@ -32,14 +30,12 @@ export const RoundInfo = ({ currentRound, className }: RoundInfoProps) => {
   return (
     <div
       className={cn(
-        'relative flex h-[19.5vh] w-full flex-col items-center justify-center',
+        'absolute bottom-8 flex h-[19.5vh] w-full flex-col items-center justify-center',
         className
       )}
     >
-      <h2 className="match-info text-5xl leading-[120%] max-xl:text-4xl">
-        ROUND
-      </h2>
-      <h2 className="match-info text-7xl leading-none max-xl:text-6xl">
+      <h2 className="match-info text-6xl max-xl:text-5xl">ROUND</h2>
+      <h2 className="match-info text-8xl leading-none max-xl:text-7xl">
         {currentRound}
       </h2>
     </div>

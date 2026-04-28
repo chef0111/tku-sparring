@@ -30,7 +30,7 @@ export const Navbar = () => {
         />
       </div>
       <div className="flex w-full grow items-center justify-center">
-        <h1 className="text-4xl font-bold select-none">TKU Sparring System</h1>
+        <h1 className="text-5xl font-bold select-none">TKU Sparring System</h1>
       </div>
       <div className="flex w-[13vw] shrink-0 items-center justify-end px-2.5">
         {isPending ? null : user ? (

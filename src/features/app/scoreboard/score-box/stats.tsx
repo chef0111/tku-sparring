@@ -48,10 +48,10 @@ export const StatItem = ({ label, value, className }: StatItemProps) => {
         className
       )}
     >
-      <Label className="metrics text-foreground/85 text-3xl max-xl:text-2xl">
+      <Label className="metrics text-foreground/85 text-4xl max-xl:text-3xl">
         {label}
       </Label>
-      <p className="metrics text-5xl">{value}</p>
+      <p className="metrics text-6xl leading-none">{value}</p>
     </div>
   );
 };

@@ -90,7 +90,7 @@ export const RoundRecord = ({
   return (
     <div
       className={cn(
-        'flex h-13.5 w-full items-center justify-between text-5xl font-semibold text-white',
+        'flex h-13.5 w-full items-center justify-between text-6xl font-semibold text-white',
         className
       )}
     >
@@ -112,7 +112,7 @@ export const TotalWins = ({ wins, className }: TotalWinsProps) => {
   return (
     <div
       className={cn(
-        'absolute top-[90%] left-1/2 m-auto h-20 -translate-x-1/2 -translate-y-1/2 text-center text-7xl font-semibold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]',
+        'absolute top-[90%] left-1/2 m-auto h-20 -translate-x-1/2 -translate-y-1/2 text-center text-8xl font-semibold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]',
         className
       )}
     >

@@ -133,7 +133,9 @@ export const Controls = ({ side = 'red', className }: ControlsProps) => {
   return (
     <Controller className={className}>
       <ControllerContent side={side}>
-        <PlayerLabel>{playerName}</PlayerLabel>
+        <PlayerLabel className="text-4xl max-xl:text-3xl">
+          {playerName}
+        </PlayerLabel>
         <ScoreButtons side={side}>
           <CriticalButtons
             player={player}

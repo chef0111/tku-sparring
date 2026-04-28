@@ -60,13 +60,13 @@ export const Penalty = ({
       onClick={onClick}
       onContextMenu={onContextMenu}
       className={cn(
-        'relative flex w-39 cursor-pointer flex-col items-center justify-center gap-1.5 transition-all duration-300',
+        'relative flex w-39 cursor-pointer flex-col items-center justify-center transition-all duration-300',
         disabled && 'cursor-not-allowed opacity-50',
         className
       )}
     >
-      <Label className="metrics text-2xl max-xl:text-xl">GAM-JEOM</Label>
-      <p className="metrics text-6xl">{fouls}</p>
+      <Label className="metrics text-3xl max-xl:text-2xl">GAM-JEOM</Label>
+      <p className="metrics text-7xl leading-none">{fouls}</p>
     </div>
   );
 };

@@ -62,7 +62,7 @@ export const TimeBox = ({
     <div
       onClick={onClick}
       className={cn(
-        'bg-background relative flex w-full cursor-pointer items-center justify-center px-13 py-1.75 transition-all duration-100',
+        'bg-background relative flex w-full cursor-pointer items-center justify-center px-10 transition-all duration-100',
         isBreakTime
           ? 'border-foreground border-7'
           : 'border-7 border-yellow-500',
@@ -71,7 +71,7 @@ export const TimeBox = ({
     >
       <h1
         className={cn(
-          'm-0 text-center text-8xl leading-none font-bold text-white select-none max-xl:text-7xl',
+          'm-0 text-center text-9xl leading-none font-bold text-white select-none max-xl:text-8xl',
           shouldBlink && 'animate-timer-blink',
           isPaused && !isBreakTime && 'text-yellow-500'
         )}
@@ -96,13 +96,13 @@ export const TimeoutIndicator = ({
   return (
     <div
       className={cn(
-        'relative flex h-[9.5vh] w-full items-center justify-center gap-2.5 px-10.25 py-3.75 transition-all duration-100 max-xl:h-[8vh]',
+        'relative flex h-[9.5vh] w-full items-center justify-center px-10 transition-all duration-100 max-xl:h-[8vh]',
         isBreakTime ? 'bg-foreground' : 'bg-yellow-500',
         isVisible ? 'visible opacity-100' : 'invisible opacity-0',
         className
       )}
     >
-      <h2 className="text-background m-0 text-center text-6xl leading-none font-bold whitespace-nowrap select-none max-2xl:text-5xl max-xl:text-[44px]">
+      <h2 className="text-background m-0 text-center text-7xl leading-none font-bold whitespace-nowrap select-none max-2xl:text-6xl max-xl:text-5xl">
         Time out
       </h2>
     </div>

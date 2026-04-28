@@ -32,11 +32,11 @@ export const getHitIconPath = (player: Player, hitType: HitType): string => {
 // Button icons
 export const getButtonIconPath = (player: Player, hitType: HitType): string => {
   const iconMap: Record<HitType, string> = {
-    headCrit: `${player}HeadCritButton`,
-    trunkCrit: `${player}TrunkCritButton`,
-    head: `${player}HeadButton`,
-    trunk: `${player}TrunkButton`,
-    punch: `${player}PunchButton`,
+    headCrit: `pixel/${player}-helmet-crit-btn`,
+    trunkCrit: `pixel/${player}-trunk-crit-btn`,
+    head: `pixel/${player}-helmet-btn`,
+    trunk: `pixel/${player}-trunk-btn`,
+    punch: `pixel/${player}-punch-btn`,
   };
 
   return `/assets/${iconMap[hitType]}.webp`;
