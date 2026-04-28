@@ -12,6 +12,7 @@ export default [
   },
   {
     rules: {
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
       '@typescript-eslint/no-unnecessary-condition': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/naming-convention': 'warn',
