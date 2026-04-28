@@ -80,7 +80,7 @@ export const AdvanceSettings = () => {
   );
 
   return (
-    <FieldSet className="font-esbuild w-full">
+    <FieldSet className="w-full">
       <FieldGroup className="settings-field-group relative items-center">
         <FieldLabel className="settings-group-label text-2xl!">
           TOURNAMENT SETTINGS
