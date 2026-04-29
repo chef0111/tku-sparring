@@ -58,6 +58,8 @@ Refer to [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed instructions on how to 
   </tr>
 </table>
 
+<br />
+
 > [!NOTE]
 >
 > - User can still operate a match without configuration
@@ -65,9 +67,11 @@ Refer to [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed instructions on how to 
 > - User cannot reset the previous round's stat during break time
 > - The system is web-base and **only supports PC resolution**.
 
+<br />
+
 ## 📊 Stats
 
-![Stats](https://repobeats.axiom.co/api/embed/66da04f4e2d5d29f7e1307ff183de30486fed782.svg 'Repobeats analytics image')
+![Stats](https://repobeats.axiom.co/api/embed/bab8fc528b5de608bc6d757a16fbef110695eead.svg 'Repobeats analytics image')
 
 ## 📃 License
 
