@@ -67,8 +67,6 @@ Refer to [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed instructions on how to 
 > - User cannot reset the previous round's stat during break time
 > - The system is web-base and **only supports PC resolution**.
 
-<br />
-
 ## 📊 Stats
 
 ![Stats](https://repobeats.axiom.co/api/embed/bab8fc528b5de608bc6d757a16fbef110695eead.svg 'Repobeats analytics image')
