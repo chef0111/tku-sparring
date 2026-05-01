@@ -1,6 +1,6 @@
 {
   "name": "tku-sparring",
-  "version": "2.0.12",
+  "version": "2.0.13",
   "private": true,
   "type": "module",
   "description": "A modern, user-friendly web application for managing Taekwondo sparring matches.",
@@ -64,7 +64,6 @@
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.24",
     "@tanstack/router-plugin": "^1.167.31",
-    "@tanstack/start-server-core": "^1.167.23",
     "better-auth": "1.6.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
