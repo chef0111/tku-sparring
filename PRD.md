@@ -30,7 +30,7 @@ Primary value:
 - Multi-role permissions beyond System Admin.
 - Double-elimination, round robin, or Swiss brackets.
 - Public-facing bracket view or spectator UX.
-- Real-time collaboration or multi-admin concurrency.
+- Real-time collaborative editing of brackets or groups beyond presence and control lease.
 - Automated tournament completion without admin confirmation.
 
 ## MVP Scope
@@ -45,6 +45,7 @@ In scope:
 - Custom SVG bracket canvas with DnD-kit interactions.
 - Match records created in Draft; bracket locked in Active.
 - Audit log for critical actions.
+- Group control lease to indicate which group is active in an arena.
 
 Out of scope:
 
@@ -119,6 +120,7 @@ What the user sees:
 - "Auto-assign" button to apply constraints.
 - Warning badges for out-of-range athletes, with a "Fix assignments" action.
 - Per-group settings drawer with third-place match toggle (default OFF).
+- Group status badge using the Status component: Online when the current device holds the lease, Degraded when another device holds it.
 
 Data / Inputs:
 
@@ -126,6 +128,8 @@ Data / Inputs:
 - Constraints: gender (M/F), belt range, weight range
 - Third-place match toggle
 - Manual athlete placement via drag-and-drop
+- Group selection to acquire a Group Control Lease (adminId, deviceId)
+- Arena assignment (manual dropdown)
 
 UAC:
 
@@ -133,6 +137,18 @@ UAC:
 - Auto-assign uses only the selected athlete pool and group constraints.
 - Manual drag-and-drop overrides auto-assignment.
 - If constraints are changed, existing assignments remain but show "out of range" warnings until fixed.
+- Selecting a group acquires a Group Control Lease with a heartbeat; the current device displays Online status.
+- Devices that do not hold the lease display Degraded status and can request takeover.
+- Takeover requires confirmation from the current holder.
+- In Advance Settings, groups leased by other devices remain visible but disabled with Degraded status and a Takeover action.
+- Takeover approval prompts the current holder via action toast (Approve/Deny).
+- Advance Settings auto-restores the last selected tournament, group, and match per device after login.
+- If the restored group is leased by another device, keep it selected but disabled with Degraded status and a Takeover action.
+- Admin can assign each group to an arena using a dropdown in Groups tab.
+- Arena list is configured per tournament in the builder (default 3: Arena 1-3).
+- Arena labels are editable, defaulting to "Arena 1-N".
+- Arena ordering becomes fixed once matches are generated to keep match labels stable.
+- Arena assignment is locked once matches are generated to keep match labels stable.
 
 ### 4) Brackets Tab (Tournament Builder)
 
@@ -203,11 +219,13 @@ What the user sees:
 
 Data / Inputs:
 
-- Event types: manual winner override, score edit, reseed/shuffle, group assignment changes
+- Event types: manual winner override, score edit, reseed/shuffle, group assignment changes, lease acquire, lease release, takeover request, takeover approve/deny
 
 UAC:
 
 - Each listed event captures who did it, when, and the affected entity (group/match/athlete).
+- Lease heartbeats are not logged.
+- Lease audit entries appear in the same Activity panel, filtered by event type.
 - Activity list is filterable by event type (optional for MVP).
 
 ## Functional Requirements
@@ -219,6 +237,16 @@ UAC:
 - Bracket generation is Draft-only and creates Match records; regeneration deletes and recreates Draft matches.
 - Active tournaments allow score edits but no shuffle; bracket changes require explicit unlock.
 - Completed tournaments are read-only.
+- Selecting a group in Advance Settings creates a Group Control Lease with a short TTL and heartbeat.
+- Other devices can see group usage status and request takeover.
+- Group Control Lease is per group (not per match).
+- Lease updates are pushed via SSE; clients still send heartbeats to extend leases.
+- SSE stream is scoped per tournament and includes all group leases.
+- Takeover requires approval by the current holder.
+- If no response is received, takeover waits for lease expiry (no forced takeover).
+- Lease TTL is 60s with heartbeat every 20s and a 2x missed-heartbeat tolerance.
+- Lease identity uses a persistent device UUID stored in localStorage.
+- Clients attempt explicit lease release on page unload; TTL remains the source of truth.
 - Performance targets: 256 athletes per tournament, 8 groups per tournament, 32 athletes per group.
 
 ## Target Technical Shape
@@ -256,6 +284,14 @@ Reference: current schema in [prisma/schema.prisma](prisma/schema.prisma).
   - Group constraints and auto-assign endpoints
   - Bracket generation endpoint (Draft only)
   - Match score update with audit logging
+- Add a slim "selection view" endpoint for Advance Settings (tournament/group/match lookup).
+  - Tournament fields: `id`, `name`, `status`
+  - Group fields: `id`, `name`, `tournamentId`, `status`, `leaseStatus`, `arenaId` or `arenaLabel`
+  - Match fields: `id`, `name`, `groupId`, `status`, `redAthleteName`, `blueAthleteName`
+  - Status values: Tournament `draft|active|completed`, Group `draft|active|completed`, Match `pending|active|complete`
+  - Lease status values: `available`, `held_by_me`, `held_by_other`, `pending_takeover`
+  - Match naming: `Match {arenaIndex}{sequence}`, sequence starts at 01 per arena (e.g., Match 101, 102)
+  - Match sequence source: bracket order at generation time (manual scheduling deferred)
 
 ### UI Surfaces
 
@@ -268,6 +304,7 @@ Reference: current schema in [prisma/schema.prisma](prisma/schema.prisma).
 - Query patterns should align with existing query hooks in [src/queries/tournaments.ts](src/queries/tournaments.ts) and [src/queries/groups.ts](src/queries/groups.ts).
 - Bracket rendering should be deterministic and derived from Match records.
 - Locks are per athlete and applied during shuffle and drag operations.
+- Lease presence is delivered by SSE from the server, and refreshed locally via heartbeat mutations.
 
 ### Non-functional Constraints
 
