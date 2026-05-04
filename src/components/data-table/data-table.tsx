@@ -1,7 +1,8 @@
 import { flexRender } from '@tanstack/react-table';
+import * as React from 'react';
 import type { Table as TanstackTable } from '@tanstack/react-table';
-import type * as React from 'react';
 
+import type { DataTableControlledState } from '@/hooks/use-data-table';
 import { DataTablePagination } from '@/components/data-table/data-table-pagination';
 import {
   Table,
@@ -16,16 +17,33 @@ import { cn } from '@/lib/utils';
 
 interface DataTableProps<TData> extends React.ComponentProps<'div'> {
   table: TanstackTable<TData>;
+  state: DataTableControlledState;
   actionBar?: React.ReactNode;
 }
 
 export function DataTable<TData>({
   table,
+  state,
   actionBar,
   children,
   className,
   ...props
 }: DataTableProps<TData>) {
+  const selectedRowCount = Object.keys(state.rowSelection).length;
+  const renderedRows = table.getRowModel().rows;
+  const visibleColumnCount = table.getVisibleLeafColumns().length;
+  const renderedHeaders = React.useMemo(
+    () =>
+      table
+        .getFlatHeaders()
+        .filter(
+          (header) =>
+            !header.isPlaceholder &&
+            state.columnVisibility[header.column.id] !== false
+        ),
+    [table, state.columnVisibility]
+  );
+
   return (
     <div
       className={cn('flex w-full flex-col gap-2.5 overflow-auto', className)}
@@ -35,30 +53,26 @@ export function DataTable<TData>({
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    colSpan={header.colSpan}
-                    style={{
-                      ...getColumnPinningStyle({ column: header.column }),
-                    }}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
+            <TableRow>
+              {renderedHeaders.map((header) => (
+                <TableHead
+                  key={header.id}
+                  colSpan={header.colSpan}
+                  style={{
+                    ...getColumnPinningStyle({ column: header.column }),
+                  }}
+                >
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
+                </TableHead>
+              ))}
+            </TableRow>
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+            {renderedRows?.length ? (
+              renderedRows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
@@ -81,7 +95,7 @@ export function DataTable<TData>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={table.getAllColumns().length}
+                  colSpan={visibleColumnCount}
                   className="h-24 text-center"
                 >
                   No results.
@@ -92,10 +106,8 @@ export function DataTable<TData>({
         </Table>
       </div>
       <div className="flex flex-col gap-2.5">
-        <DataTablePagination table={table} />
-        {actionBar &&
-          table.getFilteredSelectedRowModel().rows.length > 0 &&
-          actionBar}
+        <DataTablePagination table={table} state={state} />
+        {actionBar && selectedRowCount > 0 && actionBar}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { PlusCircle, XCircle } from 'lucide-react';
 import * as React from 'react';
 import type { Column } from '@tanstack/react-table';
+import type { DataTableControlledState } from '@/hooks/use-data-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -46,16 +47,23 @@ function parseValuesAsNumbers(value: unknown): RangeValue | undefined {
 
 interface DataTableSliderFilterProps<TData> {
   column: Column<TData, unknown>;
+  state?: DataTableControlledState;
   title?: string;
 }
 
 export function DataTableSliderFilter<TData>({
   column,
+  state,
   title,
 }: DataTableSliderFilterProps<TData>) {
   const id = React.useId();
 
-  const columnFilterValue = parseValuesAsNumbers(column.getFilterValue());
+  const controlledFilterValue = state?.columnFilters.find(
+    (filter) => filter.id === column.id
+  )?.value;
+  const columnFilterValue = parseValuesAsNumbers(
+    controlledFilterValue ?? column.getFilterValue()
+  );
 
   const defaultRange = column.columnDef.meta?.range;
   const unit = column.columnDef.meta?.unit;

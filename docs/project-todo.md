@@ -4,9 +4,6 @@ This document tracks feature status across the TKU Sparring System.
 
 ## Pending
 
-- Admin CRM: AthleteProfile + TournamentAthlete data model migration
-- Admin CRM: Athlete registry CRUD + de-dup validation
-- Admin CRM: Bulk add athletes to tournament
 - Admin CRM: Groups tab (constraints, auto-assign, DnD overrides)
 - Admin CRM: Brackets tab (SVG canvas, lock/unlock, shuffle)
 - Admin CRM: Match detail panel (scores, participants, manual winner override)
@@ -20,6 +17,9 @@ This document tracks feature status across the TKU Sparring System.
 
 ## Active
 
+- Admin CRM: AthleteProfile + TournamentAthlete data model migration
+- Admin CRM: Athlete registry CRUD + de-dup validation
+- Admin CRM: Bulk add athletes to tournament
 - (add current in-progress items)
 
 ## Finished

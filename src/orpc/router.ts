@@ -17,11 +17,20 @@ import {
 import { createMatch, listMatches, removeMatch, updateMatch } from './matches';
 
 import {
-  createAthlete,
-  listAthletes,
-  removeAthlete,
-  updateAthlete,
-} from './athletes';
+  checkDuplicate,
+  createAthleteProfile,
+  listAthleteProfiles,
+  removeAthleteProfile,
+  updateAthleteProfile,
+} from './athlete-profiles';
+
+import {
+  bulkAddAthletes,
+  bulkRemoveTournamentAthleteRecords,
+  listTournamentAthletes,
+  removeTournamentAthleteRecord,
+  updateTournamentAthleteRecord,
+} from './tournament-athletes';
 
 export default {
   tournament: {
@@ -44,10 +53,18 @@ export default {
     update: updateMatch,
     delete: removeMatch,
   },
-  athlete: {
-    list: listAthletes,
-    create: createAthlete,
-    update: updateAthlete,
-    delete: removeAthlete,
+  athleteProfile: {
+    list: listAthleteProfiles,
+    create: createAthleteProfile,
+    checkDuplicate,
+    update: updateAthleteProfile,
+    delete: removeAthleteProfile,
+  },
+  tournamentAthlete: {
+    list: listTournamentAthletes,
+    bulkAdd: bulkAddAthletes,
+    update: updateTournamentAthleteRecord,
+    remove: removeTournamentAthleteRecord,
+    bulkRemove: bulkRemoveTournamentAthleteRecords,
   },
 };

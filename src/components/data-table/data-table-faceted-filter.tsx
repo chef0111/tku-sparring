@@ -3,6 +3,7 @@ import * as React from 'react';
 import type { Column } from '@tanstack/react-table';
 
 import type { Option } from '@/types/data-table';
+import type { DataTableControlledState } from '@/hooks/use-data-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,6 +25,7 @@ import { cn } from '@/lib/utils';
 
 interface DataTableFacetedFilterProps<TData, TValue> {
   column?: Column<TData, TValue>;
+  state?: DataTableControlledState;
   title?: string;
   options: Array<Option>;
   multiple?: boolean;
@@ -31,13 +33,17 @@ interface DataTableFacetedFilterProps<TData, TValue> {
 
 export function DataTableFacetedFilter<TData, TValue>({
   column,
+  state,
   title,
   options,
   multiple,
 }: DataTableFacetedFilterProps<TData, TValue>) {
   const [open, setOpen] = React.useState(false);
 
-  const columnFilterValue = column?.getFilterValue();
+  const controlledFilterValue = state?.columnFilters.find(
+    (filter) => filter.id === column?.id
+  )?.value;
+  const columnFilterValue = controlledFilterValue ?? column?.getFilterValue();
   const selectedValues = new Set(
     Array.isArray(columnFilterValue) ? columnFilterValue : []
   );

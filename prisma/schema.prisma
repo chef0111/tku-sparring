@@ -79,9 +79,9 @@ model Tournament {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  groups   Group[]
-  matches  Match[]
-  athletes Athlete[]
+  groups             Group[]
+  matches            Match[]
+  tournamentAthletes TournamentAthlete[]
 
   @@map("tournament")
 }
@@ -93,9 +93,9 @@ model Group {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
-  matches    Match[]
-  athletes   Athlete[]
+  tournament         Tournament         @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  matches            Match[]
+  tournamentAthletes TournamentAthlete[]
 
   @@index([tournamentId])
   @@map("group")
@@ -121,21 +121,49 @@ model Match {
   @@map("match")
 }
 
-model Athlete {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  name         String
-  beltLevel    String
-  weight       Float
-  affiliation  String
-  groupId      String   @db.ObjectId
-  tournamentId String   @db.ObjectId
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+model AthleteProfile {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  athleteCode String?
+  name        String
+  gender      String
+  beltLevel   Int
+  weight      Float
+  affiliation String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  group      Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  tournamentAthletes TournamentAthlete[]
 
-  @@index([groupId])
+  @@index([athleteCode])
+  @@index([name, affiliation, beltLevel, weight])
+  @@map("athlete_profile")
+}
+
+model TournamentAthlete {
+  id               String  @id @default(auto()) @map("_id") @db.ObjectId
+  tournamentId     String  @db.ObjectId
+  athleteProfileId String  @db.ObjectId
+  groupId          String? @db.ObjectId
+  seed             Int?
+  locked           Boolean @default(false)
+  status           String  @default("selected")
+  notes            String?
+
+  name        String
+  gender      String
+  beltLevel   Int
+  weight      Float
+  affiliation String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tournament     Tournament     @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  athleteProfile AthleteProfile @relation(fields: [athleteProfileId], references: [id], onDelete: Cascade)
+  group          Group?         @relation(fields: [groupId], references: [id], onDelete: SetNull)
+
+  @@unique([tournamentId, athleteProfileId])
   @@index([tournamentId])
-  @@map("athlete")
+  @@index([groupId])
+  @@map("tournament_athlete")
 }
