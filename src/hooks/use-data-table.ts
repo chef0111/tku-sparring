@@ -355,6 +355,8 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     },
     getRowId,
     enableRowSelection: true,
+    enableColumnResizing: true,
+    columnResizeMode: 'onEnd',
     onRowSelectionChange,
     onPaginationChange,
     onSortingChange: onSortingChangeWithLog,

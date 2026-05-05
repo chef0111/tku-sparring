@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Plus, Trophy, UserPlus } from 'lucide-react';
+import { Plus, UserPlus } from 'lucide-react';
 import {
   parseAsArrayOf,
   parseAsInteger,
@@ -122,13 +122,6 @@ export function AthleteManager() {
       <div className="flex-1 overflow-auto p-4">
         {isFetching && !data ? (
           <DataTableSkeleton columnCount={7} rowCount={10} />
-        ) : data?.total === 0 &&
-          !nameFilter &&
-          !genderFilter &&
-          !affiliationFilter &&
-          !beltFilter &&
-          !weightFilter ? (
-          <EmptyState onAdd={() => setFormOpen(true)} />
         ) : (
           <DataTable
             table={table}
@@ -157,6 +150,10 @@ export function AthleteManager() {
                 </div>
               ) : undefined
             }
+            addRow={{
+              label: 'Add athlete',
+              onClick: () => setFormOpen(true),
+            }}
           >
             <DataTableToolbar table={table} state={tableState}>
               <Button size="sm" onClick={() => setFormOpen(true)}>
@@ -190,22 +187,6 @@ export function AthleteManager() {
         athleteProfileIds={selectedIds}
         onSuccess={() => table.resetRowSelection()}
       />
-    </div>
-  );
-}
-
-function EmptyState({ onAdd }: { onAdd: () => void }) {
-  return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16">
-      <Trophy className="text-muted-foreground mb-4 size-12" />
-      <h3 className="text-lg font-semibold">No athletes yet</h3>
-      <p className="text-muted-foreground mb-4 text-sm">
-        Add athletes to the global registry to get started.
-      </p>
-      <Button variant="outline" onClick={onAdd}>
-        <Plus className="mr-2 size-4" />
-        Add Athlete
-      </Button>
     </div>
   );
 }

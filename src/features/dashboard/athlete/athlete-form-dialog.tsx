@@ -20,6 +20,7 @@ import {
   useUpdateAthleteProfile,
 } from '@/queries/athlete-profiles';
 import { useAppForm } from '@/components/form/hooks';
+import { Spinner } from '@/components/ui/spinner';
 
 interface AthleteFormDialogProps {
   open: boolean;
@@ -246,7 +247,7 @@ export function AthleteFormDialog({
                   placeholder="60"
                   min={20}
                   max={150}
-                  step={0.1}
+                  step={1}
                 />
               )}
             </form.AppField>
@@ -268,7 +269,10 @@ export function AthleteFormDialog({
 
             {/* Hard block error */}
             {hardBlockError && (
-              <Alert variant="destructive">
+              <Alert
+                variant="destructive"
+                className="bg-destructive/10 border-destructive/20 border"
+              >
                 <AlertTriangle className="size-4" />
                 <AlertDescription>{hardBlockError}</AlertDescription>
               </Alert>
@@ -276,7 +280,10 @@ export function AthleteFormDialog({
 
             {/* Possible duplicate warning */}
             {possibleDuplicates.length > 0 && (
-              <Alert>
+              <Alert
+                variant="destructive"
+                className="bg-destructive/10 border-destructive/20 border"
+              >
                 <AlertTriangle className="size-4" />
                 <AlertDescription className="space-y-2">
                   <p className="font-medium">Possible duplicate detected</p>
@@ -328,6 +335,7 @@ export function AthleteFormDialog({
               type="submit"
               disabled={isPending || possibleDuplicates.length > 0}
             >
+              {isPending && <Spinner className="text-primary-foreground" />}
               {isPending
                 ? isEditing
                   ? 'Saving...'

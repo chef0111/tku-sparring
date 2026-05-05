@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { GENDER_OPTIONS, getBeltLabel, getGenderLabel } from '@/config/athlete';
+import { cn } from '@/lib/utils';
 
 interface ColumnOptions {
   onEdit: (athlete: AthleteProfileData) => void;
@@ -41,6 +42,8 @@ export function getAthletesTableColumns(
           aria-label="Select row"
         />
       ),
+      maxSize: 32,
+      enableResizing: false,
       enableSorting: false,
       enableHiding: false,
     },
@@ -51,10 +54,12 @@ export function getAthletesTableColumns(
         <DataTableColumnHeader column={column} label="Code" />
       ),
       cell: ({ row }) => (
-        <span className="text-muted-foreground font-mono text-xs">
+        <span className="text-muted-foreground">
           {row.original.athleteCode ?? '—'}
         </span>
       ),
+      maxSize: 120,
+      enableResizing: true,
       enableSorting: false,
       enableColumnFilter: false,
     },
@@ -68,6 +73,7 @@ export function getAthletesTableColumns(
         <span className="font-medium">{row.original.name}</span>
       ),
       enableSorting: true,
+      enableResizing: true,
       enableColumnFilter: true,
       meta: {
         label: 'Name',
@@ -81,9 +87,23 @@ export function getAthletesTableColumns(
       header: ({ column }) => (
         <DataTableColumnHeader column={column} label="Gender" />
       ),
-      cell: ({ row }) => (
-        <Badge variant="outline">{getGenderLabel(row.original.gender)}</Badge>
-      ),
+      cell: ({ row }) => {
+        const gender = getGenderLabel(row.original.gender);
+        const className =
+          gender === 'Male'
+            ? 'bg-blue-500/10 border-blue-500/20 text-blue-500'
+            : 'bg-amber-500/10 border-amber-500/20 text-amber-500';
+        return (
+          <Badge
+            variant="outline"
+            className={cn('scale-110 font-medium', className)}
+          >
+            {gender}
+          </Badge>
+        );
+      },
+      maxSize: 100,
+      enableResizing: true,
       enableSorting: false,
       enableColumnFilter: true,
       meta: {
@@ -103,6 +123,7 @@ export function getAthletesTableColumns(
       ),
       cell: ({ row }) => <span>{getBeltLabel(row.original.beltLevel)}</span>,
       enableSorting: true,
+      enableResizing: true,
       enableColumnFilter: true,
       meta: {
         label: 'Belt Level',
@@ -118,6 +139,7 @@ export function getAthletesTableColumns(
       ),
       cell: ({ row }) => <span>{row.original.weight} kg</span>,
       enableSorting: true,
+      enableResizing: true,
       enableColumnFilter: true,
       meta: {
         label: 'Weight',
@@ -134,6 +156,7 @@ export function getAthletesTableColumns(
       ),
       cell: ({ row }) => <span>{row.original.affiliation}</span>,
       enableSorting: true,
+      enableResizing: true,
       enableColumnFilter: true,
       meta: {
         label: 'Affiliation',
@@ -166,6 +189,8 @@ export function getAthletesTableColumns(
           </DropdownMenuContent>
         </DropdownMenu>
       ),
+      maxSize: 0,
+      enableResizing: false,
       enableSorting: false,
       enableHiding: false,
     },
