@@ -100,7 +100,7 @@
     "@tanstack/devtools-vite": "^0.6.0",
     "@tanstack/eslint-config": "^0.4.0",
     "@tanstack/intent": "^0.0.36",
-    "@tanstack/query-core": "^5.100.6",
+    "@tanstack/query-core": "^5.100.9",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
     "@types/babel__core": "^7.20.5",
