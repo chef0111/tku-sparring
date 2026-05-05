@@ -15,7 +15,9 @@ export type FormInputProps = FormControlProps &
   Omit<
     React.ComponentProps<'input'>,
     'id' | 'name' | 'value' | 'onChange' | 'onBlur'
-  >;
+  > & {
+    onValueChange?: (value: string) => void;
+  };
 
 type InputTooltip = {
   tooltip?: string;
@@ -29,6 +31,7 @@ export function FormInput({
   descPosition,
   tooltip,
   tooltipSide,
+  onValueChange,
   ...inputProps
 }: FormInputProps & InputTooltip) {
   const field = useFieldContext<string>();
@@ -39,7 +42,11 @@ export function FormInput({
       name={field.name}
       value={field.state.value}
       onBlur={field.handleBlur}
-      onChange={(e) => field.handleChange(e.target.value)}
+      onChange={(e) => {
+        const next = e.target.value;
+        field.handleChange(next);
+        onValueChange?.(next);
+      }}
       aria-invalid={isInvalid}
       {...inputProps}
     />

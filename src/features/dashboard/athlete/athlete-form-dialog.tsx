@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useForm } from '@tanstack/react-form';
+import { useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import type { AthleteProfileData } from '@/features/dashboard/types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -12,21 +11,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { FieldGroup } from '@/components/ui/field';
+import { SelectItem } from '@/components/ui/select';
 import { BELT_LEVELS, GENDER_OPTIONS } from '@/config/athlete';
 import {
   useCheckDuplicate,
   useCreateAthleteProfile,
   useUpdateAthleteProfile,
 } from '@/queries/athlete-profiles';
+import { useAppForm } from '@/components/form/hooks';
 
 interface AthleteFormDialogProps {
   open: boolean;
@@ -58,10 +51,8 @@ export function AthleteFormDialog({
   athlete,
 }: AthleteFormDialogProps) {
   const isEditing = !!athlete;
-  const [hardBlockError, setHardBlockError] = React.useState<string | null>(
-    null
-  );
-  const [possibleDuplicates, setPossibleDuplicates] = React.useState<
+  const [hardBlockError, setHardBlockError] = useState<string | null>(null);
+  const [possibleDuplicates, setPossibleDuplicates] = useState<
     Array<PossibleDuplicate>
   >([]);
 
@@ -75,7 +66,7 @@ export function AthleteFormDialog({
     onSuccess: () => onOpenChange(false),
   });
 
-  const form = useForm({
+  const form = useAppForm({
     defaultValues: {
       athleteCode: athlete?.athleteCode ?? '',
       name: athlete?.name ?? '',
@@ -158,13 +149,13 @@ export function AthleteFormDialog({
     updateMutation.isPending ||
     checkDuplicate.isPending;
 
-  function onClose(open: boolean) {
-    if (!open) {
+  function onClose(nextOpen: boolean) {
+    if (!nextOpen) {
       form.reset();
       setHardBlockError(null);
       setPossibleDuplicates([]);
     }
-    onOpenChange(open);
+    onOpenChange(nextOpen);
   }
 
   return (
@@ -187,113 +178,62 @@ export function AthleteFormDialog({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            {/* Athlete Code */}
-            <form.Field name="athleteCode">
+          <FieldGroup className="gap-4 py-4">
+            <form.AppField name="athleteCode">
               {(field) => (
-                <div className="grid gap-1.5">
-                  <Label htmlFor={field.name}>
-                    Athlete Code{' '}
-                    <span className="text-muted-foreground font-normal">
-                      (optional)
-                    </span>
-                  </Label>
-                  <Input
-                    id={field.name}
-                    placeholder="e.g. TKD-001"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => {
-                      field.handleChange(e.target.value);
-                      setHardBlockError(null);
-                    }}
-                  />
-                </div>
+                <field.Input
+                  label="Athlete Code"
+                  description="Optional"
+                  descPosition="after-label"
+                  placeholder="e.g. TKD-001"
+                  onValueChange={() => setHardBlockError(null)}
+                />
               )}
-            </form.Field>
+            </form.AppField>
 
-            {/* Name */}
-            <form.Field
+            <form.AppField
               name="name"
               validators={{
                 onChange: ({ value }) =>
                   !value.trim() ? 'Name is required' : undefined,
               }}
             >
-              {(field) => (
-                <div className="grid gap-1.5">
-                  <Label htmlFor={field.name}>Name</Label>
-                  <Input
-                    id={field.name}
-                    placeholder="Full name"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                  />
-                  {field.state.meta.isTouched &&
-                    field.state.meta.errors.length > 0 && (
-                      <p className="text-destructive text-sm">
-                        {String(field.state.meta.errors[0])}
-                      </p>
-                    )}
-                </div>
-              )}
-            </form.Field>
+              {(field) => <field.Input label="Name" placeholder="Full name" />}
+            </form.AppField>
 
-            {/* Gender */}
-            <form.Field name="gender">
+            <form.AppField name="gender">
               {(field) => (
-                <div className="grid gap-1.5">
-                  <Label>Gender</Label>
-                  <Select
-                    value={field.state.value}
-                    onValueChange={(v) => field.handleChange(v as 'M' | 'F')}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select gender" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {GENDER_OPTIONS.map((g) => (
-                        <SelectItem key={g.value} value={g.value}>
-                          {g.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <field.Select label="Gender" placeholder="Select gender">
+                  {GENDER_OPTIONS.map((g) => (
+                    <SelectItem key={g.value} value={g.value}>
+                      {g.label}
+                    </SelectItem>
+                  ))}
+                </field.Select>
               )}
-            </form.Field>
+            </form.AppField>
 
-            {/* Belt Level */}
-            <form.Field name="beltLevel">
+            <form.AppField name="beltLevel">
               {(field) => (
-                <div className="grid gap-1.5">
-                  <Label>Belt Level</Label>
-                  <Select
-                    value={String(field.state.value)}
-                    onValueChange={(v) => field.handleChange(Number(v))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select belt level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {BELT_LEVELS.map((b) => (
-                        <SelectItem key={b.value} value={String(b.value)}>
-                          {b.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <field.NumberSelect
+                  label="Belt Level"
+                  placeholder="Select belt level"
+                >
+                  {BELT_LEVELS.map((b) => (
+                    <SelectItem key={b.value} value={String(b.value)}>
+                      {b.label}
+                    </SelectItem>
+                  ))}
+                </field.NumberSelect>
               )}
-            </form.Field>
+            </form.AppField>
 
-            {/* Weight */}
-            <form.Field
+            <form.AppField
               name="weight"
               validators={{
                 onChange: ({ value }) => {
-                  if (!value || isNaN(value)) return 'Weight is required';
+                  if (value === undefined || Number.isNaN(value))
+                    return 'Weight is required';
                   if (value < 20) return 'Weight must be at least 20 kg';
                   if (value > 150) return 'Weight must be at most 150 kg';
                   return undefined;
@@ -301,39 +241,17 @@ export function AthleteFormDialog({
               }}
             >
               {(field) => (
-                <div className="grid gap-1.5">
-                  <Label htmlFor={field.name}>Weight (kg)</Label>
-                  <div className="relative">
-                    <Input
-                      id={field.name}
-                      type="number"
-                      inputMode="decimal"
-                      placeholder="60"
-                      min={20}
-                      max={150}
-                      value={field.state.value || ''}
-                      onBlur={field.handleBlur}
-                      onChange={(e) =>
-                        field.handleChange(parseFloat(e.target.value) || 0)
-                      }
-                      className="pr-10"
-                    />
-                    <span className="bg-accent text-muted-foreground absolute top-0 right-0 bottom-0 flex items-center rounded-r-md px-2 text-sm">
-                      kg
-                    </span>
-                  </div>
-                  {field.state.meta.isTouched &&
-                    field.state.meta.errors.length > 0 && (
-                      <p className="text-destructive text-sm">
-                        {String(field.state.meta.errors[0])}
-                      </p>
-                    )}
-                </div>
+                <field.NumberInput
+                  label="Weight (kg)"
+                  placeholder="60"
+                  min={20}
+                  max={150}
+                  step={0.1}
+                />
               )}
-            </form.Field>
+            </form.AppField>
 
-            {/* Affiliation */}
-            <form.Field
+            <form.AppField
               name="affiliation"
               validators={{
                 onChange: ({ value }) =>
@@ -341,24 +259,12 @@ export function AthleteFormDialog({
               }}
             >
               {(field) => (
-                <div className="grid gap-1.5">
-                  <Label htmlFor={field.name}>Affiliation</Label>
-                  <Input
-                    id={field.name}
-                    placeholder="Club or gym name"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                  />
-                  {field.state.meta.isTouched &&
-                    field.state.meta.errors.length > 0 && (
-                      <p className="text-destructive text-sm">
-                        {String(field.state.meta.errors[0])}
-                      </p>
-                    )}
-                </div>
+                <field.Input
+                  label="Affiliation"
+                  placeholder="Club or gym name"
+                />
               )}
-            </form.Field>
+            </form.AppField>
 
             {/* Hard block error */}
             {hardBlockError && (
@@ -408,7 +314,7 @@ export function AthleteFormDialog({
                 </AlertDescription>
               </Alert>
             )}
-          </div>
+          </FieldGroup>
 
           <DialogFooter>
             <Button
