@@ -11,13 +11,20 @@ type InputProps = React.ComponentProps<typeof Input> & {
   disableDecrement?: boolean;
 };
 
-export function NumberInput(props: InputProps) {
+export function NumberInput({
+  className,
+  handleIncrement,
+  handleDecrement,
+  disableIncrement,
+  disableDecrement,
+  ...props
+}: InputProps) {
   return (
     <div className="relative">
       <Input
         className={cn(
-          '[appearance:textfield] [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none',
-          props.className
+          '[appearance:textfield]! [-moz-appearance:textfield]! [&::-webkit-inner-spin-button]:appearance-none! [&::-webkit-outer-spin-button]:appearance-none!',
+          className
         )}
         {...props}
       />
@@ -30,8 +37,8 @@ export function NumberInput(props: InputProps) {
           size="icon-xs"
           variant="outline"
           className="h-full w-5 p-0 in-data-[slot=button-group]:rounded-tl-none!"
-          onClick={props.handleIncrement}
-          disabled={props.disableIncrement}
+          onClick={handleIncrement}
+          disabled={disableIncrement}
         >
           <IconChevronUp className="size-3" />
         </Button>
@@ -40,8 +47,8 @@ export function NumberInput(props: InputProps) {
           size="icon-xs"
           variant="outline"
           className="h-full w-5 p-0 in-data-[slot=button-group]:rounded-bl-none!"
-          onClick={props.handleDecrement}
-          disabled={props.disableDecrement}
+          onClick={handleDecrement}
+          disabled={disableDecrement}
         >
           <IconChevronDown className="size-3" />
         </Button>

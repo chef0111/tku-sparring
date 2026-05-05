@@ -1,11 +1,10 @@
 import * as React from 'react';
-import { NumberInput } from '../input/number-input';
 import { FormBase } from './form-base';
 import { useFieldContext } from './hooks';
 import type { FormControlProps } from './form-base';
+import { NumberInput } from '@/components/input/number-input';
 import { PasswordInput } from '@/components/input/password-input';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 import {
   Tooltip,
   TooltipContent,
@@ -117,7 +116,7 @@ export function FormNumberInput({
   max,
   ...inputProps
 }: FormNumberInputProps) {
-  const field = useFieldContext<number>();
+  const field = useFieldContext<number | undefined>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
   const handleIncrement = () => {
@@ -148,18 +147,19 @@ export function FormNumberInput({
         value={field.state.value ?? ''}
         onBlur={field.handleBlur}
         onChange={(e) => {
-          const value = e.target.value === '' ? 0 : Number(e.target.value);
+          const value =
+            e.target.value === '' ? undefined : Number(e.target.value);
           field.handleChange(value);
         }}
         aria-invalid={isInvalid}
         step={step}
         min={min}
         max={max}
-        className={cn(inputProps.className)}
         handleIncrement={handleIncrement}
         handleDecrement={handleDecrement}
         disableIncrement={max !== undefined && (field.state.value || 0) >= max}
         disableDecrement={min !== undefined && (field.state.value || 0) <= min}
+        {...inputProps}
       />
     </FormBase>
   );
