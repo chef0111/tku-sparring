@@ -1,24 +1,25 @@
-'use client';
-
 import * as React from 'react';
-import { Plus, UserPlus } from 'lucide-react';
+import { Download, Plus, Upload } from 'lucide-react';
 import {
   parseAsArrayOf,
   parseAsInteger,
   parseAsString,
   useQueryState,
 } from 'nuqs';
-import { AthleteFormDialog } from './athlete-form-dialog';
+import { AthleteAddDrawer } from './athlete-add-drawer';
+import { AthleteEditSheet } from './athlete-edit-sheet';
+import { AthleteImportDialog } from './athlete-import-dialog';
+import { AthletesActionBar } from './athletes-action-bar';
 import { BulkAddToTournamentDialog } from './bulk-add-to-tournament-dialog';
 import { DeleteAthleteDialog } from './delete-athlete-dialog';
 import { getAthletesTableColumns } from './athletes-table-columns';
 import type { AthleteProfileData } from '@/features/dashboard/types';
 import { DataTable } from '@/components/data-table/data-table';
-import { DataTableSkeleton } from '@/components/data-table/data-table-skeleton';
 import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
 import { Button } from '@/components/ui/button';
 import { SiteHeader } from '@/features/dashboard/site-header';
 import { useDataTable } from '@/hooks/use-data-table';
+import { exportTableToCSV } from '@/lib/export';
 import { getSortingStateParser } from '@/lib/parsers';
 import { useAthleteProfiles } from '@/queries/athlete-profiles';
 
@@ -57,17 +58,18 @@ export function AthleteManager() {
     )
   );
 
-  const [formOpen, setFormOpen] = React.useState(false);
+  const [addDrawerOpen, setAddDrawerOpen] = React.useState(false);
   const [editingAthlete, setEditingAthlete] =
     React.useState<AthleteProfileData | null>(null);
   const [deletingAthlete, setDeletingAthlete] =
     React.useState<AthleteProfileData | null>(null);
   const [bulkAddOpen, setBulkAddOpen] = React.useState(false);
+  const [importOpen, setImportOpen] = React.useState(false);
 
   const beltRange = parseRangeParam(beltFilter);
   const weightRange = parseRangeParam(weightFilter);
 
-  const { data, isFetching } = useAthleteProfiles({
+  const { data } = useAthleteProfiles({
     page,
     perPage,
     name: nameFilter ?? undefined,
@@ -87,7 +89,7 @@ export function AthleteManager() {
         onEdit: setEditingAthlete,
         onDelete: setDeletingAthlete,
       }),
-    []
+    [setEditingAthlete, setDeletingAthlete]
   );
 
   const { table, state: tableState } = useDataTable({
@@ -108,11 +110,26 @@ export function AthleteManager() {
     [tableState.rowSelection, currentItemIds]
   );
 
+  function handleExportAll() {
+    exportTableToCSV(table, {
+      filename: 'athletes',
+      excludeColumns: ['select', 'actions'],
+      headers: {
+        athleteCode: 'Athlete Code',
+        name: 'Name',
+        gender: 'Gender',
+        beltLevel: 'Belt Level',
+        weight: 'Weight',
+        affiliation: 'Affiliation',
+      },
+    });
+  }
+
   return (
     <div className="flex h-full flex-col">
       <SiteHeader title="Athletes">
         <div className="ml-auto pr-4">
-          <Button size="sm" onClick={() => setFormOpen(true)}>
+          <Button size="sm" onClick={() => setAddDrawerOpen(true)}>
             <Plus className="mr-1 size-4" />
             Add Athlete
           </Button>
@@ -120,67 +137,51 @@ export function AthleteManager() {
       </SiteHeader>
 
       <div className="flex-1 overflow-auto p-4">
-        {isFetching && !data ? (
-          <DataTableSkeleton columnCount={7} rowCount={10} />
-        ) : (
-          <DataTable
-            table={table}
-            state={tableState}
-            actionBar={
-              selectedIds.length > 0 ? (
-                <div className="bg-background flex items-center gap-2 rounded-md border px-3 py-2 shadow-sm">
-                  <span className="text-muted-foreground text-sm">
-                    {selectedIds.length} selected
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setBulkAddOpen(true)}
-                  >
-                    <UserPlus className="mr-1 size-4" />
-                    Add to Tournament
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => table.resetRowSelection()}
-                  >
-                    Clear
-                  </Button>
-                </div>
-              ) : undefined
-            }
-            addRow={{
-              label: 'Add athlete',
-              onClick: () => setFormOpen(true),
-            }}
-          >
-            <DataTableToolbar table={table} state={tableState}>
-              <Button size="sm" onClick={() => setFormOpen(true)}>
-                <Plus className="mr-1 size-4" />
-                Add Athlete
-              </Button>
-            </DataTableToolbar>
-          </DataTable>
-        )}
+        <DataTable
+          table={table}
+          state={tableState}
+          actionBar={
+            <AthletesActionBar
+              table={table}
+              onBulkAdd={() => setBulkAddOpen(true)}
+            />
+          }
+          addRow={{
+            label: 'Add athlete',
+            onClick: () => setAddDrawerOpen(true),
+          }}
+        >
+          <DataTableToolbar table={table} state={tableState}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setImportOpen(true)}
+            >
+              <Upload className="mr-1 size-4" />
+              Import
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExportAll}>
+              <Download className="mr-1 size-4" />
+              Export
+            </Button>
+            <Button size="sm" onClick={() => setAddDrawerOpen(true)}>
+              <Plus className="mr-1 size-4" />
+              Add Athlete
+            </Button>
+          </DataTableToolbar>
+        </DataTable>
       </div>
 
-      <AthleteFormDialog
-        open={formOpen || !!editingAthlete}
-        onOpenChange={(open) => {
-          if (!open) {
-            setFormOpen(false);
-            setEditingAthlete(null);
-          }
-        }}
-        athlete={editingAthlete ?? undefined}
+      <AthleteAddDrawer open={addDrawerOpen} onOpenChange={setAddDrawerOpen} />
+      <AthleteEditSheet
+        athlete={editingAthlete}
+        onOpenChange={setEditingAthlete}
       />
-
+      <AthleteImportDialog open={importOpen} onOpenChange={setImportOpen} />
       <DeleteAthleteDialog
         athlete={deletingAthlete}
         onClose={() => setDeletingAthlete(null)}
       />
-
       <BulkAddToTournamentDialog
         open={bulkAddOpen}
         onOpenChange={setBulkAddOpen}
