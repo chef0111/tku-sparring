@@ -95,14 +95,18 @@ export function DataTable<TData>({
                         e.preventDefault();
                         header.getResizeHandler()(e);
                       }}
+                      onDoubleClick={() => header.column.resetSize()}
                       className={cn(
-                        'absolute top-0 right-0 h-full w-1 cursor-col-resize touch-none select-none',
-                        'bg-border opacity-0 transition-opacity',
-                        'hover:opacity-100',
+                        'absolute top-0 right-0 h-full w-4 cursor-col-resize touch-none select-none',
+                        'flex items-stretch justify-center',
+                        '[&>div]:bg-border [&>div]:w-px [&>div]:opacity-0 [&>div]:transition-opacity',
+                        'hover:[&>div]:opacity-100',
                         header.column.getIsResizing() &&
-                          'bg-primary opacity-100'
+                          '[&>div]:bg-primary [&>div]:opacity-100'
                       )}
-                    />
+                    >
+                      <div />
+                    </div>
                   )}
                 </TableHead>
               ))}
