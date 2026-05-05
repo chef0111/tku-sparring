@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { ArrowLeft, Trophy } from 'lucide-react';
 import { TournamentViewer } from './viewer';
 import { TournamentViewerLoading } from './viewer/loading';
+import type { GroupData } from '../types';
 import { Button } from '@/components/ui/button';
 import { useTournament } from '@/queries/tournaments';
 import { useGroups } from '@/queries/groups';
@@ -39,7 +40,7 @@ export function TournamentPage({ id }: TournamentPageProps) {
   return (
     <TournamentViewer
       tournament={tournament}
-      groups={groups}
+      groups={groups as Array<GroupData>}
       tournamentId={id}
     />
   );

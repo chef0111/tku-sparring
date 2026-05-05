@@ -63,7 +63,6 @@
     "@tanstack/react-start": "^1.167.54",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.24",
-    "@tanstack/router-core": "^1.169.1",
     "@tanstack/router-plugin": "^1.167.32",
     "better-auth": "1.6.7",
     "class-variance-authority": "^0.7.1",
@@ -136,5 +135,9 @@
     "**/*.{html,json,css,scss,md,mdx}": [
       "prettier --write"
     ]
+  },
+  "overrides": {
+    "@tanstack/router-core": "1.169.1",
+    "@tanstack/query-core": "5.100.6"
   }
 }
