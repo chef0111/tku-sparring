@@ -12,6 +12,8 @@ export function getRouter() {
     routeTree,
     context,
     scrollRestoration: true,
+    defaultPreload: 'intent',
+    defaultPreloadStaleTime: 0,
     Wrap: ({ children }) => (
       <QueryProvider queryClient={context.queryClient}>
         {children}

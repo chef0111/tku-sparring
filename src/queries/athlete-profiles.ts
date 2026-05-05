@@ -1,5 +1,6 @@
 import {
   keepPreviousData,
+  queryOptions,
   useMutation,
   useQuery,
   useQueryClient,
@@ -13,10 +14,18 @@ import type {
 } from '@/orpc/athlete-profiles/athlete-profiles.dto';
 import { client } from '@/orpc/client';
 
-export function useAthleteProfiles(input: ListAthleteProfilesDTO) {
-  return useQuery({
+export function athleteProfilesQueryOptions(input: ListAthleteProfilesDTO) {
+  return queryOptions({
     queryKey: ['athleteProfile', 'list', input] as const,
     queryFn: () => client.athleteProfile.list(input),
+    staleTime: 30_000,
+    gcTime: 5 * 60 * 1000,
+  });
+}
+
+export function useAthleteProfiles(input: ListAthleteProfilesDTO) {
+  return useQuery({
+    ...athleteProfilesQueryOptions(input),
     placeholderData: keepPreviousData,
   });
 }
