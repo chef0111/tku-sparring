@@ -1,5 +1,6 @@
-import type { Table } from '@tanstack/react-table';
 import { IconDownload, IconUserPlus, IconX } from '@tabler/icons-react';
+import type { Table } from '@tanstack/react-table';
+import type { AthleteProfileData } from '@/features/dashboard/types';
 import {
   ActionBar,
   ActionBarClose,
@@ -9,14 +10,16 @@ import {
   ActionBarSeparator,
 } from '@/components/ui/action-bar';
 import { exportTableToCSV } from '@/lib/export';
-import type { AthleteProfileData } from '@/features/dashboard/types';
 
 interface AthletesActionBarProps {
   table: Table<AthleteProfileData>;
   onBulkAdd: () => void;
 }
 
-export function AthletesActionBar({ table, onBulkAdd }: AthletesActionBarProps) {
+export function AthletesActionBar({
+  table,
+  onBulkAdd,
+}: AthletesActionBarProps) {
   const rows = table.getFilteredSelectedRowModel().rows;
 
   function onOpenChange(open: boolean) {
