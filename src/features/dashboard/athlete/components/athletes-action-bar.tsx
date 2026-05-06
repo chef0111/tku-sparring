@@ -65,7 +65,7 @@ export function AthletesActionBar({
           <IconUserPlus />
           Add to Tournament
         </ActionBarItem>
-        <ActionBarItem onClick={onDelete}>
+        <ActionBarItem variant="destructive" onClick={onDelete}>
           <IconTrash />
           Delete
         </ActionBarItem>

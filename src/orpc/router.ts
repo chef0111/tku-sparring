@@ -17,6 +17,7 @@ import {
 import { createMatch, listMatches, removeMatch, updateMatch } from './matches';
 
 import {
+  bulkDeleteAthleteProfiles,
   checkDuplicate,
   createAthleteProfile,
   listAthleteProfiles,
@@ -59,6 +60,7 @@ export default {
     checkDuplicate,
     update: updateAthleteProfile,
     delete: removeAthleteProfile,
+    bulkDelete: bulkDeleteAthleteProfiles,
   },
   tournamentAthlete: {
     list: listTournamentAthletes,

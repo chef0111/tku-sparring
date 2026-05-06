@@ -21,6 +21,7 @@ import {
   SortableItemHandle,
   SortableOverlay,
 } from '@/components/ui/sortable';
+import { Spinner } from '@/components/ui/spinner';
 
 interface AthleteAddDrawerProps {
   open: boolean;
@@ -73,6 +74,11 @@ export function AthleteAddDrawer({
     setRows((prev) => [...prev, createEmptyRow()]);
   }
 
+  function handleOpenChange(value: boolean) {
+    if (!value) setRows([createEmptyRow()]);
+    onOpenChange(value);
+  }
+
   async function onSubmit() {
     const errors: Array<string> = [];
 
@@ -97,7 +103,7 @@ export function AthleteAddDrawer({
     for (const row of rows) {
       try {
         await createMutation.mutateAsync({
-          athleteCode: row.athleteCode || undefined,
+          athleteCode: row.athleteCode,
           name: row.name,
           gender: row.gender,
           beltLevel: row.beltLevel,
@@ -112,18 +118,17 @@ export function AthleteAddDrawer({
     }
 
     setIsSubmitting(false);
-    onOpenChange(false);
+    handleOpenChange(false);
 
     if (failCount === 0) {
-      toast.success(`${successCount} athlete(s) created successfully`);
+      toast.success(
+        `${successCount} ${successCount === 1 ? 'Athlete' : 'Athletes'} created successfully`
+      );
     } else {
-      toast.warning(`${successCount} created, ${failCount} failed`);
+      toast.warning(
+        `${successCount} ${successCount === 1 ? 'Athlete' : 'Athletes'} created, ${failCount} failed`
+      );
     }
-  }
-
-  function handleOpenChange(value: boolean) {
-    if (!value) setRows([createEmptyRow()]);
-    onOpenChange(value);
   }
 
   return (
@@ -211,7 +216,14 @@ export function AthleteAddDrawer({
             Add Row
           </Button>
           <Button onClick={onSubmit} disabled={isSubmitting}>
-            {isSubmitting ? 'Creating…' : `Create ${rows.length} Athlete(s)`}
+            {isSubmitting ? (
+              <>
+                <Spinner className="text-muted-foreground" />
+                <span>Creating…</span>
+              </>
+            ) : (
+              `Create ${rows.length} ${rows.length === 1 ? 'Athlete' : 'Athletes'}`
+            )}
           </Button>
         </DrawerFooter>
       </DrawerContent>

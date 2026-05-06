@@ -11,6 +11,7 @@ import { AthleteEditSheet } from './components/athlete-edit-sheet';
 import { AthleteImportDialog } from './components/dialogs/athlete-import-dialog';
 import { AthletesActionBar } from './components/athletes-action-bar';
 import { BulkAddToTournamentDialog } from './components/dialogs/bulk-add-to-tournament-dialog';
+import { BulkDeleteAthletesDialog } from './components/dialogs/bulk-delete-athletes-dialog';
 import { DeleteAthleteDialog } from './components/dialogs/delete-athlete-dialog';
 import { getAthletesTableColumns } from './components/athletes-table-columns';
 import type { AthleteProfileData } from '@/features/dashboard/types';
@@ -57,6 +58,10 @@ export function AthleteManager() {
   const [deletingAthlete, setDeletingAthlete] =
     React.useState<AthleteProfileData | null>(null);
   const [bulkAddOpen, setBulkAddOpen] = React.useState(false);
+  const [bulkDeleteAthletes, setBulkDeleteAthletes] = React.useState<Array<{
+    id: string;
+    name: string;
+  }> | null>(null);
   const [importOpen, setImportOpen] = React.useState(false);
 
   const beltRange = parseRangeParam(beltFilter);
@@ -105,6 +110,16 @@ export function AthleteManager() {
     [tableState.rowSelection, currentItemIds]
   );
 
+  function handleBulkDeleteClick() {
+    const rows = table.getFilteredSelectedRowModel().rows;
+    setBulkDeleteAthletes(
+      rows.map((row) => ({
+        id: row.original.id,
+        name: row.original.name,
+      }))
+    );
+  }
+
   function handleExportAll() {
     exportTableToCSV(table, {
       filename: 'athletes',
@@ -142,7 +157,7 @@ export function AthleteManager() {
               <AthletesActionBar
                 table={table}
                 onBulkAdd={() => setBulkAddOpen(true)}
-                onDelete={() => {}} // TODO: Implement delete
+                onDelete={handleBulkDeleteClick}
               />
             }
             addRow={{
@@ -177,6 +192,11 @@ export function AthleteManager() {
       <DeleteAthleteDialog
         athlete={deletingAthlete}
         onClose={() => setDeletingAthlete(null)}
+      />
+      <BulkDeleteAthletesDialog
+        athletes={bulkDeleteAthletes}
+        onClose={() => setBulkDeleteAthletes(null)}
+        onSuccess={() => table.resetRowSelection()}
       />
       <BulkAddToTournamentDialog
         open={bulkAddOpen}

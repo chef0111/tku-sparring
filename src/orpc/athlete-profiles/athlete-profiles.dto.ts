@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const CreateAthleteProfileSchema = z.object({
-  athleteCode: z.string().min(1).optional(),
+  athleteCode: z.string().min(1, 'Athlete ID is required'),
   name: z.string().min(1, 'Name is required'),
   gender: z.enum(['M', 'F']),
   beltLevel: z.number().int().min(0).max(10),
@@ -15,7 +15,7 @@ export const CreateAthleteProfileSchema = z.object({
 
 export const UpdateAthleteProfileSchema = z.object({
   id: z.string(),
-  athleteCode: z.string().min(1).nullish(),
+  athleteCode: z.string().min(1, 'Athlete ID is required'),
   name: z.string().min(1).optional(),
   gender: z.enum(['M', 'F']).optional(),
   beltLevel: z.number().int().min(0).max(10).optional(),
@@ -38,7 +38,7 @@ export const ListAthleteProfilesSchema = z.object({
 });
 
 export const CheckDuplicateSchema = z.object({
-  athleteCode: z.string().optional(),
+  athleteCode: z.string(),
   name: z.string(),
   gender: z.enum(['M', 'F']),
   beltLevel: z.number().int().min(0).max(10),
@@ -55,3 +55,11 @@ export type UpdateAthleteProfileDTO = z.infer<
 >;
 export type ListAthleteProfilesDTO = z.infer<typeof ListAthleteProfilesSchema>;
 export type CheckDuplicateDTO = z.infer<typeof CheckDuplicateSchema>;
+
+export const BulkDeleteAthleteProfilesSchema = z.object({
+  ids: z.array(z.string()).min(1).max(200),
+});
+
+export type BulkDeleteAthleteProfilesDTO = z.infer<
+  typeof BulkDeleteAthleteProfilesSchema
+>;

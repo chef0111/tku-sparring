@@ -55,7 +55,6 @@ export function useCreateAthleteProfile(options?: {
       client.athleteProfile.create(data),
     onSuccess: () => {
       invalidate();
-      toast.success('Athlete created');
       options?.onSuccess?.();
     },
     onError: (err) => {
@@ -75,7 +74,6 @@ export function useCreateAthleteProfile(options?: {
         }
         return;
       }
-      toast.error(message);
     },
   });
 }
@@ -110,6 +108,27 @@ export function useDeleteAthleteProfile(options?: { onSuccess?: () => void }) {
     onSuccess: () => {
       invalidate();
       toast.success('Athlete deleted');
+      options?.onSuccess?.();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+}
+
+export function useBulkDeleteAthleteProfiles(options?: {
+  onSuccess?: () => void;
+}) {
+  const invalidate = useInvalidateAthleteProfiles();
+
+  return useMutation({
+    mutationFn: (data: { ids: Array<string> }) =>
+      client.athleteProfile.bulkDelete(data),
+    onSuccess: (deletedCount) => {
+      invalidate();
+      toast.success(
+        deletedCount === 1
+          ? 'Athlete deleted'
+          : `${deletedCount} athletes deleted`
+      );
       options?.onSuccess?.();
     },
     onError: (err) => toast.error(err.message),

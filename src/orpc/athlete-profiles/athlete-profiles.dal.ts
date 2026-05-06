@@ -137,3 +137,10 @@ export async function update(
 export async function deleteProfile(id: string) {
   return prisma.athleteProfile.delete({ where: { id } });
 }
+
+export async function deleteProfiles(ids: Array<string>) {
+  const result = await prisma.athleteProfile.deleteMany({
+    where: { id: { in: ids } },
+  });
+  return result.count;
+}

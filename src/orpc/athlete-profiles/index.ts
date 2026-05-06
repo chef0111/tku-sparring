@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import {
+  BulkDeleteAthleteProfilesSchema,
   CheckDuplicateSchema,
   CreateAthleteProfileSchema,
   ListAthleteProfilesSchema,
@@ -8,6 +9,7 @@ import {
 import {
   create,
   deleteProfile,
+  deleteProfiles,
   findById,
   findMany,
   update,
@@ -83,4 +85,10 @@ export const removeAthleteProfile = authedProcedure
   .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {
     return deleteProfile(input.id);
+  });
+
+export const bulkDeleteAthleteProfiles = authedProcedure
+  .input(BulkDeleteAthleteProfilesSchema)
+  .handler(async ({ input }) => {
+    return deleteProfiles(input.ids);
   });
