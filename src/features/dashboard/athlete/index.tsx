@@ -23,6 +23,7 @@ import { exportTableToCSV } from '@/lib/data-table/export';
 import { getSortingStateParser } from '@/lib/data-table/parsers';
 import { useAthleteProfiles } from '@/queries/athlete-profiles';
 import { parseRangeParam } from '@/lib/data-table/utils';
+import { DataTableSkeleton } from '@/components/data-table/data-table-skeleton';
 
 const SORTABLE_COLUMN_IDS = new Set([
   'name',
@@ -61,7 +62,7 @@ export function AthleteManager() {
   const beltRange = parseRangeParam(beltFilter);
   const weightRange = parseRangeParam(weightFilter);
 
-  const { data } = useAthleteProfiles({
+  const { data, isFetching } = useAthleteProfiles({
     page,
     perPage,
     name: nameFilter ?? undefined,
@@ -131,35 +132,40 @@ export function AthleteManager() {
       </SiteHeader>
 
       <div className="flex-1 overflow-auto p-4">
-        <DataTable
-          table={table}
-          state={tableState}
-          actionBar={
-            <AthletesActionBar
-              table={table}
-              onBulkAdd={() => setBulkAddOpen(true)}
-            />
-          }
-          addRow={{
-            label: 'Add athlete',
-            onClick: () => setAddDrawerOpen(true),
-          }}
-        >
-          <DataTableToolbar table={table} state={tableState}>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setImportOpen(true)}
-            >
-              <Upload className="mr-1 size-4" />
-              Import
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleExportAll}>
-              <Download className="mr-1 size-4" />
-              Export
-            </Button>
-          </DataTableToolbar>
-        </DataTable>
+        {isFetching && !data ? (
+          <DataTableSkeleton columnCount={7} rowCount={10} />
+        ) : (
+          <DataTable
+            table={table}
+            state={tableState}
+            actionBar={
+              <AthletesActionBar
+                table={table}
+                onBulkAdd={() => setBulkAddOpen(true)}
+                onDelete={() => {}} // TODO: Implement delete
+              />
+            }
+            addRow={{
+              label: 'Add athlete',
+              onClick: () => setAddDrawerOpen(true),
+            }}
+          >
+            <DataTableToolbar table={table} state={tableState}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setImportOpen(true)}
+              >
+                <Upload className="mr-1 size-4" />
+                Import
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExportAll}>
+                <Download className="mr-1 size-4" />
+                Export
+              </Button>
+            </DataTableToolbar>
+          </DataTable>
+        )}
       </div>
 
       <AthleteAddDrawer open={addDrawerOpen} onOpenChange={setAddDrawerOpen} />

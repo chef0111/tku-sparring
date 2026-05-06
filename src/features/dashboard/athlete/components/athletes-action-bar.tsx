@@ -1,4 +1,9 @@
-import { IconDownload, IconUserPlus, IconX } from '@tabler/icons-react';
+import {
+  IconDownload,
+  IconTrash,
+  IconUserPlus,
+  IconX,
+} from '@tabler/icons-react';
 import type { Table } from '@tanstack/react-table';
 import type { AthleteProfileData } from '@/features/dashboard/types';
 import {
@@ -14,11 +19,13 @@ import { exportTableToCSV } from '@/lib/data-table/export';
 interface AthletesActionBarProps {
   table: Table<AthleteProfileData>;
   onBulkAdd: () => void;
+  onDelete: () => void;
 }
 
 export function AthletesActionBar({
   table,
   onBulkAdd,
+  onDelete,
 }: AthletesActionBarProps) {
   const rows = table.getFilteredSelectedRowModel().rows;
 
@@ -57,6 +64,10 @@ export function AthletesActionBar({
         <ActionBarItem onClick={onBulkAdd}>
           <IconUserPlus />
           Add to Tournament
+        </ActionBarItem>
+        <ActionBarItem onClick={onDelete}>
+          <IconTrash />
+          Delete
         </ActionBarItem>
         <ActionBarItem onClick={onExport}>
           <IconDownload />
