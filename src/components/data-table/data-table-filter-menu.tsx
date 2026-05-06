@@ -36,10 +36,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useDebouncedCallback } from '@/hooks/use-debounced-callback';
-import { getDefaultFilterOperator, getFilterOperators } from '@/lib/data-table';
+import {
+  getDefaultFilterOperator,
+  getFilterOperators,
+} from '@/lib/data-table/utils';
 import { formatDate } from '@/lib/format';
 import { generateId } from '@/lib/id';
-import { getFiltersStateParser } from '@/lib/parsers';
+import { getFiltersStateParser } from '@/lib/data-table/parsers';
 import { cn } from '@/lib/utils';
 
 const DEBOUNCE_MS = 300;

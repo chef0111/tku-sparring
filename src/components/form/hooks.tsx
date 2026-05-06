@@ -1,7 +1,7 @@
 import { createFormHook, createFormHookContexts } from '@tanstack/react-form';
 import { FormInput, FormNumberInput, FormPasswordInput } from './form-input';
 import { FormTextarea } from './form-textarea';
-import { FormSelect } from './form-select';
+import { FormNumberSelect, FormSelect } from './form-select';
 import { FormCheckbox } from './form-checkbox';
 import { FormCombobox } from './form-combobox';
 
@@ -13,6 +13,7 @@ const { useAppForm } = createFormHook({
     Input: FormInput,
     Textarea: FormTextarea,
     Select: FormSelect,
+    NumberSelect: FormNumberSelect,
     Checkbox: FormCheckbox,
     PasswordInput: FormPasswordInput,
     NumberInput: FormNumberInput,

@@ -54,7 +54,7 @@ export function TournamentViewer({
             <StatCard
               icon={Users}
               label="Athletes"
-              value={tournament._count.athletes}
+              value={tournament._count.tournamentAthletes}
             />
             <StatCard
               icon={Trophy}

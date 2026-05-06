@@ -1,17 +1,10 @@
 import * as React from 'react';
-import {
-  IconChevronDown,
-  IconChevronUp,
-  IconEye,
-  IconEyeOff,
-} from '@tabler/icons-react';
-import { ButtonGroup } from '../ui/button-group';
 import { FormBase } from './form-base';
 import { useFieldContext } from './hooks';
 import type { FormControlProps } from './form-base';
-import { Button } from '@/components/ui/button';
+import { NumberInput } from '@/components/input/number-input';
+import { PasswordInput } from '@/components/input/password-input';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 import {
   Tooltip,
   TooltipContent,
@@ -22,7 +15,9 @@ export type FormInputProps = FormControlProps &
   Omit<
     React.ComponentProps<'input'>,
     'id' | 'name' | 'value' | 'onChange' | 'onBlur'
-  >;
+  > & {
+    onValueChange?: (value: string) => void;
+  };
 
 type InputTooltip = {
   tooltip?: string;
@@ -36,6 +31,7 @@ export function FormInput({
   descPosition,
   tooltip,
   tooltipSide,
+  onValueChange,
   ...inputProps
 }: FormInputProps & InputTooltip) {
   const field = useFieldContext<string>();
@@ -46,7 +42,11 @@ export function FormInput({
       name={field.name}
       value={field.state.value}
       onBlur={field.handleBlur}
-      onChange={(e) => field.handleChange(e.target.value)}
+      onChange={(e) => {
+        const next = e.target.value;
+        field.handleChange(next);
+        onValueChange?.(next);
+      }}
       aria-invalid={isInvalid}
       {...inputProps}
     />
@@ -82,7 +82,6 @@ export function FormPasswordInput({
 }: FormInputProps) {
   const field = useFieldContext<string>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-  const [showPassword, setShowPassword] = React.useState(false);
 
   return (
     <FormBase
@@ -91,32 +90,15 @@ export function FormPasswordInput({
       descPosition={descPosition}
       className={fieldClassName}
     >
-      <div className="relative">
-        <Input
-          id={field.name}
-          name={field.name}
-          value={field.state.value}
-          onBlur={field.handleBlur}
-          onChange={(e) => field.handleChange(e.target.value)}
-          aria-invalid={isInvalid}
-          className="pr-10 [&::-ms-reveal]:hidden"
-          type={showPassword ? 'text' : 'password'}
-          {...inputProps}
-        />
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          className="absolute top-1/2 right-1.5 -translate-y-1/2 scale-100! hover:bg-transparent!"
-          onClick={() => setShowPassword(!showPassword)}
-        >
-          {showPassword ? (
-            <IconEyeOff className="size-5 shrink-0 opacity-50" />
-          ) : (
-            <IconEye className="size-5 shrink-0 opacity-50" />
-          )}
-        </Button>
-      </div>
+      <PasswordInput
+        id={field.name}
+        name={field.name}
+        value={field.state.value}
+        onBlur={field.handleBlur}
+        onChange={(e) => field.handleChange(e.target.value)}
+        aria-invalid={isInvalid}
+        {...inputProps}
+      />
     </FormBase>
   );
 }
@@ -141,7 +123,7 @@ export function FormNumberInput({
   max,
   ...inputProps
 }: FormNumberInputProps) {
-  const field = useFieldContext<number>();
+  const field = useFieldContext<number | undefined>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
   const handleIncrement = () => {
@@ -165,54 +147,26 @@ export function FormNumberInput({
       descPosition={descPosition}
       className={fieldClassName}
     >
-      <div className="relative">
-        <Input
-          id={field.name}
-          name={field.name}
-          type="number"
-          value={field.state.value ?? ''}
-          onBlur={field.handleBlur}
-          onChange={(e) => {
-            const value = e.target.value === '' ? 0 : Number(e.target.value);
-            field.handleChange(value);
-          }}
-          aria-invalid={isInvalid}
-          step={step}
-          min={min}
-          max={max}
-          title=""
-          {...inputProps}
-          className={cn(
-            '[appearance:textfield] [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none',
-            inputProps.className
-          )}
-        />
-        <ButtonGroup
-          orientation="vertical"
-          className="absolute top-1/4 right-0 h-1/2 -translate-y-1/2"
-        >
-          <Button
-            type="button"
-            size="icon-xs"
-            variant="outline"
-            className="h-full w-5 p-0 in-data-[slot=button-group]:rounded-tl-none!"
-            onClick={handleIncrement}
-            disabled={max !== undefined && (field.state.value || 0) >= max}
-          >
-            <IconChevronUp className="size-3" />
-          </Button>
-          <Button
-            type="button"
-            size="icon-xs"
-            variant="outline"
-            className="h-full w-5 p-0 in-data-[slot=button-group]:rounded-bl-none!"
-            onClick={handleDecrement}
-            disabled={min !== undefined && (field.state.value || 0) <= min}
-          >
-            <IconChevronDown className="size-3" />
-          </Button>
-        </ButtonGroup>
-      </div>
+      <NumberInput
+        id={field.name}
+        name={field.name}
+        value={field.state.value ?? ''}
+        onBlur={field.handleBlur}
+        onChange={(e) => {
+          const value =
+            e.target.value === '' ? undefined : Number(e.target.value);
+          field.handleChange(value);
+        }}
+        aria-invalid={isInvalid}
+        step={step}
+        min={min}
+        max={max}
+        handleIncrement={handleIncrement}
+        handleDecrement={handleDecrement}
+        disableIncrement={max !== undefined && (field.state.value || 0) >= max}
+        disableDecrement={min !== undefined && (field.state.value || 0) <= min}
+        {...inputProps}
+      />
     </FormBase>
   );
 }

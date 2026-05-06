@@ -10,7 +10,7 @@ export class TournamentDAL {
       orderBy: { createdAt: 'desc' },
       include: {
         _count: {
-          select: { groups: true, matches: true, athletes: true },
+          select: { groups: true, matches: true, tournamentAthletes: true },
         },
       },
     });
@@ -22,11 +22,11 @@ export class TournamentDAL {
       include: {
         groups: {
           include: {
-            _count: { select: { athletes: true, matches: true } },
+            _count: { select: { tournamentAthletes: true, matches: true } },
           },
         },
         _count: {
-          select: { groups: true, matches: true, athletes: true },
+          select: { groups: true, matches: true, tournamentAthletes: true },
         },
       },
     });

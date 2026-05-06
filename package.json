@@ -87,7 +87,9 @@
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.4",
     "three": "^0.184.0",
+    "vaul": "^1.1.2",
     "vite-tsconfig-paths": "^6.1.1",
+    "xlsx": "^0.18.5",
     "zod": "^4.4.1",
     "zundo": "^2.3.0",
     "zustand": "^5.0.12"
@@ -100,7 +102,6 @@
     "@tanstack/devtools-vite": "^0.6.0",
     "@tanstack/eslint-config": "^0.4.0",
     "@tanstack/intent": "^0.0.36",
-    "@tanstack/query-core": "^5.100.6",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
     "@types/babel__core": "^7.20.5",
@@ -136,5 +137,9 @@
     "**/*.{html,json,css,scss,md,mdx}": [
       "prettier --write"
     ]
+  },
+  "overrides": {
+    "@tanstack/router-core": "1.169.1",
+    "@tanstack/query-core": "5.100.6"
   }
 }

@@ -130,8 +130,12 @@ function SortableRoot<T>(props: SortableRootProps<T>) {
   const [activeId, setActiveId] = React.useState<UniqueIdentifier | null>(null);
 
   const sensors = useSensors(
-    useSensor(MouseSensor),
-    useSensor(TouchSensor),
+    useSensor(MouseSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 150, tolerance: 8 },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -462,7 +466,7 @@ function SortableItem(props: SortableItemProps) {
             'cursor-default': context.flatCursor,
             'data-dragging:cursor-grabbing': !context.flatCursor,
             'cursor-grab': !isDragging && asHandle && !context.flatCursor,
-            'opacity-50': isDragging,
+            'pointer-events-none opacity-0': isDragging,
             'pointer-events-none opacity-50': disabled,
           },
           className
@@ -485,7 +489,7 @@ function SortableItemHandle(props: SortableItemHandleProps) {
   const isDisabled = disabled ?? itemContext.disabled;
 
   const composedRef = useComposedRefs(ref, (node) => {
-    if (!isDisabled) return;
+    if (isDisabled) return;
     itemContext.setActivatorNodeRef(node);
   });
 
@@ -537,7 +541,12 @@ interface SortableOverlayProps extends Omit<
 }
 
 function SortableOverlay(props: SortableOverlayProps) {
-  const { container: containerProp, children, ...overlayProps } = props;
+  const {
+    container: containerProp,
+    children,
+    className,
+    ...overlayProps
+  } = props;
 
   const context = useSortableContext(OVERLAY_NAME);
 
@@ -553,7 +562,7 @@ function SortableOverlay(props: SortableOverlayProps) {
     <DragOverlay
       dropAnimation={dropAnimation}
       modifiers={context.modifiers}
-      className={cn(!context.flatCursor && 'cursor-grabbing')}
+      className={cn(!context.flatCursor && 'cursor-grabbing', className)}
       {...overlayProps}
     >
       <SortableOverlayContext.Provider value={true}>

@@ -1,8 +1,11 @@
 import { flexRender } from '@tanstack/react-table';
+import { PlusIcon } from 'lucide-react';
+import * as React from 'react';
 import type { Table as TanstackTable } from '@tanstack/react-table';
-import type * as React from 'react';
 
+import type { DataTableControlledState } from '@/hooks/use-data-table';
 import { DataTablePagination } from '@/components/data-table/data-table-pagination';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -11,21 +14,39 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { getColumnPinningStyle } from '@/lib/data-table';
+import { getColumnPinningStyle } from '@/lib/data-table/utils';
 import { cn } from '@/lib/utils';
 
 interface DataTableProps<TData> extends React.ComponentProps<'div'> {
   table: TanstackTable<TData>;
+  state: DataTableControlledState;
   actionBar?: React.ReactNode;
+  addRow?: {
+    label?: string;
+    onClick: () => void;
+  };
 }
 
 export function DataTable<TData>({
   table,
+  state,
   actionBar,
+  addRow,
   children,
   className,
   ...props
 }: DataTableProps<TData>) {
+  const selectedRowCount = Object.keys(state.rowSelection).length;
+  const renderedRows = table.getRowModel().rows;
+  const visibleColumnCount = table.getVisibleLeafColumns().length;
+  const renderedHeaders = table
+    .getFlatHeaders()
+    .filter(
+      (header) =>
+        !header.isPlaceholder &&
+        state.columnVisibility[header.column.id] !== false
+    );
+
   return (
     <div
       className={cn('flex w-full flex-col gap-2.5 overflow-auto', className)}
@@ -33,32 +54,30 @@ export function DataTable<TData>({
     >
       {children}
       <div className="overflow-hidden rounded-md border">
-        <Table>
+        <Table className="px-0">
           <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    colSpan={header.colSpan}
-                    style={{
-                      ...getColumnPinningStyle({ column: header.column }),
-                    }}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
+            <TableRow>
+              {renderedHeaders.map((header) => (
+                <TableHead
+                  key={header.id}
+                  colSpan={header.colSpan}
+                  style={{
+                    ...getColumnPinningStyle({ column: header.column }),
+                    width: `var(--col-${header.column.id}-size)`,
+                  }}
+                  className="relative border-x select-none first:border-l-0 last:border-r-0"
+                >
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
+                </TableHead>
+              ))}
+            </TableRow>
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+            {renderedRows?.length ? (
+              renderedRows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
@@ -81,10 +100,25 @@ export function DataTable<TData>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={table.getAllColumns().length}
+                  colSpan={visibleColumnCount}
                   className="h-24 text-center"
                 >
                   No results.
+                </TableCell>
+              </TableRow>
+            )}
+            {addRow && (
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={visibleColumnCount} className="p-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={addRow.onClick}
+                    className="text-muted-foreground no-focus hover:text-foreground h-12 w-full scale-100! gap-1.5 rounded-t-none"
+                  >
+                    <PlusIcon />
+                    {addRow.label ?? 'Add row'}
+                  </Button>
                 </TableCell>
               </TableRow>
             )}
@@ -92,10 +126,8 @@ export function DataTable<TData>({
         </Table>
       </div>
       <div className="flex flex-col gap-2.5">
-        <DataTablePagination table={table} />
-        {actionBar &&
-          table.getFilteredSelectedRowModel().rows.length > 0 &&
-          actionBar}
+        <DataTablePagination table={table} state={state} />
+        {actionBar && selectedRowCount > 0 && actionBar}
       </div>
     </div>
   );

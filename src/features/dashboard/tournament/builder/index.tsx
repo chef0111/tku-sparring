@@ -53,7 +53,7 @@ export function TournamentBuilderPage({ id }: TournamentBuilderPageProps) {
   return (
     <TournamentBuilder
       tournament={tournament}
-      groups={groups}
+      groups={groups as Array<GroupData>}
       tournamentId={id}
     />
   );
