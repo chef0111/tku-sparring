@@ -289,6 +289,12 @@
   }
 }
 
+@custom-variant data-dragging {
+  &:where([data-dragging='true']) {
+    @slot;
+  }
+}
+
 @utility no-focus {
   @apply focus-visible:border-none! focus-visible:ring-0! focus-visible:ring-transparent! focus-visible:ring-offset-0! focus-visible:outline-none!;
 }

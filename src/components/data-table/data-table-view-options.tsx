@@ -70,13 +70,14 @@ export function DataTableViewOptions<TData>({
                   <CommandItem
                     key={column.id}
                     onSelect={() => column.toggleVisibility(!isVisible)}
+                    className="relative"
                   >
                     <span className="truncate">
                       {column.columnDef.meta?.label ?? column.id}
                     </span>
                     <Check
                       className={cn(
-                        'ml-auto size-4 shrink-0',
+                        'absolute right-2 size-4',
                         isVisible ? 'opacity-100' : 'opacity-0'
                       )}
                     />

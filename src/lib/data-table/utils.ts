@@ -75,3 +75,13 @@ export function getValidFilters<TData>(
           filter.value !== undefined)
   );
 }
+
+export function parseRangeParam(value: unknown): [number, number] | undefined {
+  if (value == null || value === '') return undefined;
+  const str = typeof value === 'string' ? value : String(value);
+  const parts = str.split(',').map(Number);
+  if (parts.some((n) => Number.isNaN(n))) return undefined;
+  if (parts.length === 2) return [parts[0], parts[1]];
+  if (parts.length === 1) return [parts[0], parts[0]];
+  return undefined;
+}

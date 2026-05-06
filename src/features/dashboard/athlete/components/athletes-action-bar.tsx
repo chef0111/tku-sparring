@@ -9,7 +9,7 @@ import {
   ActionBarSelection,
   ActionBarSeparator,
 } from '@/components/ui/action-bar';
-import { exportTableToCSV } from '@/lib/export';
+import { exportTableToCSV } from '@/lib/data-table/export';
 
 interface AthletesActionBarProps {
   table: Table<AthleteProfileData>;

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { CreateAthleteProfileDTO } from '@/orpc/athlete-profiles/athlete-profiles.dto';
-import { parseImportFile } from '@/lib/import';
+import { parseImportFile } from '@/lib/data-table/import';
 import { client } from '@/orpc/client';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';

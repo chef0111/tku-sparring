@@ -1,4 +1,4 @@
-import { Check, PlusCircle, XCircle } from 'lucide-react';
+import { Check, PlusCircle, XCircle, XIcon } from 'lucide-react';
 import * as React from 'react';
 import type { Column } from '@tanstack/react-table';
 
@@ -103,7 +103,7 @@ export function DataTableFacetedFilter<TData, TValue>({
             <>
               <Separator
                 orientation="vertical"
-                className="mx-0.5 data-[orientation=vertical]:h-4"
+                className="mx-0.5 my-auto data-[orientation=vertical]:h-4"
               />
               <Badge
                 variant="secondary"
@@ -159,7 +159,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                           : 'opacity-50 [&_svg]:invisible'
                       )}
                     >
-                      <Check />
+                      <Check className="text-primary-foreground" />
                     </div>
                     {option.icon && <option.icon />}
                     <span className="truncate">{option.label}</span>
@@ -178,9 +178,10 @@ export function DataTableFacetedFilter<TData, TValue>({
                 <CommandGroup>
                   <CommandItem
                     onSelect={() => onReset()}
-                    className="justify-center text-center"
+                    className="relative w-full justify-between"
                   >
-                    Clear filters
+                    <span>Clear filters</span>
+                    <XIcon className="absolute right-2 size-4" />
                   </CommandItem>
                 </CommandGroup>
               </>

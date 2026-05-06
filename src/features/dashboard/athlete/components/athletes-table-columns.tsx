@@ -11,7 +11,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { GENDER_OPTIONS, getBeltLabel, getGenderLabel } from '@/config/athlete';
+import {
+  BELT_LEVELS,
+  GENDER_OPTIONS,
+  getBeltLabel,
+  getGenderLabel,
+} from '@/config/athlete';
 import { cn } from '@/lib/utils';
 
 interface ColumnOptions {
@@ -32,6 +37,7 @@ export function getAthletesTableColumns(
             (table.getIsSomePageRowsSelected() && 'indeterminate')
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          className="ml-1"
           aria-label="Select all"
         />
       ),
@@ -39,11 +45,11 @@ export function getAthletesTableColumns(
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
+          className="ml-1"
           aria-label="Select row"
         />
       ),
-      maxSize: 32,
-      enableResizing: false,
+      size: 30,
       enableSorting: false,
       enableHiding: false,
     },
@@ -54,12 +60,11 @@ export function getAthletesTableColumns(
         <DataTableColumnHeader column={column} label="Code" />
       ),
       cell: ({ row }) => (
-        <span className="text-muted-foreground">
+        <span className="text-muted-foreground text-base">
           {row.original.athleteCode ?? '—'}
         </span>
       ),
       maxSize: 120,
-      enableResizing: true,
       enableSorting: false,
       enableColumnFilter: false,
     },
@@ -73,7 +78,6 @@ export function getAthletesTableColumns(
         <span className="font-medium">{row.original.name}</span>
       ),
       enableSorting: true,
-      enableResizing: true,
       enableColumnFilter: true,
       meta: {
         label: 'Name',
@@ -103,7 +107,6 @@ export function getAthletesTableColumns(
         );
       },
       maxSize: 100,
-      enableResizing: true,
       enableSorting: false,
       enableColumnFilter: true,
       meta: {
@@ -123,12 +126,14 @@ export function getAthletesTableColumns(
       ),
       cell: ({ row }) => <span>{getBeltLabel(row.original.beltLevel)}</span>,
       enableSorting: true,
-      enableResizing: true,
       enableColumnFilter: true,
       meta: {
         label: 'Belt Level',
-        variant: 'range',
-        range: [0, 10],
+        variant: 'select',
+        options: BELT_LEVELS.map((b) => ({
+          label: b.label,
+          value: String(b.value),
+        })),
       },
     },
     {
@@ -139,7 +144,6 @@ export function getAthletesTableColumns(
       ),
       cell: ({ row }) => <span>{row.original.weight} kg</span>,
       enableSorting: true,
-      enableResizing: true,
       enableColumnFilter: true,
       meta: {
         label: 'Weight',
@@ -156,7 +160,6 @@ export function getAthletesTableColumns(
       ),
       cell: ({ row }) => <span>{row.original.affiliation}</span>,
       enableSorting: true,
-      enableResizing: true,
       enableColumnFilter: true,
       meta: {
         label: 'Affiliation',
@@ -169,7 +172,7 @@ export function getAthletesTableColumns(
       cell: ({ row }) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="size-8">
+            <Button variant="ghost" size="icon" className="-mr-2 size-8">
               <MoreHorizontal className="size-4" />
               <span className="sr-only">Open menu</span>
             </Button>
@@ -190,7 +193,6 @@ export function getAthletesTableColumns(
         </DropdownMenu>
       ),
       maxSize: 0,
-      enableResizing: false,
       enableSorting: false,
       enableHiding: false,
     },

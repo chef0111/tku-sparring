@@ -168,8 +168,7 @@ export function AthleteEditSheet({
               <form.AppField name="athleteCode">
                 {(field) => (
                   <field.Input
-                    label="Athlete Code"
-                    description="Optional"
+                    label="Athlete ID"
                     descPosition="after-label"
                     placeholder="e.g. TKD-001"
                     onValueChange={() => setHardBlockError(null)}

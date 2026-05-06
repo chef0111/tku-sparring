@@ -31,7 +31,7 @@ import type { SingleParser, UseQueryStateOptions } from 'nuqs';
 
 import type { ExtendedColumnSort, QueryKeys } from '@/types/data-table';
 import { useDebouncedCallback } from '@/hooks/use-debounced-callback';
-import { getSortingStateParser } from '@/lib/parsers';
+import { getSortingStateParser } from '@/lib/data-table/parsers';
 
 const PAGE_KEY = 'page';
 const PER_PAGE_KEY = 'perPage';
@@ -355,8 +355,6 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     },
     getRowId,
     enableRowSelection: true,
-    enableColumnResizing: true,
-    columnResizeMode: 'onEnd',
     onRowSelectionChange,
     onPaginationChange,
     onSortingChange: onSortingChangeWithLog,

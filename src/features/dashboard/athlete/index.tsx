@@ -19,18 +19,10 @@ import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
 import { Button } from '@/components/ui/button';
 import { SiteHeader } from '@/features/dashboard/site-header';
 import { useDataTable } from '@/hooks/use-data-table';
-import { exportTableToCSV } from '@/lib/export';
-import { getSortingStateParser } from '@/lib/parsers';
+import { exportTableToCSV } from '@/lib/data-table/export';
+import { getSortingStateParser } from '@/lib/data-table/parsers';
 import { useAthleteProfiles } from '@/queries/athlete-profiles';
-
-function parseRangeParam(value: string | null): [number, number] | undefined {
-  if (!value) return undefined;
-  const parts = value.split(',').map(Number);
-  if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-    return [parts[0], parts[1]];
-  }
-  return undefined;
-}
+import { parseRangeParam } from '@/lib/data-table/utils';
 
 const SORTABLE_COLUMN_IDS = new Set([
   'name',

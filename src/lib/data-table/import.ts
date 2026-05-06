@@ -1,3 +1,5 @@
+import { TABLE_HEADER_MAP } from '@/config/athlete';
+
 export interface ImportResult<T> {
   success: boolean;
   data?: Array<T>;
@@ -5,18 +7,9 @@ export interface ImportResult<T> {
   warnings?: Array<string>;
 }
 
-const HEADER_MAP: Record<string, string> = {
-  'Athlete Code': 'athleteCode',
-  Name: 'name',
-  Gender: 'gender',
-  'Belt Level': 'beltLevel',
-  Weight: 'weight',
-  Affiliation: 'affiliation',
-};
-
 function camelCaseHeader(header: string): string {
   return (
-    HEADER_MAP[header] ??
+    TABLE_HEADER_MAP[header] ??
     header
       .toLowerCase()
       .replace(/[^a-z0-9]+(.)/g, (_, char: string) => char.toUpperCase())

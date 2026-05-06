@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { getColumnPinningStyle } from '@/lib/data-table';
+import { getColumnPinningStyle } from '@/lib/data-table/utils';
 import { cn } from '@/lib/utils';
 
 interface DataTableProps<TData> extends React.ComponentProps<'div'> {
@@ -47,16 +47,6 @@ export function DataTable<TData>({
         state.columnVisibility[header.column.id] !== false
     );
 
-  const columnSizeVars = React.useMemo(() => {
-    const headers = table.getFlatHeaders();
-    return Object.fromEntries(
-      headers.map((header) => [
-        `--col-${header.column.id}-size`,
-        `${header.getSize()}px`,
-      ])
-    );
-  }, [table.getState().columnSizingInfo, table.getState().columnSizing]);
-
   return (
     <div
       className={cn('flex w-full flex-col gap-2.5 overflow-auto', className)}
@@ -64,11 +54,7 @@ export function DataTable<TData>({
     >
       {children}
       <div className="overflow-hidden rounded-md border">
-        <Table
-          style={{
-            ...columnSizeVars,
-          }}
-        >
+        <Table className="px-0">
           <TableHeader>
             <TableRow>
               {renderedHeaders.map((header) => (
@@ -79,34 +65,11 @@ export function DataTable<TData>({
                     ...getColumnPinningStyle({ column: header.column }),
                     width: `var(--col-${header.column.id}-size)`,
                   }}
-                  className="relative border-x select-none"
+                  className="relative border-x select-none first:border-l-0 last:border-r-0"
                 >
                   {flexRender(
                     header.column.columnDef.header,
                     header.getContext()
-                  )}
-                  {header.column.getCanResize() && (
-                    <div
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        header.getResizeHandler()(e);
-                      }}
-                      onTouchStart={(e) => {
-                        e.preventDefault();
-                        header.getResizeHandler()(e);
-                      }}
-                      onDoubleClick={() => header.column.resetSize()}
-                      className={cn(
-                        'absolute top-0 right-0 h-full w-4 cursor-col-resize touch-none select-none',
-                        'flex items-stretch justify-center',
-                        '[&>div]:bg-border [&>div]:w-px [&>div]:opacity-0 [&>div]:transition-opacity',
-                        'hover:[&>div]:opacity-100',
-                        header.column.getIsResizing() &&
-                          '[&>div]:bg-primary [&>div]:opacity-100'
-                      )}
-                    >
-                      <div />
-                    </div>
                   )}
                 </TableHead>
               ))}

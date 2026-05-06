@@ -26,3 +26,12 @@ export function getBeltLabel(beltLevel: number): string {
 export function getGenderLabel(gender: string): string {
   return GENDER_OPTIONS.find((g) => g.value === gender)?.label ?? gender;
 }
+
+export const TABLE_HEADER_MAP: Record<string, string> = {
+  'Athlete Code': 'athleteCode',
+  Name: 'name',
+  Gender: 'gender',
+  'Belt Level': 'beltLevel',
+  Weight: 'weight',
+  Affiliation: 'affiliation',
+};
