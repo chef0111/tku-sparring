@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
+  AthleteProfilesSchema,
   CheckDuplicateSchema,
   CreateAthleteProfileSchema,
-  ListAthleteProfilesSchema,
   UpdateAthleteProfileSchema,
 } from '../athlete-profiles.dto';
 
 describe('CreateAthleteProfileSchema', () => {
   const valid = {
+    athleteCode: 'TKD-001',
     name: 'Nguyen Van A',
     gender: 'M' as const,
     beltLevel: 5,
@@ -19,12 +20,12 @@ describe('CreateAthleteProfileSchema', () => {
     expect(CreateAthleteProfileSchema.safeParse(valid).success).toBe(true);
   });
 
-  it('accepts an optional athleteCode', () => {
+  it('rejects missing athleteCode', () => {
     const result = CreateAthleteProfileSchema.safeParse({
       ...valid,
-      athleteCode: 'TKD-001',
+      athleteCode: undefined,
     });
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
   });
 
   it('rejects missing name', () => {
@@ -113,9 +114,9 @@ describe('UpdateAthleteProfileSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('allows partial update with only id', () => {
+  it('rejects update without athleteCode', () => {
     const result = UpdateAthleteProfileSchema.safeParse({ id: 'abc123' });
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
   });
 
   it('rejects out-of-range beltLevel in update', () => {
@@ -127,9 +128,9 @@ describe('UpdateAthleteProfileSchema', () => {
   });
 });
 
-describe('ListAthleteProfilesSchema', () => {
+describe('AthleteProfilesSchema', () => {
   it('uses default values when input is empty', () => {
-    const result = ListAthleteProfilesSchema.safeParse({});
+    const result = AthleteProfilesSchema.safeParse({});
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.page).toBe(1);
@@ -139,18 +140,19 @@ describe('ListAthleteProfilesSchema', () => {
   });
 
   it('rejects page less than 1', () => {
-    const result = ListAthleteProfilesSchema.safeParse({ page: 0 });
+    const result = AthleteProfilesSchema.safeParse({ page: 0 });
     expect(result.success).toBe(false);
   });
 
   it('rejects perPage above 100', () => {
-    const result = ListAthleteProfilesSchema.safeParse({ perPage: 101 });
+    const result = AthleteProfilesSchema.safeParse({ perPage: 101 });
     expect(result.success).toBe(false);
   });
 });
 
 describe('CheckDuplicateSchema', () => {
   const valid = {
+    athleteCode: 'TKD-001',
     name: 'Nguyen Van A',
     gender: 'M' as const,
     beltLevel: 5,
@@ -158,15 +160,8 @@ describe('CheckDuplicateSchema', () => {
     affiliation: 'TKD Club',
   };
 
-  it('accepts valid input without athleteCode', () => {
-    expect(CheckDuplicateSchema.safeParse(valid).success).toBe(true);
-  });
-
   it('accepts valid input with athleteCode', () => {
-    expect(
-      CheckDuplicateSchema.safeParse({ ...valid, athleteCode: 'TKD-001' })
-        .success
-    ).toBe(true);
+    expect(CheckDuplicateSchema.safeParse(valid).success).toBe(true);
   });
 
   it('accepts optional excludeId', () => {

@@ -37,6 +37,7 @@ const SORTABLE_COLUMN_IDS = new Set([
 export function AthleteManager() {
   const [page] = useQueryState('page', parseAsInteger.withDefault(1));
   const [perPage] = useQueryState('perPage', parseAsInteger.withDefault(10));
+  const [athleteCodeFilter] = useQueryState('athleteCode');
   const [nameFilter] = useQueryState('name');
   const [genderFilter] = useQueryState(
     'gender',
@@ -70,6 +71,7 @@ export function AthleteManager() {
   const { data, isFetching } = useAthleteProfiles({
     page,
     perPage,
+    athleteCode: athleteCodeFilter ?? undefined,
     name: nameFilter ?? undefined,
     gender: (genderFilter?.[0] as 'M' | 'F') ?? undefined,
     affiliation: affiliationFilter ?? undefined,
@@ -125,7 +127,7 @@ export function AthleteManager() {
       filename: 'athletes',
       excludeColumns: ['select', 'actions'],
       headers: {
-        athleteCode: 'Athlete Code',
+        athleteCode: 'Athlete ID',
         name: 'Name',
         gender: 'Gender',
         beltLevel: 'Belt Level',

@@ -77,7 +77,7 @@ export function AthleteImportDialog({
     for (const row of preview) {
       try {
         await createMutation.mutateAsync({
-          athleteCode: row.athleteCode || undefined,
+          athleteCode: row.athleteCode.trim(),
           name: row.name,
           gender: row.gender?.trim().toUpperCase() === 'F' ? 'F' : 'M',
           beltLevel: Number(row.beltLevel),

@@ -7,9 +7,9 @@ import {
 } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type {
+  AthleteProfilesDTO,
   CheckDuplicateDTO,
   CreateAthleteProfileDTO,
-  ListAthleteProfilesDTO,
   UpdateAthleteProfileDTO,
 } from '@/orpc/athlete-profiles/athlete-profiles.dto';
 import { client } from '@/orpc/client';
@@ -18,9 +18,9 @@ export const athleteProfilesDefaultListInput = {
   page: 1,
   perPage: 10,
   sortDir: 'asc',
-} satisfies ListAthleteProfilesDTO;
+} satisfies AthleteProfilesDTO;
 
-export function athleteProfilesQueryOptions(input: ListAthleteProfilesDTO) {
+export function athleteProfilesQueryOptions(input: AthleteProfilesDTO) {
   return queryOptions({
     queryKey: ['athleteProfile', 'list', input] as const,
     queryFn: () => client.athleteProfile.list(input),
@@ -29,7 +29,7 @@ export function athleteProfilesQueryOptions(input: ListAthleteProfilesDTO) {
   });
 }
 
-export function useAthleteProfiles(input: ListAthleteProfilesDTO) {
+export function useAthleteProfiles(input: AthleteProfilesDTO) {
   return useQuery({
     ...athleteProfilesQueryOptions(input),
     placeholderData: keepPreviousData,

@@ -84,6 +84,8 @@ export function AthleteAddDrawer({
 
     rows.forEach((row, i) => {
       const label = `Row ${i + 1}`;
+      if (!row.athleteCode.trim())
+        errors.push(`${label}: Athlete ID is required`);
       if (!row.name.trim()) errors.push(`${label}: Name is required`);
       if (!row.affiliation.trim())
         errors.push(`${label}: Affiliation is required`);
@@ -103,7 +105,7 @@ export function AthleteAddDrawer({
     for (const row of rows) {
       try {
         await createMutation.mutateAsync({
-          athleteCode: row.athleteCode,
+          athleteCode: row.athleteCode.trim(),
           name: row.name,
           gender: row.gender,
           beltLevel: row.beltLevel,
@@ -218,7 +220,7 @@ export function AthleteAddDrawer({
           <Button onClick={onSubmit} disabled={isSubmitting}>
             {isSubmitting ? (
               <>
-                <Spinner className="text-muted-foreground" />
+                <Spinner className="text-primary-foreground" />
                 <span>Creating…</span>
               </>
             ) : (

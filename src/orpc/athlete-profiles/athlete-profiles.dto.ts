@@ -23,10 +23,11 @@ export const UpdateAthleteProfileSchema = z.object({
   affiliation: z.string().min(1).optional(),
 });
 
-export const ListAthleteProfilesSchema = z.object({
+export const AthleteProfilesSchema = z.object({
   page: z.number().int().min(1).optional().default(1),
   perPage: z.number().int().min(1).max(100).optional().default(20),
   name: z.string().optional(),
+  athleteCode: z.string().optional(),
   gender: z.enum(['M', 'F']).optional(),
   affiliation: z.string().optional(),
   beltLevelMin: z.number().int().min(0).max(10).optional(),
@@ -53,7 +54,7 @@ export type CreateAthleteProfileDTO = z.infer<
 export type UpdateAthleteProfileDTO = z.infer<
   typeof UpdateAthleteProfileSchema
 >;
-export type ListAthleteProfilesDTO = z.infer<typeof ListAthleteProfilesSchema>;
+export type AthleteProfilesDTO = z.infer<typeof AthleteProfilesSchema>;
 export type CheckDuplicateDTO = z.infer<typeof CheckDuplicateSchema>;
 
 export const BulkDeleteAthleteProfilesSchema = z.object({

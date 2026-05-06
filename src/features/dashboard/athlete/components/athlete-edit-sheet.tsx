@@ -78,7 +78,7 @@ export function AthleteEditSheet({
 
       if (nameOrCodeChanged) {
         const result = await checkDuplicate.mutateAsync({
-          athleteCode: value.athleteCode || undefined,
+          athleteCode: value.athleteCode.trim(),
           name: value.name,
           gender: value.gender,
           beltLevel: value.beltLevel,
@@ -101,7 +101,7 @@ export function AthleteEditSheet({
 
       updateMutation.mutate({
         id: athlete.id,
-        athleteCode: value.athleteCode || undefined,
+        athleteCode: value.athleteCode.trim(),
         name: value.name,
         gender: value.gender,
         beltLevel: value.beltLevel,
@@ -117,7 +117,7 @@ export function AthleteEditSheet({
     updateMutation.mutate(
       {
         id: athlete.id,
-        athleteCode: value.athleteCode || undefined,
+        athleteCode: value.athleteCode.trim(),
         name: value.name,
         gender: value.gender,
         beltLevel: value.beltLevel,

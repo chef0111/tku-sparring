@@ -28,7 +28,7 @@ export function getGenderLabel(gender: string): string {
 }
 
 export const TABLE_HEADER_MAP: Record<string, string> = {
-  'Athlete Code': 'athleteCode',
+  'Athlete ID': 'athleteCode',
   Name: 'name',
   Gender: 'gender',
   'Belt Level': 'beltLevel',

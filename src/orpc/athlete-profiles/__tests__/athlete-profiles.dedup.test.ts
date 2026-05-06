@@ -26,6 +26,7 @@ const existingProfile = {
 };
 
 const baseInput = {
+  athleteCode: '',
   name: 'Nguyen Van A',
   affiliation: 'TKD Club',
   beltLevel: 5,

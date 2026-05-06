@@ -1,8 +1,9 @@
 import type {
+  AthleteProfilesDTO,
   CreateAthleteProfileDTO,
-  ListAthleteProfilesDTO,
   UpdateAthleteProfileDTO,
 } from './athlete-profiles.dto';
+import type { AthleteProfileData } from '@/features/dashboard/types';
 import { prisma } from '@/lib/db';
 
 type SortableField =
@@ -26,10 +27,11 @@ function toSortField(field?: string): SortableField {
   return 'createdAt';
 }
 
-export async function findMany(input: ListAthleteProfilesDTO) {
+export async function findMany(input: AthleteProfilesDTO) {
   const {
     page,
     perPage,
+    athleteCode,
     name,
     gender,
     affiliation,
@@ -42,6 +44,9 @@ export async function findMany(input: ListAthleteProfilesDTO) {
   } = input;
 
   const where = {
+    ...(athleteCode
+      ? { athleteCode: { contains: athleteCode, mode: 'insensitive' as const } }
+      : {}),
     ...(name ? { name: { contains: name, mode: 'insensitive' as const } } : {}),
     ...(gender ? { gender } : {}),
     ...(affiliation
@@ -72,7 +77,7 @@ export async function findMany(input: ListAthleteProfilesDTO) {
 
   const orderBy = { [toSortField(sort)]: sortDir ?? 'desc' };
 
-  const [items, total] = await Promise.all([
+  const [rows, total] = await Promise.all([
     prisma.athleteProfile.findMany({
       where,
       orderBy,
@@ -81,6 +86,11 @@ export async function findMany(input: ListAthleteProfilesDTO) {
     }),
     prisma.athleteProfile.count({ where }),
   ]);
+
+  const items: Array<AthleteProfileData> = rows.map((row) => ({
+    ...row,
+    athleteCode: row.athleteCode ?? '',
+  }));
 
   return { items, total };
 }

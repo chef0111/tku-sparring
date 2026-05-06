@@ -14,7 +14,7 @@ export interface DedupResult {
  * Used by the checkDuplicate procedure and by createAthleteProfile.
  */
 export async function runDedupCheck(input: {
-  athleteCode?: string;
+  athleteCode: string;
   name: string;
   affiliation: string;
   beltLevel: number;

@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import {
+  AthleteProfilesSchema,
   BulkDeleteAthleteProfilesSchema,
   CheckDuplicateSchema,
   CreateAthleteProfileSchema,
-  ListAthleteProfilesSchema,
   UpdateAthleteProfileSchema,
 } from './athlete-profiles.dto';
 import {
@@ -18,7 +18,7 @@ import { runDedupCheck } from './athlete-profiles.dedup';
 import { authedProcedure } from '@/orpc/middleware';
 
 export const listAthleteProfiles = authedProcedure
-  .input(ListAthleteProfilesSchema)
+  .input(AthleteProfilesSchema)
   .handler(async ({ input }) => {
     return findMany(input);
   });

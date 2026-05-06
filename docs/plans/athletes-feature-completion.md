@@ -940,7 +940,7 @@ export const Route = createFileRoute('/dashboard/athletes/')({
 In `src/queries/athlete-profiles.ts`:
 
 ```tsx
-export function useAthleteProfiles(input: ListAthleteProfilesDTO) {
+export function useAthleteProfiles(input: AthleteProfilesDTO) {
   return useQuery({
     queryKey: ['athleteProfile', 'list', input] as const,
     queryFn: () => client.athleteProfile.list(input),

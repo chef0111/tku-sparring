@@ -57,7 +57,7 @@ export function getAthletesTableColumns(
       id: 'athleteCode',
       accessorKey: 'athleteCode',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Code" />
+        <DataTableColumnHeader column={column} label="Athlete ID" />
       ),
       cell: ({ row }) => (
         <span className="text-muted-foreground text-base">
@@ -65,8 +65,13 @@ export function getAthletesTableColumns(
         </span>
       ),
       maxSize: 120,
-      enableSorting: false,
-      enableColumnFilter: false,
+      enableSorting: true,
+      enableColumnFilter: true,
+      meta: {
+        label: 'Athlete ID',
+        variant: 'text',
+        placeholder: 'Search athlete ID...',
+      },
     },
     {
       id: 'name',

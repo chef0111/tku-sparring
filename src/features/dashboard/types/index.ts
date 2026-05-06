@@ -26,7 +26,7 @@ export interface TournamentListItem {
 
 export interface AthleteProfileData {
   id: string;
-  athleteCode: string | null;
+  athleteCode: string;
   name: string;
   gender: string;
   beltLevel: number;
