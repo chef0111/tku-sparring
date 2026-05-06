@@ -7,7 +7,7 @@ export class GroupDAL {
       where: { tournamentId },
       orderBy: { createdAt: 'asc' },
       include: {
-        _count: { select: { athletes: true, matches: true } },
+        _count: { select: { tournamentAthletes: true, matches: true } },
       },
     });
   }
@@ -16,9 +16,9 @@ export class GroupDAL {
     return await prisma.group.findUnique({
       where: { id },
       include: {
-        athletes: true,
+        tournamentAthletes: true,
         matches: true,
-        _count: { select: { athletes: true, matches: true } },
+        _count: { select: { tournamentAthletes: true, matches: true } },
       },
     });
   }

@@ -1,6 +1,6 @@
 {
   "name": "tku-sparring",
-  "version": "2.0.14",
+  "version": "2.0.15-beta",
   "private": true,
   "type": "module",
   "description": "A modern, user-friendly web application for managing Taekwondo sparring matches.",
@@ -39,12 +39,12 @@
     "@faker-js/faker": "^10.0.0",
     "@fontsource-variable/geist": "^5.2.8",
     "@fontsource-variable/geist-mono": "^5.2.7",
-    "@orpc/client": "^1.14.0",
-    "@orpc/json-schema": "^1.14.0",
-    "@orpc/openapi": "^1.14.0",
-    "@orpc/server": "^1.14.0",
-    "@orpc/tanstack-query": "^1.14.0",
-    "@orpc/zod": "^1.14.0",
+    "@orpc/client": "^1.14.2",
+    "@orpc/json-schema": "^1.14.2",
+    "@orpc/openapi": "^1.14.2",
+    "@orpc/server": "^1.14.2",
+    "@orpc/tanstack-query": "^1.14.2",
+    "@orpc/zod": "^1.14.2",
     "@prisma/client": "6.19",
     "@radix-ui/react-direction": "^1.1.1",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
@@ -60,7 +60,7 @@
     "@tanstack/react-router": "^1.169.1",
     "@tanstack/react-router-devtools": "^1.166.13",
     "@tanstack/react-router-ssr-query": "^1.166.12",
-    "@tanstack/react-start": "^1.167.54",
+    "@tanstack/react-start": "^1.167.64",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.24",
     "@tanstack/router-plugin": "^1.167.32",
@@ -71,7 +71,7 @@
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
     "export-to-csv": "^1.4.0",
-    "lucide-react": "^1.12.0",
+    "lucide-react": "^1.14.0",
     "motion": "^12.25.0",
     "nanoid": "^5.1.9",
     "next-themes": "^0.4.6",
@@ -87,7 +87,9 @@
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.4",
     "three": "^0.184.0",
+    "vaul": "^1.1.2",
     "vite-tsconfig-paths": "^6.1.1",
+    "xlsx": "^0.18.5",
     "zod": "^4.4.1",
     "zundo": "^2.3.0",
     "zustand": "^5.0.12"
@@ -99,8 +101,7 @@
     "@rolldown/plugin-babel": "^0.2.3",
     "@tanstack/devtools-vite": "^0.6.0",
     "@tanstack/eslint-config": "^0.4.0",
-    "@tanstack/intent": "^0.0.36",
-    "@tanstack/query-core": "^5.100.6",
+    "@tanstack/intent": "^0.0.40",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
     "@types/babel__core": "^7.20.5",
@@ -136,5 +137,9 @@
     "**/*.{html,json,css,scss,md,mdx}": [
       "prettier --write"
     ]
+  },
+  "overrides": {
+    "@tanstack/router-core": "1.169.1",
+    "@tanstack/query-core": "5.100.6"
   }
 }

@@ -1,14 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import { client, orpc } from '@/orpc/client';
+import { client } from '@/orpc/client';
 
 export function useTournaments() {
-  return useQuery(orpc.tournament.list.queryOptions({ input: {} }));
+  return useQuery({
+    queryKey: ['tournament', 'list'],
+    queryFn: () => client.tournament.list({}),
+  });
 }
 
 export function useTournament(id: string) {
-  return useQuery(orpc.tournament.get.queryOptions({ input: { id } }));
+  return useQuery({
+    queryKey: ['tournament', id],
+    queryFn: () => client.tournament.get({ id }),
+  });
 }
 
 export function useCreateTournament() {

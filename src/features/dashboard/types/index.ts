@@ -6,32 +6,32 @@ export interface TournamentData {
   groups: Array<{
     id: string;
     name: string;
-    _count: { athletes: number; matches: number };
+    _count: { tournamentAthletes: number; matches: number };
   }>;
-  _count: { groups: number; matches: number; athletes: number };
+  _count: { groups: number; matches: number; tournamentAthletes: number };
 }
 
 export interface GroupData {
   id: string;
   name: string;
-  _count: { athletes: number; matches: number };
+  _count: { tournamentAthletes: number; matches: number };
 }
 
 export interface TournamentListItem {
   id: string;
   name: string;
   createdAt: Date;
-  _count: { groups: number; matches: number; athletes: number };
+  _count: { groups: number; matches: number; tournamentAthletes: number };
 }
 
-export interface AthleteData {
+export interface AthleteProfileData {
   id: string;
+  athleteCode: string;
   name: string;
-  beltLevel: string;
+  gender: string;
+  beltLevel: number;
   weight: number;
   affiliation: string;
-  groupId: string;
-  tournamentId: string;
   createdAt: Date;
   updatedAt: Date;
 }

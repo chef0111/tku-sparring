@@ -1,4 +1,4 @@
-# PRD: Admin Dashboard CRM for Athletes, Groups, and Brackets
+# PRD: TKU Sparring System
 
 - Status: Draft
 - Owner: System Admin (MVP)
@@ -6,16 +6,18 @@
 
 ## Product Summary
 
-The TKU Sparring System needs a dedicated admin CRM experience to manage athletes and tournaments at scale. The admin dashboard will provide a global athlete registry, a tournament builder with Groups and Brackets tabs, and a deterministic bracket canvas with manual overrides. The goal is to reduce setup time, improve accuracy in grouping and seeding, and provide a clean operational workflow from tournament creation to completion.
+The TKU Sparring System is a full tournament operations platform that serves both arena-side clients and system admins. It includes an arena client for match execution and scoring, and an admin CRM for managing athletes, tournaments, groups, and brackets. The CRM provides a global athlete registry, a tournament builder with Groups and Brackets tabs, and a deterministic bracket canvas with manual overrides. The goal is to reduce setup time, improve accuracy in grouping and seeding, and provide a clean operational workflow from tournament creation through match completion.
 
 Target users:
 
-- System Admins who run TKU tournaments and manage athlete rosters and brackets.
+- System Admins who run TKU tournaments and manage athlete rosters, groups, and brackets.
+- Arena Operators who run matches and record results on the arena client.
 
 Primary value:
 
 - One source of truth for athletes across tournaments.
 - Fast, auditable, and deterministic tournament setup.
+- Simple arena-side scoring that stays in sync with official records.
 - Clear operational control of groups, brackets, and match progression.
 
 ## Goals
@@ -24,6 +26,7 @@ Primary value:
 - Allow admins to manage athletes globally and reuse them across tournaments.
 - Provide deterministic, auditable bracket generation with manual overrides.
 - Ensure admin workflows are consistent, predictable, and error-tolerant.
+- Keep arena-side match flow fast and resilient, even with intermittent connectivity.
 
 ## Non-goals (MVP)
 
@@ -32,6 +35,7 @@ Primary value:
 - Public-facing bracket view or spectator UX.
 - Real-time collaborative editing of brackets or groups beyond presence and control lease.
 - Automated tournament completion without admin confirmation.
+- Advanced hardware integration beyond existing scoring inputs.
 
 ## MVP Scope
 
@@ -46,12 +50,17 @@ In scope:
 - Match records created in Draft; bracket locked in Active.
 - Audit log for critical actions.
 - Group control lease to indicate which group is active in an arena.
+- Arena client for match execution and scoring.
+- Arena-side selection flow (Advance Settings) with per-device restore.
+- Round-end score submission and match-end finalization.
+- Offline-tolerant scoring with delayed sync on reconnect.
 
 Out of scope:
 
 - Public portals, athlete self-service, or scoring hardware integration.
 - Multi-role permissions and approvals.
 - Advanced analytics dashboards.
+- Automated next-match scheduling or auto-advance in the arena client.
 
 ## Primary User Flow
 
@@ -63,6 +72,12 @@ Out of scope:
 6. Switch to Brackets tab, inspect the canvas, and edit match outcomes via the detail panel.
 7. Set tournament to Active and record results as matches progress.
 8. When all groups have winners, system shows "Ready to complete"; admin confirms to Complete.
+
+Arena flow (per device):
+
+1. Open Advance Settings and select tournament, group, and match.
+2. Run the match on the arena client and score each round.
+3. Submit round-end results; finish the match to finalize and return to selection.
 
 ## Key Features
 
@@ -228,6 +243,27 @@ UAC:
 - Lease audit entries appear in the same Activity panel, filtered by event type.
 - Activity list is filterable by event type (optional for MVP).
 
+### 8) Arena Client (Match Execution)
+
+What the user sees:
+
+- Full-screen scoring UI for a single match.
+- "Advance Settings" to select tournament, group, and match.
+- "Match Result" modal with a "Finish Match" action.
+
+Data / Inputs:
+
+- Selected tournament, group, and match.
+- Per-round scoring inputs.
+
+UAC:
+
+- Arena devices restore the last selected tournament, group, and match per device.
+- Round-end results are submitted automatically.
+- "Finish Match" finalizes the match, then the operator opens the menu, chooses "Advance Settings", selects a match via combobox, and confirms.
+- If the device loses the Group Control Lease during a match, the match may finish but the next match requires re-acquire.
+- If the device goes offline, scoring continues locally and syncs on reconnect.
+
 ## Functional Requirements
 
 - Global athletes are managed in a dedicated route; tournament builder uses selected pool only.
@@ -248,69 +284,37 @@ UAC:
 - Lease identity uses a persistent device UUID stored in localStorage.
 - Clients attempt explicit lease release on page unload; TTL remains the source of truth.
 - Performance targets: 256 athletes per tournament, 8 groups per tournament, 32 athletes per group.
+- Arena client is a separate experience from the admin CRM.
+- Arena selection uses Advance Settings as the primary flow for MVP.
+- Round-end results are submitted automatically; match completion is finalized by "Finish Match".
+- After finishing a match, the arena client returns to Advance Settings without auto-advancing.
 
 ## Target Technical Shape
 
-### Data Model Changes (Prisma)
+### Tech Stack
 
-- Replace current Athlete model with:
-  - `AthleteProfile` (global identity)
-    - `athleteCode` (optional)
-    - `name`
-    - `gender`
-    - `beltLevel`
-    - `weight`
-    - `affiliation`
-  - `TournamentAthlete` (tournament participation)
-    - `tournamentId`
-    - `athleteProfileId`
-    - `groupId` (nullable)
-    - `seed`
-    - `locked`
-    - `status` (selected/assigned/eliminated)
-    - `notes` (optional)
-    - Snapshot fields: `gender`, `beltLevel`, `weight`, `affiliation`
-- Extend Group with constraints and third-place toggle.
-- Extend Match with bracket metadata: round, matchIndex, status, bestOf (3), and references to TournamentAthlete IDs.
-- Add TournamentActivity for audit log events.
+- Frontend: Tanstack Start + React + TypeScript
+- Backend: oRPC + Tanstack Query
+- Data model: `tournament`, `group`, `match`, `athleteProfile`, `tournamentAthlete`
+- Storage: S3 bucket (planned for athlete images, but deferred for MVP)
+- Auth Model: System Admin only for MVP; arena-client access scoped to match execution.
 
-Reference: current schema in [prisma/schema.prisma](prisma/schema.prisma).
+### Project Phases
 
-### API / RPC Changes
+- Phase 1: Admin CRM Foundation
+  - Athlete registry + de-dup
+  - Tournament builder (Groups/Brackets)
+  - Bracket generation + audit log
 
-- Update orpc routes to align with new models in [src/orpc/router.ts](src/orpc/router.ts):
-  - AthleteProfile CRUD
-  - TournamentAthlete CRUD and bulk-add action
-  - Group constraints and auto-assign endpoints
-  - Bracket generation endpoint (Draft only)
-  - Match score update with audit logging
-- Add a slim "selection view" endpoint for Advance Settings (tournament/group/match lookup).
-  - Tournament fields: `id`, `name`, `status`
-  - Group fields: `id`, `name`, `tournamentId`, `status`, `leaseStatus`, `arenaId` or `arenaLabel`
-  - Match fields: `id`, `name`, `groupId`, `status`, `redAthleteName`, `blueAthleteName`
-  - Status values: Tournament `draft|active|completed`, Group `draft|active|completed`, Match `pending|active|complete`
-  - Lease status values: `available`, `held_by_me`, `held_by_other`, `pending_takeover`
-  - Match naming: `Match {arenaIndex}{sequence}`, sequence starts at 01 per arena (e.g., Match 101, 102)
-  - Match sequence source: bracket order at generation time (manual scheduling deferred)
+- Phase 2: Arena Client Integration
+  - Advance Settings API integration
+  - Lease + SSE presence
+  - Round-end submission + Finish Match flow
 
-### UI Surfaces
-
-- Athletes route: extend [src/features/dashboard/athlete/index.tsx](src/features/dashboard/athlete/index.tsx) to include global data-table and actions.
-- Tournament Builder tabs: extend [src/features/dashboard/tournament/builder/index.tsx](src/features/dashboard/tournament/builder/index.tsx) to render Groups and Brackets content.
-- Data-table features should reuse components such as [src/components/data-table/data-table.tsx](src/components/data-table/data-table.tsx).
-
-### State and Logic
-
-- Query patterns should align with existing query hooks in [src/queries/tournaments.ts](src/queries/tournaments.ts) and [src/queries/groups.ts](src/queries/groups.ts).
-- Bracket rendering should be deterministic and derived from Match records.
-- Locks are per athlete and applied during shuffle and drag operations.
-- Lease presence is delivered by SSE from the server, and refreshed locally via heartbeat mutations.
-
-### Non-functional Constraints
-
-- Maintain UI responsiveness for 256-athlete datasets.
-- Enforce weight bounds and belt-level validation on both client and server.
-- Ensure all critical actions are logged in TournamentActivity.
+- Phase 3: Hardening + Scale
+  - Offline tolerance improvements
+  - Performance tuning for 256 athletes
+  - Operational monitoring
 
 ## Risks and Mitigations
 

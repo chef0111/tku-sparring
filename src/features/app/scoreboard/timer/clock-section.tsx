@@ -1,4 +1,5 @@
-import { cn, formatTime } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { formatTime } from '@/lib/format';
 
 interface ClockSectionProps {
   time: number;

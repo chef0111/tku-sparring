@@ -39,6 +39,7 @@ This document describes the Server-Sent Events (SSE) approach for Group Control 
 - `lease.takeover_requested`
 - `lease.takeover_approved`
 - `lease.takeover_denied`
+- `lease.takeover_request_expired`
 
 ## Event Payload (Example)
 
@@ -58,11 +59,11 @@ This document describes the Server-Sent Events (SSE) approach for Group Control 
 - On group selection, call `acquire` and start heartbeat (every 20s).
 - Subscribe to the tournament SSE stream and update status badges immediately.
 - If lease belongs to another device, show Degraded status and a Takeover action.
-- A takeover request creates a pending state for the requester until approved, denied, or expired.
+- A takeover request creates a pending entry in the Takeover Queue until approved, denied, or expired.
 - If lease expires, show the group as available.
 - Identify devices with a persistent UUID stored in localStorage.
 - On page unload, attempt to release the lease explicitly, but rely on TTL for correctness.
-- Show takeover requests as action toasts with Approve/Deny.
+- Show takeover requests as action toasts with Approve/Deny, and a separate action to open the full queue.
 
 ## Server Behavior
 
@@ -72,6 +73,16 @@ This document describes the Server-Sent Events (SSE) approach for Group Control 
 - Takeover approval logs the previous holder and emits `lease.takeover_approved`.
 - If no response is received, takeover requests are resolved by lease expiry (no forced takeover).
 - Audit log events: lease acquire, release, takeover request, approve/deny. Skip heartbeat renewals.
+
+## Takeover Queue
+
+- A Takeover Queue can contain multiple pending requests.
+- The current holder can select any requester to approve, deny individual requests, or deny all.
+- When a takeover is approved, the lease transfers immediately and the queue clears.
+- If the lease expires, the queue clears and a new holder must call acquire; stale requests are discarded.
+- Requests expire after a short fixed window (20s-30s) and emit `lease.takeover_request_expired`.
+- Queue entries include `requestId`, `adminId`, `deviceId`, `requestedAt`, and optional `reason`.
+- SSE includes the full queue only on events that change it.
 
 ## UI Mapping
 
