@@ -150,7 +150,6 @@ export function FormNumberInput({
       <NumberInput
         id={field.name}
         name={field.name}
-        type="number"
         value={field.state.value ?? ''}
         onBlur={field.handleBlur}
         onChange={(e) => {

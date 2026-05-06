@@ -6,13 +6,13 @@ import {
   parseAsString,
   useQueryState,
 } from 'nuqs';
-import { AthleteAddDrawer } from './athlete-add-drawer';
-import { AthleteEditSheet } from './athlete-edit-sheet';
-import { AthleteImportDialog } from './athlete-import-dialog';
-import { AthletesActionBar } from './athletes-action-bar';
-import { BulkAddToTournamentDialog } from './bulk-add-to-tournament-dialog';
-import { DeleteAthleteDialog } from './delete-athlete-dialog';
-import { getAthletesTableColumns } from './athletes-table-columns';
+import { AthleteAddDrawer } from './components/athlete-add-drawer';
+import { AthleteEditSheet } from './components/athlete-edit-sheet';
+import { AthleteImportDialog } from './components/dialogs/athlete-import-dialog';
+import { AthletesActionBar } from './components/athletes-action-bar';
+import { BulkAddToTournamentDialog } from './components/dialogs/bulk-add-to-tournament-dialog';
+import { DeleteAthleteDialog } from './components/dialogs/delete-athlete-dialog';
+import { getAthletesTableColumns } from './components/athletes-table-columns';
 import type { AthleteProfileData } from '@/features/dashboard/types';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
@@ -163,10 +163,6 @@ export function AthleteManager() {
             <Button variant="outline" size="sm" onClick={handleExportAll}>
               <Download className="mr-1 size-4" />
               Export
-            </Button>
-            <Button size="sm" onClick={() => setAddDrawerOpen(true)}>
-              <Plus className="mr-1 size-4" />
-              Add Athlete
             </Button>
           </DataTableToolbar>
         </DataTable>

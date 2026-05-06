@@ -75,7 +75,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <NuqsAdapter>
           <TooltipProvider>{children}</TooltipProvider>
         </NuqsAdapter>
-        <Toaster richColors />
+        <Toaster richColors closeButton />
         <TanStackDevtools
           config={{
             position: 'bottom-right',

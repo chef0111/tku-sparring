@@ -14,6 +14,12 @@ import type {
 } from '@/orpc/athlete-profiles/athlete-profiles.dto';
 import { client } from '@/orpc/client';
 
+export const athleteProfilesDefaultListInput = {
+  page: 1,
+  perPage: 20,
+  sortDir: 'asc',
+} satisfies ListAthleteProfilesDTO;
+
 export function athleteProfilesQueryOptions(input: ListAthleteProfilesDTO) {
   return queryOptions({
     queryKey: ['athleteProfile', 'list', input] as const,

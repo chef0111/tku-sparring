@@ -151,7 +151,7 @@ export function DataTable<TData>({
                     variant="ghost"
                     size="sm"
                     onClick={addRow.onClick}
-                    className="text-muted-foreground hover:text-foreground h-12 w-full scale-100! gap-1.5 rounded-t-none"
+                    className="text-muted-foreground no-focus hover:text-foreground h-12 w-full scale-100! gap-1.5 rounded-t-none"
                   >
                     <PlusIcon />
                     {addRow.label ?? 'Add row'}

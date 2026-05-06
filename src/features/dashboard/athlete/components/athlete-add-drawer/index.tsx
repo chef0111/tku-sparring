@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { IconGripVertical, IconPlus, IconX } from '@tabler/icons-react';
+import { IconGripVertical, IconPlus } from '@tabler/icons-react';
 import { toast } from 'sonner';
 
-import { BELT_LEVELS, GENDER_OPTIONS } from '@/config/athlete';
+import { AthleteRowFields } from './athlete-row-fields';
+import type { AthleteRow } from '../../types/athlete';
 import { useCreateAthleteProfile } from '@/queries/athlete-profiles';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,14 +14,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Sortable,
   SortableContent,
@@ -34,16 +27,6 @@ interface AthleteAddDrawerProps {
   onOpenChange: (open: boolean) => void;
 }
 
-interface AthleteRow {
-  id: string;
-  athleteCode: string;
-  name: string;
-  gender: 'M' | 'F';
-  beltLevel: number;
-  weight: number;
-  affiliation: string;
-}
-
 function createEmptyRow(): AthleteRow {
   return {
     id: crypto.randomUUID(),
@@ -54,6 +37,10 @@ function createEmptyRow(): AthleteRow {
     weight: 60,
     affiliation: '',
   };
+}
+
+function onIsolateSortableFromDrawerGesture(e: React.SyntheticEvent) {
+  e.stopPropagation();
 }
 
 export function AthleteAddDrawer({
@@ -76,8 +63,10 @@ export function AthleteAddDrawer({
   }
 
   function removeRow(index: number) {
-    if (rows.length <= 1) return;
-    setRows((prev) => prev.filter((_, i) => i !== index));
+    setRows((prev) => {
+      if (prev.length <= 1) return prev;
+      return prev.filter((_, i) => i !== index);
+    });
   }
 
   function addRow() {
@@ -142,8 +131,9 @@ export function AthleteAddDrawer({
       open={open}
       onOpenChange={handleOpenChange}
       dismissible={!isSubmitting}
+      modal={false}
     >
-      <DrawerContent className="max-h-[85vh]">
+      <DrawerContent className="mx-auto max-h-[65vh] max-w-5xl border">
         <DrawerHeader>
           <DrawerTitle>Add Athletes</DrawerTitle>
           <DrawerDescription>
@@ -158,110 +148,56 @@ export function AthleteAddDrawer({
             getItemValue={(r) => r.id}
             orientation="vertical"
           >
-            <SortableContent className="flex flex-col">
+            <SortableContent className="flex flex-col gap-2">
               {rows.map((row, index) => (
                 <SortableItem
                   key={row.id}
                   value={row.id}
-                  className="flex items-center gap-2 border-b py-2 last:border-0"
+                  className="flex items-center gap-2 rounded-xl border p-2"
                 >
-                  <SortableItemHandle className="text-muted-foreground">
+                  <SortableItemHandle
+                    className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-md px-1 py-2"
+                    onPointerDownCapture={onIsolateSortableFromDrawerGesture}
+                    onTouchStartCapture={onIsolateSortableFromDrawerGesture}
+                  >
                     <IconGripVertical className="size-4" />
                   </SortableItemHandle>
 
-                  <Input
-                    className="w-20"
-                    placeholder="Code"
-                    value={row.athleteCode}
-                    onChange={(e) =>
-                      updateRow(index, 'athleteCode', e.target.value)
-                    }
+                  <AthleteRowFields
+                    row={row}
+                    index={index}
+                    readOnly={false}
+                    rowCount={rows.length}
+                    onUpdate={updateRow}
+                    onRemove={removeRow}
                   />
-
-                  <Input
-                    className="min-w-28 flex-1"
-                    placeholder="Name *"
-                    value={row.name}
-                    onChange={(e) => updateRow(index, 'name', e.target.value)}
-                  />
-
-                  <Select
-                    value={row.gender}
-                    onValueChange={(v) =>
-                      updateRow(index, 'gender', v as 'M' | 'F')
-                    }
-                  >
-                    <SelectTrigger className="w-24">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {GENDER_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={String(row.beltLevel)}
-                    onValueChange={(v) =>
-                      updateRow(index, 'beltLevel', Number(v))
-                    }
-                  >
-                    <SelectTrigger className="w-28">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {BELT_LEVELS.map((belt) => (
-                        <SelectItem key={belt.value} value={String(belt.value)}>
-                          {belt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Input
-                    type="number"
-                    className="w-20"
-                    placeholder="kg"
-                    min={20}
-                    max={150}
-                    value={row.weight}
-                    onChange={(e) =>
-                      updateRow(index, 'weight', Number(e.target.value))
-                    }
-                  />
-
-                  <Input
-                    className="w-36"
-                    placeholder="Club / Gym"
-                    value={row.affiliation}
-                    onChange={(e) =>
-                      updateRow(index, 'affiliation', e.target.value)
-                    }
-                  />
-
-                  {rows.length > 1 && (
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => removeRow(index)}
-                    >
-                      <IconX />
-                    </Button>
-                  )}
                 </SortableItem>
               ))}
             </SortableContent>
 
-            <SortableOverlay>
+            <SortableOverlay className="z-60">
               {({ value }) => {
-                const row = rows.find((r) => r.id === value);
+                const activeIndex = rows.findIndex((r) => r.id === value);
+                const row = activeIndex === -1 ? undefined : rows[activeIndex];
+                if (!row) return null;
+
                 return (
-                  <div className="bg-background flex items-center gap-2 rounded-md border px-3 py-2 shadow-md">
-                    <IconGripVertical className="text-muted-foreground size-4" />
-                    <span className="text-sm">{row?.name || '(empty)'}</span>
+                  <div className="pointer-events-none flex items-center gap-2 rounded-xl border p-2">
+                    <button
+                      type="button"
+                      className="bg-muted cursor-grabbing rounded-md px-1 py-2"
+                      aria-hidden
+                    >
+                      <IconGripVertical className="size-4" />
+                    </button>
+                    <AthleteRowFields
+                      readOnly
+                      row={row}
+                      index={activeIndex}
+                      rowCount={rows.length}
+                      onUpdate={updateRow}
+                      onRemove={removeRow}
+                    />
                   </div>
                 );
               }}
