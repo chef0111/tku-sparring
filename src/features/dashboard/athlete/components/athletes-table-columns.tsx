@@ -37,7 +37,7 @@ export function getAthletesTableColumns(
             (table.getIsSomePageRowsSelected() && 'indeterminate')
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          className="ml-1"
+          className="xl:ml-1"
           aria-label="Select all"
         />
       ),
@@ -45,7 +45,7 @@ export function getAthletesTableColumns(
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
-          className="ml-1"
+          className="xl:ml-1"
           aria-label="Select row"
         />
       ),
@@ -172,7 +172,7 @@ export function getAthletesTableColumns(
       cell: ({ row }) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="-mr-2 size-8">
+            <Button variant="ghost" size="icon" className="size-8 xl:-mr-2">
               <MoreHorizontal className="size-4" />
               <span className="sr-only">Open menu</span>
             </Button>
