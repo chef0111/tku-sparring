@@ -34,7 +34,7 @@ const SORTABLE_COLUMN_IDS = new Set([
 
 export function AthleteManager() {
   const [page] = useQueryState('page', parseAsInteger.withDefault(1));
-  const [perPage] = useQueryState('perPage', parseAsInteger.withDefault(20));
+  const [perPage] = useQueryState('perPage', parseAsInteger.withDefault(10));
   const [nameFilter] = useQueryState('name');
   const [genderFilter] = useQueryState(
     'gender',
@@ -88,6 +88,8 @@ export function AthleteManager() {
     data: data?.items ?? [],
     columns,
     pageCount: Math.ceil((data?.total ?? 0) / perPage),
+    shallow: true,
+    clearOnDefault: true,
   });
 
   const currentItemIds = React.useMemo(

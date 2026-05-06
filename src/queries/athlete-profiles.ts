@@ -16,7 +16,7 @@ import { client } from '@/orpc/client';
 
 export const athleteProfilesDefaultListInput = {
   page: 1,
-  perPage: 20,
+  perPage: 10,
   sortDir: 'asc',
 } satisfies ListAthleteProfilesDTO;
 
