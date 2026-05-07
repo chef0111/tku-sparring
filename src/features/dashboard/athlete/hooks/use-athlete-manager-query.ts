@@ -2,10 +2,14 @@ import {
   parseAsArrayOf,
   parseAsInteger,
   parseAsString,
+  parseAsStringEnum,
   useQueryState,
 } from 'nuqs';
 import type { AthleteProfileData } from '@/features/dashboard/types';
-import { getSortingStateParser } from '@/lib/data-table/parsers';
+import {
+  getFiltersStateParser,
+  getSortingStateParser,
+} from '@/lib/data-table/parsers';
 import { parseRangeParam } from '@/lib/data-table/utils';
 
 const SORTABLE_COLUMN_IDS = new Set([
@@ -34,6 +38,14 @@ export function useAthleteTableQuery() {
       []
     )
   );
+  const [filters] = useQueryState(
+    'filters',
+    getFiltersStateParser<AthleteProfileData>().withDefault([])
+  );
+  const [joinOperator] = useQueryState(
+    'joinOperator',
+    parseAsStringEnum(['and', 'or']).withDefault('and')
+  );
 
   const beltRange = parseRangeParam(beltFilter);
   const weightRange = parseRangeParam(weightFilter);
@@ -50,5 +62,7 @@ export function useAthleteTableQuery() {
     sort,
     beltRange,
     weightRange,
+    filters,
+    joinOperator,
   };
 }

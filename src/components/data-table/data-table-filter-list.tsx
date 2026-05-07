@@ -15,7 +15,6 @@ import type {
   FilterOperator,
   JoinOperator,
 } from '@/types/data-table';
-import type { DataTableControlledState } from '@/hooks/use-data-table';
 import { DataTableRangeFilter } from '@/components/data-table/data-table-range-filter';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -79,7 +78,6 @@ interface DataTableFilterListProps<TData> extends React.ComponentProps<
   typeof PopoverContent
 > {
   table: Table<TData>;
-  state?: DataTableControlledState;
   debounceMs?: number;
   throttleMs?: number;
   shallow?: boolean;
@@ -88,7 +86,6 @@ interface DataTableFilterListProps<TData> extends React.ComponentProps<
 
 export function DataTableFilterList<TData>({
   table,
-  state,
   debounceMs = DEBOUNCE_MS,
   throttleMs = THROTTLE_MS,
   shallow = true,
@@ -112,7 +109,6 @@ export function DataTableFilterList<TData>({
     getFiltersStateParser<TData>(columns.map((field) => field.id))
       .withDefault([])
       .withOptions({
-        ...state,
         clearOnDefault: true,
         shallow,
         throttleMs,
@@ -295,7 +291,7 @@ export function DataTableFilterList<TData>({
           <div className="flex w-full items-center gap-2">
             <Button
               size="sm"
-              className="rounded"
+              className="rounded before:rounded-[calc(var(--radius)-7px)]"
               ref={addButtonRef}
               onClick={onFilterAdd}
             >

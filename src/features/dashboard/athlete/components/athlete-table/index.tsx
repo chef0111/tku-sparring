@@ -58,6 +58,9 @@ export function AthleteTable({
     weightMax: query.weightRange?.[1],
     sort: query.sort?.[0]?.id ?? undefined,
     sortDir: query.sort?.[0]?.desc ? 'desc' : 'asc',
+    filterFlag: filterFlag ?? undefined,
+    filters: query.filters,
+    joinOperator: query.joinOperator,
   });
 
   const {
