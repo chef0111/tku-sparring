@@ -1,4 +1,7 @@
 import { z } from 'zod';
+import { dataTableConfig } from '@/config/data-table';
+import { filterItemSchema } from '@/lib/data-table/parsers';
+import { flagConfig } from '@/config/flag';
 
 export const CreateAthleteProfileSchema = z.object({
   athleteCode: z.string().min(1, 'Athlete ID is required'),
@@ -36,6 +39,16 @@ export const AthleteProfilesSchema = z.object({
   weightMax: z.number().max(200).optional(),
   sort: z.string().optional(),
   sortDir: z.enum(['asc', 'desc']).optional().default('desc'),
+  filterFlag: z
+    .enum(
+      flagConfig.featureFlags.map((flag) => flag.value) as [
+        'advancedFilters',
+        'commandFilters',
+      ]
+    )
+    .optional(),
+  filters: z.array(filterItemSchema).optional().default([]),
+  joinOperator: z.enum(dataTableConfig.joinOperators).optional().default('and'),
 });
 
 export const CheckDuplicateSchema = z.object({

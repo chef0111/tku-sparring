@@ -7,6 +7,7 @@ import {
 import * as React from 'react';
 import type { ColumnSort, SortDirection, Table } from '@tanstack/react-table';
 
+import type { DataTableControlledState } from '@/hooks/use-data-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -46,11 +47,13 @@ interface DataTableSortListProps<TData> extends React.ComponentProps<
   typeof PopoverContent
 > {
   table: Table<TData>;
+  state?: DataTableControlledState;
   disabled?: boolean;
 }
 
 export function DataTableSortList<TData>({
   table,
+  state,
   disabled,
   ...props
 }: DataTableSortListProps<TData>) {
@@ -60,7 +63,7 @@ export function DataTableSortList<TData>({
   const [open, setOpen] = React.useState(false);
   const addButtonRef = React.useRef<HTMLButtonElement>(null);
 
-  const sorting = table.getState().sorting;
+  const sorting = state?.sorting ?? [];
   const onSortingChange = table.setSorting;
 
   const { columnLabels, columns } = React.useMemo(() => {
@@ -231,7 +234,7 @@ export function DataTableSortList<TData>({
           <div className="flex w-full items-center gap-2">
             <Button
               size="sm"
-              className="rounded"
+              className="rounded before:rounded-[calc(var(--radius)-7px)]"
               ref={addButtonRef}
               onClick={onSortAdd}
               disabled={columns.length === 0}

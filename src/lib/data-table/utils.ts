@@ -1,9 +1,6 @@
 import type { Column } from '@tanstack/react-table';
-import type {
-  ExtendedColumnFilter,
-  FilterOperator,
-  FilterVariant,
-} from '@/types/data-table';
+import type { FilterOperator, FilterVariant } from '@/types/data-table';
+import type { FilterItemSchema } from '@/lib/data-table/parsers';
 import { dataTableConfig } from '@/config/data-table';
 
 export function getColumnPinningStyle<TData>({
@@ -61,9 +58,9 @@ export function getDefaultFilterOperator(filterVariant: FilterVariant) {
   return operators[0]?.value ?? (filterVariant === 'text' ? 'iLike' : 'eq');
 }
 
-export function getValidFilters<TData>(
-  filters: Array<ExtendedColumnFilter<TData>>
-): Array<ExtendedColumnFilter<TData>> {
+export function getValidFilters(
+  filters: Array<FilterItemSchema>
+): Array<FilterItemSchema> {
   return filters.filter(
     (filter) =>
       filter.operator === 'isEmpty' ||

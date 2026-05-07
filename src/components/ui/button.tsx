@@ -10,7 +10,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/80',
+        default:
+          'relative isolate bg-clip-border ring-1 ring-primary dark:ring-ring shadow-[0_2px_4px_rgba(0,0,0,0.1)] bg-transparent dark:bg-primary bg-linear-to-b from-primary/80 to-primary/80 dark:from-primary dark:to-transparent text-primary-foreground before:absolute before:inset-0 before:-z-10 before:rounded-[calc(var(--radius)-2.5px)] before:bg-primary dark:before:bg-linear-to-b before:bg-linear-to-t before:from-accent/20 before:to-transparent hover:before:bg-primary/90',
         outline:
           'border-border bg-background shadow-xs hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50',
         secondary:

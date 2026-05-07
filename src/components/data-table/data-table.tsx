@@ -56,7 +56,7 @@ export function DataTable<TData>({
       <div className="overflow-hidden rounded-md border">
         <Table className="px-0">
           <TableHeader>
-            <TableRow>
+            <TableRow className="bg-muted-foreground/8! dark:bg-muted/8!">
               {renderedHeaders.map((header) => (
                 <TableHead
                   key={header.id}
@@ -65,7 +65,7 @@ export function DataTable<TData>({
                     ...getColumnPinningStyle({ column: header.column }),
                     width: `var(--col-${header.column.id}-size)`,
                   }}
-                  className="relative border-x select-none first:border-l-0 last:border-r-0"
+                  className="relative border-x bg-transparent! select-none first:border-l-0 last:border-r-0"
                 >
                   {flexRender(
                     header.column.columnDef.header,

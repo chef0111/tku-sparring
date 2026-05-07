@@ -5,6 +5,9 @@ import type {
 } from './athlete-profiles.dto';
 import type { AthleteProfileData } from '@/features/dashboard/types';
 import { prisma } from '@/lib/db';
+import { filterColumns } from '@/lib/data-table/filter-columns';
+import { athleteProfileFilterMap } from '@/lib/data-table/mappings/athlete-profiles';
+import { getValidFilters } from '@/lib/data-table/utils';
 
 type SortableField =
   | 'name'
@@ -41,9 +44,21 @@ export async function findMany(input: AthleteProfilesDTO) {
     weightMax,
     sort,
     sortDir,
+    filterFlag,
+    filters,
+    joinOperator,
   } = input;
 
-  const where = {
+  const advancedTable =
+    filterFlag === 'advancedFilters' || filterFlag === 'commandFilters';
+
+  const advancedWhere = filterColumns({
+    filters: getValidFilters(filters ?? []),
+    joinOperator: joinOperator ?? 'and',
+    fields: athleteProfileFilterMap,
+  });
+
+  const legacyWhere = {
     ...(athleteCode
       ? { athleteCode: { contains: athleteCode, mode: 'insensitive' as const } }
       : {}),
@@ -74,6 +89,8 @@ export async function findMany(input: AthleteProfilesDTO) {
         }
       : {}),
   };
+
+  const where = advancedTable ? advancedWhere : legacyWhere;
 
   const orderBy = { [toSortField(sort)]: sortDir ?? 'desc' };
 

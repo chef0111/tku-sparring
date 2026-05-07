@@ -291,7 +291,7 @@ export function DataTableFilterList<TData>({
           <div className="flex w-full items-center gap-2">
             <Button
               size="sm"
-              className="rounded"
+              className="rounded before:rounded-[calc(var(--radius)-7px)]"
               ref={addButtonRef}
               onClick={onFilterAdd}
             >

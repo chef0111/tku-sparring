@@ -48,7 +48,7 @@ export const getSortingStateParser = <TData>(
   });
 };
 
-const filterItemSchema = z.object({
+export const filterItemSchema = z.object({
   id: z.string(),
   value: z.union([z.string(), z.array(z.string())]),
   variant: z.enum(dataTableConfig.filterVariants),

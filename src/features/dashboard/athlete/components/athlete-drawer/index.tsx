@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/sortable';
 import { Spinner } from '@/components/ui/spinner';
 
-interface AthleteAddDrawerProps {
+interface AthleteDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -44,10 +44,7 @@ function onIsolateSortableFromDrawerGesture(e: React.SyntheticEvent) {
   e.stopPropagation();
 }
 
-export function AthleteAddDrawer({
-  open,
-  onOpenChange,
-}: AthleteAddDrawerProps) {
+export function AthleteDrawer({ open, onOpenChange }: AthleteDrawerProps) {
   const [rows, setRows] = useState<Array<AthleteRow>>(() => [createEmptyRow()]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
