@@ -586,7 +586,7 @@ async function handleSubmit() {
 }
 ```
 
-- **Step 7.5: Wire up in AthleteManager**
+- **Step 7.5: Wire up in AthleteTable**
 
 Replace `AthleteFormDialog` for add flow with `AthleteAddDrawer`.
 
@@ -665,7 +665,7 @@ if (nameOrCodeChanged) {
 }
 ```
 
-- **Step 8.3: Wire up in AthleteManager**
+- **Step 8.3: Wire up in AthleteTable**
 
 Replace edit path of `AthleteFormDialog` with `AthleteEditSheet`.
 
@@ -738,7 +738,7 @@ export function AthletesActionBar({ table, onBulkAdd }: Props) {
 }
 ```
 
-- **Step 9.2: Replace inline actionBar in AthleteManager**
+- **Step 9.2: Replace inline actionBar in AthleteTable**
 
 Remove the inline `actionBar` JSX and use the component:
 
@@ -860,7 +860,7 @@ export function AthleteImportDialog({ open, onOpenChange }: Props) {
 
 - **Step 10.2: Add toolbar buttons**
 
-In `AthleteManager`, add Import/Export buttons inside `DataTableToolbar`:
+In `AthleteTable`, add Import/Export buttons inside `DataTableToolbar`:
 
 ```tsx
 <DataTableToolbar table={table} state={tableState}>
@@ -896,7 +896,7 @@ Based on TanStack Router data-loading and navigation skills:
 ```tsx
 // src/routes/dashboard/athletes/index.tsx
 import { createFileRoute } from '@tanstack/react-router';
-import { AthleteManager } from '@/features/dashboard/athlete';
+import { AthleteTable } from '@/features/dashboard/athlete';
 
 export const Route = createFileRoute('/dashboard/athletes/')({
   // Validate search params for the route
@@ -931,7 +931,7 @@ export const Route = createFileRoute('/dashboard/athletes/')({
   pendingMs: 100, // Show pending after 100ms
   pendingMinMs: 200, // Keep for at least 200ms to avoid flash
 
-  component: AthleteManager,
+  component: AthleteTable,
 });
 ```
 
@@ -983,7 +983,7 @@ const router = createRouter({
 
 - Modify: `src/features/dashboard/athlete/index.tsx`
 - Delete: `src/features/dashboard/athlete/athlete-form-dialog.tsx` (after migration)
-- **Step 12.1: Update AthleteManager imports and state**
+- **Step 12.1: Update AthleteTable imports and state**
 
 ```tsx
 // New state

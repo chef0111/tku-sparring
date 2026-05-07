@@ -1,6 +1,7 @@
 import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { AthleteProfileData } from '@/features/dashboard/types';
+import type { DataTableRowAction } from '@/types/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,8 +21,7 @@ import {
 import { cn } from '@/lib/utils';
 
 interface ColumnOptions {
-  onEdit: (athlete: AthleteProfileData) => void;
-  onDelete: (athlete: AthleteProfileData) => void;
+  onRowAction: (action: DataTableRowAction<AthleteProfileData>) => void;
 }
 
 export function getAthletesTableColumns(
@@ -61,17 +61,12 @@ export function getAthletesTableColumns(
       ),
       cell: ({ row }) => (
         <span className="text-muted-foreground text-base">
-          {row.original.athleteCode ?? '—'}
+          {row.original.athleteCode}
         </span>
       ),
       maxSize: 120,
-      enableSorting: true,
-      enableColumnFilter: true,
-      meta: {
-        label: 'Athlete ID',
-        variant: 'text',
-        placeholder: 'Search athlete ID...',
-      },
+      enableSorting: false,
+      enableColumnFilter: false,
     },
     {
       id: 'name',
@@ -130,6 +125,7 @@ export function getAthletesTableColumns(
         <DataTableColumnHeader column={column} label="Belt" />
       ),
       cell: ({ row }) => <span>{getBeltLabel(row.original.beltLevel)}</span>,
+      maxSize: 100,
       enableSorting: true,
       enableColumnFilter: true,
       meta: {
@@ -148,6 +144,7 @@ export function getAthletesTableColumns(
         <DataTableColumnHeader column={column} label="Weight" />
       ),
       cell: ({ row }) => <span>{row.original.weight} kg</span>,
+      maxSize: 100,
       enableSorting: true,
       enableColumnFilter: true,
       meta: {
@@ -165,12 +162,7 @@ export function getAthletesTableColumns(
       ),
       cell: ({ row }) => <span>{row.original.affiliation}</span>,
       enableSorting: true,
-      enableColumnFilter: true,
-      meta: {
-        label: 'Affiliation',
-        variant: 'text',
-        placeholder: 'Search affiliation...',
-      },
+      enableColumnFilter: false,
     },
     {
       id: 'actions',
@@ -183,13 +175,15 @@ export function getAthletesTableColumns(
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => options.onEdit(row.original)}>
+            <DropdownMenuItem
+              onClick={() => options.onRowAction({ row, variant: 'update' })}
+            >
               <Pencil className="mr-2 size-4" />
               Edit
             </DropdownMenuItem>
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
-              onClick={() => options.onDelete(row.original)}
+              onClick={() => options.onRowAction({ row, variant: 'delete' })}
             >
               <Trash2 className="mr-2 size-4" />
               Delete
