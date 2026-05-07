@@ -1,7 +1,8 @@
 import React from 'react';
+import { Plus } from 'lucide-react';
 import { SiteHeader } from '../site-header';
-import { AthleteAddDrawer } from './components/athlete-add-drawer';
-import { AthleteEditSheet } from './components/athlete-edit-sheet';
+import { AthleteDrawer } from './components/athlete-drawer';
+import { AthleteEditSheet } from './components/athlete-table/athlete-edit-sheet';
 import { AthleteTable } from './components/athlete-table';
 import { AthleteImportDialog } from './components/dialogs/athlete-import-dialog';
 import { DeleteAthleteDialog } from './components/dialogs/delete-athlete-dialog';
@@ -9,6 +10,7 @@ import { getAthletesTableColumns } from './components/athlete-table/athletes-tab
 import type { AthleteProfileData } from '../types';
 import type { DataTableRowAction } from '@/types/data-table';
 import { FeatureFlagsProvider } from '@/contexts/feature-flags';
+import { Button } from '@/components/ui/button';
 
 export default function AthletesManager() {
   const [addDrawerOpen, setAddDrawerOpen] = React.useState(false);
@@ -26,7 +28,15 @@ export default function AthletesManager() {
 
   return (
     <div className="flex h-full flex-col">
-      <SiteHeader title="Athletes" />
+      <SiteHeader title="Athletes">
+        <div className="ml-auto pr-4">
+          <Button size="sm" onClick={() => setAddDrawerOpen(true)}>
+            <Plus className="mr-1 size-4" />
+            Add Athlete
+          </Button>
+        </div>
+      </SiteHeader>
+
       <div className="p-4">
         <FeatureFlagsProvider>
           <AthleteTable
@@ -38,7 +48,7 @@ export default function AthletesManager() {
         </FeatureFlagsProvider>
       </div>
 
-      <AthleteAddDrawer open={addDrawerOpen} onOpenChange={setAddDrawerOpen} />
+      <AthleteDrawer open={addDrawerOpen} onOpenChange={setAddDrawerOpen} />
       <AthleteEditSheet
         athlete={
           rowAction?.variant === 'update' ? rowAction.row.original : null

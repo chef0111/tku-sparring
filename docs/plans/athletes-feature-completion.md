@@ -447,7 +447,7 @@ Structure:
 
 ```tsx
 // src/features/dashboard/athlete/athlete-add-drawer.tsx
-export function AthleteAddDrawer({ open, onOpenChange }: Props) {
+export function AthleteDrawer({ open, onOpenChange }: Props) {
   const [rows, setRows] = useState<AthleteRowValues[]>([createEmptyRow()]);
 
   return (
@@ -588,7 +588,7 @@ async function handleSubmit() {
 
 - **Step 7.5: Wire up in AthleteTable**
 
-Replace `AthleteFormDialog` for add flow with `AthleteAddDrawer`.
+Replace `AthleteFormDialog` for add flow with `AthleteDrawer`.
 
 ---
 
@@ -1028,7 +1028,7 @@ return (
       </DataTable>
     </div>
 
-    <AthleteAddDrawer open={addDrawerOpen} onOpenChange={setAddDrawerOpen} />
+    <AthleteDrawer open={addDrawerOpen} onOpenChange={setAddDrawerOpen} />
     <AthleteEditSheet athlete={editingAthlete} onOpenChange={setEditingAthlete} />
     <AthleteImportDialog open={importOpen} onOpenChange={setImportOpen} />
     <DeleteAthleteDialog athlete={deletingAthlete} onClose={() => setDeletingAthlete(null)} />

@@ -49,7 +49,7 @@ export function getAthletesTableColumns(
           aria-label="Select row"
         />
       ),
-      size: 30,
+      maxSize: 24,
       enableSorting: false,
       enableHiding: false,
     },
