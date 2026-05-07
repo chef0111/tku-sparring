@@ -22,11 +22,14 @@ import { cn } from '@/lib/utils';
 
 interface ColumnOptions {
   onRowAction: (action: DataTableRowAction<AthleteProfileData>) => void;
+  nameFilterQueryKey?: 'name' | 'query';
 }
 
 export function getAthletesTableColumns(
   options: ColumnOptions
 ): Array<ColumnDef<AthleteProfileData>> {
+  const nameFilterQueryKey = options.nameFilterQueryKey ?? 'query';
+
   return [
     {
       id: 'select',
@@ -82,7 +85,10 @@ export function getAthletesTableColumns(
       meta: {
         label: 'Name',
         variant: 'text',
-        placeholder: 'Search name...',
+        placeholder:
+          nameFilterQueryKey === 'query'
+            ? 'Search athlete ID or name...'
+            : 'Search name...',
       },
     },
     {
@@ -162,7 +168,6 @@ export function getAthletesTableColumns(
       ),
       cell: ({ row }) => <span>{row.original.affiliation}</span>,
       enableSorting: true,
-      enableColumnFilter: false,
     },
     {
       id: 'actions',

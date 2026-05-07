@@ -28,6 +28,7 @@ interface AthleteTableProps {
   className?: string;
   onAdd: () => void;
   onImport: () => void;
+  enableQueryFilter?: boolean;
 }
 
 export function AthleteTable({
@@ -35,6 +36,7 @@ export function AthleteTable({
   className,
   onAdd,
   onImport,
+  enableQueryFilter = true,
 }: AthleteTableProps) {
   const { enableAdvancedFilter, filterFlag } = useFeatureFlags();
   const query = useAthleteTableQuery();
@@ -48,6 +50,7 @@ export function AthleteTable({
   const { data, isFetching } = useAthleteProfiles({
     page: query.page,
     perPage: query.perPage,
+    query: enableQueryFilter ? (query.queryFilter ?? undefined) : undefined,
     athleteCode: query.athleteCodeFilter ?? undefined,
     name: query.nameFilter ?? undefined,
     gender: (query.genderFilter?.[0] as 'M' | 'F') ?? undefined,
@@ -75,6 +78,7 @@ export function AthleteTable({
     pageCount: Math.ceil((data?.total ?? 0) / query.perPage),
     shallow: true,
     clearOnDefault: true,
+    filterQueryKeys: enableQueryFilter ? { name: 'query' } : {},
   });
 
   const currentItemIds = React.useMemo(

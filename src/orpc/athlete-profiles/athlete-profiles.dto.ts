@@ -29,6 +29,7 @@ export const UpdateAthleteProfileSchema = z.object({
 export const AthleteProfilesSchema = z.object({
   page: z.number().int().min(1).optional().default(1),
   perPage: z.number().int().min(1).max(100).optional().default(20),
+  query: z.string().optional(),
   name: z.string().optional(),
   athleteCode: z.string().optional(),
   gender: z.enum(['M', 'F']).optional(),

@@ -23,6 +23,7 @@ const SORTABLE_COLUMN_IDS = new Set([
 export function useAthleteTableQuery() {
   const [page] = useQueryState('page', parseAsInteger.withDefault(1));
   const [perPage] = useQueryState('perPage', parseAsInteger.withDefault(10));
+  const [queryFilter] = useQueryState('query');
   const [athleteCodeFilter] = useQueryState('athleteCode');
   const [nameFilter] = useQueryState('name');
   const [genderFilter] = useQueryState(
@@ -53,6 +54,7 @@ export function useAthleteTableQuery() {
   return {
     page,
     perPage,
+    queryFilter,
     athleteCodeFilter,
     nameFilter,
     genderFilter,

@@ -13,6 +13,7 @@ import { FeatureFlagsProvider } from '@/contexts/feature-flags';
 import { Button } from '@/components/ui/button';
 
 export default function AthletesManager() {
+  const enableQueryFilter = true;
   const [addDrawerOpen, setAddDrawerOpen] = React.useState(false);
   const [rowAction, setRowAction] =
     React.useState<DataTableRowAction<AthleteProfileData> | null>(null);
@@ -22,8 +23,9 @@ export default function AthletesManager() {
     () =>
       getAthletesTableColumns({
         onRowAction: setRowAction,
+        nameFilterQueryKey: enableQueryFilter ? 'query' : 'name',
       }),
-    []
+    [enableQueryFilter]
   );
 
   return (
@@ -44,6 +46,7 @@ export default function AthletesManager() {
             className="pt-6"
             onAdd={() => setAddDrawerOpen(true)}
             onImport={() => setImportOpen(true)}
+            enableQueryFilter={enableQueryFilter}
           />
         </FeatureFlagsProvider>
       </div>
