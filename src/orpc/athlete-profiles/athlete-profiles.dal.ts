@@ -34,6 +34,7 @@ export async function findMany(input: AthleteProfilesDTO) {
   const {
     page,
     perPage,
+    query,
     athleteCode,
     name,
     gender,
@@ -59,6 +60,14 @@ export async function findMany(input: AthleteProfilesDTO) {
   });
 
   const legacyWhere = {
+    ...(query
+      ? {
+          OR: [
+            { name: { contains: query, mode: 'insensitive' as const } },
+            { athleteCode: { contains: query, mode: 'insensitive' as const } },
+          ],
+        }
+      : {}),
     ...(athleteCode
       ? { athleteCode: { contains: athleteCode, mode: 'insensitive' as const } }
       : {}),

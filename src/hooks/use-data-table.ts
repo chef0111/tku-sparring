@@ -58,6 +58,7 @@ interface UseDataTableProps<TData>
     sorting?: Array<ExtendedColumnSort<TData>>;
   };
   queryKeys?: Partial<QueryKeys>;
+  filterQueryKeys?: Partial<Record<string, string>>;
   history?: 'push' | 'replace';
   debounceMs?: number;
   throttleMs?: number;
@@ -82,6 +83,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     pageCount = -1,
     initialState,
     queryKeys,
+    filterQueryKeys,
     history = 'replace',
     debounceMs = DEBOUNCE_MS,
     throttleMs = THROTTLE_MS,
@@ -178,23 +180,49 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     return columns.filter((column) => column.enableColumnFilter);
   }, [columns, enableAdvancedFilter]);
 
+  const filterKeyByColumnId = React.useMemo(() => {
+    return filterableColumns.reduce<Record<string, string>>((acc, column) => {
+      if (!column.id) return acc;
+      acc[column.id] = filterQueryKeys?.[column.id] ?? column.id;
+      return acc;
+    }, {});
+  }, [filterableColumns, filterQueryKeys]);
+
+  const columnIdByFilterKey = React.useMemo(() => {
+    return Object.entries(filterKeyByColumnId).reduce<Record<string, string>>(
+      (acc, [columnId, filterKey]) => {
+        acc[filterKey] = columnId;
+        return acc;
+      },
+      {}
+    );
+  }, [filterKeyByColumnId]);
+
   const filterParsers = React.useMemo(() => {
     if (enableAdvancedFilter) return {};
 
     return filterableColumns.reduce<
       Record<string, SingleParser<string> | SingleParser<Array<string>>>
     >((acc, column) => {
+      const filterKey = filterKeyByColumnId[column.id ?? ''] ?? column.id ?? '';
+      if (!filterKey) return acc;
+
       if (column.meta?.options) {
-        acc[column.id ?? ''] = parseAsArrayOf(
+        acc[filterKey] = parseAsArrayOf(
           parseAsString,
           ARRAY_SEPARATOR
         ).withOptions(queryStateOptions);
       } else {
-        acc[column.id ?? ''] = parseAsString.withOptions(queryStateOptions);
+        acc[filterKey] = parseAsString.withOptions(queryStateOptions);
       }
       return acc;
     }, {});
-  }, [filterableColumns, queryStateOptions, enableAdvancedFilter]);
+  }, [
+    filterableColumns,
+    filterKeyByColumnId,
+    queryStateOptions,
+    enableAdvancedFilter,
+  ]);
 
   const [filterValues, setFilterValues] = useQueryStates(filterParsers);
 
@@ -211,13 +239,14 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
 
     return Object.entries(filterValues).reduce<ColumnFiltersState>(
       (filters, [key, value]) => {
+        const columnId = columnIdByFilterKey[key] ?? key;
         if (
           value !== null &&
           value !== '' &&
           !(Array.isArray(value) && value.length === 0)
         ) {
           filters.push({
-            id: key,
+            id: columnId,
             value,
           });
         }
@@ -225,7 +254,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
       },
       []
     );
-  }, [filterValues, enableAdvancedFilter]);
+  }, [filterValues, columnIdByFilterKey, enableAdvancedFilter]);
 
   const [columnFilters, setColumnFilters] =
     React.useState<ColumnFiltersState>(initialColumnFilters);
@@ -244,8 +273,9 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
           Record<string, string | Array<string> | null>
         >((acc, filter) => {
           if (filterableColumns.find((column) => column.id === filter.id)) {
+            const filterKey = filterKeyByColumnId[filter.id] ?? filter.id;
             const value = filter.value as string | Array<string>;
-            acc[filter.id] =
+            acc[filterKey] =
               value === '' || (Array.isArray(value) && value.length === 0)
                 ? null
                 : value;
@@ -255,7 +285,9 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
 
         for (const prevFilter of prev) {
           if (!next.some((filter) => filter.id === prevFilter.id)) {
-            filterUpdates[prevFilter.id] = null;
+            const filterKey =
+              filterKeyByColumnId[prevFilter.id] ?? prevFilter.id;
+            filterUpdates[filterKey] = null;
           }
         }
 
@@ -263,7 +295,12 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
         return next;
       });
     },
-    [debouncedSetFilterValues, filterableColumns, enableAdvancedFilter]
+    [
+      debouncedSetFilterValues,
+      filterableColumns,
+      filterKeyByColumnId,
+      enableAdvancedFilter,
+    ]
   );
 
   const onRowSelectionChange = React.useCallback(
