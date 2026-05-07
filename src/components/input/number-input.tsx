@@ -24,7 +24,7 @@ export function NumberInput({
       <Input
         type="number"
         className={cn(
-          '[appearance:textfield]! [-moz-appearance:textfield]! [&::-webkit-inner-spin-button]:appearance-none! [&::-webkit-outer-spin-button]:appearance-none!',
+          '[appearance:textfield]! pr-6 [-moz-appearance:textfield]! [&::-webkit-inner-spin-button]:appearance-none! [&::-webkit-outer-spin-button]:appearance-none!',
           className
         )}
         {...props}

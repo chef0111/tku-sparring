@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { Column } from '@tanstack/react-table';
 
 import type { ExtendedColumnFilter } from '@/types/data-table';
-import { Input } from '@/components/ui/input';
+import { NumberInput } from '@/components/input/number-input';
 import { cn } from '@/lib/utils';
 
 interface DataTableRangeFilterProps<TData> extends React.ComponentProps<'div'> {
@@ -54,7 +54,7 @@ export function DataTableRangeFilter<TData>({
   }, [filter.value, formatValue]);
 
   const onRangeValueChange = React.useCallback(
-    (value: string, isMin?: boolean) => {
+    (val: string, isMin?: boolean) => {
       const numValue = Number(value);
       const currentValues = Array.isArray(filter.value)
         ? filter.value
@@ -64,14 +64,14 @@ export function DataTableRangeFilter<TData>({
         : (currentValues[0] ?? '');
 
       if (
-        value === '' ||
+        val === '' ||
         (!Number.isNaN(numValue) &&
           (isMin
             ? numValue >= min && numValue <= (Number(otherValue) || max)
             : numValue <= max && numValue >= (Number(otherValue) || min)))
       ) {
         onFilterUpdate(filter.filterId, {
-          value: isMin ? [value, otherValue] : [otherValue, value],
+          value: isMin ? [val, otherValue] : [otherValue, val],
         });
       }
     },
@@ -84,9 +84,8 @@ export function DataTableRangeFilter<TData>({
       className={cn('flex w-full items-center gap-2', className)}
       {...props}
     >
-      <Input
+      <NumberInput
         id={`${inputId}-min`}
-        type="number"
         aria-label={`${meta?.label} minimum value`}
         aria-valuemin={min}
         aria-valuemax={max}
@@ -100,9 +99,8 @@ export function DataTableRangeFilter<TData>({
         onChange={(event) => onRangeValueChange(event.target.value, true)}
       />
       <span className="text-muted-foreground sr-only shrink-0">to</span>
-      <Input
+      <NumberInput
         id={`${inputId}-max`}
-        type="number"
         aria-label={`${meta?.label} maximum value`}
         aria-valuemin={min}
         aria-valuemax={max}

@@ -2,8 +2,8 @@ import { PlusCircle, XCircle } from 'lucide-react';
 import * as React from 'react';
 import type { Column } from '@tanstack/react-table';
 import type { DataTableControlledState } from '@/hooks/use-data-table';
+import { NumberInput } from '@/components/input/number-input';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Popover,
@@ -89,19 +89,27 @@ export function DataTableSliderFilter<TData>({
     }
 
     const rangeSize = maxValue - minValue;
-    const step =
+    const numStep =
       rangeSize <= 20
         ? 1
         : rangeSize <= 100
           ? Math.ceil(rangeSize / 20)
           : Math.ceil(rangeSize / 50);
 
-    return { min: minValue, max: maxValue, step };
+    return { min: minValue, max: maxValue, step: numStep };
   }, [column, defaultRange]);
 
   const range = React.useMemo((): RangeValue => {
     return columnFilterValue ?? [min, max];
   }, [columnFilterValue, min, max]);
+
+  const [fromInput, setFromInput] = React.useState(() => range[0]?.toString());
+  const [toInput, setToInput] = React.useState(() => range[1]?.toString());
+
+  React.useEffect(() => {
+    setFromInput(range[0]?.toString() ?? '');
+    setToInput(range[1]?.toString() ?? '');
+  }, [range]);
 
   const formatValue = React.useCallback((value: number) => {
     return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
@@ -109,7 +117,12 @@ export function DataTableSliderFilter<TData>({
 
   const onFromInputChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const numValue = Number(event.target.value);
+      const nextValue = event.target.value;
+      setFromInput(nextValue);
+
+      if (nextValue === '') return;
+
+      const numValue = Number(nextValue);
       if (!Number.isNaN(numValue) && numValue >= min && numValue <= range[1]) {
         column.setFilterValue([numValue, range[1]]);
       }
@@ -119,7 +132,12 @@ export function DataTableSliderFilter<TData>({
 
   const onToInputChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const numValue = Number(event.target.value);
+      const nextValue = event.target.value;
+      setToInput(nextValue);
+
+      if (nextValue === '') return;
+
+      const numValue = Number(nextValue);
       if (!Number.isNaN(numValue) && numValue <= max && numValue >= range[0]) {
         column.setFilterValue([range[0], numValue]);
       }
@@ -184,57 +202,69 @@ export function DataTableSliderFilter<TData>({
       <PopoverContent align="start" className="flex w-auto flex-col gap-4">
         <div className="flex flex-col gap-3">
           <p className="leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            {title}
+            {title} ({unit})
           </p>
           <div className="flex items-center gap-4">
             <Label htmlFor={`${id}-from`} className="sr-only">
               From
             </Label>
-            <div className="relative">
-              <Input
-                id={`${id}-from`}
-                type="number"
-                aria-valuemin={min}
-                aria-valuemax={max}
-                inputMode="numeric"
-                pattern="[0-9]*"
-                placeholder={min.toString()}
-                min={min}
-                max={max}
-                value={range[0]?.toString()}
-                onChange={onFromInputChange}
-                className={cn('h-8 w-24', unit && 'pr-8')}
-              />
-              {unit && (
-                <span className="bg-accent text-muted-foreground absolute top-0 right-0 bottom-0 flex items-center rounded-r-md px-2 text-sm">
-                  {unit}
-                </span>
-              )}
-            </div>
+            <NumberInput
+              id={`${id}-from`}
+              aria-valuemin={min}
+              aria-valuemax={max}
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder={min.toString()}
+              min={min}
+              max={max}
+              value={fromInput}
+              onChange={onFromInputChange}
+              className={cn('h-8 w-24')}
+              handleIncrement={() => {
+                const newValue = range[0] + step;
+                if (newValue <= range[1]) {
+                  column.setFilterValue([newValue, range[1]]);
+                }
+              }}
+              handleDecrement={() => {
+                const newValue = range[0] - step;
+                if (newValue >= min) {
+                  column.setFilterValue([newValue, range[1]]);
+                }
+              }}
+              disableIncrement={range[0] + step > range[1]}
+              disableDecrement={range[0] - step < min}
+            />
             <Label htmlFor={`${id}-to`} className="sr-only">
               to
             </Label>
-            <div className="relative">
-              <Input
-                id={`${id}-to`}
-                type="number"
-                aria-valuemin={min}
-                aria-valuemax={max}
-                inputMode="numeric"
-                pattern="[0-9]*"
-                placeholder={max.toString()}
-                min={min}
-                max={max}
-                value={range[1]?.toString()}
-                onChange={onToInputChange}
-                className={cn('h-8 w-24', unit && 'pr-8')}
-              />
-              {unit && (
-                <span className="bg-accent text-muted-foreground absolute top-0 right-0 bottom-0 flex items-center rounded-r-md px-2 text-sm">
-                  {unit}
-                </span>
-              )}
-            </div>
+            <NumberInput
+              id={`${id}-to`}
+              aria-valuemin={min}
+              aria-valuemax={max}
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder={max.toString()}
+              min={min}
+              max={max}
+              value={toInput}
+              onChange={onToInputChange}
+              className={cn('h-8 w-24')}
+              handleIncrement={() => {
+                const newValue = range[1] + step;
+                if (newValue <= max) {
+                  column.setFilterValue([range[0], newValue]);
+                }
+              }}
+              handleDecrement={() => {
+                const newValue = range[1] - step;
+                if (newValue >= range[0]) {
+                  column.setFilterValue([range[0], newValue]);
+                }
+              }}
+              disableIncrement={range[1] + step > max}
+              disableDecrement={range[1] - step < range[0]}
+            />
           </div>
           <Label htmlFor={`${id}-slider`} className="sr-only">
             {title} slider

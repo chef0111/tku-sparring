@@ -83,10 +83,10 @@ export function DataTableFilterMenu<TData>({
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const onOpenChange = React.useCallback((open: boolean) => {
-    setOpen(open);
+  const onOpenChange = React.useCallback((isOpen: boolean) => {
+    setOpen(isOpen);
 
-    if (!open) {
+    if (!isOpen) {
       setTimeout(() => {
         setSelectedColumn(null);
         setInputValue('');
@@ -348,7 +348,7 @@ function DataTableFilterItem<TData>({
       React.useState(false);
     const [showValueSelector, setShowValueSelector] = React.useState(false);
 
-    const column = columns.find((column) => column.id === filter.id);
+    const column = columns.find((col) => col.id === filter.id);
 
     const operatorListboxId = `${filterItemId}-operator-listbox`;
     const inputId = `${filterItemId}-input`;
@@ -412,16 +412,16 @@ function DataTableFilterItem<TData>({
               <CommandList>
                 <CommandEmpty>No fields found.</CommandEmpty>
                 <CommandGroup>
-                  {columns.map((column) => (
+                  {columns.map((col) => (
                     <CommandItem
-                      key={column.id}
-                      value={column.id}
+                      key={col.id}
+                      value={col.id}
                       onSelect={() => {
                         onFilterUpdate(filter.filterId, {
-                          id: column.id as Extract<keyof TData, string>,
-                          variant: column.columnDef.meta?.variant ?? 'text',
+                          id: col.id as Extract<keyof TData, string>,
+                          variant: col.columnDef.meta?.variant ?? 'text',
                           operator: getDefaultFilterOperator(
-                            column.columnDef.meta?.variant ?? 'text'
+                            col.columnDef.meta?.variant ?? 'text'
                           ),
                           value: '',
                         });
