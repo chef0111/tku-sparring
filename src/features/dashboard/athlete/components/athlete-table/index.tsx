@@ -76,6 +76,10 @@ export function AthleteTable({
     data: data?.items ?? [],
     columns,
     pageCount: Math.ceil((data?.total ?? 0) / query.perPage),
+    initialState: {
+      sorting: [{ id: 'beltLevel', desc: true }],
+      columnPinning: { right: ['actions'] },
+    },
     shallow: true,
     clearOnDefault: true,
     filterQueryKeys: enableQueryFilter ? { name: 'query' } : {},

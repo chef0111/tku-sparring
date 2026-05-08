@@ -58,8 +58,10 @@ export function getAthletesTableColumns(
         </span>
       ),
       maxSize: 120,
-      enableSorting: false,
-      enableColumnFilter: false,
+      enableSorting: true,
+      meta: {
+        label: 'Athlete ID',
+      },
     },
     {
       id: 'name',
