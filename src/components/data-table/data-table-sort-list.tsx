@@ -234,7 +234,7 @@ export function DataTableSortList<TData>({
           <div className="flex w-full items-center gap-2">
             <Button
               size="sm"
-              className="rounded before:rounded-[calc(var(--radius)-7px)]"
+              className="rounded-sm"
               ref={addButtonRef}
               onClick={onSortAdd}
               disabled={columns.length === 0}
@@ -245,7 +245,7 @@ export function DataTableSortList<TData>({
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded"
+                className="rounded-sm"
                 onClick={onSortingReset}
               >
                 Reset sorting
