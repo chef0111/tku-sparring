@@ -42,7 +42,7 @@ export function AthletesActionBar({
         athleteCode: 'Athlete Code',
         name: 'Name',
         gender: 'Gender',
-        beltLevel: 'Belt Level',
+        beltLevel: 'Belt level',
         weight: 'Weight',
         affiliation: 'Affiliation',
       },

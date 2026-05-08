@@ -31,7 +31,7 @@ export const TABLE_HEADER_MAP: Record<string, string> = {
   'Athlete ID': 'athleteCode',
   Name: 'name',
   Gender: 'gender',
-  'Belt Level': 'beltLevel',
+  'Belt level': 'beltLevel',
   Weight: 'weight',
   Affiliation: 'affiliation',
 };

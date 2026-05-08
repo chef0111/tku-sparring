@@ -199,7 +199,7 @@ export function AthleteEditSheet({
               <form.AppField name="beltLevel">
                 {(field) => (
                   <field.NumberSelect
-                    label="Belt Level"
+                    label="Belt level"
                     placeholder="Select belt level"
                     className="max-w-40"
                   >

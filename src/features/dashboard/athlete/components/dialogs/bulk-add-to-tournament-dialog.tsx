@@ -76,11 +76,11 @@ export function BulkAddToTournamentDialog({
     bulkAdd.mutate({ tournamentId, athleteProfileIds, autoAssign });
   }
 
-  function onClose(open: boolean) {
-    if (!open) {
+  function onClose(isOpen: boolean) {
+    if (!isOpen) {
       setAutoAssign(false);
     }
-    onOpenChange(open);
+    onOpenChange(isOpen);
   }
 
   return (

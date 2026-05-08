@@ -118,14 +118,14 @@ export function getAthletesTableColumns(
       id: 'beltLevel',
       accessorKey: 'beltLevel',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Belt" />
+        <DataTableColumnHeader column={column} label="Belt level" />
       ),
       cell: ({ row }) => <span>{getBeltLabel(row.original.beltLevel)}</span>,
       maxSize: 100,
       enableSorting: true,
       enableColumnFilter: true,
       meta: {
-        label: 'Belt Level',
+        label: 'Belt level',
         variant: 'select',
         options: BELT_LEVELS.map((b) => ({
           label: b.label,

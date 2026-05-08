@@ -118,7 +118,7 @@ export default function AthletesActionMenu({
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
             <ChartNoAxesColumn className="mr-2 size-4" />
-            Belt
+            Belt level
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
             <DropdownMenuRadioGroup
