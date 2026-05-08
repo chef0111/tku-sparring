@@ -301,7 +301,7 @@ export function DataTableFilterList<TData>({
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded"
+                className="rounded-sm"
                 onClick={onFiltersReset}
               >
                 Reset filters

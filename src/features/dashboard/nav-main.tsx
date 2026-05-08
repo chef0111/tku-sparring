@@ -9,6 +9,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export function NavMain({
   items,
@@ -28,8 +29,15 @@ export function NavMain({
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
               tooltip="Quick Create"
-              className="bg-primary text-primary-foreground! hover:bg-primary/90 active:bg-primary/90 min-w-8 duration-200 ease-linear active:scale-98"
+              className={cn(
+                'ring-primary dark:ring-ring text-primary-foreground! isolate min-w-8 border-none ring-1',
+                'bg-[linear-gradient(to_bottom,color-mix(in_srgb,var(--accent-foreground)_80%,transparent),var(--primary-accent))] active:scale-100 dark:bg-[linear-gradient(to_top,var(--primary),var(--primary-accent))]'
+              )}
             >
+              <span
+                data-slot="button-bg"
+                className="dark:bg-primary absolute inset-[1.5px] -z-10 flex rounded-[calc(var(--radius-md)-1.5px)] bg-[linear-gradient(to_bottom,var(--primary),var(--primary-accent))]"
+              />
               <CirclePlusIcon />
               <span>Quick Create</span>
             </SidebarMenuButton>
