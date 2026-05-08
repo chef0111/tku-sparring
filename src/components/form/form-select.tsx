@@ -12,12 +12,14 @@ import {
 type FormSelectSharedProps = FormControlProps & {
   children: ReactNode;
   placeholder?: string;
+  className?: string;
 };
 
 export function FormSelect({
   children,
   descPosition,
   placeholder,
+  className,
   ...props
 }: FormSelectSharedProps) {
   const field = useFieldContext<string>();
@@ -33,6 +35,7 @@ export function FormSelect({
           aria-invalid={isInvalid}
           id={field.name}
           onBlur={field.handleBlur}
+          className={className}
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
@@ -46,6 +49,7 @@ export function FormNumberSelect({
   children,
   descPosition,
   placeholder,
+  className,
   ...props
 }: FormSelectSharedProps) {
   const field = useFieldContext<number>();
@@ -61,6 +65,7 @@ export function FormNumberSelect({
           aria-invalid={isInvalid}
           id={field.name}
           onBlur={field.handleBlur}
+          className={className}
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>

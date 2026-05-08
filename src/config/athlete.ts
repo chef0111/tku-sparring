@@ -1,5 +1,5 @@
 export const BELT_LEVELS = [
-  { value: 0, label: 'White' },
+  { value: 0, label: 'White I' },
   { value: 1, label: 'White II' },
   { value: 2, label: 'White Yellow' },
   { value: 3, label: 'Yellow' },
@@ -31,7 +31,7 @@ export const TABLE_HEADER_MAP: Record<string, string> = {
   'Athlete ID': 'athleteCode',
   Name: 'name',
   Gender: 'gender',
-  'Belt Level': 'beltLevel',
+  'Belt level': 'beltLevel',
   Weight: 'weight',
   Affiliation: 'affiliation',
 };

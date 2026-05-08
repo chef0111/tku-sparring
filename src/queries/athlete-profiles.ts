@@ -87,7 +87,10 @@ export function useCheckDuplicate() {
   });
 }
 
-export function useUpdateAthleteProfile(options?: { onSuccess?: () => void }) {
+export function useUpdateAthleteProfile(options?: {
+  onSuccess?: () => void;
+  suppressToast?: boolean;
+}) {
   const invalidate = useInvalidateAthleteProfiles();
 
   return useMutation({
@@ -95,10 +98,16 @@ export function useUpdateAthleteProfile(options?: { onSuccess?: () => void }) {
       client.athleteProfile.update(data),
     onSuccess: () => {
       invalidate();
-      toast.success('Athlete updated');
+      if (!options?.suppressToast) {
+        toast.success('Athlete updated');
+      }
       options?.onSuccess?.();
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => {
+      if (!options?.suppressToast) {
+        toast.error(err.message);
+      }
+    },
   });
 }
 

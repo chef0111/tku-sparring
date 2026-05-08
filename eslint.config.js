@@ -8,7 +8,13 @@ export default [
   ...tseslint.configs.recommended,
 
   {
-    ignores: ['.output/**', 'node_modules/**', 'dist/**', 'eslint.config.js'],
+    ignores: [
+      '.output/**',
+      'node_modules/**',
+      'dist/**',
+      'eslint.config.js',
+      '.agents/**',
+    ],
   },
   {
     rules: {

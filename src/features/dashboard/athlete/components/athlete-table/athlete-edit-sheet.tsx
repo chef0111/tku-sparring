@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
+import type z from 'zod';
 import type { AthleteProfileData } from '@/features/dashboard/types';
+import { EditAthleteSchema } from '@/lib/validations';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
@@ -26,14 +28,7 @@ interface AthleteEditSheetProps {
   onOpenChange: (athlete: AthleteProfileData | null) => void;
 }
 
-interface FormValues {
-  athleteCode: string;
-  name: string;
-  gender: 'M' | 'F';
-  beltLevel: number;
-  weight: number;
-  affiliation: string;
-}
+type FormValues = z.infer<typeof EditAthleteSchema>;
 
 interface PossibleDuplicate {
   id: string;
@@ -68,6 +63,9 @@ export function AthleteEditSheet({
       weight: athlete?.weight ?? 60,
       affiliation: athlete?.affiliation ?? '',
     } as FormValues,
+    validators: {
+      onSubmit: EditAthleteSchema,
+    },
     onSubmit: async ({ value }) => {
       if (!athlete) return;
       setHardBlockError(null);
@@ -150,7 +148,7 @@ export function AthleteEditSheet({
         if (!open) onClose();
       }}
     >
-      <SheetContent side="right" className="flex flex-col gap-0 sm:max-w-md">
+      <SheetContent side="right" className="flex flex-col gap-0 sm:max-w-md!">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -170,19 +168,13 @@ export function AthleteEditSheet({
                   <field.Input
                     label="Athlete ID"
                     descPosition="after-label"
-                    placeholder="e.g. TKD-001"
+                    placeholder="e.g. 23520111"
                     onValueChange={() => setHardBlockError(null)}
                   />
                 )}
               </form.AppField>
 
-              <form.AppField
-                name="name"
-                validators={{
-                  onChange: ({ value }) =>
-                    !value.trim() ? 'Name is required' : undefined,
-                }}
-              >
+              <form.AppField name="name">
                 {(field) => (
                   <field.Input label="Name" placeholder="Full name" />
                 )}
@@ -190,7 +182,11 @@ export function AthleteEditSheet({
 
               <form.AppField name="gender">
                 {(field) => (
-                  <field.Select label="Gender" placeholder="Select gender">
+                  <field.Select
+                    label="Gender"
+                    placeholder="Select gender"
+                    className="max-w-40"
+                  >
                     {GENDER_OPTIONS.map((g) => (
                       <SelectItem key={g.value} value={g.value}>
                         {g.label}
@@ -203,8 +199,9 @@ export function AthleteEditSheet({
               <form.AppField name="beltLevel">
                 {(field) => (
                   <field.NumberSelect
-                    label="Belt Level"
+                    label="Belt level"
                     placeholder="Select belt level"
+                    className="max-w-40"
                   >
                     {BELT_LEVELS.map((b) => (
                       <SelectItem key={b.value} value={String(b.value)}>
@@ -215,36 +212,17 @@ export function AthleteEditSheet({
                 )}
               </form.AppField>
 
-              <form.AppField
-                name="weight"
-                validators={{
-                  onChange: ({ value }) => {
-                    if (value === undefined || Number.isNaN(value))
-                      return 'Weight is required';
-                    if (value < 20) return 'Weight must be at least 20 kg';
-                    if (value > 150) return 'Weight must be at most 150 kg';
-                    return undefined;
-                  },
-                }}
-              >
+              <form.AppField name="weight">
                 {(field) => (
                   <field.NumberInput
                     label="Weight (kg)"
                     placeholder="60"
-                    min={20}
-                    max={150}
                     step={1}
                   />
                 )}
               </form.AppField>
 
-              <form.AppField
-                name="affiliation"
-                validators={{
-                  onChange: ({ value }) =>
-                    !value.trim() ? 'Affiliation is required' : undefined,
-                }}
-              >
+              <form.AppField name="affiliation">
                 {(field) => (
                   <field.Input
                     label="Affiliation"

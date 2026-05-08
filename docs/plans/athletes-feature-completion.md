@@ -348,7 +348,7 @@ const HEADER_MAP: Record<string, string> = {
   'Athlete Code': 'athleteCode',
   Name: 'name',
   Gender: 'gender',
-  'Belt Level': 'beltLevel',
+  'Belt level': 'beltLevel',
   Weight: 'weight',
   Affiliation: 'affiliation',
 };
@@ -499,7 +499,7 @@ Each row displays all fields in one horizontal line:
 - Athlete Code (Input, optional, narrow)
 - Name (Input, required, flex-1)
 - Gender (Select, narrow)
-- Belt Level (NumberSelect, narrow)
+- Belt level (NumberSelect, narrow)
 - Weight (NumberInput, narrow)
 - Affiliation (Input, medium)
 - Remove button (X icon)
@@ -706,7 +706,7 @@ export function AthletesActionBar({ table, onBulkAdd }: Props) {
         athleteCode: 'Athlete Code',
         name: 'Name',
         gender: 'Gender',
-        beltLevel: 'Belt Level',
+        beltLevel: 'Belt level',
         weight: 'Weight',
         affiliation: 'Affiliation',
       },
