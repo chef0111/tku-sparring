@@ -2,11 +2,11 @@ import { Outlet, createFileRoute, redirect } from '@tanstack/react-router';
 import { AppSidebar } from '@/features/dashboard';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import LoadingScreen from '@/components/navigation/loading';
-import { getSession } from '@/lib/session';
+import { sessionQueryOptions } from '@/queries/session';
 
 export const Route = createFileRoute('/dashboard')({
-  beforeLoad: async () => {
-    const session = await getSession();
+  beforeLoad: async ({ context: { queryClient } }) => {
+    const session = await queryClient.ensureQueryData(sessionQueryOptions());
 
     if (!session) {
       throw redirect({ to: '/login' });
