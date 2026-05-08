@@ -63,7 +63,7 @@
     "@tanstack/react-start": "^1.167.64",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.24",
-    "@tanstack/router-plugin": "^1.167.32",
+    "@tanstack/router-plugin": "^1.167.35",
     "better-auth": "1.6.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
