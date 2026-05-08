@@ -3,7 +3,7 @@ import { IconGripVertical, IconPlus } from '@tabler/icons-react';
 import { toast } from 'sonner';
 
 import { AthleteRowFields } from './athlete-row-fields';
-import type { AthleteRow } from '../../types/athlete';
+import type { AthleteRow } from '@/features/dashboard/types';
 import { useCreateAthleteProfile } from '@/queries/athlete-profiles';
 import { Button } from '@/components/ui/button';
 import {

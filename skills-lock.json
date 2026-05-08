@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "brainstorming": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "skillPath": "skills/brainstorming/SKILL.md",
+      "computedHash": "f483c304fcde060211ffae00f49bb728536e7e7613c99db45b5b924d9fc17243"
+    },
     "design-an-interface": {
       "source": "mattpocock/skills",
       "sourceType": "github",
@@ -44,6 +50,12 @@
       "source": "shadcn/ui",
       "sourceType": "github",
       "computedHash": "642a177bee320618caa49f5106cadb4e7594c606e867f61ba7b56d19cf745cd5"
+    },
+    "systematic-debugging": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "skillPath": "skills/systematic-debugging/SKILL.md",
+      "computedHash": "7246fdd3a795fc3daff0af72044ca99bf836e4e6a46844742858786fdfb86488"
     },
     "tanstack-query-best-practices": {
       "source": "deckardger/tanstack-agent-skills",

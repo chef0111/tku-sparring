@@ -357,6 +357,7 @@ function DataTableSortItem({
             </Command>
           </PopoverContent>
         </Popover>
+
         <Select
           open={showDirectionSelector}
           onOpenChange={setShowDirectionSelector}

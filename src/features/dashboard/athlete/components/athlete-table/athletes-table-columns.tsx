@@ -1,17 +1,12 @@
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import AthletesActionMenu from './athletes-action-menu';
+import type {
+  AthleteProfileData,
+  ColumnOptions,
+} from '@/features/dashboard/types';
 import type { ColumnDef } from '@tanstack/react-table';
-import type { AthleteProfileData } from '@/features/dashboard/types';
-import type { DataTableRowAction } from '@/types/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   BELT_LEVELS,
   GENDER_OPTIONS,
@@ -19,11 +14,6 @@ import {
   getGenderLabel,
 } from '@/config/athlete';
 import { cn } from '@/lib/utils';
-
-interface ColumnOptions {
-  onRowAction: (action: DataTableRowAction<AthleteProfileData>) => void;
-  nameFilterQueryKey?: 'name' | 'query';
-}
 
 export function getAthletesTableColumns(
   options: ColumnOptions
@@ -167,36 +157,16 @@ export function getAthletesTableColumns(
         <DataTableColumnHeader column={column} label="Affiliation" />
       ),
       cell: ({ row }) => <span>{row.original.affiliation}</span>,
-      enableSorting: true,
+      enableSorting: false,
+      meta: {
+        label: 'Affiliation',
+      },
     },
     {
       id: 'actions',
-      cell: ({ row }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="size-8 xl:-mr-2">
-              <MoreHorizontal className="size-4" />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => options.onRowAction({ row, variant: 'update' })}
-            >
-              <Pencil className="mr-2 size-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
-              onClick={() => options.onRowAction({ row, variant: 'delete' })}
-            >
-              <Trash2 className="mr-2 size-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
-      maxSize: 0,
+      cell: ({ row }) => <AthletesActionMenu options={options} row={row} />,
+      maxSize: 32,
+      minSize: 40,
       enableSorting: false,
       enableHiding: false,
     },

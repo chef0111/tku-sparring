@@ -54,3 +54,17 @@ export const AdvanceSettingsSchema = StandardSettingsSchema.extend({
   group: z.string().min(1, 'Group is required'),
   match: z.string().min(1, 'Match is required'),
 });
+
+export const EditAthleteSchema = z.object({
+  athleteCode: z.string().min(1, 'Athlete ID is required'),
+  name: z.string().min(1, 'Athlete name is required'),
+  gender: z.enum(['M', 'F'], {
+    message: 'Gender must be either Male or Female',
+  }),
+  beltLevel: z.number().min(0, 'Belt level is required'),
+  weight: z
+    .number()
+    .min(20, 'Weight must be at least 20kg')
+    .max(100, 'Weight must be less than 100kg'),
+  affiliation: z.string().min(1, 'Affiliation is required'),
+});
