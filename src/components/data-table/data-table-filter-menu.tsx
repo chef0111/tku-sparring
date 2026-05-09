@@ -1,19 +1,25 @@
-import {
-  BadgeCheck,
-  CalendarIcon,
-  Check,
-  ListFilter,
-  Text,
-  X,
-} from 'lucide-react';
+import { BadgeCheck, CalendarIcon, ListFilter, Text, X } from 'lucide-react';
 import { useQueryState } from 'nuqs';
 import * as React from 'react';
 import type { Column, Table } from '@tanstack/react-table';
 
-import type { ExtendedColumnFilter, FilterOperator } from '@/types/data-table';
+import type {
+  ExtendedColumnFilter,
+  FilterOperator,
+  Option,
+} from '@/types/data-table';
 import { DataTableRangeFilter } from '@/components/data-table/data-table-range-filter';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+} from '@/components/ui/combobox';
 import {
   Command,
   CommandEmpty,
@@ -393,61 +399,56 @@ function DataTableFilterItem<TData>({
         className="bg-background flex h-8 items-center rounded-md"
         onKeyDown={onItemKeyDown}
       >
-        <Popover open={showFieldSelector} onOpenChange={setShowFieldSelector}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="dark:bg-input/30 rounded-none rounded-l-md border border-r-0 font-normal"
-            >
-              {columnMeta?.icon && (
-                <columnMeta.icon className="text-muted-foreground" />
-              )}
-              {columnMeta?.label ?? column.id}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="start" className="w-48 p-0">
-            <Command loop>
-              <CommandInput placeholder="Search fields..." />
-              <CommandList>
-                <CommandEmpty>No fields found.</CommandEmpty>
-                <CommandGroup>
-                  {columns.map((col) => (
-                    <CommandItem
-                      key={col.id}
-                      value={col.id}
-                      onSelect={() => {
-                        onFilterUpdate(filter.filterId, {
-                          id: col.id as Extract<keyof TData, string>,
-                          variant: col.columnDef.meta?.variant ?? 'text',
-                          operator: getDefaultFilterOperator(
-                            col.columnDef.meta?.variant ?? 'text'
-                          ),
-                          value: '',
-                        });
+        <Combobox
+          isItemEqualToValue={(a, b) => a.id === b.id}
+          itemToStringLabel={(col: Column<TData>) =>
+            col.columnDef.meta?.label ?? col.id
+          }
+          itemToStringValue={(col: Column<TData>) => col.id}
+          items={columns}
+          onOpenChange={setShowFieldSelector}
+          onValueChange={(col) => {
+            if (!col) return;
+            onFilterUpdate(filter.filterId, {
+              id: col.id as Extract<keyof TData, string>,
+              variant: col.columnDef.meta?.variant ?? 'text',
+              operator: getDefaultFilterOperator(
+                col.columnDef.meta?.variant ?? 'text'
+              ),
+              value: '',
+            });
 
-                        setShowFieldSelector(false);
-                      }}
-                    >
-                      {column.columnDef.meta?.icon && (
-                        <column.columnDef.meta.icon />
-                      )}
-                      <span className="truncate">
-                        {column.columnDef.meta?.label ?? column.id}
-                      </span>
-                      <Check
-                        className={cn(
-                          'ml-auto',
-                          column.id === filter.id ? 'opacity-100' : 'opacity-0'
-                        )}
-                      />
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+            setShowFieldSelector(false);
+          }}
+          open={showFieldSelector}
+          value={column}
+        >
+          <ComboboxTrigger
+            className={cn(
+              buttonVariants({ variant: 'ghost', size: 'sm' }),
+              'dark:bg-input/30 rounded-none rounded-l-md border border-r-0 font-normal'
+            )}
+          >
+            {columnMeta?.icon && (
+              <columnMeta.icon className="text-muted-foreground" />
+            )}
+            {columnMeta?.label ?? column.id}
+          </ComboboxTrigger>
+          <ComboboxContent align="start" className="w-48">
+            <ComboboxInput placeholder="Search fields..." showTrigger={false} />
+            <ComboboxEmpty>No fields found.</ComboboxEmpty>
+            <ComboboxList>
+              {(col: Column<TData>) => (
+                <ComboboxItem key={col.id} value={col}>
+                  {col.columnDef.meta?.icon && <col.columnDef.meta.icon />}
+                  <span className="truncate">
+                    {col.columnDef.meta?.label ?? col.id}
+                  </span>
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
         <Select
           open={showOperatorSelector}
           onOpenChange={setShowOperatorSelector}
@@ -699,88 +700,93 @@ function onFilterInputRender<TData>({
         selectedValues.includes(option.value)
       );
 
+      const isMulti = filter.variant === 'multiSelect';
+
+      const comboboxValue = isMulti
+        ? options.filter((o) => selectedValues.includes(o.value))
+        : (options.find((o) => selectedValues.includes(o.value)) ?? null);
+
+      const onValueChange = (next: Option | Array<Option> | null) => {
+        if (isMulti) {
+          const arr = Array.isArray(next) ? next : [];
+          onFilterUpdate(filter.filterId, {
+            value: arr.map((o) => o.value),
+          });
+        } else {
+          const opt = next as (typeof options)[number] | null;
+          onFilterUpdate(filter.filterId, { value: opt?.value ?? '' });
+          setShowValueSelector(false);
+        }
+      };
+
       return (
-        <Popover open={showValueSelector} onOpenChange={setShowValueSelector}>
-          <PopoverTrigger asChild>
-            <Button
-              id={inputId}
-              aria-controls={inputListboxId}
-              variant="ghost"
-              size="sm"
-              className="dark:bg-input/30 h-full min-w-16 rounded-none border px-1.5 font-normal"
-            >
-              {selectedOptions.length === 0 ? (
-                filter.variant === 'multiSelect' ? (
-                  'Select options...'
-                ) : (
-                  'Select option...'
-                )
-              ) : (
-                <>
-                  <div className="flex items-center -space-x-2 rtl:space-x-reverse">
-                    {selectedOptions.map((selectedOption) =>
-                      selectedOption.icon ? (
-                        <div
-                          key={selectedOption.value}
-                          className="bg-background rounded-full border p-0.5"
-                        >
-                          <selectedOption.icon className="size-3.5" />
-                        </div>
-                      ) : null
-                    )}
-                  </div>
-                  <span className="truncate">
-                    {selectedOptions.length > 1
-                      ? `${selectedOptions.length} selected`
-                      : selectedOptions[0]?.label}
-                  </span>
-                </>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            id={inputListboxId}
-            align="start"
-            className="w-48 p-0"
+        <Combobox
+          isItemEqualToValue={(a, b) => a.value === b.value}
+          itemToStringLabel={(o: Option) => o.label}
+          itemToStringValue={(o: Option) => o.value}
+          items={options}
+          multiple={isMulti}
+          onOpenChange={setShowValueSelector}
+          onValueChange={onValueChange}
+          open={showValueSelector}
+          value={comboboxValue}
+        >
+          <ComboboxTrigger
+            aria-controls={inputListboxId}
+            className={cn(
+              buttonVariants({ variant: 'ghost', size: 'sm' }),
+              'dark:bg-input/30 h-full min-w-16 rounded-none border px-1.5 font-normal'
+            )}
+            id={inputId}
           >
-            <Command>
-              <CommandInput placeholder="Search options..." />
-              <CommandList>
-                <CommandEmpty>No options found.</CommandEmpty>
-                <CommandGroup>
-                  {options.map((option) => (
-                    <CommandItem
-                      key={option.value}
-                      value={option.value}
-                      onSelect={() => {
-                        const value =
-                          filter.variant === 'multiSelect'
-                            ? selectedValues.includes(option.value)
-                              ? selectedValues.filter((v) => v !== option.value)
-                              : [...selectedValues, option.value]
-                            : option.value;
-                        onFilterUpdate(filter.filterId, { value });
-                      }}
-                    >
-                      {option.icon && <option.icon />}
-                      <span className="truncate">{option.label}</span>
-                      {filter.variant === 'multiSelect' && (
-                        <Check
-                          className={cn(
-                            'ml-auto',
-                            selectedValues.includes(option.value)
-                              ? 'opacity-100'
-                              : 'opacity-0'
-                          )}
-                        />
-                      )}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+            {selectedOptions.length === 0 ? (
+              isMulti ? (
+                'Select options...'
+              ) : (
+                'Select option...'
+              )
+            ) : (
+              <>
+                <div className="flex items-center -space-x-2 rtl:space-x-reverse">
+                  {selectedOptions.map((selectedOption) =>
+                    selectedOption.icon ? (
+                      <div
+                        key={selectedOption.value}
+                        className="bg-background rounded-full border p-0.5"
+                      >
+                        <selectedOption.icon className="size-3.5" />
+                      </div>
+                    ) : null
+                  )}
+                </div>
+                <span className="truncate">
+                  {selectedOptions.length > 1
+                    ? `${selectedOptions.length} selected`
+                    : selectedOptions[0]?.label}
+                </span>
+              </>
+            )}
+          </ComboboxTrigger>
+          <ComboboxContent align="start" id={inputListboxId}>
+            <ComboboxInput
+              placeholder="Search options..."
+              showTrigger={false}
+            />
+            <ComboboxEmpty>No options found.</ComboboxEmpty>
+            <ComboboxList>
+              {(option: Option) => (
+                <ComboboxItem
+                  key={option.value}
+                  className="[&>span.pointer-events-none.absolute]:hidden"
+                  value={option}
+                >
+                  {option.icon && <option.icon />}
+                  <span className="truncate">{option.label}</span>
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
       );
     }
 

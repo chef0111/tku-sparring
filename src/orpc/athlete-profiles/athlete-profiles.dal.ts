@@ -72,7 +72,7 @@ export async function findMany(input: AthleteProfilesDTO) {
       ? { athleteCode: { contains: athleteCode, mode: 'insensitive' as const } }
       : {}),
     ...(name ? { name: { contains: name, mode: 'insensitive' as const } } : {}),
-    ...(gender ? { gender } : {}),
+    ...(gender && gender.length > 0 ? { gender: { in: gender } } : {}),
     ...(affiliation
       ? {
           affiliation: {

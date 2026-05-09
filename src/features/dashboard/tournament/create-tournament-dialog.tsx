@@ -8,39 +8,38 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { useCreateTournament } from '@/queries/tournaments';
 
 interface CreateTournamentDialogProps {
-  children: React.ReactNode;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function CreateTournamentDialog({
-  children,
+  open,
+  onOpenChange,
 }: CreateTournamentDialogProps) {
-  const [open, setOpen] = React.useState(false);
   const [name, setName] = React.useState('');
 
   const mutation = useCreateTournament();
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
     if (!name.trim()) return;
     mutation.mutate(
       { name: name.trim() },
       {
         onSuccess: () => {
-          setOpen(false);
           setName('');
+          onOpenChange(false);
         },
       }
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader>

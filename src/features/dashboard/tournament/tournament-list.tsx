@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function TournamentListPage() {
   const [search, setSearch] = useState('');
+  const [open, setOpen] = useState(false);
   const tournamentsQuery = useTournaments();
   const tournaments = tournamentsQuery.data ?? [];
 
@@ -35,12 +36,11 @@ export function TournamentListPage() {
                 className="pl-9"
               />
             </div>
-            <CreateTournamentDialog>
-              <Button>
-                <Plus className="size-4" />
-                Create Tournament
-              </Button>
-            </CreateTournamentDialog>
+            <Button onClick={() => setOpen(true)}>
+              <Plus className="size-4" />
+              Create Tournament
+            </Button>
+            <CreateTournamentDialog open={open} onOpenChange={setOpen} />
           </div>
 
           {tournamentsQuery.isPending ? (
@@ -61,12 +61,13 @@ export function TournamentListPage() {
                   : 'Create your first tournament to get started.'}
               </p>
               {!search && (
-                <CreateTournamentDialog>
+                <>
                   <Button variant="outline">
                     <Plus className="mr-2 size-4" />
                     Create Tournament
                   </Button>
-                </CreateTournamentDialog>
+                  <CreateTournamentDialog open={open} onOpenChange={setOpen} />
+                </>
               )}
             </div>
           ) : (

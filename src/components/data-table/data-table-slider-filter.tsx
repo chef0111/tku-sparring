@@ -199,7 +199,7 @@ export function DataTableSliderFilter<TData>({
           ) : null}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="flex w-auto flex-col gap-4">
+      <PopoverContent align="center" className="flex w-auto flex-col gap-4">
         <div className="flex flex-col gap-3">
           <p className="leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             {title} ({unit})

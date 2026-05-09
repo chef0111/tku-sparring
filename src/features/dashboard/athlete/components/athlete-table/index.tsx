@@ -53,7 +53,10 @@ export function AthleteTable({
     query: enableQueryFilter ? (query.queryFilter ?? undefined) : undefined,
     athleteCode: query.athleteCodeFilter ?? undefined,
     name: query.nameFilter ?? undefined,
-    gender: (query.genderFilter?.[0] as 'M' | 'F') ?? undefined,
+    gender:
+      query.genderFilter && query.genderFilter.length > 0
+        ? (query.genderFilter as Array<'M' | 'F'>)
+        : undefined,
     affiliation: query.affiliationFilter ?? undefined,
     beltLevelMin: query.beltRange?.[0],
     beltLevelMax: query.beltRange?.[1],

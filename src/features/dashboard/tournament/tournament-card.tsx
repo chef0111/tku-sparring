@@ -63,6 +63,7 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
 
         <div className="relative flex h-8 items-center justify-center">
           <Button
+            variant="primary"
             className="z-10 -translate-y-2 opacity-0 transition duration-200 group-hover:translate-y-0 group-hover:opacity-100 hover:bg-white"
             asChild
           >

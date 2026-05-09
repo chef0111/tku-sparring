@@ -128,7 +128,7 @@ export function getAthletesTableColumns(
       enableColumnFilter: true,
       meta: {
         label: 'Belt level',
-        variant: 'select',
+        variant: 'multiSelect',
         options: BELT_LEVELS.map((b) => ({
           label: b.label,
           value: String(b.value),

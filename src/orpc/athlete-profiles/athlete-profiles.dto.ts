@@ -32,7 +32,11 @@ export const AthleteProfilesSchema = z.object({
   query: z.string().optional(),
   name: z.string().optional(),
   athleteCode: z.string().optional(),
-  gender: z.enum(['M', 'F']).optional(),
+  gender: z
+    .array(z.enum(['M', 'F']))
+    .min(1)
+    .max(2)
+    .optional(),
   affiliation: z.string().optional(),
   beltLevelMin: z.number().int().min(0).max(10).optional(),
   beltLevelMax: z.number().int().min(0).max(10).optional(),
