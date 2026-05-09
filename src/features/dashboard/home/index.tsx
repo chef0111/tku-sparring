@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { ArrowRight, Plus } from 'lucide-react';
 import { TournamentCard } from '../tournament/tournament-card';
@@ -10,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function DashboardHome() {
   const { data, isPending } = useTournaments();
+  const [open, setOpen] = useState(false);
 
   const tournaments = data ?? [];
 
@@ -28,12 +30,11 @@ export function DashboardHome() {
                 Manage your Taekwondo tournaments from here
               </p>
             </div>
-            <CreateTournamentDialog>
-              <Button>
-                <Plus className="size-4" />
-                Create Tournament
-              </Button>
-            </CreateTournamentDialog>
+            <Button onClick={() => setOpen(true)}>
+              <Plus className="size-4" />
+              Create Tournament
+            </Button>
+            <CreateTournamentDialog open={open} onOpenChange={setOpen} />
           </div>
 
           <div className="space-y-4">

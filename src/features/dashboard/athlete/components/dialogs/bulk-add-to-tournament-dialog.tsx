@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Users } from 'lucide-react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -19,10 +18,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  LAST_USED_TOURNAMENT_KEY,
+  bulkAddAthleteResult,
+} from '@/features/dashboard/athlete/lib/bulk-add-athletes';
 import { useBulkAddAthletes } from '@/queries/tournament-athletes';
 import { useTournaments } from '@/queries/tournaments';
-
-const LAST_USED_TOURNAMENT_KEY = 'tku:lastUsedTournamentId';
 
 interface BulkAddToTournamentDialogProps {
   open: boolean;
@@ -53,18 +54,7 @@ export function BulkAddToTournamentDialog({
 
   const bulkAdd = useBulkAddAthletes({
     onSuccess: (result) => {
-      const { added, unassigned } = result;
-      if (added === 0) {
-        toast.info('All selected athletes are already in this tournament.');
-      } else if (unassigned === added) {
-        toast.success(
-          `Added ${added} athlete${added !== 1 ? 's' : ''} to the unassigned pool.`
-        );
-      } else {
-        toast.success(
-          `Added ${added} athlete${added !== 1 ? 's' : ''}. ${result.assigned} assigned, ${unassigned} unassigned.`
-        );
-      }
+      bulkAddAthleteResult(result);
       onSuccess?.();
       onOpenChange(false);
     },

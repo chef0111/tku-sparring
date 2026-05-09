@@ -5,6 +5,7 @@ import {
   MoreHorizontal,
   Pencil,
   Trash2,
+  Trophy,
 } from 'lucide-react';
 import * as React from 'react';
 import type { Row } from '@tanstack/react-table';
@@ -16,6 +17,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
@@ -26,6 +28,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { BELT_LEVELS, GENDER_OPTIONS } from '@/config/athlete';
+import {
+  LAST_USED_TOURNAMENT_KEY,
+  bulkAddAthleteResult,
+} from '@/features/dashboard/athlete/lib/bulk-add-athletes';
+import { useBulkAddAthletes } from '@/queries/tournament-athletes';
+import { useTournaments } from '@/queries/tournaments';
 import { useUpdateAthleteProfile } from '@/queries/athlete-profiles';
 
 interface AthletesActionMenuProps {
@@ -41,8 +49,18 @@ export default function AthletesActionMenu({
 }: AthletesActionMenuProps) {
   const [isUpdatePending, startUpdateTransition] = React.useTransition();
   const updateMutation = useUpdateAthleteProfile({ suppressToast: true });
+  const { data: tournaments = [], isPending: tournamentsLoading } =
+    useTournaments();
+  const bulkAddToTournament = useBulkAddAthletes({
+    onSuccess: (result) => {
+      bulkAddAthleteResult(result);
+    },
+  });
 
-  const isUpdating = isUpdatePending || updateMutation.isPending;
+  const isUpdating =
+    isUpdatePending ||
+    updateMutation.isPending ||
+    bulkAddToTournament.isPending;
 
   const onUpdate = React.useCallback(
     (updates: { gender?: GenderValue; beltLevel?: number }) => {
@@ -70,6 +88,18 @@ export default function AthletesActionMenu({
     ]
   );
 
+  const onQuickAddToTournament = React.useCallback(
+    (tournamentId: string) => {
+      localStorage.setItem(LAST_USED_TOURNAMENT_KEY, tournamentId);
+      bulkAddToTournament.mutate({
+        tournamentId,
+        athleteProfileIds: [row.original.id],
+        autoAssign: false,
+      });
+    },
+    [bulkAddToTournament, row.original.id]
+  );
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -78,7 +108,7 @@ export default function AthletesActionMenu({
           <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-40">
+      <DropdownMenuContent align="end" className="min-w-42">
         <DropdownMenuItem
           onClick={() => options.onRowAction({ row, variant: 'update' })}
         >
@@ -86,11 +116,15 @@ export default function AthletesActionMenu({
           Edit
         </DropdownMenuItem>
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
+          <DropdownMenuSubTrigger disabled={isUpdating}>
             <Mars className="mr-2 size-4" />
             Gender
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
+            <DropdownMenuLabel className="text-center">
+              Choose gender
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
             <DropdownMenuRadioGroup
               value={row.original.gender}
               onValueChange={(value) => {
@@ -116,11 +150,15 @@ export default function AthletesActionMenu({
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
+          <DropdownMenuSubTrigger disabled={isUpdating}>
             <ChartNoAxesColumn className="mr-2 size-4" />
             Belt level
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
+            <DropdownMenuLabel className="text-center">
+              Choose belt level
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
             <DropdownMenuRadioGroup
               value={String(row.original.beltLevel)}
               onValueChange={(value) => {
@@ -141,6 +179,38 @@ export default function AthletesActionMenu({
                 </DropdownMenuRadioItem>
               ))}
             </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger disabled={isUpdating}>
+            <Trophy className="mr-2 size-4" />
+            Tournaments
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="max-h-60 min-w-48 overflow-y-auto">
+            <DropdownMenuLabel className="text-center">
+              Add to tournaments
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {tournamentsLoading ? (
+              <div className="text-muted-foreground px-2 py-1.5 text-sm">
+                Loading tournaments…
+              </div>
+            ) : tournaments.length === 0 ? (
+              <div className="text-muted-foreground px-2 py-1.5 text-sm">
+                No tournaments
+              </div>
+            ) : (
+              tournaments.map((t) => (
+                <DropdownMenuItem
+                  key={t.id}
+                  disabled={bulkAddToTournament.isPending}
+                  className="cursor-pointer"
+                  onClick={() => onQuickAddToTournament(t.id)}
+                >
+                  <span className="truncate">{t.name}</span>
+                </DropdownMenuItem>
+              ))
+            )}
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSeparator />

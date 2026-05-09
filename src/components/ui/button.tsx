@@ -12,6 +12,7 @@ const buttonVariants = cva(
       variant: {
         default:
           'group/default bg-[linear-gradient(to_bottom,color-mix(in_srgb,var(--accent-foreground)_80%,transparent),var(--primary-accent))] dark:bg-[linear-gradient(to_top,var(--primary),var(--primary-accent))] ring-primary ring-1 border-none dark:ring-ring text-primary-foreground isolate shadow-none',
+        primary: 'bg-primary text-primary-foreground [a]:hover:bg-primary/80',
         outline:
           'border-border bg-background shadow-xs hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50',
         secondary:

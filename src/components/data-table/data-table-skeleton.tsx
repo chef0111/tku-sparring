@@ -57,7 +57,7 @@ export function DataTableSkeleton({
           <TableHeader>
             {Array.from({ length: 1 }).map((_, i) => (
               <TableRow key={i} className="hover:bg-transparent">
-                {Array.from({ length: columnCount }).map((_, j) => (
+                {Array.from({ length: columnCount }).map((__, j) => (
                   <TableHead
                     key={j}
                     style={{
@@ -74,7 +74,7 @@ export function DataTableSkeleton({
           <TableBody>
             {Array.from({ length: rowCount }).map((_, i) => (
               <TableRow key={i} className="hover:bg-transparent">
-                {Array.from({ length: columnCount }).map((_, j) => (
+                {Array.from({ length: columnCount }).map((__, j) => (
                   <TableCell
                     key={j}
                     style={{
