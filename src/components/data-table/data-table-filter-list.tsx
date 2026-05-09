@@ -1,11 +1,4 @@
-import {
-  CalendarIcon,
-  Check,
-  ChevronsUpDown,
-  GripVertical,
-  ListFilter,
-  Trash2,
-} from 'lucide-react';
+import { CalendarIcon, GripVertical, ListFilter, Trash2 } from 'lucide-react';
 import { parseAsStringEnum, useQueryState } from 'nuqs';
 import * as React from 'react';
 import type { Column, ColumnMeta, Table } from '@tanstack/react-table';
@@ -17,16 +10,17 @@ import type {
 } from '@/types/data-table';
 import { DataTableRangeFilter } from '@/components/data-table/data-table-range-filter';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+} from '@/components/ui/combobox';
 import {
   Faceted,
   FacetedBadgeList,
@@ -434,64 +428,57 @@ function DataTableFilterItem<TData>({
             </span>
           )}
         </div>
-        <Popover open={showFieldSelector} onOpenChange={setShowFieldSelector}>
-          <PopoverTrigger asChild>
-            <Button
-              aria-controls={fieldListboxId}
-              variant="outline"
-              size="sm"
-              className="w-32 justify-between rounded font-normal"
-            >
-              <span className="truncate">
-                {columns.find((col) => col.id === filter.id)?.columnDef.meta
-                  ?.label ?? 'Select field'}
-              </span>
-              <ChevronsUpDown className="opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            id={fieldListboxId}
-            align="start"
-            className="w-40 p-0"
-          >
-            <Command>
-              <CommandInput placeholder="Search fields..." />
-              <CommandList>
-                <CommandEmpty>No fields found.</CommandEmpty>
-                <CommandGroup>
-                  {columns.map((col) => (
-                    <CommandItem
-                      key={col.id}
-                      value={col.id}
-                      onSelect={(value) => {
-                        onFilterUpdate(filter.filterId, {
-                          id: value as Extract<keyof TData, string>,
-                          variant: col.columnDef.meta?.variant ?? 'text',
-                          operator: getDefaultFilterOperator(
-                            col.columnDef.meta?.variant ?? 'text'
-                          ),
-                          value: '',
-                        });
+        <Combobox
+          isItemEqualToValue={(a, b) => a.id === b.id}
+          itemToStringLabel={(col: Column<TData>) =>
+            col.columnDef.meta?.label ?? col.id
+          }
+          itemToStringValue={(col: Column<TData>) => col.id}
+          items={columns}
+          onOpenChange={setShowFieldSelector}
+          onValueChange={(col) => {
+            if (!col) return;
+            onFilterUpdate(filter.filterId, {
+              id: col.id as Extract<keyof TData, string>,
+              variant: col.columnDef.meta?.variant ?? 'text',
+              operator: getDefaultFilterOperator(
+                col.columnDef.meta?.variant ?? 'text'
+              ),
+              value: '',
+            });
 
-                        setShowFieldSelector(false);
-                      }}
-                    >
-                      <span className="truncate">
-                        {col.columnDef.meta?.label}
-                      </span>
-                      <Check
-                        className={cn(
-                          'ml-auto',
-                          col.id === filter.id ? 'opacity-100' : 'opacity-0'
-                        )}
-                      />
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+            setShowFieldSelector(false);
+          }}
+          open={showFieldSelector}
+          value={column}
+        >
+          <ComboboxTrigger
+            aria-controls={fieldListboxId}
+            className={cn(
+              buttonVariants({ variant: 'outline', size: 'sm' }),
+              'w-32 justify-between rounded font-normal'
+            )}
+          >
+            <span className="truncate">
+              {columns.find((col) => col.id === filter.id)?.columnDef.meta
+                ?.label ?? 'Select field'}
+            </span>
+          </ComboboxTrigger>
+          <ComboboxContent align="start" id={fieldListboxId}>
+            <ComboboxInput placeholder="Search fields..." showTrigger={false} />
+            <ComboboxEmpty>No fields found.</ComboboxEmpty>
+            <ComboboxList>
+              {(col: Column<TData>) => (
+                <ComboboxItem key={col.id} value={col}>
+                  {col.columnDef.meta?.icon && <col.columnDef.meta.icon />}
+                  <span className="truncate">
+                    {col.columnDef.meta?.label ?? col.id}
+                  </span>
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
         <Select
           open={showOperatorSelector}
           onOpenChange={setShowOperatorSelector}

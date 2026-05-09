@@ -1,23 +1,19 @@
-import {
-  ArrowDownUp,
-  ChevronsUpDown,
-  GripVertical,
-  Trash2,
-} from 'lucide-react';
+import { ArrowDownUp, GripVertical, Trash2 } from 'lucide-react';
 import * as React from 'react';
 import type { ColumnSort, SortDirection, Table } from '@tanstack/react-table';
 
 import type { DataTableControlledState } from '@/hooks/use-data-table';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+} from '@/components/ui/combobox';
 import {
   Popover,
   PopoverContent,
@@ -321,42 +317,42 @@ function DataTableSortItem({
         className="flex items-center gap-2"
         onKeyDown={onItemKeyDown}
       >
-        <Popover open={showFieldSelector} onOpenChange={setShowFieldSelector}>
-          <PopoverTrigger asChild>
-            <Button
-              id={fieldTriggerId}
-              aria-controls={fieldListboxId}
-              variant="outline"
-              size="sm"
-              className="w-44 justify-between rounded font-normal"
-            >
-              <span className="truncate">{columnLabels.get(sort.id)}</span>
-              <ChevronsUpDown className="opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            id={fieldListboxId}
-            className="w-(--radix-popover-trigger-width) p-0"
+        <Combobox
+          itemToStringLabel={(c: { id: string; label: string }) => c.label}
+          itemToStringValue={(c: { id: string; label: string }) => c.id}
+          items={columns}
+          onOpenChange={setShowFieldSelector}
+          open={showFieldSelector}
+        >
+          <ComboboxTrigger
+            aria-controls={fieldListboxId}
+            className={cn(
+              buttonVariants({ variant: 'outline', size: 'sm' }),
+              'w-44 justify-between rounded font-normal'
+            )}
+            id={fieldTriggerId}
           >
-            <Command>
-              <CommandInput placeholder="Search fields..." />
-              <CommandList>
-                <CommandEmpty>No fields found.</CommandEmpty>
-                <CommandGroup>
-                  {columns.map((column) => (
-                    <CommandItem
-                      key={column.id}
-                      value={column.id}
-                      onSelect={(value) => onSortUpdate(sort.id, { id: value })}
-                    >
-                      <span className="truncate">{column.label}</span>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+            <span className="truncate">{columnLabels.get(sort.id)}</span>
+          </ComboboxTrigger>
+          <ComboboxContent align="start" id={fieldListboxId}>
+            <ComboboxInput placeholder="Search fields..." showTrigger={false} />
+            <ComboboxEmpty>No fields found.</ComboboxEmpty>
+            <ComboboxList>
+              {(col: { id: string; label: string }) => (
+                <ComboboxItem
+                  key={col.id}
+                  value={col}
+                  onClick={() => {
+                    onSortUpdate(sort.id, { id: col.id });
+                    setShowFieldSelector(false);
+                  }}
+                >
+                  <span className="truncate">{col.label}</span>
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
 
         <Select
           open={showDirectionSelector}

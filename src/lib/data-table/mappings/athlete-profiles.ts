@@ -20,7 +20,7 @@ export const athleteProfileFilterMap: FilterFieldMap = {
   },
   gender: {
     path: ['gender'],
-    variant: 'select',
+    variant: 'multiSelect',
     dataType: 'string',
   },
   beltLevel: {

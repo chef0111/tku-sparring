@@ -7,7 +7,6 @@ import { useSettings } from '@/contexts/settings';
 import { useAppForm } from '@/components/form/hooks';
 import { AdvanceSettingsSchema } from '@/lib/validations';
 import { FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field';
-import { ComboboxItem } from '@/components/ui/combobox';
 import { Button } from '@/components/ui/button';
 import { useGroups, useMatches, useTournaments } from '@/hooks/use-tournaments';
 
@@ -103,17 +102,8 @@ export const AdvanceSettings = () => {
                   type={field.type}
                   label={field.label}
                   disabled={field.disabled}
-                >
-                  {field.data.map((item) => (
-                    <ComboboxItem
-                      key={item.value}
-                      value={item.value}
-                      className="hover:bg-accent! bg-transparent!"
-                    >
-                      {item.label}
-                    </ComboboxItem>
-                  ))}
-                </formField.Combobox>
+                  itemClassName="hover:bg-accent! bg-transparent!"
+                />
               )}
             </form.AppField>
           </FieldGroup>

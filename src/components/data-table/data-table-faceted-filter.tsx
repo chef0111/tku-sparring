@@ -4,24 +4,21 @@ import type { Column } from '@tanstack/react-table';
 
 import type { Option } from '@/types/data-table';
 import type { DataTableControlledState } from '@/hooks/use-data-table';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxSeparator,
+  ComboboxTrigger,
+} from '@/components/ui/combobox';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 
 interface DataTableFacetedFilterProps<TData, TValue> {
   column?: Column<TData, TValue>;
@@ -48,27 +45,6 @@ export function DataTableFacetedFilter<TData, TValue>({
     Array.isArray(columnFilterValue) ? columnFilterValue : []
   );
 
-  const onItemSelect = React.useCallback(
-    (option: Option, isSelected: boolean) => {
-      if (!column) return;
-
-      if (multiple) {
-        const newSelectedValues = new Set(selectedValues);
-        if (isSelected) {
-          newSelectedValues.delete(option.value);
-        } else {
-          newSelectedValues.add(option.value);
-        }
-        const filterValues = Array.from(newSelectedValues);
-        column.setFilterValue(filterValues.length ? filterValues : undefined);
-      } else {
-        column.setFilterValue(isSelected ? undefined : [option.value]);
-        setOpen(false);
-      }
-    },
-    [column, multiple, selectedValues]
-  );
-
   const onReset = React.useCallback(
     (event?: React.MouseEvent) => {
       event?.stopPropagation();
@@ -77,109 +53,145 @@ export function DataTableFacetedFilter<TData, TValue>({
     [column]
   );
 
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="border-dashed font-normal"
-        >
-          {selectedValues?.size > 0 ? (
-            <div
-              role="button"
-              aria-label={`Clear ${title} filter`}
-              tabIndex={0}
-              className="focus-visible:ring-ring rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:outline-none"
-              onClick={onReset}
-            >
-              <XCircle />
-            </div>
-          ) : (
-            <PlusCircle />
-          )}
-          {title}
-          {selectedValues?.size > 0 && (
-            <>
-              <Separator
-                orientation="vertical"
-                className="mx-0.5 my-auto data-[orientation=vertical]:h-4"
-              />
-              <Badge
-                variant="secondary"
-                className="rounded-sm px-1 font-normal lg:hidden"
-              >
-                {selectedValues.size}
-              </Badge>
-              <div className="hidden items-center gap-1 lg:flex">
-                {selectedValues.size > 2 ? (
-                  <Badge
-                    variant="secondary"
-                    className="rounded-sm px-1 font-normal"
-                  >
-                    {selectedValues.size} selected
-                  </Badge>
-                ) : (
-                  options
-                    .filter((option) => selectedValues.has(option.value))
-                    .map((option) => (
-                      <Badge
-                        variant="secondary"
-                        key={option.value}
-                        className="rounded-sm px-1 font-normal"
-                      >
-                        {option.label}
-                      </Badge>
-                    ))
-                )}
-              </div>
-            </>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-50 p-0" align="start">
-        <Command>
-          <CommandInput placeholder={title} />
-          <CommandList className="max-h-full">
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup className="max-h-75 scroll-py-1 overflow-x-hidden overflow-y-auto">
-              {options.map((option) => {
-                const isSelected = selectedValues.has(option.value);
+  const searchTitle = title ?? 'option';
 
-                return (
-                  <CommandItem
-                    key={option.value}
-                    onSelect={() => onItemSelect(option, isSelected)}
-                  >
-                    <Checkbox checked={isSelected} />
-                    {option.icon && <option.icon />}
-                    <span className="truncate">{option.label}</span>
-                    {option.count && (
-                      <span className="ml-auto font-mono text-xs">
-                        {option.count}
-                      </span>
-                    )}
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-            {selectedValues.size > 0 && (
-              <>
-                <CommandSeparator />
-                <CommandGroup>
-                  <CommandItem
-                    onSelect={() => onReset()}
-                    className="relative w-full justify-between"
-                  >
-                    <span>Clear filters</span>
-                    <XIcon className="absolute right-2 size-4" />
-                  </CommandItem>
-                </CommandGroup>
-              </>
-            )}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+  const comboboxValue = multiple
+    ? options.filter((o) => selectedValues.has(o.value))
+    : (options.find((o) => selectedValues.has(o.value)) ?? null);
+
+  const onValueChange = React.useCallback(
+    (next: Option | Array<Option> | null) => {
+      if (!column) return;
+
+      if (multiple) {
+        const nextOptions = Array.isArray(next) ? next : [];
+        const vals = nextOptions.map((o) => o.value);
+        column.setFilterValue(vals.length ? vals : undefined);
+      } else {
+        const opt = next as Option | null;
+        column.setFilterValue(opt ? [opt.value] : undefined);
+        setOpen(false);
+      }
+    },
+    [column, multiple]
+  );
+
+  return (
+    <Combobox
+      isItemEqualToValue={(a, b) => a.value === b.value}
+      itemToStringLabel={(o) => o.label}
+      itemToStringValue={(o) => o.value}
+      items={options}
+      multiple={!!multiple}
+      onOpenChange={setOpen}
+      onValueChange={onValueChange}
+      open={open}
+      value={comboboxValue}
+    >
+      <ComboboxTrigger
+        className={cn(
+          buttonVariants({ variant: 'outline', size: 'sm' }),
+          'border-dashed font-normal'
+        )}
+      >
+        {selectedValues?.size > 0 ? (
+          <div
+            role="button"
+            aria-label={`Clear ${title} filter`}
+            tabIndex={0}
+            className="focus-visible:ring-ring rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:outline-none"
+            onClick={onReset}
+          >
+            <XCircle />
+          </div>
+        ) : (
+          <PlusCircle />
+        )}
+        {title}
+        {selectedValues?.size > 0 && (
+          <>
+            <Separator
+              orientation="vertical"
+              className="mx-0.5 my-auto data-[orientation=vertical]:h-4"
+            />
+            <Badge
+              variant="secondary"
+              className="rounded-sm px-1 font-normal lg:hidden"
+            >
+              {selectedValues.size}
+            </Badge>
+            <div className="hidden items-center gap-1 lg:flex">
+              {selectedValues.size > 2 ? (
+                <Badge
+                  variant="secondary"
+                  className="rounded-sm px-1 font-normal"
+                >
+                  {selectedValues.size} selected
+                </Badge>
+              ) : (
+                options
+                  .filter((option) => selectedValues.has(option.value))
+                  .map((option) => (
+                    <Badge
+                      variant="secondary"
+                      key={option.value}
+                      className="rounded-sm px-1 font-normal"
+                    >
+                      {option.label}
+                    </Badge>
+                  ))
+              )}
+            </div>
+          </>
+        )}
+      </ComboboxTrigger>
+      <ComboboxContent align="center">
+        <ComboboxInput showTrigger={false} placeholder={searchTitle} />
+        <ComboboxEmpty>No results found.</ComboboxEmpty>
+        <ComboboxList className="max-h-75 scroll-py-1 overflow-x-hidden overflow-y-auto">
+          {(option: Option) => {
+            const isSelected = selectedValues.has(option.value);
+
+            return (
+              <ComboboxItem
+                key={option.value}
+                className="[&>span.pointer-events-none.absolute]:hidden"
+                value={option}
+              >
+                <Checkbox checked={isSelected} />
+                {option.icon && <option.icon />}
+                <span className="min-w-0 flex-1 whitespace-nowrap">
+                  {option.label}
+                </span>
+                {option.count !== undefined && (
+                  <span className="ml-auto font-mono text-xs">
+                    {option.count}
+                  </span>
+                )}
+              </ComboboxItem>
+            );
+          }}
+        </ComboboxList>
+        {selectedValues.size > 0 && (
+          <>
+            <ComboboxSeparator />
+            <button
+              className={cn(
+                buttonVariants({ variant: 'ghost', size: 'sm' }),
+                'mx-1 mb-1 w-full justify-between font-normal'
+              )}
+              type="button"
+              onClick={() => {
+                onReset();
+                setOpen(false);
+              }}
+            >
+              <span>Clear filters</span>
+              <XIcon className="size-4 shrink-0" />
+            </button>
+          </>
+        )}
+      </ComboboxContent>
+    </Combobox>
   );
 }

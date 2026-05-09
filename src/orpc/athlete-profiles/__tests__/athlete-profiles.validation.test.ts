@@ -148,6 +148,21 @@ describe('AthleteProfilesSchema', () => {
     const result = AthleteProfilesSchema.safeParse({ perPage: 101 });
     expect(result.success).toBe(false);
   });
+
+  it('accepts gender as a single-value array for list', () => {
+    const result = AthleteProfilesSchema.safeParse({ gender: ['M'] });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts gender as both sexes for list', () => {
+    const result = AthleteProfilesSchema.safeParse({ gender: ['M', 'F'] });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects invalid gender in list filter array', () => {
+    const result = AthleteProfilesSchema.safeParse({ gender: ['X'] });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('CheckDuplicateSchema', () => {
