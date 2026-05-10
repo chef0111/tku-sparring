@@ -325,16 +325,20 @@ function DataTableSortItem({
           open={showFieldSelector}
         >
           <ComboboxTrigger
+            id={fieldTriggerId}
             aria-controls={fieldListboxId}
             className={cn(
               buttonVariants({ variant: 'outline', size: 'sm' }),
               'w-44 justify-between rounded font-normal'
             )}
-            id={fieldTriggerId}
           >
             <span className="truncate">{columnLabels.get(sort.id)}</span>
           </ComboboxTrigger>
-          <ComboboxContent align="start" id={fieldListboxId}>
+          <ComboboxContent
+            id={fieldListboxId}
+            className="min-w-44"
+            align="start"
+          >
             <ComboboxInput placeholder="Search fields..." showTrigger={false} />
             <ComboboxEmpty>No fields found.</ComboboxEmpty>
             <ComboboxList>
