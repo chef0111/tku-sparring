@@ -280,12 +280,12 @@ const underlinePositionStyles: Record<
   right: {
     highlight: '-right-0.25',
     list: 'border-r',
-    gradient: 'bg-gradient-to-l from-foreground/10 to-transparent',
+    gradient: 'bg-linear-to-l from-foreground/10 to-transparent',
   },
   left: {
     highlight: '-left-0.25',
     list: 'border-l',
-    gradient: 'bg-gradient-to-r from-foreground/10 to-transparent',
+    gradient: 'bg-linear-to-r from-foreground/10 to-transparent',
   },
 } as const;
 
