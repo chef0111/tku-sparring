@@ -93,6 +93,7 @@ export function DataTableFacetedFilter<TData, TValue>({
           buttonVariants({ variant: 'outline', size: 'sm' }),
           'border-dashed font-normal'
         )}
+        showChevron={false}
       >
         {selectedValues?.size > 0 ? (
           <div

@@ -464,7 +464,11 @@ function DataTableFilterItem<TData>({
                 ?.label ?? 'Select field'}
             </span>
           </ComboboxTrigger>
-          <ComboboxContent align="start" id={fieldListboxId}>
+          <ComboboxContent
+            id={fieldListboxId}
+            className="min-w-32"
+            align="start"
+          >
             <ComboboxInput placeholder="Search fields..." showTrigger={false} />
             <ComboboxEmpty>No fields found.</ComboboxEmpty>
             <ComboboxList>
@@ -696,7 +700,7 @@ function onFilterInputRender<TData>({
               />
             </Button>
           </FacetedTrigger>
-          <FacetedContent id={inputListboxId} className="w-50">
+          <FacetedContent id={inputListboxId} className="w-44">
             <FacetedInput
               aria-label={`Search ${columnMeta?.label} options`}
               placeholder={columnMeta?.placeholder ?? 'Search options...'}

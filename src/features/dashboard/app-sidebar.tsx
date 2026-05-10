@@ -1,14 +1,7 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
-import {
-  CircleHelpIcon,
-  Home,
-  SearchIcon,
-  Settings2Icon,
-  Trophy,
-  UserCog,
-} from 'lucide-react';
 import { NavSecondary } from './nav-secondary';
+import { NavDocuments } from './nav-documents';
 import { LogoIcon } from '@/components/ui/logo';
 import { NavMain } from '@/features/dashboard/nav-main';
 import { UserNav } from '@/components/user/user-nav';
@@ -21,29 +14,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-
-const navMain = [
-  { title: 'Home', icon: Home, to: '/dashboard' },
-  { title: 'Tournaments', icon: Trophy, to: '/dashboard/tournaments' },
-  { title: 'Athletes', icon: UserCog, to: '/dashboard/athletes' },
-];
-const navSecondary = [
-  {
-    title: 'Settings',
-    url: '#',
-    icon: Settings2Icon,
-  },
-  {
-    title: 'Get Help',
-    url: '#',
-    icon: CircleHelpIcon,
-  },
-  {
-    title: 'Search',
-    url: '#',
-    icon: SearchIcon,
-  },
-];
+import { navDocuments, navMain, navSecondary } from '@/config/sidebar-nav';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -68,6 +39,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarContent>
         <NavMain items={navMain} />
+        <NavDocuments items={navDocuments} />
         <NavSecondary
           items={navSecondary}
           className="absolute bottom-16 pr-16 transition-all duration-200 group-data-[collapsible=icon]:bottom-12"

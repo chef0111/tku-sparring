@@ -59,6 +59,7 @@ export function DataTableViewOptions<TData>({
           'ml-auto hidden h-8 font-normal lg:flex'
         )}
         disabled={disabled}
+        showChevron={false}
       >
         <Settings2 className="text-muted-foreground" />
         View
