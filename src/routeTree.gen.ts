@@ -20,6 +20,7 @@ import { Route as DashboardTournamentsIndexRouteImport } from './routes/dashboar
 import { Route as DashboardAthletesIndexRouteImport } from './routes/dashboard/athletes/index'
 import { Route as DashboardTournamentsIdRouteImport } from './routes/dashboard/tournaments/$id'
 import { Route as ApiRpcSplatRouteImport } from './routes/api.rpc.$'
+import { Route as ApiLeaseStreamRouteImport } from './routes/api/lease/stream'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as DashboardTournamentsIdBuilderRouteImport } from './routes/dashboard_.tournaments.$id.builder'
 
@@ -77,6 +78,11 @@ const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
   path: '/api/rpc/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiLeaseStreamRoute = ApiLeaseStreamRouteImport.update({
+  id: '/api/lease/stream',
+  path: '/api/lease/stream',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/api/$': typeof ApiSplatRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/lease/stream': typeof ApiLeaseStreamRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dashboard/tournaments/$id': typeof DashboardTournamentsIdRoute
   '/dashboard/athletes/': typeof DashboardAthletesIndexRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/api/$': typeof ApiSplatRoute
   '/dashboard': typeof DashboardIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/lease/stream': typeof ApiLeaseStreamRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dashboard/tournaments/$id': typeof DashboardTournamentsIdRoute
   '/dashboard/athletes': typeof DashboardAthletesIndexRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/dashboard/_tournaments': typeof DashboardTournamentsRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/lease/stream': typeof ApiLeaseStreamRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dashboard/tournaments/$id': typeof DashboardTournamentsIdRoute
   '/dashboard/athletes/': typeof DashboardAthletesIndexRoute
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/api/$'
     | '/dashboard/'
     | '/api/auth/$'
+    | '/api/lease/stream'
     | '/api/rpc/$'
     | '/dashboard/tournaments/$id'
     | '/dashboard/athletes/'
@@ -151,6 +161,7 @@ export interface FileRouteTypes {
     | '/api/$'
     | '/dashboard'
     | '/api/auth/$'
+    | '/api/lease/stream'
     | '/api/rpc/$'
     | '/dashboard/tournaments/$id'
     | '/dashboard/athletes'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/dashboard/_tournaments'
     | '/dashboard/'
     | '/api/auth/$'
+    | '/api/lease/stream'
     | '/api/rpc/$'
     | '/dashboard/tournaments/$id'
     | '/dashboard/athletes/'
@@ -179,6 +191,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   ApiSplatRoute: typeof ApiSplatRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiLeaseStreamRoute: typeof ApiLeaseStreamRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
   DashboardTournamentsIdBuilderRoute: typeof DashboardTournamentsIdBuilderRoute
 }
@@ -262,6 +275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRpcSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/lease/stream': {
+      id: '/api/lease/stream'
+      path: '/api/lease/stream'
+      fullPath: '/api/lease/stream'
+      preLoaderRoute: typeof ApiLeaseStreamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -315,6 +335,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRouteWithChildren,
   ApiSplatRoute: ApiSplatRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiLeaseStreamRoute: ApiLeaseStreamRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
   DashboardTournamentsIdBuilderRoute: DashboardTournamentsIdBuilderRoute,
 }

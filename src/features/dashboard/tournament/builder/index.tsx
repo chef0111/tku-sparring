@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
 import { ArrowLeft, Trophy } from 'lucide-react';
+import { TournamentStatusPill } from '../list/components/tournament-status-pill';
 import { BuilderSidebar } from './sidebar';
 import {
   AddGroupDialog,
@@ -9,10 +10,13 @@ import {
 } from './dialogs';
 import { Header } from './header';
 import type { GroupData, TournamentData } from '@/features/dashboard/types';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import LoadingScreen from '@/components/navigation/loading';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { useLeaseStream } from '@/hooks/use-lease-stream';
+import { useTournamentReadOnly } from '@/hooks/use-tournament-read-only';
 import { useTournament } from '@/queries/tournaments';
 import { useGroups } from '@/queries/groups';
 import { UserDropdown } from '@/components/user/user-dropdown';
@@ -25,6 +29,8 @@ interface TournamentBuilderPageProps {
 }
 
 export function TournamentBuilderPage({ id }: TournamentBuilderPageProps) {
+  useLeaseStream(id);
+
   const tournamentQuery = useTournament(id);
   const groupsQuery = useGroups(id);
 
@@ -70,6 +76,7 @@ function TournamentBuilder({
   groups,
   tournamentId,
 }: TournamentBuilderProps) {
+  const isReadOnly = useTournamentReadOnly(tournamentId);
   const [selectedGroupId, setSelectedGroupId] = React.useState<string | null>(
     groups[0]?.id ?? null
   );
@@ -88,6 +95,16 @@ function TournamentBuilder({
     }
   }, [groups, selectedGroupId]);
 
+  React.useEffect(() => {
+    if (!isReadOnly) {
+      return;
+    }
+
+    setShowAddGroup(false);
+    setShowEditTournament(false);
+    setShowDeleteTournament(false);
+  }, [isReadOnly]);
+
   const { data } = authClient.useSession();
   const user = data?.user;
 
@@ -100,6 +117,7 @@ function TournamentBuilder({
           <Badge className="bg-primary/10 text-primary ml-1 rounded text-xs font-medium">
             Builder
           </Badge>
+          <TournamentStatusPill status={tournament.status} className="ml-2" />
         </div>
         <Tabs
           defaultValue="groups"
@@ -125,12 +143,31 @@ function TournamentBuilder({
       </Header>
       <BuilderSidebar
         tournamentId={tournamentId}
-        onEditTournament={() => setShowEditTournament(true)}
-        onDeleteTournament={() => setShowDeleteTournament(true)}
+        onEditTournament={() => {
+          if (!isReadOnly) {
+            setShowEditTournament(true);
+          }
+        }}
+        onDeleteTournament={() => {
+          if (!isReadOnly) {
+            setShowDeleteTournament(true);
+          }
+        }}
+        readOnly={isReadOnly}
       />
 
       <main className="flex h-dvh flex-1 flex-col">
-        <div className="relative flex-1"></div>
+        <div className="relative flex-1 p-6">
+          {isReadOnly ? (
+            <Alert className="max-w-xl">
+              <AlertTitle>Read-only workspace</AlertTitle>
+              <AlertDescription>
+                This tournament is completed. Builder mutations are disabled so
+                results stay locked.
+              </AlertDescription>
+            </Alert>
+          ) : null}
+        </div>
       </main>
 
       {/* Dialogs */}

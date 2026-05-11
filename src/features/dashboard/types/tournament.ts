@@ -25,6 +25,9 @@ export interface TournamentData {
   status: TournamentStatus;
   createdAt: Date;
   updatedAt: Date;
+  lifecycle: {
+    canComplete: boolean;
+  };
   groups: Array<{
     id: string;
     name: string;

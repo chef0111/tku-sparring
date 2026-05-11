@@ -25,6 +25,11 @@ export const UpdateTournamentSchema = z.object({
   name: z.string().min(1, 'Tournament name is required'),
 });
 
+export const SetTournamentStatusSchema = z.object({
+  id: z.string(),
+  status: TournamentStatusSchema,
+});
+
 export const ListTournamentsSchema = z.object({
   page: z.number().int().positive().optional(),
   perPage: z.number().int().positive().optional(),
@@ -39,4 +44,5 @@ export type TournamentStatusDTO = z.infer<typeof TournamentStatusSchema>;
 export type TournamentDTO = z.infer<typeof TournamentSchema>;
 export type CreateTournamentDTO = z.infer<typeof CreateTournamentSchema>;
 export type UpdateTournamentDTO = z.infer<typeof UpdateTournamentSchema>;
+export type SetTournamentStatusDTO = z.infer<typeof SetTournamentStatusSchema>;
 export type ListTournamentsDTO = z.infer<typeof ListTournamentsSchema>;

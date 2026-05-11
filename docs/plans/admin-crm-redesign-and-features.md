@@ -534,6 +534,8 @@ flowchart TD
 
 Per PRD §3, §8 and [docs/sse-group-control-lease.md](docs/sse-group-control-lease.md).
 
+Note: the minimal audit foundation from Phase G (`TournamentActivity` schema + server-side helper) was intentionally pulled forward into this slice so lease and lifecycle mutations can write required activity rows atomically.
+
 ### B1. Data model
 
 - Add `GroupControlLease` to [prisma/schema.prisma](prisma/schema.prisma): `groupId`, `tournamentId`, `adminId`, `deviceId`, `acquiredAt`, `lastHeartbeatAt`, `expiresAt`.
@@ -545,13 +547,13 @@ Per PRD §3, §8 and [docs/sse-group-control-lease.md](docs/sse-group-control-le
 - `lease.heartbeat({ groupId, deviceId })` — extends `expiresAt` if still holder.
 - `lease.release({ groupId, deviceId })` — explicit release.
 - `lease.requestTakeover({ groupId, deviceId })` — adds entry to takeover queue.
-- `lease.respondTakeover({ requestId, approve })` — current holder responds.
-- `lease.listForTournament({ tournamentId })` — initial snapshot.
+- `lease.respondTakeover({ requestId, approve, deviceId })` — current holder responds from the active lease-owning device.
+- `lease.listForTournament({ tournamentId, deviceId? })` — initial snapshot; optional `deviceId` allows device-relative lease status decoration.
 
 ### B3. SSE stream
 
 - New server route `/api/lease/stream?tournamentId=…` (Tanstack Start server route).
-- Emits `lease.update` and `takeover.request` events scoped per tournament.
+- Initial implementation may emit snapshot + invalidate events scoped per tournament, with richer event payloads deferred until the Groups tab needs device-relative live updates.
 - TTL = 60s, heartbeat every 20s, 2× missed-heartbeat tolerance (per PRD).
 
 ### B4. Client hook
@@ -570,6 +572,7 @@ PRD §6.
 - Add `tournament.setStatus({ id, status })` oRPC endpoint.
 - DAL enforces transition rules: `draft → active → completed`, no skipping, no going back.
 - Each transition writes a `TournamentActivity` row (see Phase G).
+- Completion readiness is derived from persisted match state in the current schema: every group must have at least one match and every tournament match must have a non-null `winnerId`.
 
 ### C2. UI — tournament viewer header
 
@@ -686,6 +689,8 @@ PRD §5.
 ## Phase G — Audit log
 
 PRD §7.
+
+Dependency note: `TournamentActivity` schema work and the reusable `recordTournamentActivity(...)` server helper were pulled into Phases B/C because lease and lifecycle mutations depend on them. The remaining activity API/UI work stays in Phase G.
 
 ### G1. Schema
 
