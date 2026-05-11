@@ -15,31 +15,32 @@ This document describes the Server-Sent Events (SSE) approach for Group Control 
 
 ## Suggested Endpoints
 
-- `GET /api/leases/stream?tournamentId=...`
+The implemented tournament stream endpoint is `GET /api/lease/stream?tournamentId=...`.
+The lease mutations themselves are exposed through the authenticated oRPC router rather
+than separate REST-style `/api/leases/*` routes.
+
+- `GET /api/lease/stream?tournamentId=...`
   - SSE channel for lease updates.
-- `POST /api/leases/acquire`
+- `orpc.lease.acquire({ groupId, deviceId })`
   - Acquire a lease for a group.
-- `POST /api/leases/heartbeat`
+- `orpc.lease.heartbeat({ groupId, deviceId })`
   - Extend the lease TTL.
-- `POST /api/leases/release`
-  - Release a lease explicitly (optional).
-- `POST /api/leases/request-takeover`
+- `orpc.lease.release({ groupId, deviceId })`
+  - Release a lease explicitly.
+- `orpc.lease.requestTakeover({ groupId, deviceId })`
   - Request a takeover from the current holder.
-- `POST /api/leases/respond-takeover`
-  - Approve or deny a takeover request.
+- `orpc.lease.respondTakeover({ requestId, approve, deviceId })`
+  - Approve or deny a takeover request from the active holder device.
 - `GET /api/selection-view?tournamentId=...`
   - Slim lookup for Advance Settings (tournaments, groups, matches).
 
 ## Event Types
 
-- `lease.acquired`
-- `lease.renewed`
-- `lease.released`
-- `lease.expired`
-- `lease.takeover_requested`
-- `lease.takeover_approved`
-- `lease.takeover_denied`
-- `lease.takeover_request_expired`
+- Current implementation sends:
+  - `snapshot`
+  - `invalidate`
+- Rich event-specific payloads such as `lease.acquired` or `lease.expired` can still be
+  added later if the Groups tab needs more granular live updates.
 
 ## Event Payload (Example)
 

@@ -7,10 +7,10 @@ todos:
     status: completed
   - id: phase-b-lease
     content: 'Phase B: Group Control Lease backend (schema, oRPC endpoints, SSE stream, client hook)'
-    status: pending
+    status: completed
   - id: phase-c-lifecycle
     content: 'Phase C: Tournament lifecycle controls (status transition mutation + UI + read-only enforcement)'
-    status: pending
+    status: completed
   - id: phase-d-groups
     content: 'Phase D: Groups tab (constraints schema, auto-assign, DnD overrides, lease status integration, arena assignment)'
     status: pending
@@ -530,7 +530,7 @@ flowchart TD
 
 ---
 
-## Phase B — Group Control Lease backend (foundation for Groups tab)
+## Phase B — Group Control Lease backend (foundation for Groups tab) - [DONE]
 
 Per PRD §3, §8 and [docs/sse-group-control-lease.md](docs/sse-group-control-lease.md).
 
@@ -563,7 +563,7 @@ Note: the minimal audit foundation from Phase G (`TournamentActivity` schema + s
 
 ---
 
-## Phase C — Tournament lifecycle controls
+## Phase C — Tournament lifecycle controls - [DONE]
 
 PRD §6.
 
