@@ -163,6 +163,16 @@ describe('AthleteProfilesSchema', () => {
     const result = AthleteProfilesSchema.safeParse({ gender: ['X'] });
     expect(result.success).toBe(false);
   });
+
+  it('accepts beltLevels as discrete OR filter (e.g. Red II + Yellow)', () => {
+    const result = AthleteProfilesSchema.safeParse({ beltLevels: [8, 3] });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects belt level out of range in beltLevels', () => {
+    const result = AthleteProfilesSchema.safeParse({ beltLevels: [8, 11] });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('CheckDuplicateSchema', () => {

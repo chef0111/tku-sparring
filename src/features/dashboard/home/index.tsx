@@ -1,19 +1,20 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { ArrowRight, Plus } from 'lucide-react';
-import { TournamentCard } from '../tournament/tournament-card';
-import { TournamentEmpty } from '../tournament/tournament-empty';
+import { TournamentCard } from '../tournament/list/components/tournaments-grid/tournament-card';
+import { TournamentCardSkeleton } from '../tournament/list/components/tournaments-grid/tournament-card-skeleton';
+import { TournamentsEmptyState } from '../tournament/list/components/tournaments-empty-state';
 import { SiteHeader } from '../site-header';
+import type { TournamentListItem } from '@/features/dashboard/types';
 import { Button } from '@/components/ui/button';
 import { CreateTournamentDialog } from '@/features/dashboard/tournament/create-tournament-dialog';
 import { useTournaments } from '@/queries/tournaments';
-import { Skeleton } from '@/components/ui/skeleton';
 
 export function DashboardHome() {
   const { data, isPending } = useTournaments();
   const [open, setOpen] = useState(false);
 
-  const tournaments = data ?? [];
+  const tournaments = (data ?? []) as Array<TournamentListItem>;
 
   return (
     <div className="flex h-full flex-col">
@@ -51,15 +52,15 @@ export function DashboardHome() {
             </div>
 
             {isPending ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton key={i} className="h-64 rounded-lg" />
+                  <TournamentCardSkeleton key={i} />
                 ))}
               </div>
             ) : tournaments.length === 0 ? (
-              <TournamentEmpty />
+              <TournamentsEmptyState variant="no-data" />
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {tournaments.slice(0, 6).map((tournament) => (
                   <TournamentCard key={tournament.id} tournament={tournament} />
                 ))}

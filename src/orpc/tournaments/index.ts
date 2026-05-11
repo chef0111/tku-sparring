@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import {
   CreateTournamentSchema,
+  ListTournamentsSchema,
+  SetTournamentStatusSchema,
   UpdateTournamentSchema,
 } from './tournaments.dto';
 import {
@@ -8,14 +10,15 @@ import {
   deleteTournament,
   findById,
   findMany,
+  setStatus,
   update,
 } from './tournaments.dal';
 import { authedProcedure } from '@/orpc/middleware';
 
 export const listTournaments = authedProcedure
-  .input(z.object({}))
-  .handler(async () => {
-    return findMany();
+  .input(ListTournamentsSchema)
+  .handler(async ({ input }) => {
+    return findMany(input);
   });
 
 export const getTournament = authedProcedure
@@ -39,6 +42,15 @@ export const updateTournament = authedProcedure
   .handler(async ({ input }) => {
     const { id, ...data } = input;
     return update(id, data);
+  });
+
+export const setTournamentStatus = authedProcedure
+  .input(SetTournamentStatusSchema)
+  .handler(async ({ input, context }) => {
+    return setStatus({
+      ...input,
+      adminId: context.user.id,
+    });
   });
 
 export const removeTournament = authedProcedure

@@ -132,20 +132,45 @@ export function DataTableFilterMenu<TData>({
         return;
       }
 
-      const filterValue =
-        column.columnDef.meta?.variant === 'multiSelect' ? [value] : value;
+      const variant = column.columnDef.meta?.variant ?? 'text';
 
-      const newFilter: ExtendedColumnFilter<TData> = {
-        id: column.id as Extract<keyof TData, string>,
-        value: filterValue,
-        variant: column.columnDef.meta?.variant ?? 'text',
-        operator: getDefaultFilterOperator(
-          column.columnDef.meta?.variant ?? 'text'
-        ),
-        filterId: generateId({ length: 8 }),
-      };
+      if (variant === 'multiSelect') {
+        debouncedSetFilters((prevFilters) => {
+          const existing = prevFilters.find(
+            (f) =>
+              f.id === column.id &&
+              f.operator === 'inArray' &&
+              Array.isArray(f.value)
+          );
+          if (existing) {
+            const current = existing.value as Array<string>;
+            if (current.includes(value)) return prevFilters;
+            return prevFilters.map((f) =>
+              f.filterId === existing.filterId
+                ? { ...f, value: [...current, value] }
+                : f
+            );
+          }
+          const newFilter: ExtendedColumnFilter<TData> = {
+            id: column.id as Extract<keyof TData, string>,
+            value: [value],
+            variant,
+            operator: getDefaultFilterOperator(variant),
+            filterId: generateId({ length: 8 }),
+          };
+          return [...prevFilters, newFilter];
+        });
+      } else {
+        const newFilter: ExtendedColumnFilter<TData> = {
+          id: column.id as Extract<keyof TData, string>,
+          value,
+          variant,
+          operator: getDefaultFilterOperator(variant),
+          filterId: generateId({ length: 8 }),
+        };
+        debouncedSetFilters((prevFilters) => [...prevFilters, newFilter]);
+      }
 
-      debouncedSetFilters([...filters, newFilter]);
       setOpen(false);
 
       setTimeout(() => {
@@ -153,7 +178,7 @@ export function DataTableFilterMenu<TData>({
         setInputValue('');
       }, 100);
     },
-    [filters, debouncedSetFilters]
+    [debouncedSetFilters]
   );
 
   const onFilterRemove = React.useCallback(

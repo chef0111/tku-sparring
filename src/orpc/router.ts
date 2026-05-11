@@ -3,6 +3,7 @@ import {
   getTournament,
   listTournaments,
   removeTournament,
+  setTournamentStatus,
   updateTournament,
 } from './tournaments';
 
@@ -32,6 +33,14 @@ import {
   removeTournamentAthleteRecord,
   updateTournamentAthleteRecord,
 } from './tournament-athletes';
+import {
+  acquire as acquireLease,
+  heartbeat as heartbeatLease,
+  listForTournamentLeases,
+  release as releaseLease,
+  requestTakeover,
+  respondTakeover,
+} from './lease';
 
 export default {
   tournament: {
@@ -39,6 +48,7 @@ export default {
     get: getTournament,
     create: createTournament,
     update: updateTournament,
+    setStatus: setTournamentStatus,
     delete: removeTournament,
   },
   group: {
@@ -68,5 +78,13 @@ export default {
     update: updateTournamentAthleteRecord,
     remove: removeTournamentAthleteRecord,
     bulkRemove: bulkRemoveTournamentAthleteRecords,
+  },
+  lease: {
+    acquire: acquireLease,
+    heartbeat: heartbeatLease,
+    release: releaseLease,
+    requestTakeover,
+    respondTakeover,
+    listForTournament: listForTournamentLeases,
   },
 };

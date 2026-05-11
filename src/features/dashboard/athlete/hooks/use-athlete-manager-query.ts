@@ -12,6 +12,18 @@ import {
 } from '@/lib/data-table/parsers';
 import { parseRangeParam } from '@/lib/data-table/utils';
 
+const ARRAY_SEPARATOR = ',';
+
+function parseBeltLevelsFromQuery(
+  values: Array<string> | null | undefined
+): Array<number> | undefined {
+  if (values == null || values.length === 0) return undefined;
+  const nums = values
+    .map((s) => Number(s))
+    .filter((n) => Number.isInteger(n) && n >= 0 && n <= 10);
+  return nums.length > 0 ? [...new Set(nums)] : undefined;
+}
+
 const SORTABLE_COLUMN_IDS = new Set([
   'name',
   'beltLevel',
@@ -31,7 +43,10 @@ export function useAthleteTableQuery() {
     parseAsArrayOf(parseAsString, ',')
   );
   const [affiliationFilter] = useQueryState('affiliation');
-  const [beltFilter] = useQueryState('beltLevel');
+  const [beltLevelQuery] = useQueryState(
+    'beltLevel',
+    parseAsArrayOf(parseAsString, ARRAY_SEPARATOR)
+  );
   const [weightFilter] = useQueryState('weight');
   const [sort] = useQueryState(
     'sort',
@@ -48,7 +63,7 @@ export function useAthleteTableQuery() {
     parseAsStringEnum(['and', 'or']).withDefault('and')
   );
 
-  const beltRange = parseRangeParam(beltFilter);
+  const beltLevels = parseBeltLevelsFromQuery(beltLevelQuery ?? undefined);
   const weightRange = parseRangeParam(weightFilter);
 
   return {
@@ -59,10 +74,9 @@ export function useAthleteTableQuery() {
     nameFilter,
     genderFilter,
     affiliationFilter,
-    beltFilter,
+    beltLevels,
     weightFilter,
     sort,
-    beltRange,
     weightRange,
     filters,
     joinOperator,

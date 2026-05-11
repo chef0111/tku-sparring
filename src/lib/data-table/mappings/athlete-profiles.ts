@@ -25,7 +25,7 @@ export const athleteProfileFilterMap: FilterFieldMap = {
   },
   beltLevel: {
     path: ['beltLevel'],
-    variant: 'select',
+    variant: 'multiSelect',
     dataType: 'number',
     parse: (value) => {
       if (Array.isArray(value)) {

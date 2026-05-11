@@ -2,8 +2,9 @@ import { Link } from '@tanstack/react-router';
 import { ArrowLeft, Trophy } from 'lucide-react';
 import { TournamentViewer } from './viewer';
 import { TournamentViewerLoading } from './viewer/loading';
-import type { GroupData } from '../types';
+import type { GroupData, TournamentData } from '../types';
 import { Button } from '@/components/ui/button';
+import { useLeaseStream } from '@/hooks/use-lease-stream';
 import { useTournament } from '@/queries/tournaments';
 import { useGroups } from '@/queries/groups';
 
@@ -12,6 +13,8 @@ interface TournamentPageProps {
 }
 
 export function TournamentPage({ id }: TournamentPageProps) {
+  useLeaseStream(id);
+
   const tournamentQuery = useTournament(id);
   const groupsQuery = useGroups(id);
 
@@ -34,7 +37,7 @@ export function TournamentPage({ id }: TournamentPageProps) {
     );
   }
 
-  const tournament = tournamentQuery.data;
+  const tournament = tournamentQuery.data as TournamentData;
   const groups = groupsQuery.data ?? [];
 
   return (

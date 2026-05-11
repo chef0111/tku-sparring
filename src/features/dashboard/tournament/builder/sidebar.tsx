@@ -18,12 +18,14 @@ interface BuilderSidebarProps {
   tournamentId: string;
   onEditTournament: () => void;
   onDeleteTournament: () => void;
+  readOnly?: boolean;
 }
 
 export function BuilderSidebar({
   tournamentId,
   onEditTournament,
   onDeleteTournament,
+  readOnly = false,
 }: BuilderSidebarProps) {
   return (
     <Sidebar
@@ -59,6 +61,7 @@ export function BuilderSidebar({
                 <SidebarMenuButton
                   tooltip="Edit Tournament"
                   onClick={onEditTournament}
+                  disabled={readOnly}
                 >
                   <Settings className="size-4" />
                   <span className="transition-none!">Edit Tournament</span>
@@ -69,6 +72,7 @@ export function BuilderSidebar({
                   tooltip="Delete Tournament"
                   onClick={onDeleteTournament}
                   className="text-destructive hover:text-destructive"
+                  disabled={readOnly}
                 >
                   <Trash2 className="size-4" />
                   <span className="transition-none!">Delete Tournament</span>
