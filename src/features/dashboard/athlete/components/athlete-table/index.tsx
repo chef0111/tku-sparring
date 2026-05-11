@@ -58,8 +58,7 @@ export function AthleteTable({
         ? (query.genderFilter as Array<'M' | 'F'>)
         : undefined,
     affiliation: query.affiliationFilter ?? undefined,
-    beltLevelMin: query.beltRange?.[0],
-    beltLevelMax: query.beltRange?.[1],
+    beltLevels: query.beltLevels,
     weightMin: query.weightRange?.[0],
     weightMax: query.weightRange?.[1],
     sort: query.sort?.[0]?.id ?? undefined,
@@ -129,7 +128,7 @@ export function AthleteTable({
     <>
       <div className={cn('flex-1 overflow-auto', className)}>
         {isFetching && !data ? (
-          <DataTableSkeleton columnCount={7} rowCount={10} />
+          <DataTableSkeleton columnCount={7} filterCount={4} rowCount={10} />
         ) : (
           <DataTable
             table={table}

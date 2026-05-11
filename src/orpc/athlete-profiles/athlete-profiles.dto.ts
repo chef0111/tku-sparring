@@ -38,6 +38,12 @@ export const AthleteProfilesSchema = z.object({
     .max(2)
     .optional(),
   affiliation: z.string().optional(),
+  /** Discrete belt levels (OR). From faceted multi-select URL `beltLevel=a,b`. */
+  beltLevels: z
+    .array(z.number().int().min(0).max(10))
+    .min(1)
+    .max(20)
+    .optional(),
   beltLevelMin: z.number().int().min(0).max(10).optional(),
   beltLevelMax: z.number().int().min(0).max(10).optional(),
   weightMin: z.number().min(0).optional(),

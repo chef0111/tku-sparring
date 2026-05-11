@@ -39,6 +39,7 @@ export async function findMany(input: AthleteProfilesDTO) {
     name,
     gender,
     affiliation,
+    beltLevels,
     beltLevelMin,
     beltLevelMax,
     weightMin,
@@ -81,14 +82,16 @@ export async function findMany(input: AthleteProfilesDTO) {
           },
         }
       : {}),
-    ...(beltLevelMin !== undefined || beltLevelMax !== undefined
-      ? {
-          beltLevel: {
-            ...(beltLevelMin !== undefined ? { gte: beltLevelMin } : {}),
-            ...(beltLevelMax !== undefined ? { lte: beltLevelMax } : {}),
-          },
-        }
-      : {}),
+    ...(beltLevels && beltLevels.length > 0
+      ? { beltLevel: { in: beltLevels } }
+      : beltLevelMin !== undefined || beltLevelMax !== undefined
+        ? {
+            beltLevel: {
+              ...(beltLevelMin !== undefined ? { gte: beltLevelMin } : {}),
+              ...(beltLevelMax !== undefined ? { lte: beltLevelMax } : {}),
+            },
+          }
+        : {}),
     ...(weightMin !== undefined || weightMax !== undefined
       ? {
           weight: {

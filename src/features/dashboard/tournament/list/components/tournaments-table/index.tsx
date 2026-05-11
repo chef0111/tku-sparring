@@ -48,7 +48,11 @@ export function TournamentsTable({
   if (isPending && !data) {
     return (
       <div className={cn('flex-1 overflow-auto', className)}>
-        <DataTableSkeleton columnCount={6} rowCount={10} />
+        <DataTableSkeleton
+          columnCount={6}
+          withViewOptions={false}
+          rowCount={10}
+        />
       </div>
     );
   }
