@@ -47,7 +47,7 @@ export function TournamentBuilderPage({ id }: TournamentBuilderPageProps) {
     );
   }
 
-  const tournament = tournamentQuery.data;
+  const tournament = tournamentQuery.data as TournamentData;
   const groups = groupsQuery.data ?? [];
 
   return (

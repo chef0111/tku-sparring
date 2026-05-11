@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { PlusIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -9,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Spinner } from '@/components/ui/spinner';
 import { useCreateTournament } from '@/queries/tournaments';
 
 interface CreateTournamentDialogProps {
@@ -60,7 +62,17 @@ export function CreateTournamentDialog({
           </div>
           <DialogFooter>
             <Button type="submit" disabled={!name.trim() || mutation.isPending}>
-              {mutation.isPending ? 'Creating...' : 'Create Tournament'}
+              {mutation.isPending ? (
+                <>
+                  <Spinner className="text-primary-foreground" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <PlusIcon />
+                  Create Tournament
+                </>
+              )}
             </Button>
           </DialogFooter>
         </form>

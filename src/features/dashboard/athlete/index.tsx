@@ -39,7 +39,7 @@ export default function AthletesManager() {
         </div>
       </SiteHeader>
 
-      <div className="p-4">
+      <div className="mx-auto w-full max-w-7xl p-6">
         <FeatureFlagsProvider>
           <AthleteTable
             columns={columns}

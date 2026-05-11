@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
   CreateTournamentSchema,
+  ListTournamentsSchema,
   UpdateTournamentSchema,
 } from './tournaments.dto';
 import {
@@ -13,9 +14,9 @@ import {
 import { authedProcedure } from '@/orpc/middleware';
 
 export const listTournaments = authedProcedure
-  .input(z.object({}))
-  .handler(async () => {
-    return findMany();
+  .input(ListTournamentsSchema)
+  .handler(async ({ input }) => {
+    return findMany(input);
   });
 
 export const getTournament = authedProcedure

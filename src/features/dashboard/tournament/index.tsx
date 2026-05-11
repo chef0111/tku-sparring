@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { ArrowLeft, Trophy } from 'lucide-react';
 import { TournamentViewer } from './viewer';
 import { TournamentViewerLoading } from './viewer/loading';
-import type { GroupData } from '../types';
+import type { GroupData, TournamentData } from '../types';
 import { Button } from '@/components/ui/button';
 import { useTournament } from '@/queries/tournaments';
 import { useGroups } from '@/queries/groups';
@@ -34,7 +34,7 @@ export function TournamentPage({ id }: TournamentPageProps) {
     );
   }
 
-  const tournament = tournamentQuery.data;
+  const tournament = tournamentQuery.data as TournamentData;
   const groups = groupsQuery.data ?? [];
 
   return (

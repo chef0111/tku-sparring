@@ -1,37 +1,87 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import { client, orpc } from '@/orpc/client';
+import type { ListTournamentsDTO } from '@/orpc/tournaments/tournaments.dto';
+import { client } from '@/orpc/client';
 
-export function tournamentsListQueryOptions() {
-  return orpc.tournament.list.queryOptions({ input: {} });
+const ALL_TOURNAMENTS_PER_PAGE = 1000;
+
+export const tournamentsDefaultListInput = {
+  page: 1,
+  perPage: 20,
+  status: [],
+  sortDir: 'desc',
+} satisfies ListTournamentsDTO;
+
+const tournamentsAllListInput = {
+  ...tournamentsDefaultListInput,
+  perPage: ALL_TOURNAMENTS_PER_PAGE,
+} satisfies ListTournamentsDTO;
+
+export function tournamentsListQueryOptions(input: ListTournamentsDTO) {
+  return queryOptions({
+    queryKey: ['tournament', 'list', input] as const,
+    queryFn: () => client.tournament.list(input),
+    staleTime: 30_000,
+    gcTime: 5 * 60 * 1000,
+  });
+}
+
+export function tournamentsAllQueryOptions() {
+  return queryOptions({
+    queryKey: ['tournament', 'list', 'all'] as const,
+    queryFn: () => client.tournament.list(tournamentsAllListInput),
+    staleTime: 30_000,
+    gcTime: 5 * 60 * 1000,
+  });
 }
 
 export function tournamentQueryOptions(id: string) {
-  return orpc.tournament.get.queryOptions({ input: { id } });
+  return queryOptions({
+    queryKey: ['tournament', 'get', id] as const,
+    queryFn: () => client.tournament.get({ id }),
+  });
 }
 
 export function useTournaments() {
-  return useQuery(tournamentsListQueryOptions());
+  return useQuery({
+    ...tournamentsAllQueryOptions(),
+    select: (data) => data.items,
+  });
+}
+
+export function useTournamentList(input: ListTournamentsDTO) {
+  return useQuery({
+    ...tournamentsListQueryOptions(input),
+    placeholderData: keepPreviousData,
+  });
 }
 
 export function useTournament(id: string) {
   return useQuery(tournamentQueryOptions(id));
 }
 
-export function useCreateTournament() {
+function useInvalidateTournaments() {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
+  return () => {
+    queryClient.invalidateQueries({ queryKey: ['tournament'] });
+  };
+}
+
+export function useCreateTournament() {
+  const invalidate = useInvalidateTournaments();
 
   return useMutation({
     mutationFn: (data: { name: string }) => client.tournament.create(data),
-    onSuccess: (tournament) => {
-      queryClient.invalidateQueries({ queryKey: ['tournament'] });
+    onSuccess: () => {
+      invalidate();
       toast.success('Tournament created successfully');
-      navigate({
-        to: '/dashboard/tournaments/$id/builder',
-        params: { id: tournament.id },
-      });
     },
     onError: (error) => {
       toast.error(error.message || 'Failed to create tournament');
@@ -40,13 +90,13 @@ export function useCreateTournament() {
 }
 
 export function useUpdateTournament(options?: { onSuccess?: () => void }) {
-  const queryClient = useQueryClient();
+  const invalidate = useInvalidateTournaments();
 
   return useMutation({
     mutationFn: (data: { id: string; name: string }) =>
       client.tournament.update(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tournament'] });
+      invalidate();
       toast.success('Tournament updated');
       options?.onSuccess?.();
     },
@@ -54,14 +104,25 @@ export function useUpdateTournament(options?: { onSuccess?: () => void }) {
   });
 }
 
-export function useDeleteTournament() {
+interface UseDeleteTournamentOptions {
+  navigateAway?: boolean;
+  onSuccess?: () => void;
+}
+
+export function useDeleteTournament(options?: UseDeleteTournamentOptions) {
   const navigate = useNavigate();
+  const invalidate = useInvalidateTournaments();
+  const navigateAway = options?.navigateAway ?? true;
 
   return useMutation({
     mutationFn: (data: { id: string }) => client.tournament.delete(data),
     onSuccess: () => {
       toast.success('Tournament deleted');
-      navigate({ to: '/dashboard/tournaments' });
+      invalidate();
+      if (navigateAway) {
+        navigate({ to: '/dashboard/tournaments' });
+      }
+      options?.onSuccess?.();
     },
     onError: (err) => toast.error(err.message),
   });

@@ -1,65 +1,131 @@
 import type {
   CreateTournamentDTO,
+  ListTournamentsDTO,
   UpdateTournamentDTO,
 } from './tournaments.dto';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 
-export class TournamentDAL {
-  static async findMany() {
-    return await prisma.tournament.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: {
-        _count: {
-          select: { groups: true, matches: true, tournamentAthletes: true },
+type SortableField = 'name' | 'status' | 'athletes' | 'createdAt';
+
+const SORTABLE_FIELDS = new Set<SortableField>([
+  'name',
+  'status',
+  'athletes',
+  'createdAt',
+]);
+
+function toSortField(field?: string): SortableField {
+  if (field && SORTABLE_FIELDS.has(field as SortableField))
+    return field as SortableField;
+  return 'createdAt';
+}
+
+function toOrderBy(
+  field?: string,
+  direction: Prisma.SortOrder = 'desc'
+): Prisma.TournamentOrderByWithRelationInput {
+  switch (toSortField(field)) {
+    case 'athletes':
+      return {
+        tournamentAthletes: {
+          _count: direction,
         },
-      },
-    });
-  }
-
-  static async findById(id: string) {
-    return await prisma.tournament.findUnique({
-      where: { id },
-      include: {
-        groups: {
-          include: {
-            _count: { select: { tournamentAthletes: true, matches: true } },
-          },
-        },
-        _count: {
-          select: { groups: true, matches: true, tournamentAthletes: true },
-        },
-      },
-    });
-  }
-
-  static async create(data: CreateTournamentDTO) {
-    return await prisma.tournament.create({ data });
-  }
-
-  static async update(id: string, data: Omit<UpdateTournamentDTO, 'id'>) {
-    return await prisma.tournament.update({
-      where: { id },
-      data,
-    });
-  }
-
-  static async delete(id: string) {
-    return await prisma.tournament.delete({ where: { id } });
+      };
+    case 'name':
+      return { name: direction };
+    case 'status':
+      return { status: direction };
+    case 'createdAt':
+    default:
+      return { createdAt: direction };
   }
 }
 
-export const findMany = (...args: Parameters<typeof TournamentDAL.findMany>) =>
-  TournamentDAL.findMany(...args);
+export async function findMany(input: ListTournamentsDTO) {
+  const {
+    page = 1,
+    perPage = 20,
+    query,
+    name,
+    status,
+    sort,
+    sortDir = 'desc',
+  } = input;
 
-export const findById = (...args: Parameters<typeof TournamentDAL.findById>) =>
-  TournamentDAL.findById(...args);
+  const filters: Array<Prisma.TournamentWhereInput> = [];
 
-export const create = (...args: Parameters<typeof TournamentDAL.create>) =>
-  TournamentDAL.create(...args);
+  if (query) {
+    filters.push({
+      name: { contains: query, mode: 'insensitive' },
+    });
+  }
 
-export const update = (...args: Parameters<typeof TournamentDAL.update>) =>
-  TournamentDAL.update(...args);
+  if (name) {
+    filters.push({
+      name: { contains: name, mode: 'insensitive' },
+    });
+  }
 
-export const deleteTournament = (
-  ...args: Parameters<typeof TournamentDAL.delete>
-) => TournamentDAL.delete(...args);
+  if (status && status.length > 0) {
+    filters.push({
+      status: { in: status },
+    });
+  }
+
+  const where =
+    filters.length > 0
+      ? ({ AND: filters } satisfies Prisma.TournamentWhereInput)
+      : undefined;
+
+  const [items, total] = await Promise.all([
+    prisma.tournament.findMany({
+      where,
+      orderBy: toOrderBy(sort, sortDir),
+      skip: (page - 1) * perPage,
+      take: perPage,
+      include: {
+        _count: {
+          select: { groups: true, matches: true, tournamentAthletes: true },
+        },
+      },
+    }),
+    prisma.tournament.count({ where }),
+  ]);
+
+  return { items, total };
+}
+
+export async function findById(id: string) {
+  return await prisma.tournament.findUnique({
+    where: { id },
+    include: {
+      groups: {
+        include: {
+          _count: { select: { tournamentAthletes: true, matches: true } },
+        },
+      },
+      _count: {
+        select: { groups: true, matches: true, tournamentAthletes: true },
+      },
+    },
+  });
+}
+
+export async function create(data: CreateTournamentDTO) {
+  return await prisma.tournament.create({ data });
+}
+
+export async function update(
+  id: string,
+  data: Omit<UpdateTournamentDTO, 'id'>
+) {
+  return await prisma.tournament.update({
+    where: { id },
+    data,
+  });
+}
+
+export async function deleteTournament(id: string) {
+  return await prisma.tournament.delete({ where: { id } });
+}
