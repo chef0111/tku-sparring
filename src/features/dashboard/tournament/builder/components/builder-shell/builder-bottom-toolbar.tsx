@@ -30,6 +30,8 @@ interface BuilderBottomToolbarProps {
   leasedByMeCount: number;
   totalGroups: number;
   readOnly: boolean;
+  isRefreshing?: boolean;
+  canCompleteTournament?: boolean;
   onRefresh?: () => void;
   onAutoAssignAll?: () => void;
   onLifecycle?: () => void;
@@ -56,11 +58,47 @@ function DisabledWhenReadOnly({
   );
 }
 
+function LifecycleButtonWrapper({
+  readOnly,
+  blockedByReadiness,
+  children,
+}: {
+  readOnly: boolean;
+  blockedByReadiness: boolean;
+  children: React.ReactElement;
+}) {
+  if (readOnly) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex">{children}</span>
+        </TooltipTrigger>
+        <TooltipContent>Tournament completed</TooltipContent>
+      </Tooltip>
+    );
+  }
+  if (blockedByReadiness) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex">{children}</span>
+        </TooltipTrigger>
+        <TooltipContent>
+          All groups must have winners before completing.
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+  return children;
+}
+
 export function BuilderBottomToolbar({
   tournament,
   leasedByMeCount,
   totalGroups,
   readOnly,
+  isRefreshing,
+  canCompleteTournament,
   onRefresh,
   onAutoAssignAll,
   onLifecycle,
@@ -73,6 +111,8 @@ export function BuilderBottomToolbar({
   const lifecycleLabel =
     status === 'draft' ? 'Activate' : 'Complete tournament';
   const LifecycleIcon = status === 'draft' ? PlayCircle : CheckCircle2;
+  const lifecycleBlockedByReadiness =
+    status === 'active' && canCompleteTournament === false;
 
   const leaseDisabled = totalGroups === 0;
 
@@ -111,9 +151,12 @@ export function BuilderBottomToolbar({
             variant="ghost"
             size="sm"
             onClick={() => onRefresh?.()}
+            disabled={isRefreshing}
             className="gap-2"
           >
-            <RefreshCw className="size-4" />
+            <RefreshCw
+              className={isRefreshing ? 'size-4 animate-spin' : 'size-4'}
+            />
             <span>Refresh</span>
           </Button>
 
@@ -131,18 +174,21 @@ export function BuilderBottomToolbar({
           </DisabledWhenReadOnly>
 
           {showLifecycle && (
-            <DisabledWhenReadOnly readOnly={readOnly}>
+            <LifecycleButtonWrapper
+              readOnly={readOnly}
+              blockedByReadiness={lifecycleBlockedByReadiness}
+            >
               <Button
                 variant="ghost"
                 size="sm"
-                disabled={readOnly}
+                disabled={readOnly || lifecycleBlockedByReadiness}
                 onClick={() => onLifecycle?.()}
                 className="gap-2"
               >
                 <LifecycleIcon className="size-4" />
                 <span>{lifecycleLabel}</span>
               </Button>
-            </DisabledWhenReadOnly>
+            </LifecycleButtonWrapper>
           )}
         </div>
 

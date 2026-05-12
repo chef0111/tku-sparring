@@ -36,7 +36,7 @@ export function BuilderHeader({
       <Tabs
         value={tab}
         onValueChange={(v) => onTabChange(v as 'groups' | 'brackets')}
-        className="absolute top-2 left-1/2 h-10 -translate-x-1/2"
+        className="absolute top-2.5 left-1/2 h-10 -translate-x-1/2"
       >
         <TabsList className="bg-sidebar border-2 p-0">
           <TabsTrigger

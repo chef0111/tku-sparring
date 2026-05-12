@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { SaveIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -10,6 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useUpdateTournament } from '@/queries/tournaments';
+import { Spinner } from '@/components/ui/spinner';
 
 interface EditTournamentDialogProps {
   open: boolean;
@@ -58,8 +60,26 @@ export function EditTournamentDialog({
             />
           </div>
           <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="h-9.5"
+            >
+              Cancel
+            </Button>
             <Button type="submit" disabled={!name.trim() || mutation.isPending}>
-              {mutation.isPending ? 'Saving...' : 'Save'}
+              {mutation.isPending ? (
+                <>
+                  <Spinner className="text-primary-foreground" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <SaveIcon />
+                  <span>Save</span>
+                </>
+              )}
             </Button>
           </DialogFooter>
         </form>
