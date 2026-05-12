@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import { getOrCreateStoredDeviceId } from './use-device-id';
 
+/** Satisfies `Crypto['randomUUID']` return type in tests (plain `string` is not assignable). */
+const mockRandomUuid = (value: string) =>
+  value as ReturnType<Crypto['randomUUID']>;
+
+const generatedUuid = mockRandomUuid('11111111-1111-4111-8111-111111111111');
+
 describe('getOrCreateStoredDeviceId', () => {
   it('returns the existing stored device id without generating a new one', () => {
     const storage = {
@@ -8,7 +14,7 @@ describe('getOrCreateStoredDeviceId', () => {
       setItem: vi.fn(),
     };
     const crypto = {
-      randomUUID: vi.fn(() => 'device-generated'),
+      randomUUID: vi.fn(() => generatedUuid),
     };
 
     const result = getOrCreateStoredDeviceId(storage, crypto);
@@ -25,15 +31,15 @@ describe('getOrCreateStoredDeviceId', () => {
       setItem: vi.fn(),
     };
     const crypto = {
-      randomUUID: vi.fn(() => 'device-generated'),
+      randomUUID: vi.fn(() => generatedUuid),
     };
 
     const result = getOrCreateStoredDeviceId(storage, crypto);
 
-    expect(result).toBe('device-generated');
+    expect(result).toBe(generatedUuid);
     expect(storage.setItem).toHaveBeenCalledWith(
       'tku-device-id',
-      'device-generated'
+      generatedUuid
     );
   });
 
@@ -45,12 +51,12 @@ describe('getOrCreateStoredDeviceId', () => {
       }),
     };
     const crypto = {
-      randomUUID: vi.fn(() => 'device-generated'),
+      randomUUID: vi.fn(() => generatedUuid),
     };
 
     const result = getOrCreateStoredDeviceId(storage, crypto);
 
-    expect(result).toBe('device-generated');
+    expect(result).toBe(generatedUuid);
     expect(crypto.randomUUID).toHaveBeenCalledTimes(1);
   });
 });
