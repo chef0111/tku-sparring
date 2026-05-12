@@ -33,7 +33,7 @@ export function TournamentCard({
   const row = adaptToRow(tournament);
 
   return (
-    <Card className="group bg-card hover:border-foreground/30 hover:bg-muted/30 relative gap-0 rounded-md border p-4 transition-colors">
+    <Card className="group bg-popover/70 relative gap-0 rounded-lg border-none p-0 ring-0">
       {onRowAction ? (
         <div className="absolute top-1 right-1 z-20 p-0">
           <TournamentsActionMenu options={{ onRowAction }} row={row} />
@@ -44,7 +44,7 @@ export function TournamentCard({
         params={{ id: tournament.id }}
         aria-label={`Open ${tournament.name}`}
       >
-        <CardContent className="space-y-4 p-0">
+        <CardContent className="hover:border-primary/30 bg-card hover:bg-muted/30 gap-0 space-y-4 rounded-lg border p-4 transition-colors">
           <CardHeader className="gap-1 p-0">
             <CardTitle className="truncate font-semibold">
               {tournament.name}
@@ -58,16 +58,16 @@ export function TournamentCard({
             {tournament._count.tournamentAthletes} athletes ·{' '}
             {tournament._count.matches} matches
           </p>
-          <CardFooter className="relative flex w-full items-center justify-between p-0">
-            <TournamentStatusPill status={tournament.status} />
-            <span className="text-muted-foreground text-xs">
-              {formatDistanceToNow(new Date(tournament.createdAt), {
-                addSuffix: true,
-              })}
-            </span>
-          </CardFooter>
         </CardContent>
       </Link>
+      <CardFooter className="relative flex w-full items-center justify-between p-2">
+        <TournamentStatusPill status={tournament.status} />
+        <span className="text-muted-foreground text-xs">
+          {formatDistanceToNow(new Date(tournament.createdAt), {
+            addSuffix: true,
+          })}
+        </span>
+      </CardFooter>
     </Card>
   );
 }
