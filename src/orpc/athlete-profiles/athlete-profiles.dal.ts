@@ -9,27 +9,6 @@ import { filterColumns } from '@/lib/data-table/filter-columns';
 import { athleteProfileFilterMap } from '@/lib/data-table/mappings/athlete-profiles';
 import { getValidFilters } from '@/lib/data-table/utils';
 
-type SortableField =
-  | 'name'
-  | 'beltLevel'
-  | 'weight'
-  | 'affiliation'
-  | 'createdAt';
-
-const SORTABLE_FIELDS = new Set<SortableField>([
-  'name',
-  'beltLevel',
-  'weight',
-  'affiliation',
-  'createdAt',
-]);
-
-function toSortField(field?: string): SortableField {
-  if (field && SORTABLE_FIELDS.has(field as SortableField))
-    return field as SortableField;
-  return 'createdAt';
-}
-
 export async function findMany(input: AthleteProfilesDTO) {
   const {
     page,
@@ -44,8 +23,7 @@ export async function findMany(input: AthleteProfilesDTO) {
     beltLevelMax,
     weightMin,
     weightMax,
-    sort,
-    sortDir,
+    sorting,
     filterFlag,
     filters,
     joinOperator,
@@ -104,7 +82,12 @@ export async function findMany(input: AthleteProfilesDTO) {
 
   const where = advancedTable ? advancedWhere : legacyWhere;
 
-  const orderBy = { [toSortField(sort)]: sortDir ?? 'desc' };
+  const orderBy =
+    sorting.length > 0
+      ? sorting.map((s) => ({
+          [s.id]: s.desc ? ('desc' as const) : ('asc' as const),
+        }))
+      : [{ createdAt: 'desc' as const }];
 
   const [rows, total] = await Promise.all([
     prisma.athleteProfile.findMany({

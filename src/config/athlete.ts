@@ -1,3 +1,5 @@
+import type { AthleteProfilesDTO } from '@/orpc/athlete-profiles/athlete-profiles.dto';
+
 export const BELT_LEVELS = [
   { value: 0, label: 'White I' },
   { value: 1, label: 'White II' },
@@ -29,9 +31,15 @@ export function getGenderLabel(gender: string): string {
 
 export const TABLE_HEADER_MAP: Record<string, string> = {
   'Athlete ID': 'athleteCode',
+  'Athlete Name': 'name',
+  Me: 'name',
   Name: 'name',
   Gender: 'gender',
   'Belt level': 'beltLevel',
   Weight: 'weight',
   Affiliation: 'affiliation',
 };
+
+export const DEFAULT_SORTING: AthleteProfilesDTO['sorting'] = [
+  { id: 'beltLevel', desc: true },
+];

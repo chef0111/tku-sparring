@@ -16,8 +16,12 @@ export function getTournamentsTableColumns(
     {
       id: 'name',
       accessorKey: 'name',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Tournament" />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader
+          column={column}
+          state={table.getState()}
+          label="Tournament"
+        />
       ),
       cell: ({ row }) => (
         <div className="flex min-w-0 flex-col">
@@ -36,8 +40,12 @@ export function getTournamentsTableColumns(
     {
       id: 'status',
       accessorKey: 'status',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Status" />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader
+          column={column}
+          state={table.getState()}
+          label="Status"
+        />
       ),
       cell: ({ row }) => <TournamentStatusPill status={row.original.status} />,
       maxSize: 140,
@@ -50,8 +58,12 @@ export function getTournamentsTableColumns(
     {
       id: 'groups',
       accessorFn: (row) => row._count.groups,
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Groups" />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader
+          column={column}
+          state={table.getState()}
+          label="Groups"
+        />
       ),
       cell: ({ row }) => (
         <span className="tabular-nums">{row.original._count.groups}</span>
@@ -63,8 +75,12 @@ export function getTournamentsTableColumns(
     {
       id: 'athletes',
       accessorFn: (row) => row._count.tournamentAthletes,
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Athletes" />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader
+          column={column}
+          state={table.getState()}
+          label="Athletes"
+        />
       ),
       cell: ({ row }) => (
         <span className="tabular-nums">
@@ -78,8 +94,12 @@ export function getTournamentsTableColumns(
     {
       id: 'matches',
       accessorFn: (row) => row._count.matches,
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Matches" />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader
+          column={column}
+          state={table.getState()}
+          label="Matches"
+        />
       ),
       cell: ({ row }) => (
         <span className="tabular-nums">{row.original._count.matches}</span>
@@ -91,8 +111,12 @@ export function getTournamentsTableColumns(
     {
       id: 'createdAt',
       accessorKey: 'createdAt',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Created" />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader
+          column={column}
+          state={table.getState()}
+          label="Created"
+        />
       ),
       cell: ({ row }) => (
         <span className="text-muted-foreground text-sm">

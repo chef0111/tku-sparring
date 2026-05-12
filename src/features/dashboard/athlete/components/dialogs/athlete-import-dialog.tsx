@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { UserPlus } from 'lucide-react';
 import type { CreateAthleteProfileDTO } from '@/orpc/athlete-profiles/athlete-profiles.dto';
 import { parseImportFile } from '@/lib/data-table/import';
 import { client } from '@/orpc/client';
@@ -15,6 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
 
 interface AthleteRowValues {
   athleteCode: string;
@@ -135,9 +137,17 @@ export function AthleteImportDialog({
             disabled={!preview || preview.length === 0 || isImporting}
             onClick={handleImport}
           >
-            {isImporting
-              ? 'Importing...'
-              : `Import ${preview?.length ?? 0} Athletes`}
+            {isImporting ? (
+              <>
+                <Spinner className="text-primary-foreground" />
+                <span>Importing...</span>
+              </>
+            ) : (
+              <>
+                <UserPlus />
+                <span>Import {preview?.length ?? 0} Athletes</span>
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,7 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
 import { describe, expect, it } from 'vitest';
-import { leasesQueryOptions, setLeaseSnapshotInCache } from './leases';
-import type { LeaseSnapshot } from './leases';
+import { leasesQueryOptions, setLeaseSnapshotInCache } from '../leases';
+import type { LeaseSnapshot } from '../leases';
 
 function createSnapshot(id: string): LeaseSnapshot {
   return [

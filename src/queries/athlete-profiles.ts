@@ -12,6 +12,7 @@ import type {
   CreateAthleteProfileDTO,
   UpdateAthleteProfileDTO,
 } from '@/orpc/athlete-profiles/athlete-profiles.dto';
+import { DEFAULT_SORTING } from '@/config/athlete';
 import { client } from '@/orpc/client';
 
 export const athleteProfilesDefaultListInput = {
@@ -19,7 +20,7 @@ export const athleteProfilesDefaultListInput = {
   perPage: 10,
   filters: [],
   joinOperator: 'and',
-  sortDir: 'asc',
+  sorting: DEFAULT_SORTING,
 } satisfies AthleteProfilesDTO;
 
 export function athleteProfilesQueryOptions(input: AthleteProfilesDTO) {

@@ -41,6 +41,10 @@ export function TournamentsTable({
     data: (data?.items ?? []) as Array<TournamentListItem>,
     columns,
     pageCount: Math.max(1, Math.ceil((data?.total ?? 0) / query.perPage)),
+    initialState: {
+      sorting: [{ id: 'createdAt', desc: true }],
+      columnPinning: { right: ['actions'] },
+    },
     shallow: true,
     clearOnDefault: true,
   });

@@ -11,6 +11,7 @@ import {
   getSortingStateParser,
 } from '@/lib/data-table/parsers';
 import { parseRangeParam } from '@/lib/data-table/utils';
+import { DEFAULT_SORTING } from '@/config/athlete';
 
 const ARRAY_SEPARATOR = ',';
 
@@ -51,7 +52,7 @@ export function useAthleteTableQuery() {
   const [sort] = useQueryState(
     'sort',
     getSortingStateParser<AthleteProfileData>(SORTABLE_COLUMN_IDS).withDefault(
-      []
+      DEFAULT_SORTING
     )
   );
   const [filters] = useQueryState(

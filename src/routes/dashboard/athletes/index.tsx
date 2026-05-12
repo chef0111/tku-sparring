@@ -30,7 +30,7 @@ export const Route = createFileRoute('/dashboard/athletes/')({
       </SiteHeader>
       <div className="p-4">
         <Skeleton className="mb-2 h-7 w-64" />
-        <DataTableSkeleton columnCount={7} rowCount={10} />
+        <DataTableSkeleton columnCount={7} filterCount={4} rowCount={10} />
       </div>
     </div>
   ),

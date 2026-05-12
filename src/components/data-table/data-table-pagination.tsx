@@ -75,7 +75,7 @@ export function DataTablePagination<TData>({
             size="icon"
             className="hidden size-8 lg:flex"
             onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
+            disabled={state.pagination.pageIndex <= 0}
           >
             <ChevronsLeft />
           </Button>
@@ -85,7 +85,7 @@ export function DataTablePagination<TData>({
             size="icon"
             className="size-8"
             onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            disabled={state.pagination.pageIndex <= 0}
           >
             <ChevronLeft />
           </Button>
@@ -95,7 +95,7 @@ export function DataTablePagination<TData>({
             size="icon"
             className="size-8"
             onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            disabled={state.pagination.pageIndex >= table.getPageCount() - 1}
           >
             <ChevronRight />
           </Button>
@@ -105,7 +105,7 @@ export function DataTablePagination<TData>({
             size="icon"
             className="hidden size-8 lg:flex"
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
+            disabled={state.pagination.pageIndex >= table.getPageCount() - 1}
           >
             <ChevronsRight />
           </Button>

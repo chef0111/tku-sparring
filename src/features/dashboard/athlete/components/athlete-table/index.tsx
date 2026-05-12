@@ -8,10 +8,12 @@ import { AthletesActionBar } from './athletes-action-bar';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { AthleteProfileData } from '@/features/dashboard/types';
 
+import type { AthleteProfilesDTO } from '@/orpc/athlete-profiles/athlete-profiles.dto';
 import { useAthleteProfiles } from '@/queries/athlete-profiles';
 import { useFeatureFlags } from '@/contexts/feature-flags';
 import { useDataTable } from '@/hooks/use-data-table';
 import { exportTableToCSV } from '@/lib/data-table/export';
+import { DEFAULT_SORTING } from '@/config/athlete';
 import { cn } from '@/lib/utils';
 
 import { DataTable } from '@/components/data-table/data-table';
@@ -61,8 +63,7 @@ export function AthleteTable({
     beltLevels: query.beltLevels,
     weightMin: query.weightRange?.[0],
     weightMax: query.weightRange?.[1],
-    sort: query.sort?.[0]?.id ?? undefined,
-    sortDir: query.sort?.[0]?.desc ? 'desc' : 'asc',
+    sorting: query.sort as AthleteProfilesDTO['sorting'],
     filterFlag: filterFlag ?? undefined,
     filters: query.filters,
     joinOperator: query.joinOperator,
@@ -79,7 +80,7 @@ export function AthleteTable({
     columns,
     pageCount: Math.ceil((data?.total ?? 0) / query.perPage),
     initialState: {
-      sorting: [{ id: 'beltLevel', desc: true }],
+      sorting: DEFAULT_SORTING,
       columnPinning: { right: ['actions'] },
     },
     shallow: true,
