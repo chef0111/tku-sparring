@@ -1,4 +1,6 @@
+import { Prisma } from '@prisma/client';
 import { recordTournamentActivity } from '../activity/tournament-activity.dal';
+import { TournamentStatusSchema } from './tournaments.dto';
 import type {
   CreateTournamentDTO,
   ListTournamentsDTO,
@@ -6,7 +8,6 @@ import type {
   TournamentStatusDTO,
   UpdateTournamentDTO,
 } from './tournaments.dto';
-import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 
 type SortableField = 'name' | 'status' | 'athletes' | 'createdAt';
@@ -46,13 +47,23 @@ function toOrderBy(
 }
 
 type TournamentLookupDatabase = Pick<typeof prisma, 'match' | 'tournament'>;
-type TournamentStatusDatabase = Pick<
-  typeof prisma,
-  '$transaction' | 'match' | 'tournament' | 'tournamentActivity'
->;
 
-type TournamentWithCounts = NonNullable<
-  Awaited<ReturnType<typeof prisma.tournament.findUnique>>
+const findTournamentWithLifecycleArgs =
+  Prisma.validator<Prisma.TournamentDefaultArgs>()({
+    include: {
+      groups: {
+        include: {
+          _count: { select: { tournamentAthletes: true, matches: true } },
+        },
+      },
+      _count: {
+        select: { groups: true, matches: true, tournamentAthletes: true },
+      },
+    },
+  });
+
+type TournamentWithLifecyclePayload = Prisma.TournamentGetPayload<
+  typeof findTournamentWithLifecycleArgs
 >;
 
 const NEXT_TOURNAMENT_STATUS: Record<
@@ -65,7 +76,7 @@ const NEXT_TOURNAMENT_STATUS: Record<
 };
 
 async function buildTournamentLifecycle(
-  tournament: TournamentWithCounts,
+  tournament: TournamentWithLifecyclePayload,
   db: TournamentLookupDatabase
 ) {
   const hasGroups = tournament.groups.length > 0;
@@ -97,16 +108,7 @@ async function findTournamentWithLifecycle(
 ) {
   const tournament = await db.tournament.findUnique({
     where: { id },
-    include: {
-      groups: {
-        include: {
-          _count: { select: { tournamentAthletes: true, matches: true } },
-        },
-      },
-      _count: {
-        select: { groups: true, matches: true, tournamentAthletes: true },
-      },
-    },
+    ...findTournamentWithLifecycleArgs,
   });
 
   if (!tournament) {
@@ -212,7 +214,8 @@ export async function setStatus(
       throw new Error('Tournament not found');
     }
 
-    assertNextStatus(tournament.status, input.status);
+    const currentStatus = TournamentStatusSchema.parse(tournament.status);
+    assertNextStatus(currentStatus, input.status);
 
     if (input.status === 'completed' && !tournament.lifecycle.canComplete) {
       throw new Error(
@@ -233,7 +236,7 @@ export async function setStatus(
         entityType: 'tournament',
         entityId: input.id,
         payload: {
-          fromStatus: tournament.status,
+          fromStatus: currentStatus,
           toStatus: input.status,
         },
       },
