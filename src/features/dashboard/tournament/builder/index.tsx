@@ -5,11 +5,10 @@ import { ArrowLeft, Trophy } from 'lucide-react';
 import { BuilderShell } from './components/builder-shell';
 import { BuilderHeader } from './components/builder-shell/builder-header';
 import { BuilderBottomToolbar } from './components/builder-shell/builder-bottom-toolbar';
-import { AddGroupDialog } from './components/dialogs/add-group-dialog';
 import { EditTournamentDialog } from './components/dialogs/edit-tournament-dialog';
 import { DeleteTournamentDialog } from './components/dialogs/delete-tournament-dialog';
 import { useBuilderManagerQuery } from './hooks/use-builder-manager-query';
-import { GroupsTab } from './groups/groups-tab';
+import { GroupsTab } from './components/groups-tab';
 import { BracketsTab } from './brackets/brackets-tab';
 import type { GroupData, TournamentData } from '@/features/dashboard/types';
 import LoadingScreen from '@/components/navigation/loading';
@@ -82,13 +81,11 @@ function TournamentBuilder({
   const { tab } = useBuilderManagerQuery();
   const [, setTab] = useQueryState('tab', TAB_PARSER);
 
-  const [showAddGroup, setShowAddGroup] = React.useState(false);
   const [showEditTournament, setShowEditTournament] = React.useState(false);
   const [showDeleteTournament, setShowDeleteTournament] = React.useState(false);
 
   React.useEffect(() => {
     if (!isReadOnly) return;
-    setShowAddGroup(false);
     setShowEditTournament(false);
     setShowDeleteTournament(false);
   }, [isReadOnly]);
@@ -148,11 +145,6 @@ function TournamentBuilder({
         )}
       </div>
 
-      <AddGroupDialog
-        open={showAddGroup}
-        onOpenChange={setShowAddGroup}
-        tournamentId={tournamentId}
-      />
       <EditTournamentDialog
         open={showEditTournament}
         onOpenChange={setShowEditTournament}
