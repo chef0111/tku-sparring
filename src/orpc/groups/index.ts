@@ -1,10 +1,19 @@
 import { z } from 'zod';
-import { CreateGroupSchema, UpdateGroupSchema } from './groups.dto';
 import {
+  AssignAthleteSchema,
+  AutoAssignSchema,
+  CreateGroupSchema,
+  UnassignAthleteSchema,
+  UpdateGroupSchema,
+} from './groups.dto';
+import {
+  assignAthlete,
+  autoAssign,
   create,
   deleteGroup,
   findById,
   findByTournamentId,
+  unassignAthlete,
   update,
 } from './groups.dal';
 import { authedProcedure } from '@/orpc/middleware';
@@ -42,4 +51,22 @@ export const removeGroup = authedProcedure
   .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {
     return deleteGroup(input.id);
+  });
+
+export const autoAssignGroup = authedProcedure
+  .input(AutoAssignSchema)
+  .handler(async ({ input }) => {
+    return autoAssign(input);
+  });
+
+export const assignAthleteToGroup = authedProcedure
+  .input(AssignAthleteSchema)
+  .handler(async ({ input }) => {
+    return assignAthlete(input);
+  });
+
+export const unassignAthleteFromGroup = authedProcedure
+  .input(UnassignAthleteSchema)
+  .handler(async ({ input }) => {
+    return unassignAthlete(input);
   });

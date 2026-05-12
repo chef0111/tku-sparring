@@ -68,3 +68,30 @@ export const EditAthleteSchema = z.object({
     .max(100, 'Weight must be less than 100kg'),
   affiliation: z.string().min(1, 'Affiliation is required'),
 });
+
+export const GroupConstraintsSchema = z.object({
+  gender: z
+    .enum(['M', 'F'], { message: 'Gender must be Male or Female' })
+    .nullable()
+    .optional(),
+  beltMin: z.number().int().min(0).max(10).nullable().optional(),
+  beltMax: z.number().int().min(0).max(10).nullable().optional(),
+  weightMin: z.number().min(20).max(150).nullable().optional(),
+  weightMax: z.number().min(20).max(150).nullable().optional(),
+});
+
+export const GroupSettingsSchema = z.object({
+  name: z.string().min(1, 'Group name is required'),
+  gender: z.enum(['M', 'F']).nullable().optional(),
+  beltMin: z.number().int().min(0).max(10).nullable().optional(),
+  beltMax: z.number().int().min(0).max(10).nullable().optional(),
+  weightMin: z.number().min(20).max(150).nullable().optional(),
+  weightMax: z.number().min(20).max(150).nullable().optional(),
+  thirdPlaceMatch: z.boolean(),
+  arenaIndex: z.number().int().min(1),
+});
+
+export const MatchScoreSchema = z.object({
+  redWins: z.number().int().min(0).max(2),
+  blueWins: z.number().int().min(0).max(2),
+});

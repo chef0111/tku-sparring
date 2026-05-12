@@ -90,11 +90,18 @@ model Tournament {
 }
 
 model Group {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  name         String
-  tournamentId String   @db.ObjectId
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  tournamentId    String   @db.ObjectId
+  gender          String?
+  beltMin         Int?
+  beltMax         Int?
+  weightMin       Float?
+  weightMax       Float?
+  thirdPlaceMatch Boolean  @default(false)
+  arenaIndex      Int      @default(1)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   tournament         Tournament         @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   controlLease       GroupControlLease?
@@ -106,16 +113,25 @@ model Group {
 }
 
 model Match {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  redAthleteId  String   @db.ObjectId
-  blueAthleteId String   @db.ObjectId
-  redWins       Int      @default(0)
-  blueWins      Int      @default(0)
-  winnerId      String?  @db.ObjectId
-  groupId       String   @db.ObjectId
-  tournamentId  String   @db.ObjectId
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                       String   @id @default(auto()) @map("_id") @db.ObjectId
+  round                    Int      @default(0)
+  matchIndex               Int      @default(0)
+  status                   String   @default("pending")
+  bestOf                   Int      @default(3)
+  redAthleteId             String?  @db.ObjectId
+  blueAthleteId            String?  @db.ObjectId
+  redTournamentAthleteId   String?  @db.ObjectId
+  blueTournamentAthleteId  String?  @db.ObjectId
+  redWins                  Int      @default(0)
+  blueWins                 Int      @default(0)
+  winnerId                 String?  @db.ObjectId
+  winnerTournamentAthleteId String? @db.ObjectId
+  redLocked                Boolean  @default(false)
+  blueLocked               Boolean  @default(false)
+  groupId                  String   @db.ObjectId
+  tournamentId             String   @db.ObjectId
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
 
   group      Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
   tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)

@@ -1,11 +1,29 @@
 import { z } from 'zod';
-import { CreateMatchSchema, UpdateMatchSchema } from './matches.dto';
+import {
+  CreateMatchSchema,
+  GenerateBracketSchema,
+  RegenerateBracketSchema,
+  SetLockSchema,
+  SetWinnerSchema,
+  ShuffleBracketSchema,
+  SwapParticipantsSchema,
+  UpdateMatchSchema,
+  UpdateScoreSchema,
+} from './matches.dto';
 import {
   create,
   deleteMatch,
   findByGroupId,
+  findById,
   findByTournamentId,
+  generateBracket,
+  regenerateBracket,
+  setLock,
+  setWinner,
+  shuffleBracket,
+  swapParticipants,
   update,
+  updateScore,
 } from './matches.dal';
 import { authedProcedure } from '@/orpc/middleware';
 
@@ -26,6 +44,14 @@ export const listMatches = authedProcedure
     throw new Error('Either groupId or tournamentId is required');
   });
 
+export const getMatch = authedProcedure
+  .input(z.object({ id: z.string() }))
+  .handler(async ({ input }) => {
+    const match = await findById(input.id);
+    if (!match) throw new Error('Match not found');
+    return match;
+  });
+
 export const createMatch = authedProcedure
   .input(CreateMatchSchema)
   .handler(async ({ input }) => {
@@ -43,4 +69,46 @@ export const removeMatch = authedProcedure
   .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {
     return deleteMatch(input.id);
+  });
+
+export const generateBracketEndpoint = authedProcedure
+  .input(GenerateBracketSchema)
+  .handler(async ({ input, context }) => {
+    return generateBracket(input, context.user.id);
+  });
+
+export const shuffleBracketEndpoint = authedProcedure
+  .input(ShuffleBracketSchema)
+  .handler(async ({ input, context }) => {
+    return shuffleBracket(input.groupId, context.user.id);
+  });
+
+export const regenerateBracketEndpoint = authedProcedure
+  .input(RegenerateBracketSchema)
+  .handler(async ({ input, context }) => {
+    return regenerateBracket(input.groupId, context.user.id);
+  });
+
+export const setLockEndpoint = authedProcedure
+  .input(SetLockSchema)
+  .handler(async ({ input }) => {
+    return setLock(input);
+  });
+
+export const updateScoreEndpoint = authedProcedure
+  .input(UpdateScoreSchema)
+  .handler(async ({ input, context }) => {
+    return updateScore(input, context.user.id);
+  });
+
+export const setWinnerEndpoint = authedProcedure
+  .input(SetWinnerSchema)
+  .handler(async ({ input, context }) => {
+    return setWinner(input, context.user.id);
+  });
+
+export const swapParticipantsEndpoint = authedProcedure
+  .input(SwapParticipantsSchema)
+  .handler(async ({ input, context }) => {
+    return swapParticipants(input, context.user.id);
   });
