@@ -298,7 +298,7 @@ function ParticipantRow({
             </p>
           </>
         ) : (
-          <p className="text-muted-foreground text-sm italic">BYE</p>
+          <p className="text-muted-foreground text-sm italic">EMPTY</p>
         )}
       </div>
       {isWinner && <Crown className="size-4 text-emerald-500" />}

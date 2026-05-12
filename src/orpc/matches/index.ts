@@ -1,16 +1,20 @@
 import { z } from 'zod';
 import {
+  AssignSlotSchema,
   CreateMatchSchema,
   GenerateBracketSchema,
   RegenerateBracketSchema,
+  ResetBracketSchema,
   SetLockSchema,
   SetWinnerSchema,
   ShuffleBracketSchema,
   SwapParticipantsSchema,
+  SwapSlotsSchema,
   UpdateMatchSchema,
   UpdateScoreSchema,
 } from './matches.dto';
 import {
+  assignSlot,
   create,
   deleteMatch,
   findByGroupId,
@@ -18,10 +22,12 @@ import {
   findByTournamentId,
   generateBracket,
   regenerateBracket,
+  resetBracket,
   setLock,
   setWinner,
   shuffleBracket,
   swapParticipants,
+  swapSlots,
   update,
   updateScore,
 } from './matches.dal';
@@ -89,6 +95,12 @@ export const regenerateBracketEndpoint = authedProcedure
     return regenerateBracket(input.groupId, context.user.id);
   });
 
+export const resetBracketEndpoint = authedProcedure
+  .input(ResetBracketSchema)
+  .handler(async ({ input, context }) => {
+    return resetBracket(input.groupId, context.user.id);
+  });
+
 export const setLockEndpoint = authedProcedure
   .input(SetLockSchema)
   .handler(async ({ input }) => {
@@ -111,4 +123,16 @@ export const swapParticipantsEndpoint = authedProcedure
   .input(SwapParticipantsSchema)
   .handler(async ({ input, context }) => {
     return swapParticipants(input, context.user.id);
+  });
+
+export const assignSlotEndpoint = authedProcedure
+  .input(AssignSlotSchema)
+  .handler(async ({ input, context }) => {
+    return assignSlot(input, context.user.id);
+  });
+
+export const swapSlotsEndpoint = authedProcedure
+  .input(SwapSlotsSchema)
+  .handler(async ({ input, context }) => {
+    return swapSlots(input, context.user.id);
   });

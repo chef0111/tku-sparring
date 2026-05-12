@@ -19,16 +19,19 @@ import {
 } from './groups';
 
 import {
+  assignSlotEndpoint,
   createMatch,
   generateBracketEndpoint,
   getMatch,
   listMatches,
   regenerateBracketEndpoint,
   removeMatch,
+  resetBracketEndpoint,
   setLockEndpoint,
   setWinnerEndpoint,
   shuffleBracketEndpoint,
   swapParticipantsEndpoint,
+  swapSlotsEndpoint,
   updateMatch,
   updateScoreEndpoint,
 } from './matches';
@@ -87,11 +90,14 @@ export default {
     setWinner: setWinnerEndpoint,
     swapParticipants: swapParticipantsEndpoint,
     setLock: setLockEndpoint,
+    assignSlot: assignSlotEndpoint,
+    swapSlots: swapSlotsEndpoint,
   },
   bracket: {
     generate: generateBracketEndpoint,
     shuffle: shuffleBracketEndpoint,
     regenerate: regenerateBracketEndpoint,
+    reset: resetBracketEndpoint,
   },
   athleteProfile: {
     list: listAthleteProfiles,

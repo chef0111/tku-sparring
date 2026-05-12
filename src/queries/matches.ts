@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type {
+  AssignSlotDTO,
   GenerateBracketDTO,
   SetLockDTO,
   SetWinnerDTO,
   SwapParticipantsDTO,
+  SwapSlotsDTO,
   UpdateScoreDTO,
 } from '@/orpc/matches/matches.dto';
 import { client } from '@/orpc/client';
@@ -40,10 +42,8 @@ export function useGenerateBracket(options?: { onSuccess?: () => void }) {
     mutationFn: (data: GenerateBracketDTO) => client.bracket.generate(data),
     onSuccess: () => {
       invalidate();
-      toast.success('Bracket generated');
       options?.onSuccess?.();
     },
-    onError: (err) => toast.error(err.message),
   });
 }
 
@@ -54,10 +54,8 @@ export function useShuffleBracket(options?: { onSuccess?: () => void }) {
     mutationFn: (data: { groupId: string }) => client.bracket.shuffle(data),
     onSuccess: () => {
       invalidate();
-      toast.success('Bracket shuffled');
       options?.onSuccess?.();
     },
-    onError: (err) => toast.error(err.message),
   });
 }
 
@@ -68,10 +66,44 @@ export function useRegenerateBracket(options?: { onSuccess?: () => void }) {
     mutationFn: (data: { groupId: string }) => client.bracket.regenerate(data),
     onSuccess: () => {
       invalidate();
-      toast.success('Bracket regenerated');
       options?.onSuccess?.();
     },
-    onError: (err) => toast.error(err.message),
+  });
+}
+
+export function useResetBracket(options?: { onSuccess?: () => void }) {
+  const invalidate = useInvalidateMatches();
+
+  return useMutation({
+    mutationFn: (data: { groupId: string }) => client.bracket.reset(data),
+    onSuccess: () => {
+      invalidate();
+      options?.onSuccess?.();
+    },
+  });
+}
+
+export function useAssignSlot(options?: { onSuccess?: () => void }) {
+  const invalidate = useInvalidateMatches();
+
+  return useMutation({
+    mutationFn: (data: AssignSlotDTO) => client.match.assignSlot(data),
+    onSuccess: () => {
+      invalidate();
+      options?.onSuccess?.();
+    },
+  });
+}
+
+export function useSwapSlots(options?: { onSuccess?: () => void }) {
+  const invalidate = useInvalidateMatches();
+
+  return useMutation({
+    mutationFn: (data: SwapSlotsDTO) => client.match.swapSlots(data),
+    onSuccess: () => {
+      invalidate();
+      options?.onSuccess?.();
+    },
   });
 }
 

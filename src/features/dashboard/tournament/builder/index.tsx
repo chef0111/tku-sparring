@@ -12,7 +12,7 @@ import { AutoAssignAllDialog } from './components/dialogs/auto-assign-all-dialog
 import { LifecycleConfirmDialog } from './components/dialogs/lifecycle-confirm-dialog';
 import { useBuilderManagerQuery } from './hooks/use-builder-manager-query';
 import { GroupsTab } from './components/groups-tab';
-import { BracketsTab } from './brackets/brackets-tab';
+import { BracketsTab } from './components/brackets-tab';
 import type { GroupData, TournamentData } from '@/features/dashboard/types';
 import type { LeaseSnapshot } from '@/queries/leases';
 import LoadingScreen from '@/components/navigation/loading';

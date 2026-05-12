@@ -90,6 +90,23 @@ export const RegenerateBracketSchema = z.object({
   groupId: z.string(),
 });
 
+export const ResetBracketSchema = z.object({
+  groupId: z.string(),
+});
+
+export const AssignSlotSchema = z.object({
+  matchId: z.string(),
+  side: z.enum(['red', 'blue']),
+  tournamentAthleteId: z.string().nullable(),
+});
+
+export const SwapSlotsSchema = z.object({
+  matchAId: z.string(),
+  sideA: z.enum(['red', 'blue']),
+  matchBId: z.string(),
+  sideB: z.enum(['red', 'blue']),
+});
+
 export type MatchStatusDTO = z.infer<typeof MatchStatusSchema>;
 export type MatchDTO = z.infer<typeof MatchSchema>;
 export type CreateMatchDTO = z.infer<typeof CreateMatchSchema>;
@@ -101,3 +118,6 @@ export type SetLockDTO = z.infer<typeof SetLockSchema>;
 export type GenerateBracketDTO = z.infer<typeof GenerateBracketSchema>;
 export type ShuffleBracketDTO = z.infer<typeof ShuffleBracketSchema>;
 export type RegenerateBracketDTO = z.infer<typeof RegenerateBracketSchema>;
+export type ResetBracketDTO = z.infer<typeof ResetBracketSchema>;
+export type AssignSlotDTO = z.infer<typeof AssignSlotSchema>;
+export type SwapSlotsDTO = z.infer<typeof SwapSlotsSchema>;

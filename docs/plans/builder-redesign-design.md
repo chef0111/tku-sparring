@@ -1,9 +1,10 @@
 ---
-name: builder-redesign-design
+
+## name: builder-redesign-design
+
 date: 2026-05-12
 status: design
 overview: Redesign the tournament Builder workspace (/dashboard/tournaments/$id/builder). Restructures the builder feature folder to the list/athlete pattern, replaces the left Sidebar with a horizontal bottom toolbar, rebuilds the Groups tab as a three-column workspace (athlete pool · group roster table · groups rail), and moves all tournament-athlete data fetching to server-side pagination/filtering/sorting.
----
 
 # Tournament Builder Redesign
 
@@ -150,9 +151,11 @@ Cluster details:
 
 1. **Lease summary** (left): Popover trigger. Trigger label `{leasedByMe}/{totalGroups} locked by you`. Popover body = list of group rows: name · status dot · holder (admin name or "available"). Disabled if `leases` is empty (no groups yet).
 2. **Quick actions** (center):
-   - `Refresh` — invalidates `['tournament']`, `['group']`, `['lease']`, `['tournamentAthlete']`. Spinner during refetch.
-   - `Auto-assign all` — opens `auto-assign-all-dialog`. Iterates groups (skipping groups with `_count.matches > 0`), calls `useAutoAssignGroup` per group, shows aggregated toast.
-   - `Lifecycle` — hidden when `status === 'completed'`. When `status === 'draft'`: label `Activate`, opens `lifecycle-confirm-dialog` w/ target=`active`. When `status === 'active'`: label `Complete tournament`, disabled until readiness derived from existing logic in viewer header, opens dialog w/ target=`completed`. Uses existing `tournament.setStatus` oRPC (Phase C, already shipped).
+
+- `Refresh` — invalidates `['tournament']`, `['group']`, `['lease']`, `['tournamentAthlete']`. Spinner during refetch.
+- `Auto-assign all` — opens `auto-assign-all-dialog`. Iterates groups (skipping groups with `_count.matches > 0`), calls `useAutoAssignGroup` per group, shows aggregated toast.
+- `Lifecycle` — hidden when `status === 'completed'`. When `status === 'draft'`: label `Activate`, opens `lifecycle-confirm-dialog` w/ target=`active`. When `status === 'active'`: label `Complete tournament`, disabled until readiness derived from existing logic in viewer header, opens dialog w/ target=`completed`. Uses existing `tournament.setStatus` oRPC (Phase C, already shipped).
+
 3. **Chrome** (right): `Edit Tournament` (ghost), `Delete` (ghost destructive, opens existing confirm dialog), `Back to Detail` (outline + ArrowLeft, `asChild` Link to `/dashboard/tournaments/$id`).
 
 Read-only behavior: Edit, Delete, Auto-assign all, Lifecycle disabled with tooltip "Tournament completed". Refresh + Lease summary + Back stay enabled.
@@ -251,7 +254,6 @@ Visual:
 `index.tsx`:
 
 - Header strip above table:
-
   ```
   Group A · Belt 7–9 · 50–60kg · M     [● Online · You]  [Take over]  [⚙ Settings]
   4 athletes · 0 violations · Arena 2
@@ -262,7 +264,6 @@ Visual:
   - `Take over` button visible when `leaseInfo?.leaseStatus === 'held_by_other'`.
   - `Settings` opens `GroupSettingsSheet`.
   - Second line: counts.
-
 - Uses `useDataTable` w/ controlled state from local `useState` for `pagination` and `sorting` (kept ephemeral — not in URL; resets on group switch).
 - Calls `useTournamentAthletes({ tournamentId, groupId: group.id, page, perPage, sorting })`.
 - Renders `DataTable` + `DataTableToolbar` + `DataTableSortList`. No row selection. No view options.
@@ -541,28 +542,34 @@ Existing `useDeleteTournament` already navigates away on success — keep behavi
 1. `bun run lint` clean.
 2. `bun run typecheck` clean.
 3. DAL test for `tournamentAthlete.list` exercises:
-   - `unassignedOnly: true` → only `groupId: null` rows.
-   - `groupId: 'X'` → only `groupId === 'X'` rows.
-   - `query` → name OR affiliation insensitive.
-   - `gender: ['M']`, `beltLevelMin/Max`, `weightMin/Max` work in combination.
-   - `sorting` honored.
-   - `page/perPage` produce correct `total` + sliced `items`.
+
+- `unassignedOnly: true` → only `groupId: null` rows.
+- `groupId: 'X'` → only `groupId === 'X'` rows.
+- `query` → name OR affiliation insensitive.
+- `gender: ['M']`, `beltLevelMin/Max`, `weightMin/Max` work in combination.
+- `sorting` honored.
+- `page/perPage` produce correct `total` + sliced `items`.
+
 4. Manual smoke (Groups tab):
-   - Create 2 groups; switch via rail; roster table reflects.
-   - Pool filters (search, gender, belt range, weight range) update URL and refetch.
-   - Pool infinite scroll: scroll past page 1, more rows load.
-   - Click `+` on pool row with no group selected → tooltip shown, disabled.
-   - Click `+` on pool row with group selected → athlete moves to roster table.
-   - Drag pool row onto a rail row of a different group → athlete moves there.
-   - Drag a roster row onto a different rail row → moves between groups.
-   - Roster table: sort by name/belt/weight, paginate.
-   - Out-of-range badge shows on rows violating group constraints; popover lists violations.
+
+- Create 2 groups; switch via rail; roster table reflects.
+- Pool filters (search, gender, belt range, weight range) update URL and refetch.
+- Pool infinite scroll: scroll past page 1, more rows load.
+- Click `+` on pool row with no group selected → tooltip shown, disabled.
+- Click `+` on pool row with group selected → athlete moves to roster table.
+- Drag pool row onto a rail row of a different group → athlete moves there.
+- Drag a roster row onto a different rail row → moves between groups.
+- Roster table: sort by name/belt/weight, paginate.
+- Out-of-range badge shows on rows violating group constraints; popover lists violations.
+
 5. Manual smoke (bottom toolbar):
-   - Refresh button shows spinner and re-fetches.
-   - Auto-assign all: dialog lists eligible + skipped groups; running assigns athletes and toasts a summary.
-   - Lifecycle: button label changes with status; confirm dialog opens; status updates.
-   - Lease popover lists groups with holders.
-   - Edit, Delete, Back behave as before.
+
+- Refresh button shows spinner and re-fetches.
+- Auto-assign all: dialog lists eligible + skipped groups; running assigns athletes and toasts a summary.
+- Lifecycle: button label changes with status; confirm dialog opens; status updates.
+- Lease popover lists groups with holders.
+- Edit, Delete, Back behave as before.
+
 6. Manual smoke (Brackets tab): still works; one-line callsite update verified.
 7. URL share: copy URL with `?tab=groups&group=<id>&q=phong` → opens same selection on a fresh tab.
 
@@ -578,5 +585,3 @@ Existing `useDeleteTournament` already navigates away on success — keep behavi
 - Brackets tab visual polish (handoff items).
 - Activity log toggle on bottom toolbar (waits on Phase G).
 - Virtualized pool list when list grows past a few hundred items.
-- Command palette and keyboard shortcuts on the builder.
-- Advanced filter flag on tournament-athlete list (filter columns + filter map mirroring `athleteProfileFilterMap`).

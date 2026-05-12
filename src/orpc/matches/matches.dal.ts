@@ -1,9 +1,11 @@
 import type {
+  AssignSlotDTO,
   CreateMatchDTO,
   GenerateBracketDTO,
   SetLockDTO,
   SetWinnerDTO,
   SwapParticipantsDTO,
+  SwapSlotsDTO,
   UpdateMatchDTO,
   UpdateScoreDTO,
 } from './matches.dto';
@@ -46,15 +48,20 @@ function nextPowerOfTwo(n: number): number {
   return p;
 }
 
-function standardSeedOrder(size: number): Array<number> {
-  if (size === 1) return [0];
-  const half = standardSeedOrder(size / 2);
-  return half.flatMap((i) => [i, size - 1 - i]);
+/** Uniform random permutation (Math.random). */
+function shuffleAthletePool<T>(items: Array<T>): Array<T> {
+  const a = [...items];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j]!, a[i]!];
+  }
+  return a;
 }
 
 export async function generateBracket(
   input: GenerateBracketDTO,
-  adminId: string
+  adminId: string,
+  options?: { skipActivity?: boolean }
 ) {
   const group = await prisma.group.findUnique({
     where: { id: input.groupId },
@@ -84,51 +91,19 @@ export async function generateBracket(
   }
 
   const bracketSize = nextPowerOfTwo(athletes.length);
-  const seedOrder = standardSeedOrder(bracketSize);
-
-  const seeded: Array<(typeof athletes)[0] | null> = new Array(
-    bracketSize
-  ).fill(null);
-
-  const shuffledAthletes = [...athletes];
-  for (let i = shuffledAthletes.length - 1; i > 0; i--) {
-    let j = i;
-    while (
-      j > 0 &&
-      shuffledAthletes[j]!.beltLevel === shuffledAthletes[j - 1]!.beltLevel &&
-      shuffledAthletes[j]!.weight === shuffledAthletes[j - 1]!.weight
-    ) {
-      j--;
-    }
-    if (j < i) {
-      const k = j + Math.floor(Math.random() * (i - j + 1));
-      [shuffledAthletes[i], shuffledAthletes[k]] = [
-        shuffledAthletes[k]!,
-        shuffledAthletes[i]!,
-      ];
-    }
-  }
-
-  for (let i = 0; i < shuffledAthletes.length; i++) {
-    seeded[seedOrder[i]!] = shuffledAthletes[i]!;
-  }
-
   const totalRounds = Math.log2(bracketSize);
   const matches: Array<CreateMatchDTO> = [];
 
   for (let matchIdx = 0; matchIdx < bracketSize / 2; matchIdx++) {
-    const redAthlete = seeded[matchIdx * 2] ?? null;
-    const blueAthlete = seeded[matchIdx * 2 + 1] ?? null;
-
     matches.push({
       round: 0,
       matchIndex: matchIdx,
       status: 'pending',
       bestOf: 3,
-      redTournamentAthleteId: redAthlete?.id ?? null,
-      blueTournamentAthleteId: blueAthlete?.id ?? null,
-      redAthleteId: redAthlete?.athleteProfileId ?? null,
-      blueAthleteId: blueAthlete?.athleteProfileId ?? null,
+      redTournamentAthleteId: null,
+      blueTournamentAthleteId: null,
+      redAthleteId: null,
+      blueAthleteId: null,
       redLocked: false,
       blueLocked: false,
       groupId: input.groupId,
@@ -173,11 +148,35 @@ export async function generateBracket(
     });
   }
 
-  const created = await Promise.all(
-    matches.map((m) => prisma.match.create({ data: m }))
-  );
+  await Promise.all(matches.map((m) => prisma.match.create({ data: m })));
 
-  const round0 = created.filter((m) => m.round === 0);
+  if (!options?.skipActivity) {
+    await recordTournamentActivity({
+      tournamentId: group.tournamentId,
+      adminId,
+      eventType: 'bracket.generate',
+      entityType: 'group',
+      entityId: input.groupId,
+      payload: {
+        athleteCount: athletes.length,
+        bracketSize,
+        mode: 'shell',
+      },
+    });
+  }
+
+  return findByGroupId(input.groupId);
+}
+
+async function applyRound0ByeAdvancement(
+  groupId: string,
+  tournamentId: string
+) {
+  const round0 = await prisma.match.findMany({
+    where: { groupId, round: 0 },
+    orderBy: { matchIndex: 'asc' },
+  });
+
   for (const match of round0) {
     const isBye =
       (match.redTournamentAthleteId && !match.blueTournamentAthleteId) ||
@@ -199,24 +198,9 @@ export async function generateBracket(
         },
       });
 
-      await advanceWinner(match.id, winnerId!, group.tournamentId);
+      await advanceWinner(match.id, winnerId!, tournamentId);
     }
   }
-
-  await recordTournamentActivity({
-    tournamentId: group.tournamentId,
-    adminId,
-    eventType: 'bracket.generate',
-    entityType: 'group',
-    entityId: input.groupId,
-    payload: {
-      athleteCount: athletes.length,
-      bracketSize,
-      matchCount: matches.length,
-    },
-  });
-
-  return findByGroupId(input.groupId);
 }
 
 async function advanceWinner(
@@ -259,6 +243,45 @@ async function advanceWinner(
   });
 }
 
+export async function resetBracket(groupId: string, adminId: string) {
+  const group = await prisma.group.findUnique({
+    where: { id: groupId },
+    include: { tournament: { select: { id: true, status: true } } },
+  });
+  if (!group) throw new Error('Group not found');
+  if (group.tournament.status !== 'draft') {
+    throw new Error('Reset only allowed in Draft status');
+  }
+
+  await prisma.match.updateMany({
+    where: { groupId },
+    data: {
+      redTournamentAthleteId: null,
+      blueTournamentAthleteId: null,
+      redAthleteId: null,
+      blueAthleteId: null,
+      redWins: 0,
+      blueWins: 0,
+      winnerId: null,
+      winnerTournamentAthleteId: null,
+      status: 'pending',
+      redLocked: false,
+      blueLocked: false,
+    },
+  });
+
+  await recordTournamentActivity({
+    tournamentId: group.tournamentId,
+    adminId,
+    eventType: 'bracket.reset',
+    entityType: 'group',
+    entityId: groupId,
+    payload: {},
+  });
+
+  return findByGroupId(groupId);
+}
+
 export async function shuffleBracket(groupId: string, adminId: string) {
   const group = await prisma.group.findUnique({
     where: { id: groupId },
@@ -269,7 +292,88 @@ export async function shuffleBracket(groupId: string, adminId: string) {
     throw new Error('Shuffle only allowed in Draft status');
   }
 
-  await prisma.match.deleteMany({ where: { groupId } });
+  const allMatches = await prisma.match.findMany({
+    where: { groupId },
+    orderBy: [{ round: 'asc' }, { matchIndex: 'asc' }],
+  });
+  if (allMatches.length === 0) {
+    throw new Error('No bracket yet. Generate a bracket first.');
+  }
+
+  const athletes = await prisma.tournamentAthlete.findMany({
+    where: { groupId },
+    orderBy: [{ beltLevel: 'desc' }, { weight: 'asc' }],
+  });
+
+  const lockedIds = new Set<string>();
+  const round0 = allMatches.filter((m) => m.round === 0);
+  round0.sort((a, b) => a.matchIndex - b.matchIndex);
+
+  for (const m of round0) {
+    if (m.redLocked && m.redTournamentAthleteId) {
+      lockedIds.add(m.redTournamentAthleteId);
+    }
+    if (m.blueLocked && m.blueTournamentAthleteId) {
+      lockedIds.add(m.blueTournamentAthleteId);
+    }
+  }
+
+  const pool = athletes.filter((a) => !lockedIds.has(a.id));
+  const shuffled = shuffleAthletePool(pool);
+
+  let si = 0;
+  for (const m of round0) {
+    let redTa = m.redTournamentAthleteId;
+    let blueTa = m.blueTournamentAthleteId;
+    let redProfile = m.redAthleteId;
+    let blueProfile = m.blueAthleteId;
+
+    if (!m.redLocked) {
+      const next = shuffled[si++] ?? null;
+      redTa = next?.id ?? null;
+      redProfile = next?.athleteProfileId ?? null;
+    }
+    if (!m.blueLocked) {
+      const next = shuffled[si++] ?? null;
+      blueTa = next?.id ?? null;
+      blueProfile = next?.athleteProfileId ?? null;
+    }
+
+    await prisma.match.update({
+      where: { id: m.id },
+      data: {
+        redTournamentAthleteId: redTa,
+        blueTournamentAthleteId: blueTa,
+        redAthleteId: redProfile,
+        blueAthleteId: blueProfile,
+        redWins: 0,
+        blueWins: 0,
+        winnerId: null,
+        winnerTournamentAthleteId: null,
+        status: 'pending',
+      },
+    });
+  }
+
+  const higher = allMatches.filter((m) => m.round >= 1);
+  for (const m of higher) {
+    await prisma.match.update({
+      where: { id: m.id },
+      data: {
+        redTournamentAthleteId: null,
+        blueTournamentAthleteId: null,
+        redAthleteId: null,
+        blueAthleteId: null,
+        redWins: 0,
+        blueWins: 0,
+        winnerId: null,
+        winnerTournamentAthleteId: null,
+        status: 'pending',
+      },
+    });
+  }
+
+  await applyRound0ByeAdvancement(groupId, group.tournamentId);
 
   await recordTournamentActivity({
     tournamentId: group.tournamentId,
@@ -280,7 +384,7 @@ export async function shuffleBracket(groupId: string, adminId: string) {
     payload: {},
   });
 
-  return generateBracket({ groupId }, adminId);
+  return findByGroupId(groupId);
 }
 
 export async function regenerateBracket(groupId: string, adminId: string) {
@@ -304,7 +408,7 @@ export async function regenerateBracket(groupId: string, adminId: string) {
     payload: {},
   });
 
-  return generateBracket({ groupId }, adminId);
+  return generateBracket({ groupId }, adminId, { skipActivity: true });
 }
 
 export async function setLock(input: SetLockDTO) {
@@ -317,6 +421,149 @@ export async function setLock(input: SetLockDTO) {
     where: { id: input.matchId },
     data,
   });
+}
+
+export async function assignSlot(input: AssignSlotDTO, _adminId: string) {
+  const match = await prisma.match.findUnique({
+    where: { id: input.matchId },
+    include: { group: { include: { tournament: true } } },
+  });
+  if (!match) throw new Error('Match not found');
+  if (match.group.tournament.status !== 'draft') {
+    throw new Error('Assign only allowed in Draft status');
+  }
+  if (match.round !== 0) {
+    throw new Error('Athletes can only be assigned to opening-round slots');
+  }
+
+  const locked = input.side === 'red' ? match.redLocked : match.blueLocked;
+  if (locked) {
+    throw new Error('That slot is locked');
+  }
+
+  if (input.tournamentAthleteId === null) {
+    const data =
+      input.side === 'red'
+        ? {
+            redTournamentAthleteId: null,
+            redAthleteId: null,
+          }
+        : {
+            blueTournamentAthleteId: null,
+            blueAthleteId: null,
+          };
+    return prisma.match.update({ where: { id: input.matchId }, data });
+  }
+
+  const ta = await prisma.tournamentAthlete.findUnique({
+    where: { id: input.tournamentAthleteId },
+  });
+  if (!ta) throw new Error('Tournament athlete not found');
+  if (ta.groupId !== match.groupId) {
+    throw new Error('Athlete does not belong to this bracket group');
+  }
+
+  const data =
+    input.side === 'red'
+      ? {
+          redTournamentAthleteId: ta.id,
+          redAthleteId: ta.athleteProfileId,
+        }
+      : {
+          blueTournamentAthleteId: ta.id,
+          blueAthleteId: ta.athleteProfileId,
+        };
+
+  return prisma.match.update({ where: { id: input.matchId }, data });
+}
+
+export async function swapSlots(input: SwapSlotsDTO, _adminId: string) {
+  const [a, b] = await Promise.all([
+    prisma.match.findUnique({
+      where: { id: input.matchAId },
+      include: { group: { include: { tournament: true } } },
+    }),
+    prisma.match.findUnique({
+      where: { id: input.matchBId },
+      include: { group: { include: { tournament: true } } },
+    }),
+  ]);
+  if (!a || !b) throw new Error('Match not found');
+  if (a.groupId !== b.groupId) {
+    throw new Error('Both slots must be in the same group');
+  }
+  if (a.group.tournament.status !== 'draft') {
+    throw new Error('Swap only allowed in Draft status');
+  }
+  if (a.round !== 0 || b.round !== 0) {
+    throw new Error('Can only swap opening-round slots');
+  }
+
+  const lockA = input.sideA === 'red' ? a.redLocked : a.blueLocked;
+  const lockB = input.sideB === 'red' ? b.redLocked : b.blueLocked;
+  if (lockA || lockB) {
+    throw new Error('Cannot swap a locked slot');
+  }
+
+  if (input.matchAId === input.matchBId) {
+    if (input.sideA === input.sideB) {
+      throw new Error('Invalid swap');
+    }
+    return prisma.match.update({
+      where: { id: a.id },
+      data: {
+        redTournamentAthleteId: a.blueTournamentAthleteId,
+        blueTournamentAthleteId: a.redTournamentAthleteId,
+        redAthleteId: a.blueAthleteId,
+        blueAthleteId: a.redAthleteId,
+      },
+    });
+  }
+
+  const aRedTa = a.redTournamentAthleteId;
+  const aBlueTa = a.blueTournamentAthleteId;
+  const aRedProfile = a.redAthleteId;
+  const aBlueProfile = a.blueAthleteId;
+  const bRedTa = b.redTournamentAthleteId;
+  const bBlueTa = b.blueTournamentAthleteId;
+  const bRedProfile = b.redAthleteId;
+  const bBlueProfile = b.blueAthleteId;
+
+  const aTa = input.sideA === 'red' ? aRedTa : aBlueTa;
+  const aProf = input.sideA === 'red' ? aRedProfile : aBlueProfile;
+  const bTa = input.sideB === 'red' ? bRedTa : bBlueTa;
+  const bProf = input.sideB === 'red' ? bRedProfile : bBlueProfile;
+
+  return prisma
+    .$transaction([
+      prisma.match.update({
+        where: { id: input.matchAId },
+        data:
+          input.sideA === 'red'
+            ? {
+                redTournamentAthleteId: bTa,
+                redAthleteId: bProf,
+              }
+            : {
+                blueTournamentAthleteId: bTa,
+                blueAthleteId: bProf,
+              },
+      }),
+      prisma.match.update({
+        where: { id: input.matchBId },
+        data:
+          input.sideB === 'red'
+            ? {
+                redTournamentAthleteId: aTa,
+                redAthleteId: aProf,
+              }
+            : {
+                blueTournamentAthleteId: aTa,
+                blueAthleteId: aProf,
+              },
+      }),
+    ])
+    .then((r) => r[1]!);
 }
 
 export async function updateScore(input: UpdateScoreDTO, adminId: string) {
