@@ -139,25 +139,47 @@ function ActiveGroupRoster({
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  const unassign = useUnassignAthlete();
+  const unassign = useUnassignAthlete({ suppressErrorToast: true });
   const assign = useAssignAthlete({ suppressErrorToast: true });
+
+  const unassignMutateAsyncRef = React.useRef(unassign.mutateAsync);
+  unassignMutateAsyncRef.current = unassign.mutateAsync;
+  const assignMutateAsyncRef = React.useRef(assign.mutateAsync);
+  assignMutateAsyncRef.current = assign.mutateAsync;
+
+  const groupRef = React.useRef(group);
+  groupRef.current = group;
+  const otherGroupsRef = React.useRef<Array<GroupData>>([]);
 
   const otherGroups = React.useMemo(
     () => groups.filter((g) => g.id !== group.id),
     [groups, group.id]
   );
+  otherGroupsRef.current = otherGroups;
+  const otherGroupsKey = otherGroups.map((g) => g.id).join(',');
 
   const columns = React.useMemo(
     () =>
       getGroupRosterColumns({
-        group,
+        group: groupRef.current,
         readOnly,
-        otherGroups,
-        onUnassign: (athleteId) =>
-          unassign.mutate({ tournamentAthleteId: athleteId }),
+        otherGroups: otherGroupsRef.current,
+        onUnassign: (athleteId) => {
+          void toast.promise(
+            unassignMutateAsyncRef.current({
+              tournamentAthleteId: athleteId,
+            }),
+            {
+              loading: 'Removing from group…',
+              success: 'Moved to unassigned',
+              error: (err) =>
+                err instanceof Error ? err.message : 'Could not unassign',
+            }
+          );
+        },
         onMove: (athleteId, targetGroupId) => {
           void toast.promise(
-            assign.mutateAsync({
+            assignMutateAsyncRef.current({
               groupId: targetGroupId,
               tournamentAthleteId: athleteId,
             }),
@@ -170,7 +192,7 @@ function ActiveGroupRoster({
           );
         },
       }),
-    [group, readOnly, otherGroups, unassign, assign]
+    [group.id, readOnly, otherGroupsKey]
   );
 
   const tableState = React.useMemo(

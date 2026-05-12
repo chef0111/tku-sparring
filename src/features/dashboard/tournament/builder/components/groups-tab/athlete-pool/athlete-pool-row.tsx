@@ -54,7 +54,7 @@ export function AthletePoolRow({
       type="button"
       size="icon"
       variant="ghost"
-      className="absolute top-6 right-2 z-100 size-7 shrink-0 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
+      className="absolute top-6 right-2 size-7 shrink-0 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
       onPointerDown={(e) => e.stopPropagation()}
       onClick={(e) => {
         e.stopPropagation();

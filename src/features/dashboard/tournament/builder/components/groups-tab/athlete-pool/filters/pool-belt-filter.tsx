@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { BELT_LEVELS, getBeltLabel } from '@/config/athlete';
+import { Label } from '@/components/ui/label';
 
 export interface PoolBeltFilterPatch {
   poolBeltMin?: number | null;
@@ -33,12 +34,16 @@ export function PoolBeltFilter({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="w-auto px-2 text-xs">
+        <Button
+          variant="outline"
+          size="sm"
+          className="min-w-12 border-dashed px-2 text-xs"
+        >
           Belt
           {(poolBeltMin != null || poolBeltMax != null) && (
             <Badge
               variant="secondary"
-              className="ml-1 max-w-28 truncate px-1 text-[10px]"
+              className="mx-0 max-w-28 truncate px-1 text-[10px]"
               title={
                 poolBeltMin != null && poolBeltMax != null
                   ? `${getBeltLabel(poolBeltMin)} – ${getBeltLabel(poolBeltMax)}`
@@ -59,11 +64,11 @@ export function PoolBeltFilter({
       <PopoverContent className="w-64 p-3" align="start">
         <div className="flex flex-col gap-3">
           <p className="text-xs font-medium">Belt range</p>
-          <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
             <div className="space-y-1">
-              <p className="text-muted-foreground text-[10px] font-medium">
+              <Label className="text-muted-foreground text-xs font-medium">
                 Min
-              </p>
+              </Label>
               <Select
                 value={poolBeltMin == null ? 'any' : String(poolBeltMin)}
                 onValueChange={(v) => {
@@ -79,10 +84,10 @@ export function PoolBeltFilter({
                   });
                 }}
               >
-                <SelectTrigger className="h-8 w-full text-xs">
+                <SelectTrigger className="h-8 w-28 text-xs">
                   <SelectValue placeholder="Any" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="min-w-28">
                   <SelectItem value="any">Any</SelectItem>
                   {BELT_LEVELS.map((b) => (
                     <SelectItem key={b.value} value={String(b.value)}>
@@ -93,9 +98,9 @@ export function PoolBeltFilter({
               </Select>
             </div>
             <div className="space-y-1">
-              <p className="text-muted-foreground text-[10px] font-medium">
+              <Label className="text-muted-foreground text-xs font-medium">
                 Max
-              </p>
+              </Label>
               <Select
                 value={poolBeltMax == null ? 'any' : String(poolBeltMax)}
                 onValueChange={(v) => {
@@ -111,10 +116,10 @@ export function PoolBeltFilter({
                   });
                 }}
               >
-                <SelectTrigger className="h-8 w-full text-xs">
+                <SelectTrigger className="h-8 w-28 text-xs">
                   <SelectValue placeholder="Any" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="min-w-28">
                   <SelectItem value="any">Any</SelectItem>
                   {BELT_LEVELS.map((b) => (
                     <SelectItem key={b.value} value={String(b.value)}>

@@ -1,4 +1,3 @@
-import { SlidersHorizontal } from 'lucide-react';
 import { NumberInput } from '@/components/input/number-input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,13 +26,16 @@ export function PoolWeightFilter({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button size="sm" variant="outline" className="h-8 px-2 text-xs">
-          <SlidersHorizontal className="size-3" />
-          kg
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-8 border-dashed px-2 text-xs"
+        >
+          Weight
           {(poolWeightMin != null || poolWeightMax != null) && (
             <Badge
               variant="secondary"
-              className="ml-1 max-w-24 truncate px-1 text-[10px]"
+              className="max-w-24 truncate px-1 text-[10px]"
               title={
                 poolWeightMin != null && poolWeightMax != null
                   ? `${poolWeightMin}–${poolWeightMax} kg`
@@ -94,13 +96,13 @@ export function PoolWeightFilter({
                 const next = Math.max(0, poolWeightMin - 1);
                 onPatch({ poolWeightMin: next });
               }}
-              disableIncrement={(poolWeightMin ?? -1) >= 300}
+              disableIncrement={(poolWeightMin ?? -1) >= 150}
               disableDecrement={poolWeightMin == null || poolWeightMin <= 0}
             />
             <span className="text-muted-foreground text-xs">–</span>
             <NumberInput
               min={0}
-              max={300}
+              max={150}
               step={1}
               placeholder="Max"
               value={poolWeightMax ?? ''}
@@ -112,7 +114,7 @@ export function PoolWeightFilter({
                 }
                 const n = Math.round(Number(raw));
                 if (!Number.isFinite(n)) return;
-                const clamped = Math.min(300, Math.max(0, n));
+                const clamped = Math.min(150, Math.max(0, n));
                 onPatch({
                   poolWeightMax: clamped,
                   poolWeightMin:
@@ -124,10 +126,10 @@ export function PoolWeightFilter({
               className="h-8 text-xs"
               handleIncrement={() => {
                 if (poolWeightMax == null) {
-                  onPatch({ poolWeightMax: 300 });
+                  onPatch({ poolWeightMax: 150 });
                   return;
                 }
-                const next = Math.min(300, poolWeightMax + 1);
+                const next = Math.min(150, poolWeightMax + 1);
                 onPatch({
                   poolWeightMax: next,
                   poolWeightMin:
@@ -147,7 +149,7 @@ export function PoolWeightFilter({
                       : poolWeightMin,
                 });
               }}
-              disableIncrement={poolWeightMax != null && poolWeightMax >= 300}
+              disableIncrement={poolWeightMax != null && poolWeightMax >= 150}
               disableDecrement={poolWeightMax == null || poolWeightMax <= 0}
             />
           </div>

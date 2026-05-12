@@ -97,7 +97,7 @@ export function AthletePool({
   ]);
 
   return (
-    <div className="bg-card flex w-72 shrink-0 flex-col overflow-hidden border-r">
+    <div className="bg-card flex w-xs shrink-0 flex-col overflow-hidden border-r">
       <div className="border-b p-3">
         <div className="mb-2 flex items-center justify-between">
           <h3 className="text-sm font-semibold">Unassigned Athletes</h3>

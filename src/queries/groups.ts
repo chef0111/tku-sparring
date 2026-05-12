@@ -96,7 +96,10 @@ export function useAssignAthlete(options?: {
   });
 }
 
-export function useUnassignAthlete(options?: { onSuccess?: () => void }) {
+export function useUnassignAthlete(options?: {
+  onSuccess?: () => void;
+  suppressErrorToast?: boolean;
+}) {
   const invalidate = useInvalidateGroups();
 
   return useMutation({
@@ -106,6 +109,8 @@ export function useUnassignAthlete(options?: { onSuccess?: () => void }) {
       invalidate();
       options?.onSuccess?.();
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => {
+      if (!options?.suppressErrorToast) toast.error(err.message);
+    },
   });
 }

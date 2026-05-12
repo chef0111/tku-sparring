@@ -22,8 +22,8 @@ export function PoolGenderSelect({ value, onChange }: PoolGenderSelectProps) {
       </SelectTrigger>
       <SelectContent className="max-w-24! min-w-24!">
         <SelectItem value="all">All</SelectItem>
-        <SelectItem value="M">M</SelectItem>
-        <SelectItem value="F">F</SelectItem>
+        <SelectItem value="M">Male</SelectItem>
+        <SelectItem value="F">Female</SelectItem>
       </SelectContent>
     </Select>
   );
