@@ -25,6 +25,8 @@ interface DataTableProps<TData> extends React.ComponentProps<'div'> {
     label?: string;
     onClick: () => void;
   };
+  pagination?: boolean;
+  selectedRows?: boolean;
 }
 
 export function DataTable<TData>({
@@ -34,6 +36,8 @@ export function DataTable<TData>({
   addRow,
   children,
   className,
+  pagination = true,
+  selectedRows = true,
   ...props
 }: DataTableProps<TData>) {
   const selectedRowCount = Object.keys(state.rowSelection).length;
@@ -127,7 +131,13 @@ export function DataTable<TData>({
         </Table>
       </div>
       <div className="flex flex-col gap-2.5">
-        <DataTablePagination table={table} state={state} />
+        {pagination && (
+          <DataTablePagination
+            table={table}
+            state={state}
+            selectedRows={selectedRows}
+          />
+        )}
         {actionBar && selectedRowCount > 0 && actionBar}
       </div>
     </div>
