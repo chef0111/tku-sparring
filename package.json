@@ -83,7 +83,7 @@
     "react": "^19.2.6",
     "react-day-picker": "9",
     "react-dom": "^19.2.6",
-    "react-hotkeys-hook": "^5.2.4",
+    "react-hotkeys-hook": "^5.3.2",
     "rough-notation": "^0.5.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
