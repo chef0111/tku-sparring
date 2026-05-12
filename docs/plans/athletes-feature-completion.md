@@ -1032,7 +1032,7 @@ return (
     <AthleteEditSheet athlete={editingAthlete} onOpenChange={setEditingAthlete} />
     <AthleteImportDialog open={importOpen} onOpenChange={setImportOpen} />
     <DeleteAthleteDialog athlete={deletingAthlete} onClose={() => setDeletingAthlete(null)} />
-    <BulkAddToTournamentDialog ... />
+    <BulkAddAthletesDialog ... />
   </div>
 );
 ```

@@ -54,6 +54,7 @@ interface UseDataTableProps<TData>
       | 'manualSorting'
     >,
     Required<Pick<TableOptions<TData>, 'pageCount'>> {
+  filteredRowCount?: number;
   initialState?: Omit<Partial<TableState>, 'sorting'> & {
     sorting?: Array<ExtendedColumnSort<TData>>;
   };
@@ -75,6 +76,7 @@ export interface DataTableControlledState {
   columnVisibility: VisibilityState;
   rowSelection: RowSelectionState;
   columnFilters: ColumnFiltersState;
+  filteredRowCount?: number;
 }
 
 export function useDataTable<TData>(props: UseDataTableProps<TData>) {
@@ -92,6 +94,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     scroll = false,
     shallow = true,
     startTransition,
+    filteredRowCount: filteredRowCountProp,
     ...tableProps
   } = props;
   const pageKey = queryKeys?.page ?? PAGE_KEY;
@@ -350,8 +353,16 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
       columnVisibility,
       rowSelection,
       columnFilters,
+      filteredRowCount: filteredRowCountProp,
     }),
-    [pagination, sorting, columnVisibility, rowSelection, columnFilters]
+    [
+      pagination,
+      sorting,
+      columnVisibility,
+      rowSelection,
+      columnFilters,
+      filteredRowCountProp,
+    ]
   );
 
   const getRowId = React.useCallback(
@@ -385,7 +396,16 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     columns,
     initialState,
     pageCount,
-    state: tableState,
+    ...(filteredRowCountProp !== undefined
+      ? { rowCount: filteredRowCountProp }
+      : {}),
+    state: {
+      pagination: tableState.pagination,
+      sorting: tableState.sorting,
+      columnVisibility: tableState.columnVisibility,
+      rowSelection: tableState.rowSelection,
+      columnFilters: tableState.columnFilters,
+    },
     defaultColumn: {
       ...tableProps.defaultColumn,
       enableColumnFilter: false,

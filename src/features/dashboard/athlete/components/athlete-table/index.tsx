@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Download, Upload } from 'lucide-react';
 
-import { BulkAddToTournamentDialog } from '../dialogs/bulk-add-to-tournament-dialog';
+import { BulkAddAthletesDialog } from '../dialogs/bulk-add-athletes-dialog';
 import { BulkDeleteAthletesDialog } from '../dialogs/bulk-delete-athletes-dialog';
 import { useAthleteTableQuery } from '../../hooks/use-athlete-manager-query';
 import { AthletesActionBar } from './athletes-action-bar';
@@ -44,6 +44,9 @@ export function AthleteTable({
   const query = useAthleteTableQuery();
 
   const [bulkAddOpen, setBulkAddOpen] = React.useState(false);
+  const [bulkAddAthleteIds, setBulkAddAthleteIds] = React.useState<
+    Array<string>
+  >([]);
   const [bulkDeleteAthletes, setBulkDeleteAthletes] = React.useState<Array<{
     id: string;
     name: string;
@@ -69,6 +72,8 @@ export function AthleteTable({
     joinOperator: query.joinOperator,
   });
 
+  const tableData = data?.items ?? [];
+
   const {
     table,
     state: tableState,
@@ -76,9 +81,10 @@ export function AthleteTable({
     debounceMs,
     throttleMs,
   } = useDataTable({
-    data: data?.items ?? [],
+    data: tableData,
     columns,
     pageCount: Math.ceil((data?.total ?? 0) / query.perPage),
+    filteredRowCount: data?.total,
     initialState: {
       sorting: DEFAULT_SORTING,
       columnPinning: { right: ['actions'] },
@@ -88,17 +94,12 @@ export function AthleteTable({
     filterQueryKeys: enableQueryFilter ? { name: 'query' } : {},
   });
 
-  const currentItemIds = React.useMemo(
-    () => new Set((data?.items ?? []).map((athlete) => athlete.id)),
-    [data?.items]
-  );
-  const selectedIds = React.useMemo(
-    () =>
-      Object.keys(tableState.rowSelection).filter((id) =>
-        currentItemIds.has(id)
-      ),
-    [tableState.rowSelection, currentItemIds]
-  );
+  function handleBulkAddToTournament() {
+    setBulkAddAthleteIds(
+      table.getFilteredSelectedRowModel().rows.map((row) => row.original.id)
+    );
+    setBulkAddOpen(true);
+  }
 
   function handleBulkDeleteClick() {
     const rows = table.getFilteredSelectedRowModel().rows;
@@ -137,7 +138,8 @@ export function AthleteTable({
             actionBar={
               <AthletesActionBar
                 table={table}
-                onBulkAdd={() => setBulkAddOpen(true)}
+                state={tableState}
+                onBulkAdd={handleBulkAddToTournament}
                 onDelete={handleBulkDeleteClick}
               />
             }
@@ -197,11 +199,17 @@ export function AthleteTable({
         onClose={() => setBulkDeleteAthletes(null)}
         onSuccess={() => table.resetRowSelection()}
       />
-      <BulkAddToTournamentDialog
+      <BulkAddAthletesDialog
         open={bulkAddOpen}
-        onOpenChange={setBulkAddOpen}
-        athleteProfileIds={selectedIds}
-        onSuccess={() => table.resetRowSelection()}
+        onOpenChange={(open) => {
+          setBulkAddOpen(open);
+          if (!open) setBulkAddAthleteIds([]);
+        }}
+        athleteProfileIds={bulkAddAthleteIds}
+        onSuccess={() => {
+          table.resetRowSelection();
+          setBulkAddAthleteIds([]);
+        }}
       />
     </>
   );

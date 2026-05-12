@@ -229,7 +229,7 @@ export const UpdateTournamentAthleteSchema = z.object({
 - `AthletesTable` — data-table with columns: select, athleteCode, name, gender, belt, weight, affiliation, actions
 - `AthleteFormDialog` — create/edit form with all fields
 - `DeleteAthleteDialog` — confirmation dialog
-- `BulkAddToTournamentDialog` — modal for bulk action
+- `BulkAddAthletesDialog` — modal for bulk action
 - `DuplicateWarningDialog` — shown when soft de-dup triggers
 
 **Column definitions:** `src/features/dashboard/athlete/athletes-table-columns.tsx`
@@ -391,7 +391,7 @@ async function findPossibleDuplicates(input) {
 
 - `AthletesTable` renders columns correctly
 - `AthleteFormDialog` validates inputs
-- `BulkAddToTournamentDialog` calls mutation with correct payload
+- `BulkAddAthletesDialog` calls mutation with correct payload
 
 ---
 
