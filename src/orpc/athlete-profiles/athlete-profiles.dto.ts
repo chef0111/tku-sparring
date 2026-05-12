@@ -48,8 +48,16 @@ export const AthleteProfilesSchema = z.object({
   beltLevelMax: z.number().int().min(0).max(10).optional(),
   weightMin: z.number().min(0).optional(),
   weightMax: z.number().max(200).optional(),
-  sort: z.string().optional(),
-  sortDir: z.enum(['asc', 'desc']).optional().default('desc'),
+  sorting: z
+    .array(
+      z.object({
+        id: z.enum(['name', 'beltLevel', 'weight', 'affiliation', 'createdAt']),
+        desc: z.boolean(),
+      })
+    )
+    .max(5)
+    .optional()
+    .default([]),
   filterFlag: z
     .enum(
       flagConfig.featureFlags.map((flag) => flag.value) as [

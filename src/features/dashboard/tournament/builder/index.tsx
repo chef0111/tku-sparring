@@ -1,28 +1,30 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
+import { useQueryClient } from '@tanstack/react-query';
+import { parseAsStringEnum, useQueryState } from 'nuqs';
 import { ArrowLeft, Trophy } from 'lucide-react';
-import { TournamentStatusPill } from '../list/components/tournament-status-pill';
-import { BuilderSidebar } from './sidebar';
-import {
-  AddGroupDialog,
-  DeleteTournamentDialog,
-  EditTournamentDialog,
-} from './dialogs';
-import { Header } from './header';
+import { BuilderShell } from './components/builder-shell';
+import { BuilderHeader } from './components/builder-shell/builder-header';
+import { BuilderBottomToolbar } from './components/builder-shell/builder-bottom-toolbar';
+import { EditTournamentDialog } from './components/dialogs/edit-tournament-dialog';
+import { DeleteTournamentDialog } from './components/dialogs/delete-tournament-dialog';
+import { AutoAssignAllDialog } from './components/dialogs/auto-assign-all-dialog';
+import { LifecycleConfirmDialog } from './components/dialogs/lifecycle-confirm-dialog';
+import { useBuilderManagerQuery } from './hooks/use-builder-manager-query';
+import { GroupsTab } from './components/groups-tab';
+import { BracketsTab } from './components/brackets-tab';
 import type { GroupData, TournamentData } from '@/features/dashboard/types';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type { LeaseSnapshot } from '@/queries/leases';
 import LoadingScreen from '@/components/navigation/loading';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { Status, StatusIndicator, StatusLabel } from '@/components/ui/status';
 import { useLeaseStream } from '@/hooks/use-lease-stream';
 import { useTournamentReadOnly } from '@/hooks/use-tournament-read-only';
 import { useTournament } from '@/queries/tournaments';
-import { useGroups } from '@/queries/groups';
-import { UserDropdown } from '@/components/user/user-dropdown';
+import { invalidateOrpcGroupListQueries, useGroups } from '@/queries/groups';
+import { useLeases } from '@/queries/leases';
+import { useDeviceId } from '@/hooks/use-device-id';
 import { authClient } from '@/lib/auth-client';
-import { Badge } from '@/components/ui/badge';
-import { ButtonGroupSeparator } from '@/components/ui/button-group';
 
 interface TournamentBuilderPageProps {
   id: string;
@@ -71,111 +73,128 @@ interface TournamentBuilderProps {
   tournamentId: string;
 }
 
+const TAB_PARSER = parseAsStringEnum(['groups', 'brackets']).withDefault(
+  'groups'
+);
+
+type LeaseEntry = LeaseSnapshot[number];
+
 function TournamentBuilder({
   tournament,
   groups,
   tournamentId,
 }: TournamentBuilderProps) {
   const isReadOnly = useTournamentReadOnly(tournamentId);
-  const [selectedGroupId, setSelectedGroupId] = React.useState<string | null>(
-    groups[0]?.id ?? null
-  );
-  const [showAddGroup, setShowAddGroup] = React.useState(false);
+  const { tab } = useBuilderManagerQuery();
+  const [, setTab] = useQueryState('tab', TAB_PARSER);
+  const queryClient = useQueryClient();
+
   const [showEditTournament, setShowEditTournament] = React.useState(false);
   const [showDeleteTournament, setShowDeleteTournament] = React.useState(false);
-
-  // When groups list changes (e.g. after creation), auto-select the first if no selection
-  React.useEffect(() => {
-    if (!selectedGroupId && groups.length > 0) {
-      setSelectedGroupId(groups[0]?.id ?? null);
-    }
-    // If the selected group was deleted, reset
-    if (selectedGroupId && !groups.find((g) => g.id === selectedGroupId)) {
-      setSelectedGroupId(groups[0]?.id ?? null);
-    }
-  }, [groups, selectedGroupId]);
+  const [showAutoAssignAll, setShowAutoAssignAll] = React.useState(false);
+  const [lifecycleTarget, setLifecycleTarget] = React.useState<
+    'active' | 'completed' | null
+  >(null);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   React.useEffect(() => {
-    if (!isReadOnly) {
-      return;
-    }
-
-    setShowAddGroup(false);
+    if (!isReadOnly) return;
     setShowEditTournament(false);
     setShowDeleteTournament(false);
+    setShowAutoAssignAll(false);
+    setLifecycleTarget(null);
   }, [isReadOnly]);
 
-  const { data } = authClient.useSession();
-  const user = data?.user;
+  const { data: sessionData } = authClient.useSession();
+  const user = sessionData?.user;
+
+  const deviceId = useDeviceId();
+  const { data: leases } = useLeases(tournamentId, deviceId);
+  const leasedByMeCount = React.useMemo(
+    () =>
+      (leases ?? []).filter((lease) => lease.leaseStatus === 'held_by_me')
+        .length,
+    [leases]
+  );
+  const leaseMap = React.useMemo(() => {
+    const map = new Map<string, LeaseEntry>();
+    for (const lease of leases ?? []) map.set(lease.groupId, lease);
+    return map;
+  }, [leases]);
+
+  const handleRefresh = React.useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['tournament'] }),
+        invalidateOrpcGroupListQueries(queryClient),
+        queryClient.invalidateQueries({ queryKey: ['lease'] }),
+        queryClient.invalidateQueries({ queryKey: ['tournamentAthlete'] }),
+      ]);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [queryClient]);
+
+  const handleLifecycle = React.useCallback(() => {
+    if (tournament.status === 'draft') {
+      setLifecycleTarget('active');
+    } else if (tournament.status === 'active') {
+      setLifecycleTarget('completed');
+    }
+  }, [tournament.status]);
 
   return (
-    <SidebarProvider defaultOpen>
-      <Header>
-        <div className="relative flex w-full items-center">
-          <SidebarTrigger className="bg-muted/70 hover:bg-accent! z-50 border" />
-          <h1 className="ml-2 text-lg font-semibold">{tournament.name}</h1>
-          <Badge className="bg-primary/10 text-primary ml-1 rounded text-xs font-medium">
-            Builder
-          </Badge>
-          <TournamentStatusPill status={tournament.status} className="ml-2" />
-        </div>
-        <Tabs
-          defaultValue="groups"
-          className="absolute top-2 left-1/2 h-10 -translate-x-1/2"
-        >
-          <TabsList className="bg-sidebar border-2 p-0">
-            <TabsTrigger
-              value="groups"
-              className="w-32 rounded-r-none border-none px-4 text-lg"
-            >
-              Groups
-            </TabsTrigger>
-            <ButtonGroupSeparator />
-            <TabsTrigger
-              value="brackets"
-              className="w-32 rounded-l-none border-none px-4 text-lg"
-            >
-              Brackets
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-        {user && <UserDropdown user={user} className="-mr-2 scale-95" />}
-      </Header>
-      <BuilderSidebar
-        tournamentId={tournamentId}
-        onEditTournament={() => {
-          if (!isReadOnly) {
-            setShowEditTournament(true);
+    <BuilderShell
+      readOnly={isReadOnly}
+      header={
+        <BuilderHeader
+          tournament={tournament}
+          tab={tab}
+          onTabChange={(v) => void setTab(v)}
+          user={user}
+        />
+      }
+      footer={
+        <BuilderBottomToolbar
+          tournament={tournament}
+          leasedByMeCount={leasedByMeCount}
+          totalGroups={groups.length}
+          readOnly={isReadOnly}
+          isRefreshing={isRefreshing}
+          canCompleteTournament={tournament.lifecycle.canComplete}
+          onRefresh={handleRefresh}
+          onAutoAssignAll={() => setShowAutoAssignAll(true)}
+          onLifecycle={handleLifecycle}
+          onEditTournament={() => {
+            if (!isReadOnly) setShowEditTournament(true);
+          }}
+          onDeleteTournament={() => {
+            if (!isReadOnly) setShowDeleteTournament(true);
+          }}
+          leasePopoverContent={
+            <LeaseSummaryList groups={groups} leaseMap={leaseMap} />
           }
-        }}
-        onDeleteTournament={() => {
-          if (!isReadOnly) {
-            setShowDeleteTournament(true);
-          }
-        }}
-        readOnly={isReadOnly}
-      />
+        />
+      }
+    >
+      <div className="relative flex-1 overflow-hidden">
+        {tab === 'groups' ? (
+          <GroupsTab
+            tournamentId={tournamentId}
+            groups={groups}
+            readOnly={isReadOnly}
+          />
+        ) : (
+          <BracketsTab
+            tournamentId={tournamentId}
+            groups={groups}
+            readOnly={isReadOnly}
+            tournamentStatus={tournament.status}
+          />
+        )}
+      </div>
 
-      <main className="flex h-dvh flex-1 flex-col">
-        <div className="relative flex-1 p-6">
-          {isReadOnly ? (
-            <Alert className="max-w-xl">
-              <AlertTitle>Read-only workspace</AlertTitle>
-              <AlertDescription>
-                This tournament is completed. Builder mutations are disabled so
-                results stay locked.
-              </AlertDescription>
-            </Alert>
-          ) : null}
-        </div>
-      </main>
-
-      {/* Dialogs */}
-      <AddGroupDialog
-        open={showAddGroup}
-        onOpenChange={setShowAddGroup}
-        tournamentId={tournamentId}
-      />
       <EditTournamentDialog
         open={showEditTournament}
         onOpenChange={setShowEditTournament}
@@ -188,6 +207,88 @@ function TournamentBuilder({
         tournamentId={tournamentId}
         tournamentName={tournament.name}
       />
-    </SidebarProvider>
+      <AutoAssignAllDialog
+        open={showAutoAssignAll}
+        onOpenChange={setShowAutoAssignAll}
+        tournamentId={tournamentId}
+        groups={groups}
+      />
+      {lifecycleTarget !== null && (
+        <LifecycleConfirmDialog
+          open={lifecycleTarget !== null}
+          onOpenChange={(v) => {
+            if (!v) setLifecycleTarget(null);
+          }}
+          target={lifecycleTarget}
+          tournamentId={tournamentId}
+          tournamentName={tournament.name}
+        />
+      )}
+    </BuilderShell>
+  );
+}
+
+function leaseToStatusVariant(
+  status: LeaseEntry['leaseStatus'] | undefined
+): 'online' | 'offline' | 'degraded' | 'maintenance' {
+  switch (status) {
+    case 'held_by_me':
+      return 'online';
+    case 'held_by_other':
+      return 'degraded';
+    case 'pending_takeover':
+      return 'maintenance';
+    default:
+      return 'online';
+  }
+}
+
+function leaseHolderLabel(status: LeaseEntry['leaseStatus'] | undefined) {
+  switch (status) {
+    case 'held_by_me':
+      return 'You';
+    case 'held_by_other':
+      return 'Locked';
+    case 'pending_takeover':
+      return 'Pending';
+    default:
+      return 'Free';
+  }
+}
+
+interface LeaseSummaryListProps {
+  groups: Array<GroupData>;
+  leaseMap: Map<string, LeaseEntry>;
+}
+
+function LeaseSummaryList({ groups, leaseMap }: LeaseSummaryListProps) {
+  if (groups.length === 0) {
+    return (
+      <div className="text-muted-foreground p-3 text-sm">No groups yet.</div>
+    );
+  }
+
+  return (
+    <ul className="max-h-72 divide-y overflow-y-auto py-1">
+      {groups.map((group) => {
+        const lease = leaseMap.get(group.id);
+        const variant = leaseToStatusVariant(lease?.leaseStatus);
+        const holder = leaseHolderLabel(lease?.leaseStatus);
+        return (
+          <li
+            key={group.id}
+            className="flex items-center justify-between gap-2 px-3 py-2 text-sm"
+          >
+            <span className="min-w-0 flex-1 truncate font-medium">
+              {group.name}
+            </span>
+            <Status status={variant} className="gap-1.5">
+              <StatusIndicator />
+              <StatusLabel className="text-xs">{holder}</StatusLabel>
+            </Status>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

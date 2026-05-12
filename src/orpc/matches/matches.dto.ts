@@ -1,12 +1,23 @@
 import { z } from 'zod';
 
+export const MatchStatusSchema = z.enum(['pending', 'active', 'complete']);
+
 export const MatchSchema = z.object({
   id: z.string(),
-  redAthleteId: z.string(),
-  blueAthleteId: z.string(),
+  round: z.number().int(),
+  matchIndex: z.number().int(),
+  status: MatchStatusSchema,
+  bestOf: z.number().int(),
+  redAthleteId: z.string().nullable(),
+  blueAthleteId: z.string().nullable(),
+  redTournamentAthleteId: z.string().nullable(),
+  blueTournamentAthleteId: z.string().nullable(),
   redWins: z.number().int(),
   blueWins: z.number().int(),
   winnerId: z.string().nullable(),
+  winnerTournamentAthleteId: z.string().nullable(),
+  redLocked: z.boolean(),
+  blueLocked: z.boolean(),
   groupId: z.string(),
   tournamentId: z.string(),
   createdAt: z.date(),
@@ -14,19 +25,99 @@ export const MatchSchema = z.object({
 });
 
 export const CreateMatchSchema = z.object({
-  redAthleteId: z.string(),
-  blueAthleteId: z.string(),
+  round: z.number().int().default(0),
+  matchIndex: z.number().int().default(0),
+  status: MatchStatusSchema.default('pending'),
+  bestOf: z.number().int().default(3),
+  redAthleteId: z.string().nullable().optional(),
+  blueAthleteId: z.string().nullable().optional(),
+  redTournamentAthleteId: z.string().nullable().optional(),
+  blueTournamentAthleteId: z.string().nullable().optional(),
+  redLocked: z.boolean().default(false),
+  blueLocked: z.boolean().default(false),
   groupId: z.string(),
   tournamentId: z.string(),
 });
 
 export const UpdateMatchSchema = z.object({
   id: z.string(),
+  status: MatchStatusSchema.optional(),
   redWins: z.number().int().optional(),
   blueWins: z.number().int().optional(),
   winnerId: z.string().nullable().optional(),
+  winnerTournamentAthleteId: z.string().nullable().optional(),
+  redTournamentAthleteId: z.string().nullable().optional(),
+  blueTournamentAthleteId: z.string().nullable().optional(),
+  redAthleteId: z.string().nullable().optional(),
+  blueAthleteId: z.string().nullable().optional(),
+  redLocked: z.boolean().optional(),
+  blueLocked: z.boolean().optional(),
 });
 
+export const UpdateScoreSchema = z.object({
+  matchId: z.string(),
+  redWins: z.number().int().min(0).max(2),
+  blueWins: z.number().int().min(0).max(2),
+});
+
+export const SetWinnerSchema = z.object({
+  matchId: z.string(),
+  winnerSide: z.enum(['red', 'blue']),
+  reason: z.string().optional(),
+});
+
+export const SwapParticipantsSchema = z.object({
+  matchId: z.string(),
+  redTournamentAthleteId: z.string().nullable(),
+  blueTournamentAthleteId: z.string().nullable(),
+});
+
+export const SetLockSchema = z.object({
+  matchId: z.string(),
+  side: z.enum(['red', 'blue']),
+  locked: z.boolean(),
+});
+
+export const GenerateBracketSchema = z.object({
+  groupId: z.string(),
+});
+
+export const ShuffleBracketSchema = z.object({
+  groupId: z.string(),
+});
+
+export const RegenerateBracketSchema = z.object({
+  groupId: z.string(),
+});
+
+export const ResetBracketSchema = z.object({
+  groupId: z.string(),
+});
+
+export const AssignSlotSchema = z.object({
+  matchId: z.string(),
+  side: z.enum(['red', 'blue']),
+  tournamentAthleteId: z.string().nullable(),
+});
+
+export const SwapSlotsSchema = z.object({
+  matchAId: z.string(),
+  sideA: z.enum(['red', 'blue']),
+  matchBId: z.string(),
+  sideB: z.enum(['red', 'blue']),
+});
+
+export type MatchStatusDTO = z.infer<typeof MatchStatusSchema>;
 export type MatchDTO = z.infer<typeof MatchSchema>;
 export type CreateMatchDTO = z.infer<typeof CreateMatchSchema>;
 export type UpdateMatchDTO = z.infer<typeof UpdateMatchSchema>;
+export type UpdateScoreDTO = z.infer<typeof UpdateScoreSchema>;
+export type SetWinnerDTO = z.infer<typeof SetWinnerSchema>;
+export type SwapParticipantsDTO = z.infer<typeof SwapParticipantsSchema>;
+export type SetLockDTO = z.infer<typeof SetLockSchema>;
+export type GenerateBracketDTO = z.infer<typeof GenerateBracketSchema>;
+export type ShuffleBracketDTO = z.infer<typeof ShuffleBracketSchema>;
+export type RegenerateBracketDTO = z.infer<typeof RegenerateBracketSchema>;
+export type ResetBracketDTO = z.infer<typeof ResetBracketSchema>;
+export type AssignSlotDTO = z.infer<typeof AssignSlotSchema>;
+export type SwapSlotsDTO = z.infer<typeof SwapSlotsSchema>;

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Users } from 'lucide-react';
+import { UserPlus, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -24,20 +24,21 @@ import {
 } from '@/features/dashboard/athlete/lib/bulk-add-athletes';
 import { useBulkAddAthletes } from '@/queries/tournament-athletes';
 import { useTournaments } from '@/queries/tournaments';
+import { Spinner } from '@/components/ui/spinner';
 
-interface BulkAddToTournamentDialogProps {
+interface BulkAddAthletesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   athleteProfileIds: Array<string>;
   onSuccess?: () => void;
 }
 
-export function BulkAddToTournamentDialog({
+export function BulkAddAthletesDialog({
   open,
   onOpenChange,
   athleteProfileIds,
   onSuccess,
-}: BulkAddToTournamentDialogProps) {
+}: BulkAddAthletesDialogProps) {
   const { data: tournaments = [] } = useTournaments();
   const [tournamentId, setTournamentId] = React.useState<string>('');
   const [autoAssign, setAutoAssign] = React.useState(false);
@@ -75,7 +76,7 @@ export function BulkAddToTournamentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Add to Tournament</DialogTitle>
           <DialogDescription>
@@ -92,7 +93,7 @@ export function BulkAddToTournamentDialog({
           <div className="grid gap-1.5">
             <Label>Tournament</Label>
             <Select value={tournamentId} onValueChange={setTournamentId}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a tournament..." />
               </SelectTrigger>
               <SelectContent>
@@ -139,7 +140,17 @@ export function BulkAddToTournamentDialog({
             disabled={!tournamentId || bulkAdd.isPending}
             onClick={onSubmit}
           >
-            {bulkAdd.isPending ? 'Adding...' : 'Add to Tournament'}
+            {bulkAdd.isPending ? (
+              <>
+                <Spinner className="text-primary-foreground" />
+                <span>Adding...</span>
+              </>
+            ) : (
+              <>
+                <UserPlus />
+                <span>Add to Tournament</span>
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

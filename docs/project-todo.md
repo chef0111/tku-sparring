@@ -4,16 +4,17 @@ This document tracks feature status across the TKU Sparring System.
 
 ## Pending
 
-- Admin CRM: Groups tab (constraints, auto-assign, DnD overrides)
-- Admin CRM: Brackets tab (SVG canvas, lock/unlock, shuffle)
-- Admin CRM: Match detail panel (scores, participants, manual winner override)
-- Admin CRM: Audit log (critical actions)
 - Advance Settings: selection view endpoint + device restore
 - Arena Client: match selection via Advance Settings
 - Arena Client: round-end auto-submit + match-end finish flow
 - Arena Client: offline-tolerant scoring + sync on reconnect
 
 ## Active
+
+- Admin CRM: Groups tab (constraints, auto-assign, DnD overrides)
+- Admin CRM: Brackets tab (SVG canvas, lock/unlock, shuffle)
+- Admin CRM: Match detail panel (scores, participants, manual winner override)
+- Admin CRM: Audit log (critical actions)
 
 ## Finished
 

@@ -8,14 +8,33 @@ import {
 } from './tournaments';
 
 import {
+  assignAthleteToGroup,
+  autoAssignGroup,
   createGroup,
   getGroup,
   listGroups,
   removeGroup,
+  unassignAthleteFromGroup,
   updateGroup,
 } from './groups';
 
-import { createMatch, listMatches, removeMatch, updateMatch } from './matches';
+import {
+  assignSlotEndpoint,
+  createMatch,
+  generateBracketEndpoint,
+  getMatch,
+  listMatches,
+  regenerateBracketEndpoint,
+  removeMatch,
+  resetBracketEndpoint,
+  setLockEndpoint,
+  setWinnerEndpoint,
+  shuffleBracketEndpoint,
+  swapParticipantsEndpoint,
+  swapSlotsEndpoint,
+  updateMatch,
+  updateScoreEndpoint,
+} from './matches';
 
 import {
   bulkDeleteAthleteProfiles,
@@ -57,12 +76,28 @@ export default {
     create: createGroup,
     update: updateGroup,
     delete: removeGroup,
+    autoAssign: autoAssignGroup,
+    assignAthlete: assignAthleteToGroup,
+    unassignAthlete: unassignAthleteFromGroup,
   },
   match: {
     list: listMatches,
+    get: getMatch,
     create: createMatch,
     update: updateMatch,
     delete: removeMatch,
+    updateScore: updateScoreEndpoint,
+    setWinner: setWinnerEndpoint,
+    swapParticipants: swapParticipantsEndpoint,
+    setLock: setLockEndpoint,
+    assignSlot: assignSlotEndpoint,
+    swapSlots: swapSlotsEndpoint,
+  },
+  bracket: {
+    generate: generateBracketEndpoint,
+    shuffle: shuffleBracketEndpoint,
+    regenerate: regenerateBracketEndpoint,
+    reset: resetBracketEndpoint,
   },
   athleteProfile: {
     list: listAthleteProfiles,

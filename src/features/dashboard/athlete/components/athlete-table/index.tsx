@@ -1,17 +1,19 @@
 import * as React from 'react';
 import { Download, Upload } from 'lucide-react';
 
-import { BulkAddToTournamentDialog } from '../dialogs/bulk-add-to-tournament-dialog';
+import { BulkAddAthletesDialog } from '../dialogs/bulk-add-athletes-dialog';
 import { BulkDeleteAthletesDialog } from '../dialogs/bulk-delete-athletes-dialog';
 import { useAthleteTableQuery } from '../../hooks/use-athlete-manager-query';
 import { AthletesActionBar } from './athletes-action-bar';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { AthleteProfileData } from '@/features/dashboard/types';
 
+import type { AthleteProfilesDTO } from '@/orpc/athlete-profiles/athlete-profiles.dto';
 import { useAthleteProfiles } from '@/queries/athlete-profiles';
 import { useFeatureFlags } from '@/contexts/feature-flags';
 import { useDataTable } from '@/hooks/use-data-table';
 import { exportTableToCSV } from '@/lib/data-table/export';
+import { DEFAULT_SORTING } from '@/config/athlete';
 import { cn } from '@/lib/utils';
 
 import { DataTable } from '@/components/data-table/data-table';
@@ -42,6 +44,9 @@ export function AthleteTable({
   const query = useAthleteTableQuery();
 
   const [bulkAddOpen, setBulkAddOpen] = React.useState(false);
+  const [bulkAddAthleteIds, setBulkAddAthleteIds] = React.useState<
+    Array<string>
+  >([]);
   const [bulkDeleteAthletes, setBulkDeleteAthletes] = React.useState<Array<{
     id: string;
     name: string;
@@ -61,12 +66,13 @@ export function AthleteTable({
     beltLevels: query.beltLevels,
     weightMin: query.weightRange?.[0],
     weightMax: query.weightRange?.[1],
-    sort: query.sort?.[0]?.id ?? undefined,
-    sortDir: query.sort?.[0]?.desc ? 'desc' : 'asc',
+    sorting: query.sort as AthleteProfilesDTO['sorting'],
     filterFlag: filterFlag ?? undefined,
     filters: query.filters,
     joinOperator: query.joinOperator,
   });
+
+  const tableData = data?.items ?? [];
 
   const {
     table,
@@ -75,11 +81,12 @@ export function AthleteTable({
     debounceMs,
     throttleMs,
   } = useDataTable({
-    data: data?.items ?? [],
+    data: tableData,
     columns,
     pageCount: Math.ceil((data?.total ?? 0) / query.perPage),
+    filteredRowCount: data?.total,
     initialState: {
-      sorting: [{ id: 'beltLevel', desc: true }],
+      sorting: DEFAULT_SORTING,
       columnPinning: { right: ['actions'] },
     },
     shallow: true,
@@ -87,17 +94,12 @@ export function AthleteTable({
     filterQueryKeys: enableQueryFilter ? { name: 'query' } : {},
   });
 
-  const currentItemIds = React.useMemo(
-    () => new Set((data?.items ?? []).map((athlete) => athlete.id)),
-    [data?.items]
-  );
-  const selectedIds = React.useMemo(
-    () =>
-      Object.keys(tableState.rowSelection).filter((id) =>
-        currentItemIds.has(id)
-      ),
-    [tableState.rowSelection, currentItemIds]
-  );
+  function handleBulkAddToTournament() {
+    setBulkAddAthleteIds(
+      table.getFilteredSelectedRowModel().rows.map((row) => row.original.id)
+    );
+    setBulkAddOpen(true);
+  }
 
   function handleBulkDeleteClick() {
     const rows = table.getFilteredSelectedRowModel().rows;
@@ -136,7 +138,8 @@ export function AthleteTable({
             actionBar={
               <AthletesActionBar
                 table={table}
-                onBulkAdd={() => setBulkAddOpen(true)}
+                state={tableState}
+                onBulkAdd={handleBulkAddToTournament}
                 onDelete={handleBulkDeleteClick}
               />
             }
@@ -196,11 +199,17 @@ export function AthleteTable({
         onClose={() => setBulkDeleteAthletes(null)}
         onSuccess={() => table.resetRowSelection()}
       />
-      <BulkAddToTournamentDialog
+      <BulkAddAthletesDialog
         open={bulkAddOpen}
-        onOpenChange={setBulkAddOpen}
-        athleteProfileIds={selectedIds}
-        onSuccess={() => table.resetRowSelection()}
+        onOpenChange={(open) => {
+          setBulkAddOpen(open);
+          if (!open) setBulkAddAthleteIds([]);
+        }}
+        athleteProfileIds={bulkAddAthleteIds}
+        onSuccess={() => {
+          table.resetRowSelection();
+          setBulkAddAthleteIds([]);
+        }}
       />
     </>
   );

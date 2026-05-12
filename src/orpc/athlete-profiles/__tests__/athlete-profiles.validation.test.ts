@@ -135,7 +135,7 @@ describe('AthleteProfilesSchema', () => {
     if (result.success) {
       expect(result.data.page).toBe(1);
       expect(result.data.perPage).toBe(20);
-      expect(result.data.sortDir).toBe('desc');
+      expect(result.data.sorting).toEqual([]);
     }
   });
 

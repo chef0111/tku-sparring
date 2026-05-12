@@ -49,8 +49,12 @@ export function getAthletesTableColumns(
     {
       id: 'athleteCode',
       accessorKey: 'athleteCode',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Athlete ID" />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader
+          column={column}
+          state={table.getState()}
+          label="Athlete ID"
+        />
       ),
       cell: ({ row }) => (
         <span className="text-muted-foreground text-base">
@@ -66,8 +70,12 @@ export function getAthletesTableColumns(
     {
       id: 'name',
       accessorKey: 'name',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Name" />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader
+          column={column}
+          state={table.getState()}
+          label="Name"
+        />
       ),
       cell: ({ row }) => (
         <span className="font-medium">{row.original.name}</span>
@@ -86,8 +94,12 @@ export function getAthletesTableColumns(
     {
       id: 'gender',
       accessorKey: 'gender',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Gender" />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader
+          column={column}
+          state={table.getState()}
+          label="Gender"
+        />
       ),
       cell: ({ row }) => {
         const gender = getGenderLabel(row.original.gender);
@@ -119,8 +131,12 @@ export function getAthletesTableColumns(
     {
       id: 'beltLevel',
       accessorKey: 'beltLevel',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Belt level" />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader
+          column={column}
+          state={table.getState()}
+          label="Belt level"
+        />
       ),
       cell: ({ row }) => <span>{getBeltLabel(row.original.beltLevel)}</span>,
       maxSize: 100,
@@ -138,8 +154,12 @@ export function getAthletesTableColumns(
     {
       id: 'weight',
       accessorKey: 'weight',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Weight" />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader
+          column={column}
+          state={table.getState()}
+          label="Weight"
+        />
       ),
       cell: ({ row }) => <span>{row.original.weight} kg</span>,
       maxSize: 100,
@@ -155,8 +175,12 @@ export function getAthletesTableColumns(
     {
       id: 'affiliation',
       accessorKey: 'affiliation',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Affiliation" />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader
+          column={column}
+          state={table.getState()}
+          label="Affiliation"
+        />
       ),
       cell: ({ row }) => <span>{row.original.affiliation}</span>,
       enableSorting: false,

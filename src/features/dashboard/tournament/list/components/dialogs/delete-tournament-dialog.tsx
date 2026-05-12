@@ -35,11 +35,17 @@ export function DeleteTournamentDialog({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete tournament</DialogTitle>
-          <DialogDescription>
-            Delete <span className="font-semibold">{tournament?.name}</span>?
-            This removes all of its groups, matches, and athlete participations.
-            This action cannot be undone.
+          <DialogTitle className="text-destructive text-lg">
+            Delete Tournament
+          </DialogTitle>
+          <DialogDescription className="space-y-2">
+            <p>
+              Delete <span className="font-semibold">{tournament?.name}</span>?
+            </p>
+            <p>
+              This removes all of its groups, matches, and athlete
+              participations. This action cannot be undone.
+            </p>
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

@@ -44,7 +44,7 @@ export function TournamentCard({
         params={{ id: tournament.id }}
         aria-label={`Open ${tournament.name}`}
       >
-        <CardContent className="hover:border-primary/30 bg-card hover:bg-muted/30 gap-0 space-y-4 rounded-lg border p-4 transition-colors">
+        <CardContent className="hover:border-primary/30 bg-card hover:bg-muted/50 gap-0 space-y-4 rounded-lg border p-4 transition-colors">
           <CardHeader className="gap-1 p-0">
             <CardTitle className="truncate font-semibold">
               {tournament.name}
