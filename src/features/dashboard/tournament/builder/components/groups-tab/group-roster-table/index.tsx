@@ -304,7 +304,7 @@ function ActiveGroupRoster({
             readOnly={readOnly}
           />
         ) : (
-          <DataTable table={table} state={tableState} />
+          <DataTable table={table} state={tableState} selectedRows={false} />
         )}
       </div>
     </div>

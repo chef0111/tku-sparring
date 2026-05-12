@@ -1,18 +1,18 @@
 import * as React from 'react';
-import { usePanZoom } from '../../../hooks/use-pan-zoom';
 import { BracketMatchNode } from './bracket-match-node';
+import type { MatchPosition } from '@/lib/tournament/bracket-layout';
+import type {
+  MatchData,
+  TournamentAthleteData,
+} from '@/features/dashboard/types';
 import {
   MATCH_W,
   PADDING,
   ROUND_GAP,
   buildConnectors,
   buildLayout,
-} from './bracket-layout';
-import type { MatchPosition } from './bracket-layout';
-import type {
-  MatchData,
-  TournamentAthleteData,
-} from '@/features/dashboard/types';
+} from '@/lib/tournament/bracket-layout';
+import { usePanZoom } from '@/features/dashboard/tournament/builder/hooks/use-pan-zoom';
 import { cn } from '@/lib/utils';
 
 const statusColor: Record<string, string> = {
@@ -50,7 +50,7 @@ function ThirdPlaceLabel({
       x={pos.x + MATCH_W / 2}
       y={pos.y - 8}
       textAnchor="middle"
-      className="fill-muted-foreground text-[11px] font-medium tracking-wider uppercase"
+      className="fill-muted-foreground text-xs font-medium tracking-wider uppercase"
     >
       3rd Place
     </text>
@@ -64,8 +64,6 @@ export function BracketCanvas({
   onSlotClick,
   readOnly,
 }: BracketCanvasProps) {
-  const { containerRef, transform, handlers } = usePanZoom();
-
   const athleteMap = React.useMemo(() => {
     const map = new Map<string, TournamentAthleteData>();
     for (const a of athletes) map.set(a.id, a);
@@ -76,6 +74,8 @@ export function BracketCanvas({
     () => buildLayout(matches, thirdPlaceMatch),
     [matches, thirdPlaceMatch]
   );
+
+  const { containerRef, transform, handlers } = usePanZoom(width, height);
 
   const connectors = React.useMemo(
     () => buildConnectors(positions),
@@ -120,9 +120,9 @@ export function BracketCanvas({
               <text
                 key={round}
                 x={PADDING + round * ROUND_GAP + MATCH_W / 2}
-                y={12}
+                y={8}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[11px] font-medium tracking-wider uppercase"
+                className="fill-muted-foreground text-xs font-medium tracking-wider uppercase"
               >
                 {label}
               </text>

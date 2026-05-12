@@ -67,7 +67,7 @@ export function TournamentsTable({
       {isFetching && !data ? (
         <DataTableSkeleton columnCount={6} rowCount={10} />
       ) : (
-        <DataTable table={table} state={tableState} />
+        <DataTable table={table} state={tableState} selectedRows={false} />
       )}
     </div>
   );

@@ -1,8 +1,16 @@
-import * as React from 'react';
 import { Dices } from 'lucide-react';
 import { toast } from 'sonner';
 import { useGenerateBracket } from '@/queries/matches';
 import { Button } from '@/components/ui/button';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
+import { Spinner } from '@/components/ui/spinner';
 
 interface EmptyBracketStateProps {
   groupId: string | null;
@@ -22,45 +30,63 @@ export function EmptyBracketState({
   const hidden = readOnly || tournamentStatus !== 'draft';
   if (hidden) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-3 p-6">
-        <div className="bg-muted flex size-14 items-center justify-center rounded-full">
-          <Dices className="text-muted-foreground size-7" />
-        </div>
-        <h3 className="font-semibold">No bracket yet</h3>
-        <p className="text-muted-foreground max-w-xs text-center text-sm">
-          No bracket has been generated for this group.
-        </p>
-      </div>
+      <Empty className="h-full border-none py-8">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Dices />
+          </EmptyMedia>
+          <EmptyTitle>No bracket yet</EmptyTitle>
+          <EmptyDescription>
+            No bracket has been generated for this group.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 p-6">
-      <div className="bg-muted flex size-14 items-center justify-center rounded-full">
-        <Dices className="text-muted-foreground size-7" />
-      </div>
-      <div className="flex max-w-sm flex-col items-center gap-2 text-center">
-        <h3 className="font-semibold">No bracket yet</h3>
-        <p className="text-muted-foreground text-sm">
+    <Empty className="h-full border-none py-8">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <Dices />
+        </EmptyMedia>
+        <EmptyTitle>No bracket yet</EmptyTitle>
+        <EmptyDescription>
           Creates an empty shell sized to your {athleteCount} athletes. Use
           Shuffle in the toolbar to populate.
-        </p>
-      </div>
-      <Button
-        disabled={!groupId || generate.isPending || athleteCount < 2}
-        onClick={() => {
-          if (!groupId) return;
-          void toast.promise(generate.mutateAsync({ groupId }), {
-            loading: 'Generating shell…',
-            success: 'Bracket shell created',
-            error: (e) =>
-              e instanceof Error ? e.message : 'Could not generate',
-          });
-        }}
-      >
-        <Dices data-icon="inline-start" />
-        Generate Bracket
-      </Button>
-    </div>
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button
+          disabled={!groupId || generate.isPending || athleteCount < 2}
+          onClick={() => {
+            if (!groupId) return;
+            void toast.promise(generate.mutateAsync({ groupId }), {
+              loading: 'Generating shell…',
+              success: 'Bracket shell created',
+              error: (e) =>
+                e instanceof Error ? e.message : 'Could not generate',
+            });
+          }}
+        >
+          <Dices data-icon="inline-start" />
+          Generate Bracket
+        </Button>
+      </EmptyContent>
+    </Empty>
+  );
+}
+
+export function LoadingBracketState() {
+  return (
+    <Empty className="h-full min-h-48 -translate-y-8 border-none py-8">
+      <EmptyHeader>
+        <EmptyMedia>
+          <Spinner className="size-8" />
+        </EmptyMedia>
+        <EmptyTitle>Loading bracket</EmptyTitle>
+        <EmptyDescription>Fetching matches for this group.</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
   );
 }

@@ -3,10 +3,25 @@ import * as React from 'react';
 const SCALE_MIN = 0.25;
 const SCALE_MAX = 2.5;
 
-export function usePanZoom() {
-  const [transform, setTransform] = React.useState({ x: 0, y: 0, scale: 1 });
+/**
+ * @param contentWidth - Bracket layout width (px)
+ * @param contentHeight - Bracket layout height (px)
+ */
+export function usePanZoom(contentWidth: number, contentHeight: number) {
+  const [transform, setTransform] = React.useState({
+    x: 0,
+    y: 0,
+    scale: 1,
+  });
   const transformRef = React.useRef(transform);
   transformRef.current = transform;
+
+  const contentDimsRef = React.useRef({
+    w: contentWidth,
+    h: contentHeight,
+  });
+  contentDimsRef.current = { w: contentWidth, h: contentHeight };
+
   const containerRef = React.useRef<HTMLDivElement>(null);
   const panRef = React.useRef<{
     active: boolean;
@@ -16,8 +31,50 @@ export function usePanZoom() {
     originY: number;
   } | null>(null);
 
+  React.useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    function centerView() {
+      const node = containerRef.current;
+      const { w, h } = contentDimsRef.current;
+      setTransform((t) => {
+        if (!node || w <= 0 || h <= 0) return t;
+        const rect = node.getBoundingClientRect();
+        const W = rect.width;
+        const H = rect.height;
+        if (W <= 0 || H <= 0) return t;
+        return {
+          ...t,
+          x: W / 2 - (w * t.scale) / 2,
+          y: H / 2 - (h * t.scale) / 2,
+        };
+      });
+    }
+
+    centerView();
+    const ro = new ResizeObserver(centerView);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [contentWidth, contentHeight]);
+
   const reset = React.useCallback(() => {
-    setTransform({ x: 0, y: 0, scale: 1 });
+    setTransform(() => {
+      const el = containerRef.current;
+      const { w, h } = contentDimsRef.current;
+      const scale = 1;
+      if (!el || w <= 0 || h <= 0) {
+        return { x: 0, y: 0, scale };
+      }
+      const rect = el.getBoundingClientRect();
+      const W = rect.width;
+      const H = rect.height;
+      return {
+        scale,
+        x: W / 2 - w / 2,
+        y: H / 2 - h / 2,
+      };
+    });
   }, []);
 
   const zoomIn = React.useCallback(() => {

@@ -12,6 +12,7 @@ import { SelectItem } from '@/components/ui/select';
 import { useAppForm } from '@/components/form/hooks';
 import { useDeleteGroup, useUpdateGroup } from '@/queries/groups';
 import { Spinner } from '@/components/ui/spinner';
+import { BELT_LEVELS } from '@/config/athlete';
 
 interface GroupSettingsSheetProps {
   open: boolean;
@@ -107,12 +108,34 @@ function GroupSettingsForm({ group, onClose }: GroupSettingsFormProps) {
       <div className="grid grid-cols-2 gap-3">
         <form.AppField name="beltMin">
           {(field) => (
-            <field.NumberInput label="Min Belt" min={0} max={10} step={1} />
+            <field.NumberSelect
+              label="Min Belt"
+              placeholder="Any"
+              emptyValue="__any__"
+              emptyLabel="Any"
+            >
+              {BELT_LEVELS.map((b) => (
+                <SelectItem key={b.value} value={String(b.value)}>
+                  {b.label}
+                </SelectItem>
+              ))}
+            </field.NumberSelect>
           )}
         </form.AppField>
         <form.AppField name="beltMax">
           {(field) => (
-            <field.NumberInput label="Max Belt" min={0} max={10} step={1} />
+            <field.NumberSelect
+              label="Max Belt"
+              placeholder="Any"
+              emptyValue="__any__"
+              emptyLabel="Any"
+            >
+              {BELT_LEVELS.map((b) => (
+                <SelectItem key={b.value} value={String(b.value)}>
+                  {b.label}
+                </SelectItem>
+              ))}
+            </field.NumberSelect>
           )}
         </form.AppField>
       </div>
@@ -154,11 +177,10 @@ function GroupSettingsForm({ group, onClose }: GroupSettingsFormProps) {
         )}
       </form.AppField>
 
-      <div className="flex gap-2 p-0 pt-6">
+      <div className="flex items-center gap-2 p-0 pt-6">
         <Button
           type="button"
           variant="destructive"
-          size="sm"
           onClick={() => deleteGroup.mutate({ id: group.id })}
           disabled={deleteGroup.isPending}
         >
@@ -166,12 +188,7 @@ function GroupSettingsForm({ group, onClose }: GroupSettingsFormProps) {
           Delete Group
         </Button>
         <div className="flex-1" />
-        <Button
-          type="button"
-          variant="outline"
-          className="h-8.5"
-          onClick={onClose}
-        >
+        <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
         <Button type="submit" size="sm" disabled={updateGroup.isPending}>

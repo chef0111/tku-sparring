@@ -9,8 +9,16 @@ import type {
   SwapSlotsDTO,
   UpdateScoreDTO,
 } from '@/orpc/matches/matches.dto';
+import type { MatchData } from '@/features/dashboard/types';
+import type { BracketDnDMutationContext } from '@/lib/queries/match';
 import { client } from '@/orpc/client';
 import { invalidateOrpcGroupListQueries } from '@/queries/groups';
+import {
+  applyOptimisticAssign,
+  applyOptimisticSetLock,
+  applyOptimisticSwap,
+  findMatchListQueryKey,
+} from '@/lib/queries/match';
 
 export function useMatches(groupId: string | null) {
   return useQuery({
@@ -85,39 +93,96 @@ export function useResetBracket(options?: { onSuccess?: () => void }) {
 }
 
 export function useAssignSlot(options?: { onSuccess?: () => void }) {
+  const queryClient = useQueryClient();
   const invalidate = useInvalidateMatches();
 
   return useMutation({
     mutationFn: (data: AssignSlotDTO) => client.match.assignSlot(data),
-    onSuccess: () => {
-      invalidate();
-      options?.onSuccess?.();
+    onMutate: async (input): Promise<BracketDnDMutationContext | undefined> => {
+      const queryKey = findMatchListQueryKey(queryClient, input.matchId);
+      if (!queryKey) return undefined;
+
+      await queryClient.cancelQueries({ queryKey });
+      const previousMatches =
+        queryClient.getQueryData<Array<MatchData>>(queryKey);
+      queryClient.setQueryData<Array<MatchData>>(queryKey, (old) => {
+        if (!old) return old;
+        return applyOptimisticAssign(old, input);
+      });
+      return { queryKey, previousMatches };
+    },
+    onError: (_err, _input, context) => {
+      if (context?.queryKey && context.previousMatches !== undefined) {
+        queryClient.setQueryData(context.queryKey, context.previousMatches);
+      }
+    },
+    onSettled: (_data, error) => {
+      void invalidate();
+      if (!error) options?.onSuccess?.();
     },
   });
 }
 
 export function useSwapSlots(options?: { onSuccess?: () => void }) {
+  const queryClient = useQueryClient();
   const invalidate = useInvalidateMatches();
 
   return useMutation({
     mutationFn: (data: SwapSlotsDTO) => client.match.swapSlots(data),
-    onSuccess: () => {
-      invalidate();
-      options?.onSuccess?.();
+    onMutate: async (input): Promise<BracketDnDMutationContext | undefined> => {
+      const queryKey = findMatchListQueryKey(queryClient, input.matchAId);
+      if (!queryKey) return undefined;
+
+      await queryClient.cancelQueries({ queryKey });
+      const previousMatches =
+        queryClient.getQueryData<Array<MatchData>>(queryKey);
+      queryClient.setQueryData<Array<MatchData>>(queryKey, (old) => {
+        if (!old) return old;
+        return applyOptimisticSwap(old, input);
+      });
+      return { queryKey, previousMatches };
+    },
+    onError: (_err, _input, context) => {
+      if (context?.queryKey && context.previousMatches !== undefined) {
+        queryClient.setQueryData(context.queryKey, context.previousMatches);
+      }
+    },
+    onSettled: (_data, error) => {
+      void invalidate();
+      if (!error) options?.onSuccess?.();
     },
   });
 }
 
 export function useSetLock(options?: { onSuccess?: () => void }) {
+  const queryClient = useQueryClient();
   const invalidate = useInvalidateMatches();
 
   return useMutation({
     mutationFn: (data: SetLockDTO) => client.match.setLock(data),
-    onSuccess: () => {
-      invalidate();
-      options?.onSuccess?.();
+    onMutate: async (input): Promise<BracketDnDMutationContext | undefined> => {
+      const queryKey = findMatchListQueryKey(queryClient, input.matchId);
+      if (!queryKey) return undefined;
+
+      await queryClient.cancelQueries({ queryKey });
+      const previousMatches =
+        queryClient.getQueryData<Array<MatchData>>(queryKey);
+      queryClient.setQueryData<Array<MatchData>>(queryKey, (old) => {
+        if (!old) return old;
+        return applyOptimisticSetLock(old, input);
+      });
+      return { queryKey, previousMatches };
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err, _input, context) => {
+      if (context?.queryKey && context.previousMatches !== undefined) {
+        queryClient.setQueryData(context.queryKey, context.previousMatches);
+      }
+      toast.error(err.message);
+    },
+    onSettled: (_data, error) => {
+      void invalidate();
+      if (!error) options?.onSuccess?.();
+    },
   });
 }
 
