@@ -34,11 +34,15 @@ export function AthletePool({
 
   const { data: athletes, isPending } = useTournamentAthletes({
     tournamentId,
+    unassignedOnly: false,
+    page: 1,
+    perPage: 200,
+    sorting: [],
   });
 
   const unassigned = React.useMemo(() => {
-    if (!athletes) return [];
-    return athletes.filter((a: TournamentAthleteData) => a.groupId === null);
+    const items = athletes?.items ?? [];
+    return items.filter((a: TournamentAthleteData) => a.groupId === null);
   }, [athletes]);
 
   const filtered = React.useMemo(() => {

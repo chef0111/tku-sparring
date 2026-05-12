@@ -1,5 +1,6 @@
 import {
   keepPreviousData,
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
@@ -16,6 +17,22 @@ export function useTournamentAthletes(input: ListTournamentAthletesDTO) {
   return useQuery({
     queryKey: ['tournamentAthlete', 'list', input] as const,
     queryFn: () => client.tournamentAthlete.list(input),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useTournamentAthletesInfinite(
+  input: Omit<ListTournamentAthletesDTO, 'page'>
+) {
+  return useInfiniteQuery({
+    queryKey: ['tournamentAthlete', 'list', 'infinite', input] as const,
+    queryFn: ({ pageParam }: { pageParam: number }) =>
+      client.tournamentAthlete.list({ ...input, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (last, allPages) => {
+      const fetched = allPages.reduce((acc, p) => acc + p.items.length, 0);
+      return fetched < last.total ? allPages.length + 1 : undefined;
+    },
     placeholderData: keepPreviousData,
   });
 }

@@ -48,10 +48,14 @@ export function BracketsTab({
   const athletesQuery = useTournamentAthletes({
     tournamentId,
     groupId: selectedGroupId ?? undefined,
+    unassignedOnly: false,
+    page: 1,
+    perPage: 200,
+    sorting: [],
   });
 
   const matches = matchesQuery.data ?? [];
-  const athletes = athletesQuery.data ?? [];
+  const athletes = athletesQuery.data?.items ?? [];
   const selectedGroup = groups.find((g) => g.id === selectedGroupId);
 
   const generateBracket = useGenerateBracket();

@@ -98,12 +98,16 @@ export function GroupPanel({
   const { data: athletes, isPending } = useTournamentAthletes({
     tournamentId,
     groupId: group.id,
+    unassignedOnly: false,
+    page: 1,
+    perPage: 200,
+    sorting: [],
   });
 
   const autoAssign = useAutoAssignGroup();
   const updateGroup = useUpdateGroup();
 
-  const groupAthletes = (athletes ?? []) as Array<TournamentAthleteData>;
+  const groupAthletes = (athletes?.items ?? []) as Array<TournamentAthleteData>;
 
   const violationCount = React.useMemo(
     () =>

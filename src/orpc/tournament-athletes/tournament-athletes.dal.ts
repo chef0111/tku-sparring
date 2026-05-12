@@ -5,19 +5,75 @@ import type {
 import { prisma } from '@/lib/db';
 
 export async function findByTournamentId(input: ListTournamentAthletesDTO) {
-  return prisma.tournamentAthlete.findMany({
-    where: {
-      tournamentId: input.tournamentId,
-      ...(input.groupId !== undefined ? { groupId: input.groupId } : {}),
-      ...(input.status ? { status: input.status } : {}),
-    },
-    orderBy: { createdAt: 'asc' },
-    include: {
-      athleteProfile: {
-        select: { id: true, athleteCode: true },
-      },
-    },
-  });
+  const {
+    tournamentId,
+    groupId,
+    unassignedOnly,
+    status,
+    page,
+    perPage,
+    query,
+    gender,
+    beltLevels,
+    beltLevelMin,
+    beltLevelMax,
+    weightMin,
+    weightMax,
+    sorting,
+  } = input;
+
+  const where = {
+    tournamentId,
+    ...(unassignedOnly ? { groupId: null } : groupId ? { groupId } : {}),
+    ...(status ? { status } : {}),
+    ...(query
+      ? {
+          OR: [
+            { name: { contains: query, mode: 'insensitive' as const } },
+            { affiliation: { contains: query, mode: 'insensitive' as const } },
+          ],
+        }
+      : {}),
+    ...(gender && gender.length > 0 ? { gender: { in: gender } } : {}),
+    ...(beltLevels && beltLevels.length > 0
+      ? { beltLevel: { in: beltLevels } }
+      : beltLevelMin !== undefined || beltLevelMax !== undefined
+        ? {
+            beltLevel: {
+              ...(beltLevelMin !== undefined ? { gte: beltLevelMin } : {}),
+              ...(beltLevelMax !== undefined ? { lte: beltLevelMax } : {}),
+            },
+          }
+        : {}),
+    ...(weightMin !== undefined || weightMax !== undefined
+      ? {
+          weight: {
+            ...(weightMin !== undefined ? { gte: weightMin } : {}),
+            ...(weightMax !== undefined ? { lte: weightMax } : {}),
+          },
+        }
+      : {}),
+  };
+
+  const orderBy =
+    sorting.length > 0
+      ? sorting.map((s) => ({
+          [s.id]: s.desc ? ('desc' as const) : ('asc' as const),
+        }))
+      : [{ createdAt: 'asc' as const }];
+
+  const [items, total] = await Promise.all([
+    prisma.tournamentAthlete.findMany({
+      where,
+      orderBy,
+      skip: (page - 1) * perPage,
+      take: perPage,
+      include: { athleteProfile: { select: { id: true, athleteCode: true } } },
+    }),
+    prisma.tournamentAthlete.count({ where }),
+  ]);
+
+  return { items, total };
 }
 
 export async function bulkCreate(
