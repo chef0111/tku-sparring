@@ -75,7 +75,7 @@
         "@rolldown/plugin-babel": "^0.2.3",
         "@tanstack/devtools-vite": "^0.6.0",
         "@tanstack/eslint-config": "^0.4.0",
-        "@tanstack/intent": "^0.0.40",
+        "@tanstack/intent": "^0.0.41",
         "@testing-library/dom": "^10.4.0",
         "@testing-library/react": "^16.2.0",
         "@types/babel__core": "^7.20.5",
@@ -701,7 +701,7 @@
 
     "@tanstack/history": ["@tanstack/history@1.161.6", "", {}, "sha512-NaOGLRrddszbQj9upGat6HG/4TKvXLvu+osAIgfxPYA+eIvYKv8GKDJOrY2D3/U9MRnKfMWD7bU4jeD4xmqyIg=="],
 
-    "@tanstack/intent": ["@tanstack/intent@0.0.40", "", { "dependencies": { "cac": "^6.7.14", "jsonc-parser": "^3.3.1", "semver": "^7.7.4", "yaml": "2.8.3" }, "bin": { "intent": "dist/cli.mjs", "intent-library": "dist/intent-library.mjs" } }, "sha512-ZuUTzr4QrjNuWdv+DfTv0///uONz5+Sw3mR+2xOXHpob6vWsUXnSk3Ht7X9Rpu6zZdQYZlZnJCwN50CAZ21GCw=="],
+    "@tanstack/intent": ["@tanstack/intent@0.0.41", "", { "dependencies": { "cac": "^6.7.14", "jsonc-parser": "^3.3.1", "semver": "^7.7.4", "yaml": "2.8.3" }, "bin": { "intent": "dist/cli.mjs", "intent-library": "dist/intent-library.mjs" } }, "sha512-Psl+oDiidLvtctswkTQ1P6sQIihwrMLcdfQVfkLpO42oKwxWEr1lodWUHiOG5jFXsGwDDvpUv/WAdlmJF+yGpw=="],
 
     "@tanstack/match-sorter-utils": ["@tanstack/match-sorter-utils@8.19.4", "", { "dependencies": { "remove-accents": "0.5.0" } }, "sha512-Wo1iKt2b9OT7d+YGhvEPD3DXvPv2etTusIMhMUoG7fbhmxcXCtIjJDEygy91Y2JFlwGyjqiBPRozme7UD8hoqg=="],
 
