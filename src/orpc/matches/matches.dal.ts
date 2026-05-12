@@ -46,7 +46,7 @@ function nextPowerOfTwo(n: number): number {
   return p;
 }
 
-function standardSeedOrder(size: number): number[] {
+function standardSeedOrder(size: number): Array<number> {
   if (size === 1) return [0];
   const half = standardSeedOrder(size / 2);
   return half.flatMap((i) => [i, size - 1 - i]);
@@ -114,7 +114,7 @@ export async function generateBracket(
   }
 
   const totalRounds = Math.log2(bracketSize);
-  const matches: CreateMatchDTO[] = [];
+  const matches: Array<CreateMatchDTO> = [];
 
   for (let matchIdx = 0; matchIdx < bracketSize / 2; matchIdx++) {
     const redAthlete = seeded[matchIdx * 2] ?? null;

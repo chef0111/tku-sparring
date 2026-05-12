@@ -22,7 +22,9 @@ export async function findById(id: string) {
     where: { id },
     include: {
       tournamentAthletes: {
-        include: { athleteProfile: { select: { id: true, athleteCode: true } } },
+        include: {
+          athleteProfile: { select: { id: true, athleteCode: true } },
+        },
       },
       matches: true,
       _count: { select: { tournamentAthletes: true, matches: true } },

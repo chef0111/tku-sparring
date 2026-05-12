@@ -9,6 +9,8 @@ import {
   EditTournamentDialog,
 } from './dialogs';
 import { Header } from './header';
+import { GroupsTab } from './groups/groups-tab';
+import { BracketsTab } from './brackets/brackets-tab';
 import type { GroupData, TournamentData } from '@/features/dashboard/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -77,28 +79,13 @@ function TournamentBuilder({
   tournamentId,
 }: TournamentBuilderProps) {
   const isReadOnly = useTournamentReadOnly(tournamentId);
-  const [selectedGroupId, setSelectedGroupId] = React.useState<string | null>(
-    groups[0]?.id ?? null
-  );
+  const [activeTab, setActiveTab] = React.useState('groups');
   const [showAddGroup, setShowAddGroup] = React.useState(false);
   const [showEditTournament, setShowEditTournament] = React.useState(false);
   const [showDeleteTournament, setShowDeleteTournament] = React.useState(false);
 
-  // When groups list changes (e.g. after creation), auto-select the first if no selection
   React.useEffect(() => {
-    if (!selectedGroupId && groups.length > 0) {
-      setSelectedGroupId(groups[0]?.id ?? null);
-    }
-    // If the selected group was deleted, reset
-    if (selectedGroupId && !groups.find((g) => g.id === selectedGroupId)) {
-      setSelectedGroupId(groups[0]?.id ?? null);
-    }
-  }, [groups, selectedGroupId]);
-
-  React.useEffect(() => {
-    if (!isReadOnly) {
-      return;
-    }
+    if (!isReadOnly) return;
 
     setShowAddGroup(false);
     setShowEditTournament(false);
@@ -120,7 +107,8 @@ function TournamentBuilder({
           <TournamentStatusPill status={tournament.status} className="ml-2" />
         </div>
         <Tabs
-          defaultValue="groups"
+          value={activeTab}
+          onValueChange={setActiveTab}
           className="absolute top-2 left-1/2 h-10 -translate-x-1/2"
         >
           <TabsList className="bg-sidebar border-2 p-0">
@@ -144,33 +132,43 @@ function TournamentBuilder({
       <BuilderSidebar
         tournamentId={tournamentId}
         onEditTournament={() => {
-          if (!isReadOnly) {
-            setShowEditTournament(true);
-          }
+          if (!isReadOnly) setShowEditTournament(true);
         }}
         onDeleteTournament={() => {
-          if (!isReadOnly) {
-            setShowDeleteTournament(true);
-          }
+          if (!isReadOnly) setShowDeleteTournament(true);
         }}
         readOnly={isReadOnly}
       />
 
-      <main className="flex h-dvh flex-1 flex-col">
-        <div className="relative flex-1 p-6">
-          {isReadOnly ? (
-            <Alert className="max-w-xl">
-              <AlertTitle>Read-only workspace</AlertTitle>
-              <AlertDescription>
-                This tournament is completed. Builder mutations are disabled so
-                results stay locked.
-              </AlertDescription>
-            </Alert>
-          ) : null}
+      <main className="mt-14 flex h-[calc(100dvh-3.5rem)] flex-1 flex-col">
+        {isReadOnly && (
+          <Alert className="mx-6 mt-4 max-w-xl">
+            <AlertTitle>Read-only workspace</AlertTitle>
+            <AlertDescription>
+              This tournament is completed. Builder mutations are disabled so
+              results stay locked.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <div className="relative flex-1 overflow-hidden p-4">
+          {activeTab === 'groups' ? (
+            <GroupsTab
+              tournamentId={tournamentId}
+              groups={groups}
+              readOnly={isReadOnly}
+            />
+          ) : (
+            <BracketsTab
+              tournamentId={tournamentId}
+              groups={groups}
+              readOnly={isReadOnly}
+              tournamentStatus={tournament.status}
+            />
+          )}
         </div>
       </main>
 
-      {/* Dialogs */}
       <AddGroupDialog
         open={showAddGroup}
         onOpenChange={setShowAddGroup}
