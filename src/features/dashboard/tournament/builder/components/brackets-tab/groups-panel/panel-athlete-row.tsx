@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import type { TournamentAthleteData } from '@/features/dashboard/types';
 import { cn } from '@/lib/utils';

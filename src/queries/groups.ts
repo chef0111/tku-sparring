@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import type { QueryClient } from '@tanstack/react-query';
 import type {
   AssignAthleteDTO,
   AutoAssignDTO,
@@ -12,12 +13,28 @@ export function useGroups(tournamentId: string) {
   return useQuery(orpc.group.list.queryOptions({ input: { tournamentId } }));
 }
 
+export function isOrpcGroupListQuery(query: {
+  queryKey: ReadonlyArray<unknown>;
+}): boolean {
+  const head = query.queryKey[0];
+  return (
+    Array.isArray(head) &&
+    head.length >= 2 &&
+    head[0] === 'group' &&
+    head[1] === 'list'
+  );
+}
+
+export function invalidateOrpcGroupListQueries(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ predicate: isOrpcGroupListQuery });
+}
+
 function useInvalidateGroups() {
   const queryClient = useQueryClient();
   return () => {
-    queryClient.invalidateQueries({ queryKey: ['tournament'] });
-    queryClient.invalidateQueries({ queryKey: ['group'] });
-    queryClient.invalidateQueries({ queryKey: ['tournamentAthlete'] });
+    void queryClient.invalidateQueries({ queryKey: ['tournament'] });
+    void invalidateOrpcGroupListQueries(queryClient);
+    void queryClient.invalidateQueries({ queryKey: ['tournamentAthlete'] });
   };
 }
 

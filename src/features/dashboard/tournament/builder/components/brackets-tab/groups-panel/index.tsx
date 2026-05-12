@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { GroupsTabsHeader } from './groups-tabs-header';
 import { PanelAthleteRow } from './panel-athlete-row';
 import type {
@@ -22,7 +21,7 @@ export function GroupsPanel({
   readOnly,
 }: GroupsPanelProps) {
   return (
-    <aside className="bg-sidebar/30 flex h-full min-h-0 w-72 shrink-0 flex-col border-l">
+    <aside className="bg-sidebar/30 flex h-full min-h-0 w-xs shrink-0 flex-col border-l">
       <GroupsTabsHeader
         groups={groups}
         selectedGroupId={selectedGroupId}

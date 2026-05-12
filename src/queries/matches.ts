@@ -10,6 +10,7 @@ import type {
   UpdateScoreDTO,
 } from '@/orpc/matches/matches.dto';
 import { client } from '@/orpc/client';
+import { invalidateOrpcGroupListQueries } from '@/queries/groups';
 
 export function useMatches(groupId: string | null) {
   return useQuery({
@@ -29,9 +30,9 @@ export function useTournamentMatches(tournamentId: string) {
 function useInvalidateMatches() {
   const queryClient = useQueryClient();
   return () => {
-    queryClient.invalidateQueries({ queryKey: ['match'] });
-    queryClient.invalidateQueries({ queryKey: ['tournament'] });
-    queryClient.invalidateQueries({ queryKey: ['group'] });
+    void queryClient.invalidateQueries({ queryKey: ['match'] });
+    void queryClient.invalidateQueries({ queryKey: ['tournament'] });
+    void invalidateOrpcGroupListQueries(queryClient);
   };
 }
 

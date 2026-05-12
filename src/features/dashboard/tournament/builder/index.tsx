@@ -21,7 +21,7 @@ import { Status, StatusIndicator, StatusLabel } from '@/components/ui/status';
 import { useLeaseStream } from '@/hooks/use-lease-stream';
 import { useTournamentReadOnly } from '@/hooks/use-tournament-read-only';
 import { useTournament } from '@/queries/tournaments';
-import { useGroups } from '@/queries/groups';
+import { invalidateOrpcGroupListQueries, useGroups } from '@/queries/groups';
 import { useLeases } from '@/queries/leases';
 import { useDeviceId } from '@/hooks/use-device-id';
 import { authClient } from '@/lib/auth-client';
@@ -127,7 +127,7 @@ function TournamentBuilder({
     try {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['tournament'] }),
-        queryClient.invalidateQueries({ queryKey: ['group'] }),
+        invalidateOrpcGroupListQueries(queryClient),
         queryClient.invalidateQueries({ queryKey: ['lease'] }),
         queryClient.invalidateQueries({ queryKey: ['tournamentAthlete'] }),
       ]);

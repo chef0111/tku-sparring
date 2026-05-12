@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { client } from '@/orpc/client';
+import { invalidateOrpcGroupListQueries } from '@/queries/groups';
 
 interface AutoAssignAllDialogProps {
   open: boolean;
@@ -54,7 +55,7 @@ export function AutoAssignAllDialog({
         assignedSum += result.assigned;
       }
       queryClient.invalidateQueries({ queryKey: ['tournament'] });
-      queryClient.invalidateQueries({ queryKey: ['group'] });
+      await invalidateOrpcGroupListQueries(queryClient);
       queryClient.invalidateQueries({ queryKey: ['tournamentAthlete'] });
       toast.success(
         `Auto-assigned ${assignedSum} athletes across ${eligible.length} groups (skipped ${skipped.length})`
