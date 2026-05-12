@@ -1,30 +1,26 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
+import { parseAsStringEnum, useQueryState } from 'nuqs';
 import { ArrowLeft, Trophy } from 'lucide-react';
-import { TournamentStatusPill } from '../list/components/tournament-status-pill';
-import { BuilderSidebar } from './sidebar';
-import {
-  AddGroupDialog,
-  DeleteTournamentDialog,
-  EditTournamentDialog,
-} from './dialogs';
-import { Header } from './header';
+import { BuilderShell } from './components/builder-shell';
+import { BuilderHeader } from './components/builder-shell/builder-header';
+import { BuilderBottomToolbar } from './components/builder-shell/builder-bottom-toolbar';
+import { AddGroupDialog } from './components/dialogs/add-group-dialog';
+import { EditTournamentDialog } from './components/dialogs/edit-tournament-dialog';
+import { DeleteTournamentDialog } from './components/dialogs/delete-tournament-dialog';
+import { useBuilderManagerQuery } from './hooks/use-builder-manager-query';
 import { GroupsTab } from './groups/groups-tab';
 import { BracketsTab } from './brackets/brackets-tab';
 import type { GroupData, TournamentData } from '@/features/dashboard/types';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import LoadingScreen from '@/components/navigation/loading';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { useLeaseStream } from '@/hooks/use-lease-stream';
 import { useTournamentReadOnly } from '@/hooks/use-tournament-read-only';
 import { useTournament } from '@/queries/tournaments';
 import { useGroups } from '@/queries/groups';
-import { UserDropdown } from '@/components/user/user-dropdown';
+import { useLeases } from '@/queries/leases';
+import { useDeviceId } from '@/hooks/use-device-id';
 import { authClient } from '@/lib/auth-client';
-import { Badge } from '@/components/ui/badge';
-import { ButtonGroupSeparator } from '@/components/ui/button-group';
 
 interface TournamentBuilderPageProps {
   id: string;
@@ -73,101 +69,84 @@ interface TournamentBuilderProps {
   tournamentId: string;
 }
 
+const TAB_PARSER = parseAsStringEnum(['groups', 'brackets']).withDefault(
+  'groups'
+);
+
 function TournamentBuilder({
   tournament,
   groups,
   tournamentId,
 }: TournamentBuilderProps) {
   const isReadOnly = useTournamentReadOnly(tournamentId);
-  const [activeTab, setActiveTab] = React.useState('groups');
+  const { tab } = useBuilderManagerQuery();
+  const [, setTab] = useQueryState('tab', TAB_PARSER);
+
   const [showAddGroup, setShowAddGroup] = React.useState(false);
   const [showEditTournament, setShowEditTournament] = React.useState(false);
   const [showDeleteTournament, setShowDeleteTournament] = React.useState(false);
 
   React.useEffect(() => {
     if (!isReadOnly) return;
-
     setShowAddGroup(false);
     setShowEditTournament(false);
     setShowDeleteTournament(false);
   }, [isReadOnly]);
 
-  const { data } = authClient.useSession();
-  const user = data?.user;
+  const { data: sessionData } = authClient.useSession();
+  const user = sessionData?.user;
+
+  const deviceId = useDeviceId();
+  const { data: leases } = useLeases(tournamentId, deviceId);
+  const leasedByMeCount = React.useMemo(
+    () =>
+      (leases ?? []).filter((lease) => lease.leaseStatus === 'held_by_me')
+        .length,
+    [leases]
+  );
 
   return (
-    <SidebarProvider defaultOpen>
-      <Header>
-        <div className="relative flex w-full items-center">
-          <SidebarTrigger className="bg-muted/70 hover:bg-accent! z-50 border" />
-          <h1 className="ml-2 text-lg font-semibold">{tournament.name}</h1>
-          <Badge className="bg-primary/10 text-primary ml-1 rounded text-xs font-medium">
-            Builder
-          </Badge>
-          <TournamentStatusPill status={tournament.status} className="ml-2" />
-        </div>
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="absolute top-2 left-1/2 h-10 -translate-x-1/2"
-        >
-          <TabsList className="bg-sidebar border-2 p-0">
-            <TabsTrigger
-              value="groups"
-              className="w-32 rounded-r-none border-none px-4 text-lg"
-            >
-              Groups
-            </TabsTrigger>
-            <ButtonGroupSeparator />
-            <TabsTrigger
-              value="brackets"
-              className="w-32 rounded-l-none border-none px-4 text-lg"
-            >
-              Brackets
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-        {user && <UserDropdown user={user} className="-mr-2 scale-95" />}
-      </Header>
-      <BuilderSidebar
-        tournamentId={tournamentId}
-        onEditTournament={() => {
-          if (!isReadOnly) setShowEditTournament(true);
-        }}
-        onDeleteTournament={() => {
-          if (!isReadOnly) setShowDeleteTournament(true);
-        }}
-        readOnly={isReadOnly}
-      />
-
-      <main className="mt-14 flex h-[calc(100dvh-3.5rem)] flex-1 flex-col">
-        {isReadOnly && (
-          <Alert className="mx-6 mt-4 max-w-xl">
-            <AlertTitle>Read-only workspace</AlertTitle>
-            <AlertDescription>
-              This tournament is completed. Builder mutations are disabled so
-              results stay locked.
-            </AlertDescription>
-          </Alert>
+    <BuilderShell
+      readOnly={isReadOnly}
+      header={
+        <BuilderHeader
+          tournament={tournament}
+          tab={tab}
+          onTabChange={(v) => void setTab(v)}
+          user={user}
+        />
+      }
+      footer={
+        <BuilderBottomToolbar
+          tournament={tournament}
+          leasedByMeCount={leasedByMeCount}
+          totalGroups={groups.length}
+          readOnly={isReadOnly}
+          onEditTournament={() => {
+            if (!isReadOnly) setShowEditTournament(true);
+          }}
+          onDeleteTournament={() => {
+            if (!isReadOnly) setShowDeleteTournament(true);
+          }}
+        />
+      }
+    >
+      <div className="relative flex-1 overflow-hidden p-4">
+        {tab === 'groups' ? (
+          <GroupsTab
+            tournamentId={tournamentId}
+            groups={groups}
+            readOnly={isReadOnly}
+          />
+        ) : (
+          <BracketsTab
+            tournamentId={tournamentId}
+            groups={groups}
+            readOnly={isReadOnly}
+            tournamentStatus={tournament.status}
+          />
         )}
-
-        <div className="relative flex-1 overflow-hidden p-4">
-          {activeTab === 'groups' ? (
-            <GroupsTab
-              tournamentId={tournamentId}
-              groups={groups}
-              readOnly={isReadOnly}
-            />
-          ) : (
-            <BracketsTab
-              tournamentId={tournamentId}
-              groups={groups}
-              readOnly={isReadOnly}
-              tournamentStatus={tournament.status}
-            />
-          )}
-        </div>
-      </main>
+      </div>
 
       <AddGroupDialog
         open={showAddGroup}
@@ -186,6 +165,6 @@ function TournamentBuilder({
         tournamentId={tournamentId}
         tournamentName={tournament.name}
       />
-    </SidebarProvider>
+    </BuilderShell>
   );
 }
