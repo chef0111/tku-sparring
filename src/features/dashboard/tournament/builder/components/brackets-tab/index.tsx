@@ -69,6 +69,21 @@ export function BracketsTab({
   const athletes = athletesQuery.data?.items ?? [];
   const selectedGroup = groups.find((g) => g.id === selectedGroupId);
 
+  const assignedRound0TaIds = React.useMemo(() => {
+    const s = new Set<string>();
+    for (const m of matches) {
+      if (m.round !== 0) continue;
+      if (m.redTournamentAthleteId) s.add(m.redTournamentAthleteId);
+      if (m.blueTournamentAthleteId) s.add(m.blueTournamentAthleteId);
+    }
+    return s;
+  }, [matches]);
+
+  const panelPoolAthletes = React.useMemo(
+    () => athletes.filter((a) => !assignedRound0TaIds.has(a.id)),
+    [athletes, assignedRound0TaIds]
+  );
+
   const assignSlot = useAssignSlot();
   const swapSlots = useSwapSlots();
 
@@ -110,24 +125,31 @@ export function BracketsTab({
     const src = e.active.data.current as
       | {
           from?: string;
-          tournamentAthleteId?: string;
+          tournamentAthleteId?: string | null;
           groupId?: string;
           matchId?: string;
           side?: 'red' | 'blue';
         }
       | undefined;
     const dst = e.over?.data.current as
-      | { matchId?: string; side?: 'red' | 'blue'; locked?: boolean }
+      | {
+          from?: string;
+          groupId?: string | null;
+          matchId?: string;
+          side?: 'red' | 'blue';
+          locked?: boolean;
+        }
       | undefined;
 
-    if (!src || !dst || dst.locked) return;
+    if (!src) return;
     if (e.active.id === e.over?.id) return;
 
     if (
       src.from === 'panel' &&
       src.tournamentAthleteId &&
-      dst.matchId &&
-      dst.side
+      dst?.matchId &&
+      dst.side &&
+      !dst.locked
     ) {
       void toast.promise(
         assignSlot.mutateAsync({
@@ -149,8 +171,33 @@ export function BracketsTab({
       src.from === 'slot' &&
       src.matchId &&
       src.side &&
-      dst.matchId &&
-      dst.side
+      dst?.from === 'panel-drop' &&
+      dst.groupId &&
+      src.groupId === dst.groupId
+    ) {
+      void toast.promise(
+        assignSlot.mutateAsync({
+          matchId: src.matchId,
+          side: src.side,
+          tournamentAthleteId: null,
+        }),
+        {
+          loading: 'Removing…',
+          success: 'Removed from slot',
+          error: (err) =>
+            err instanceof Error ? err.message : 'Could not remove',
+        }
+      );
+      return;
+    }
+
+    if (
+      src.from === 'slot' &&
+      src.matchId &&
+      src.side &&
+      dst?.matchId &&
+      dst.side &&
+      !dst.locked
     ) {
       void toast.promise(
         swapSlots.mutateAsync({
@@ -231,8 +278,10 @@ export function BracketsTab({
           groups={groups}
           selectedGroupId={selectedGroupId}
           onSelect={setSelectedGroupId}
-          athletes={athletes}
+          athletes={panelPoolAthletes}
           readOnly={readOnly}
+          slotReturnEnabled={matches.length > 0}
+          groupAthleteCount={athleteCount}
         />
       </div>
 

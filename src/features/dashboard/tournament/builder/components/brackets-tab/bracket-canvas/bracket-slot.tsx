@@ -52,6 +52,7 @@ export function BracketSlot({
       from: 'slot' as const,
       matchId: match.id,
       side,
+      groupId: match.groupId,
       tournamentAthleteId: athlete?.id ?? null,
     },
   });
@@ -89,8 +90,8 @@ export function BracketSlot({
         height: ATHLETE_ROW_H,
       }}
       className={cn(
-        'relative z-2 flex cursor-grab touch-none items-stretch border border-transparent bg-transparent active:cursor-grabbing',
-        locked && 'rounded-md border-amber-500/60',
+        'relative z-2 flex cursor-grab touch-none items-stretch rounded-md border border-transparent bg-transparent active:cursor-grabbing',
+        locked && 'border-amber-500/60',
         isOver && canDrop && 'ring-primary/40 ring-2',
         isDragging && 'opacity-60'
       )}
