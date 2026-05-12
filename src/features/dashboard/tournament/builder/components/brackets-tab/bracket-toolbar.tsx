@@ -11,6 +11,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Card } from '@/components/ui/card';
 
 interface BracketToolbarProps {
   groupId: string | null;
@@ -54,16 +55,17 @@ export function BracketToolbar({
   }
 
   return (
-    <div className="bg-popover absolute top-1/3 left-3 z-10 flex -translate-y-1/3 flex-col gap-1 rounded-lg border p-1 shadow-md">
+    <Card className="bg-popover absolute top-1/3 left-3 z-10 flex -translate-y-1/3 flex-col gap-1 rounded-md border p-1 shadow-md">
       <Tooltip>
         <TooltipTrigger asChild>
           <span className="inline-flex">
             <Button
               type="button"
               variant="ghost"
-              size="icon"
+              size="icon-lg"
               disabled={blocked || shuffle.isPending}
               aria-label="Shuffle bracket"
+              className="rounded-sm"
               onClick={() => {
                 if (!groupId) return;
                 void wrap(shuffle.mutateAsync({ groupId }), {
@@ -132,6 +134,6 @@ export function BracketToolbar({
           {reason ?? 'Reset bracket'}
         </TooltipContent>
       </Tooltip>
-    </div>
+    </Card>
   );
 }

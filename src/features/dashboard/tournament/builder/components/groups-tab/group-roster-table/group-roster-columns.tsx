@@ -24,6 +24,7 @@ import { DataTableColumnHeader } from '@/components/data-table/data-table-column
 //   TooltipTrigger,
 // } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { getBeltLabel, getGenderLabel } from '@/config/athlete';
 
 interface GetGroupRosterColumnsArgs {
   group: GroupData;
@@ -96,7 +97,7 @@ export function getGroupRosterColumns({
       ),
       cell: ({ row }) => (
         <Badge variant="outline" className="text-xs">
-          {row.original.gender}
+          {getGenderLabel(row.original.gender)}
         </Badge>
       ),
       enableSorting: true,
@@ -108,7 +109,9 @@ export function getGroupRosterColumns({
         <DataTableColumnHeader column={column} label="Belt" />
       ),
       cell: ({ row }) => (
-        <span className="text-sm tabular-nums">{row.original.beltLevel}</span>
+        <span className="text-sm tabular-nums">
+          {getBeltLabel(row.original.beltLevel)}
+        </span>
       ),
       enableSorting: true,
     },
@@ -147,7 +150,11 @@ export function getGroupRosterColumns({
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="size-7">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="absolute inset-2"
+              >
                 <MoreHorizontal className="size-4" />
               </Button>
             </DropdownMenuTrigger>

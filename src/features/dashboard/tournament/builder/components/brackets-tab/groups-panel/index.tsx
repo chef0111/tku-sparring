@@ -1,10 +1,18 @@
 import { useDroppable } from '@dnd-kit/core';
+import { BetweenHorizonalEnd } from 'lucide-react';
 import { GroupsTabsHeader } from './groups-tabs-header';
 import { PanelAthleteRow } from './panel-athlete-row';
 import type {
   GroupData,
   TournamentAthleteData,
 } from '@/features/dashboard/types';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
 import { cn } from '@/lib/utils';
 
 interface GroupsPanelProps {
@@ -44,20 +52,31 @@ export function GroupsPanel({
       />
       <div
         ref={poolDrop.setNodeRef}
-        className={cn(
-          'min-h-0 flex-1 overflow-y-auto transition-colors',
-          poolDrop.isOver && slotReturnEnabled && !readOnly && 'bg-primary/5'
-        )}
+        className={cn('min-h-0 flex-1 overflow-y-auto transition-colors')}
       >
         <div className="flex flex-col gap-1.5 p-2">
           {athletes.length === 0 ? (
-            <p className="text-muted-foreground px-2 py-4 text-center text-sm">
-              {groupAthleteCount === 0
-                ? 'No athletes in this group.'
-                : slotReturnEnabled && !readOnly
-                  ? 'All athletes are in round 1 slots. Drag from the bracket here to remove an athlete.'
-                  : 'No athletes to show.'}
-            </p>
+            <Empty className="border-none px-2 py-8">
+              {groupAthleteCount === 0 ? (
+                <EmptyHeader>
+                  <EmptyTitle>No athletes in this group</EmptyTitle>
+                </EmptyHeader>
+              ) : slotReturnEnabled && !readOnly ? (
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <BetweenHorizonalEnd />
+                  </EmptyMedia>
+                  <EmptyTitle>All athletes are arranged</EmptyTitle>
+                  <EmptyDescription>
+                    Drag from the bracket here to remove an athlete.
+                  </EmptyDescription>
+                </EmptyHeader>
+              ) : (
+                <EmptyHeader>
+                  <EmptyTitle>No athletes to show</EmptyTitle>
+                </EmptyHeader>
+              )}
+            </Empty>
           ) : (
             athletes.map((a) => (
               <PanelAthleteRow

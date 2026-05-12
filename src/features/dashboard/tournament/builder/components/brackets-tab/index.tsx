@@ -10,14 +10,13 @@ import { toast } from 'sonner';
 import { Trophy } from 'lucide-react';
 import { BracketCanvas } from './bracket-canvas';
 import { BracketToolbar } from './bracket-toolbar';
-import { EmptyBracketState } from './empty-bracket-state';
+import { EmptyBracketState, LoadingBracketState } from './empty-bracket-state';
 import { GroupsPanel } from './groups-panel';
 import { MatchDetailPanel } from './match-detail-panel';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type { GroupData, MatchData } from '@/features/dashboard/types';
 import { useAssignSlot, useMatches, useSwapSlots } from '@/queries/matches';
 import { useTournamentAthletes } from '@/queries/tournament-athletes';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface BracketsTabProps {
   tournamentId: string;
@@ -30,6 +29,10 @@ type DragLabel =
   | { kind: 'panel'; name: string }
   | { kind: 'slot'; name: string }
   | null;
+
+function dndErrorMessage(err: unknown, fallback: string): string {
+  return err instanceof Error ? err.message : fallback;
+}
 
 export function BracketsTab({
   tournamentId,
@@ -151,17 +154,14 @@ export function BracketsTab({
       dst.side &&
       !dst.locked
     ) {
-      void toast.promise(
-        assignSlot.mutateAsync({
+      assignSlot.mutate(
+        {
           matchId: dst.matchId,
           side: dst.side,
           tournamentAthleteId: src.tournamentAthleteId,
-        }),
+        },
         {
-          loading: 'Assigning…',
-          success: 'Assigned',
-          error: (err) =>
-            err instanceof Error ? err.message : 'Assign failed',
+          onError: (err) => toast.error(dndErrorMessage(err, 'Assign failed')),
         }
       );
       return;
@@ -175,17 +175,15 @@ export function BracketsTab({
       dst.groupId &&
       src.groupId === dst.groupId
     ) {
-      void toast.promise(
-        assignSlot.mutateAsync({
+      assignSlot.mutate(
+        {
           matchId: src.matchId,
           side: src.side,
           tournamentAthleteId: null,
-        }),
+        },
         {
-          loading: 'Removing…',
-          success: 'Removed from slot',
-          error: (err) =>
-            err instanceof Error ? err.message : 'Could not remove',
+          onError: (err) =>
+            toast.error(dndErrorMessage(err, 'Could not remove')),
         }
       );
       return;
@@ -199,17 +197,15 @@ export function BracketsTab({
       dst.side &&
       !dst.locked
     ) {
-      void toast.promise(
-        swapSlots.mutateAsync({
+      swapSlots.mutate(
+        {
           matchAId: src.matchId,
           sideA: src.side,
           matchBId: dst.matchId,
           sideB: dst.side,
-        }),
+        },
         {
-          loading: 'Swapping…',
-          success: 'Slots swapped',
-          error: (err) => (err instanceof Error ? err.message : 'Swap failed'),
+          onError: (err) => toast.error(dndErrorMessage(err, 'Swap failed')),
         }
       );
     }
@@ -246,10 +242,7 @@ export function BracketsTab({
       <div className="flex h-full min-h-0 w-full">
         <div className="relative min-h-0 min-w-0 flex-1">
           {matchesQuery.isPending ? (
-            <div className="flex flex-col gap-4 p-6">
-              <Skeleton className="h-6 w-32" />
-              <Skeleton className="h-40 w-full" />
-            </div>
+            <LoadingBracketState />
           ) : matches.length === 0 ? (
             <EmptyBracketState
               groupId={selectedGroupId}

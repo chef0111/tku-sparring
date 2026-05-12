@@ -1,17 +1,13 @@
 import * as React from 'react';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { Lock, LockOpen } from 'lucide-react';
-import { ATHLETE_ROW_H, MATCH_W } from './bracket-layout';
 import type {
   MatchData,
   TournamentAthleteData,
 } from '@/features/dashboard/types';
+import { ATHLETE_ROW_H, MATCH_W } from '@/lib/tournament/bracket-layout';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
-function truncate(str: string, max: number) {
-  return str.length > max ? str.slice(0, max - 1) + '…' : str;
-}
 
 export interface BracketSlotProps {
   match: MatchData;
@@ -104,7 +100,7 @@ export function BracketSlot({
         if (e.key === 'Enter' || e.key === ' ') onSlotClick(match);
       }}
     >
-      <div className={cn('w-0.75 shrink-0 rounded-l-sm', sideBar)} />
+      <div className={cn('ml-px w-1 shrink-0 rounded-l-lg', sideBar)} />
 
       <div className="flex min-w-0 flex-1 flex-col justify-center px-1.5 py-0.5 pl-2">
         <div className="flex min-w-0 items-center gap-1">
@@ -135,12 +131,12 @@ export function BracketSlot({
           )}
           <span
             className={cn(
-              'min-w-0 truncate text-xs',
+              'min-w-0 text-xs',
               athlete ? 'text-foreground' : 'text-muted-foreground italic',
               isWinner && 'font-semibold text-emerald-600'
             )}
           >
-            {athlete ? truncate(athlete.name, 18) : 'EMPTY'}
+            {athlete ? athlete.name : 'EMPTY'}
           </span>
         </div>
         {athlete && (

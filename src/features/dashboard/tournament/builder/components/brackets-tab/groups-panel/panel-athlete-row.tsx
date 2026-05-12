@@ -1,4 +1,5 @@
 import { useDraggable } from '@dnd-kit/core';
+import { EllipsisVertical } from 'lucide-react';
 import type { TournamentAthleteData } from '@/features/dashboard/types';
 import { cn } from '@/lib/utils';
 
@@ -27,16 +28,21 @@ export function PanelAthleteRow({
   return (
     <div
       ref={setNodeRef}
+      data-dragging={isDragging}
       className={cn(
-        'bg-card flex cursor-grab items-center gap-2 rounded-md border px-2 py-2 text-sm active:cursor-grabbing',
+        'bg-card flex cursor-grab items-center gap-2 rounded-md border px-2 py-2 text-sm active:cursor-grabbing data-dragging:cursor-grabbing',
         isDragging && 'opacity-60'
       )}
       {...(readOnly ? {} : listeners)}
       {...(readOnly ? {} : attributes)}
     >
-      <div className="text-muted-foreground flex size-6 shrink-0 items-center justify-center rounded border border-dashed text-xs">
-        ⋮
-      </div>
+      <button
+        type="button"
+        data-slot="panel-athlete-drag"
+        className="text-muted-foreground flex size-6 shrink-0 items-center justify-center rounded-sm text-xs"
+      >
+        <EllipsisVertical className="size-3.5" />
+      </button>
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium">{athlete.name}</p>
         <p className="text-muted-foreground truncate text-xs">

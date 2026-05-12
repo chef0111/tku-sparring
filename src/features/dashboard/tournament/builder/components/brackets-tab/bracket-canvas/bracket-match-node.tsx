@@ -1,10 +1,14 @@
 import { BracketSlot } from './bracket-slot';
-import { ATHLETE_ROW_H, MATCH_H, MATCH_W } from './bracket-layout';
 import type {
   MatchData,
   TournamentAthleteData,
 } from '@/features/dashboard/types';
-import type { MatchPosition } from './bracket-layout';
+import type { MatchPosition } from '@/lib/tournament/bracket-layout';
+import {
+  ATHLETE_ROW_H,
+  MATCH_H,
+  MATCH_W,
+} from '@/lib/tournament/bracket-layout';
 import { cn } from '@/lib/utils';
 import { useSetLock } from '@/queries/matches';
 

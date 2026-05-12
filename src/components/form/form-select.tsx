@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import {
   Select,
   SelectContent,
+  SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -45,21 +46,39 @@ export function FormSelect({
   );
 }
 
+type FormNumberSelectProps = FormSelectSharedProps & {
+  /** When set, maps to `undefined` field value (e.g. optional min/max). */
+  emptyValue?: string;
+  emptyLabel?: string;
+};
+
 export function FormNumberSelect({
   children,
   descPosition,
   placeholder,
   className,
+  emptyValue,
+  emptyLabel,
   ...props
-}: FormSelectSharedProps) {
-  const field = useFieldContext<number>();
+}: FormNumberSelectProps) {
+  const field = useFieldContext<number | undefined>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
+  const raw = field.state.value;
+  const selectValue =
+    raw === undefined || raw === null ? (emptyValue ?? '') : String(raw);
 
   return (
     <FormBase {...props} descPosition={descPosition}>
       <Select
-        onValueChange={(v) => field.handleChange(Number(v))}
-        value={String(field.state.value)}
+        onValueChange={(v) => {
+          if (emptyValue !== undefined && v === emptyValue) {
+            field.handleChange(undefined);
+            return;
+          }
+          field.handleChange(Number(v));
+        }}
+        value={selectValue}
       >
         <SelectTrigger
           aria-invalid={isInvalid}
@@ -69,7 +88,12 @@ export function FormNumberSelect({
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent>{children}</SelectContent>
+        <SelectContent>
+          {emptyValue !== undefined && emptyLabel !== undefined ? (
+            <SelectItem value={emptyValue}>{emptyLabel}</SelectItem>
+          ) : null}
+          {children}
+        </SelectContent>
       </Select>
     </FormBase>
   );
