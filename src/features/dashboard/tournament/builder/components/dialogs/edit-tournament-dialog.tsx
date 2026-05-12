@@ -47,8 +47,8 @@ export function EditTournamentDialog({
           }}
         >
           <DialogHeader>
-            <DialogTitle>Edit Tournament</DialogTitle>
-            <DialogDescription>Update the tournament name.</DialogDescription>
+            <DialogTitle className="text-xl">Edit Tournament</DialogTitle>
+            <DialogDescription>Update the tournament name</DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <Input

@@ -124,7 +124,11 @@ describe('findByTournamentId', () => {
     const args = getFindManyArgs();
     expect(args?.where).toMatchObject({
       tournamentId: 'tournament-1',
-      groupId: null,
+      AND: [
+        {
+          OR: [{ groupId: null }, { groupId: { isSet: false } }],
+        },
+      ],
     });
   });
 
@@ -135,7 +139,7 @@ describe('findByTournamentId', () => {
     const args = getFindManyArgs();
     expect(args?.where).toMatchObject({
       tournamentId: 'tournament-1',
-      groupId: 'group-1',
+      AND: [{ groupId: 'group-1' }],
     });
   });
 
@@ -148,7 +152,37 @@ describe('findByTournamentId', () => {
     });
 
     const args = getFindManyArgs();
-    expect(args?.where).toMatchObject({ groupId: null });
+    expect(args?.where).toMatchObject({
+      AND: [
+        {
+          OR: [{ groupId: null }, { groupId: { isSet: false } }],
+        },
+      ],
+    });
+  });
+
+  it('combines unassignedOnly with query filter (AND, not overwriting OR)', async () => {
+    mockResult([], 0);
+    await findByTournamentId({
+      ...baseInput,
+      unassignedOnly: true,
+      query: 'lee',
+    });
+
+    const args = getFindManyArgs();
+    const andClauses = args?.where?.AND;
+    expect(Array.isArray(andClauses)).toBe(true);
+    if (!Array.isArray(andClauses)) throw new Error('expected AND array');
+    expect(andClauses).toHaveLength(2);
+    expect(andClauses[0]).toMatchObject({
+      OR: [{ groupId: null }, { groupId: { isSet: false } }],
+    });
+    expect(andClauses[1]).toMatchObject({
+      OR: [
+        { name: { contains: 'lee', mode: 'insensitive' } },
+        { affiliation: { contains: 'lee', mode: 'insensitive' } },
+      ],
+    });
   });
 
   it('builds case-insensitive OR query for name and affiliation', async () => {
@@ -157,9 +191,14 @@ describe('findByTournamentId', () => {
 
     const args = getFindManyArgs();
     expect(args?.where).toMatchObject({
-      OR: [
-        { name: { contains: 'john', mode: 'insensitive' } },
-        { affiliation: { contains: 'john', mode: 'insensitive' } },
+      tournamentId: 'tournament-1',
+      AND: [
+        {
+          OR: [
+            { name: { contains: 'john', mode: 'insensitive' } },
+            { affiliation: { contains: 'john', mode: 'insensitive' } },
+          ],
+        },
       ],
     });
   });

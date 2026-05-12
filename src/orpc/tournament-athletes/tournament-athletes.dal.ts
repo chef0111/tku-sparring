@@ -1,8 +1,14 @@
+import type { Prisma } from '@prisma/client';
 import type {
   ListTournamentAthletesDTO,
   UpdateTournamentAthleteDTO,
 } from './tournament-athletes.dto';
 import { prisma } from '@/lib/db';
+
+/** MongoDB: `field: null` does not match documents where the field is omitted. */
+const UNASSIGNED_GROUP_FILTER = {
+  OR: [{ groupId: null }, { groupId: { isSet: false } }],
+} satisfies Prisma.TournamentAthleteWhereInput;
 
 export async function findByTournamentId(input: ListTournamentAthletesDTO) {
   const {
@@ -22,18 +28,25 @@ export async function findByTournamentId(input: ListTournamentAthletesDTO) {
     sorting,
   } = input;
 
-  const where = {
+  const andBranches: Array<Prisma.TournamentAthleteWhereInput> = [];
+  if (unassignedOnly) {
+    andBranches.push(UNASSIGNED_GROUP_FILTER);
+  } else if (groupId) {
+    andBranches.push({ groupId });
+  }
+  if (query) {
+    andBranches.push({
+      OR: [
+        { name: { contains: query, mode: 'insensitive' as const } },
+        { affiliation: { contains: query, mode: 'insensitive' as const } },
+      ],
+    });
+  }
+
+  const where: Prisma.TournamentAthleteWhereInput = {
     tournamentId,
-    ...(unassignedOnly ? { groupId: null } : groupId ? { groupId } : {}),
+    ...(andBranches.length > 0 ? { AND: andBranches } : {}),
     ...(status ? { status } : {}),
-    ...(query
-      ? {
-          OR: [
-            { name: { contains: query, mode: 'insensitive' as const } },
-            { affiliation: { contains: query, mode: 'insensitive' as const } },
-          ],
-        }
-      : {}),
     ...(gender && gender.length > 0 ? { gender: { in: gender } } : {}),
     ...(beltLevels && beltLevels.length > 0
       ? { beltLevel: { in: beltLevels } }

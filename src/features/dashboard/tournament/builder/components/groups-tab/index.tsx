@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { DndContext } from '@dnd-kit/core';
 import { useQueryState } from 'nuqs';
+import { toast } from 'sonner';
 import { useBuilderManagerQuery } from '../../hooks/use-builder-manager-query';
 import { AddGroupDialog } from '../dialogs/add-group-dialog';
-import { GroupSettingsDrawer } from '../dialogs/group-settings-drawer';
+import { GroupSettingsSheet } from '../dialogs/group-settings-sheet';
 import { AthletePool } from './athlete-pool';
 import { GroupRosterTable } from './group-roster-table';
 import { GroupsRail } from './groups-rail';
@@ -26,7 +27,7 @@ export function GroupsTab({ tournamentId, groups, readOnly }: GroupsTabProps) {
   const deviceId = useDeviceId();
   const { data: leases } = useLeases(tournamentId, deviceId);
   const requestTakeover = useRequestLeaseTakeover(tournamentId);
-  const assignAthlete = useAssignAthlete();
+  const assignAthlete = useAssignAthlete({ suppressErrorToast: true });
 
   const leaseMap = React.useMemo(() => {
     const map = new Map<string, NonNullable<typeof leases>[number]>();
@@ -66,10 +67,18 @@ export function GroupsTab({ tournamentId, groups, readOnly }: GroupsTabProps) {
       | undefined;
     if (!athleteId || !targetGroupId) return;
     if (event.active.data.current?.fromGroupId === targetGroupId) return;
-    assignAthlete.mutate({
-      groupId: targetGroupId,
-      tournamentAthleteId: athleteId,
-    });
+    void toast.promise(
+      assignAthlete.mutateAsync({
+        groupId: targetGroupId,
+        tournamentAthleteId: athleteId,
+      }),
+      {
+        loading: 'Adding to group…',
+        success: 'Added to group',
+        error: (err) =>
+          err instanceof Error ? err.message : 'Could not add athlete',
+      }
+    );
   };
 
   const handleOpenSettings = (group: GroupData) => {
@@ -117,7 +126,7 @@ export function GroupsTab({ tournamentId, groups, readOnly }: GroupsTabProps) {
         onOpenChange={setShowAddGroup}
         tournamentId={tournamentId}
       />
-      <GroupSettingsDrawer
+      <GroupSettingsSheet
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
         group={settingsGroup}

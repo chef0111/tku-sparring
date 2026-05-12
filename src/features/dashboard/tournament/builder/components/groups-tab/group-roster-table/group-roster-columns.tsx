@@ -1,6 +1,6 @@
-import { AlertTriangle, MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import { useDraggable } from '@dnd-kit/core';
-import { OutOfRangeBadge, getViolations } from '../out-of-range-badge';
+// import { OutOfRangeBadge, getViolations } from '../out-of-range-badge';
 import type { ColumnDef } from '@tanstack/react-table';
 import type {
   GroupData,
@@ -18,11 +18,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+// import {
+//   Tooltip,
+//   TooltipContent,
+//   TooltipTrigger,
+// } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 interface GetGroupRosterColumnsArgs {
@@ -123,21 +123,21 @@ export function getGroupRosterColumns({
       ),
       enableSorting: true,
     },
-    {
-      id: 'violations',
-      header: () => (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <AlertTriangle className="text-muted-foreground size-3.5" />
-          </TooltipTrigger>
-          <TooltipContent>Constraint violations</TooltipContent>
-        </Tooltip>
-      ),
-      cell: ({ row }) => (
-        <OutOfRangeBadge violations={getViolations(row.original, group)} />
-      ),
-      enableSorting: false,
-    },
+    // {
+    //   id: 'violations',
+    //   header: () => (
+    //     <Tooltip>
+    //       <TooltipTrigger asChild>
+    //         <AlertTriangle className="text-muted-foreground size-3.5" />
+    //       </TooltipTrigger>
+    //       <TooltipContent>Constraint violations</TooltipContent>
+    //     </Tooltip>
+    //   ),
+    //   cell: ({ row }) => (
+    //     <OutOfRangeBadge violations={getViolations(row.original, group)} />
+    //   ),
+    //   enableSorting: false,
+    // },
     {
       id: 'actions',
       header: '',

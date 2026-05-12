@@ -1,3 +1,4 @@
+import type { Prisma } from '@prisma/client';
 import type {
   AssignAthleteDTO,
   AutoAssignDTO,
@@ -6,6 +7,10 @@ import type {
   UpdateGroupDTO,
 } from './groups.dto';
 import { prisma } from '@/lib/db';
+
+const UNASSIGNED_GROUP_FILTER = {
+  OR: [{ groupId: null }, { groupId: { isSet: false } }],
+} satisfies Prisma.TournamentAthleteWhereInput;
 
 export async function findByTournamentId(tournamentId: string) {
   return prisma.group.findMany({
@@ -48,9 +53,9 @@ export async function autoAssign(input: AutoAssignDTO) {
   const group = await prisma.group.findUnique({ where: { id: input.groupId } });
   if (!group) throw new Error('Group not found');
 
-  const where: Record<string, unknown> = {
+  const where: Prisma.TournamentAthleteWhereInput = {
     tournamentId: input.tournamentId,
-    groupId: null,
+    AND: [UNASSIGNED_GROUP_FILTER],
   };
 
   if (group.gender) where.gender = group.gender;

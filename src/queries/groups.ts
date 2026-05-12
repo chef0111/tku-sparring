@@ -78,7 +78,10 @@ export function useAutoAssignGroup(options?: { onSuccess?: () => void }) {
   });
 }
 
-export function useAssignAthlete(options?: { onSuccess?: () => void }) {
+export function useAssignAthlete(options?: {
+  onSuccess?: () => void;
+  suppressErrorToast?: boolean;
+}) {
   const invalidate = useInvalidateGroups();
 
   return useMutation({
@@ -87,7 +90,9 @@ export function useAssignAthlete(options?: { onSuccess?: () => void }) {
       invalidate();
       options?.onSuccess?.();
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => {
+      if (!options?.suppressErrorToast) toast.error(err.message);
+    },
   });
 }
 

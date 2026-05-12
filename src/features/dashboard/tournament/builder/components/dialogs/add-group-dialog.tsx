@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { PlusIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -10,6 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useCreateGroup } from '@/queries/groups';
+import { Spinner } from '@/components/ui/spinner';
 
 interface AddGroupDialogProps {
   open: boolean;
@@ -48,9 +50,9 @@ export function AddGroupDialog({
           }}
         >
           <DialogHeader>
-            <DialogTitle>Add Group</DialogTitle>
+            <DialogTitle className="text-lg">Add Group</DialogTitle>
             <DialogDescription>
-              Create a new group for this tournament.
+              Create a new group for this tournament
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -64,7 +66,17 @@ export function AddGroupDialog({
           </div>
           <DialogFooter>
             <Button type="submit" disabled={!name.trim() || mutation.isPending}>
-              {mutation.isPending ? 'Creating...' : 'Add Group'}
+              {mutation.isPending ? (
+                <>
+                  <Spinner className="text-primary-foreground" />
+                  <span>Creating...</span>
+                </>
+              ) : (
+                <>
+                  <PlusIcon />
+                  <span>Add group</span>
+                </>
+              )}
             </Button>
           </DialogFooter>
         </form>

@@ -34,13 +34,14 @@ function leaseToStatusVariant(
 ): 'online' | 'offline' | 'degraded' | 'maintenance' {
   switch (status) {
     case 'held_by_me':
+    case 'available':
       return 'online';
     case 'held_by_other':
       return 'degraded';
     case 'pending_takeover':
       return 'maintenance';
     default:
-      return 'offline';
+      return 'online';
   }
 }
 
@@ -75,7 +76,7 @@ export function GroupRailRow({
     <div
       ref={setNodeRef}
       className={cn(
-        'hover:bg-muted/40 relative flex items-center border-l-2 border-transparent',
+        'hover:bg-muted/40 relative flex items-center border-y-0 border-r-0 border-l-2 border-transparent',
         active && 'border-primary bg-muted/50',
         isOver && 'bg-primary/10'
       )}
@@ -113,7 +114,10 @@ export function GroupRailRow({
           variant="ghost"
           size="icon"
           className="mr-1 size-6 shrink-0"
-          onClick={() => onOpenSettings(group)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenSettings(group);
+          }}
           aria-label="Group settings"
         >
           <Settings className="size-3.5" />

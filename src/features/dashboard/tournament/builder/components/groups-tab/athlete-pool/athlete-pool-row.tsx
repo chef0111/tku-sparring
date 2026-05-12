@@ -1,6 +1,8 @@
 import { Plus } from 'lucide-react';
 import { useDraggable } from '@dnd-kit/core';
+import { toast } from 'sonner';
 import type { TournamentAthleteData } from '@/features/dashboard/types';
+import { getBeltLabel } from '@/config/athlete';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,7 +24,7 @@ export function AthletePoolRow({
   selectedGroupId,
   readOnly,
 }: AthletePoolRowProps) {
-  const assignAthlete = useAssignAthlete();
+  const assignAthlete = useAssignAthlete({ suppressErrorToast: true });
   const { setNodeRef, attributes, listeners, isDragging } = useDraggable({
     id: athlete.id,
     data: { type: 'pool-athlete', athleteId: athlete.id },
@@ -33,18 +35,31 @@ export function AthletePoolRow({
 
   const handleAssign = () => {
     if (!canAssign) return;
-    assignAthlete.mutate({
-      groupId: selectedGroupId!,
-      tournamentAthleteId: athlete.id,
-    });
+    void toast.promise(
+      assignAthlete.mutateAsync({
+        groupId: selectedGroupId!,
+        tournamentAthleteId: athlete.id,
+      }),
+      {
+        loading: 'Adding to group…',
+        success: 'Added to group',
+        error: (err) =>
+          err instanceof Error ? err.message : 'Could not add athlete',
+      }
+    );
   };
 
   const plusButton = (
     <Button
+      type="button"
       size="icon"
       variant="ghost"
-      className="size-7 shrink-0 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
-      onClick={handleAssign}
+      className="absolute top-6 right-2 z-100 size-7 shrink-0 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation();
+        handleAssign();
+      }}
       disabled={!canAssign || assignAthlete.isPending}
     >
       <Plus className="size-3.5" />
@@ -57,7 +72,7 @@ export function AthletePoolRow({
       {...attributes}
       {...listeners}
       className={cn(
-        'group flex cursor-grab items-center gap-2 px-3 py-2 active:cursor-grabbing',
+        'group relative flex cursor-grab items-center gap-2 px-3 py-2 pr-10 active:cursor-grabbing',
         isDragging && 'opacity-50'
       )}
     >
@@ -68,7 +83,7 @@ export function AthletePoolRow({
         </p>
         <div className="mt-0.5 flex items-center gap-1.5">
           <Badge variant="outline" className="text-[10px]">
-            Belt {athlete.beltLevel}
+            {getBeltLabel(athlete.beltLevel)}
           </Badge>
           <Badge variant="outline" className="text-[10px]">
             {athlete.weight}kg

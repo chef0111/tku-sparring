@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Settings } from 'lucide-react';
 import { useDroppable } from '@dnd-kit/core';
 import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { toast } from 'sonner';
 import { GroupViolationCountBadge, getViolations } from '../out-of-range-badge';
 import { getGroupRosterColumns } from './group-roster-columns';
 import { GroupRosterEmptyState } from './group-roster-empty-state';
@@ -13,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Status, StatusIndicator, StatusLabel } from '@/components/ui/status';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DataTable } from '@/components/data-table/data-table';
+import { getBeltLabel } from '@/config/athlete';
 import { useTournamentAthletes } from '@/queries/tournament-athletes';
 import { useAssignAthlete, useUnassignAthlete } from '@/queries/groups';
 import { cn } from '@/lib/utils';
@@ -42,13 +44,14 @@ function leaseToStatusVariant(
 ): 'online' | 'offline' | 'degraded' | 'maintenance' {
   switch (status) {
     case 'held_by_me':
+    case 'available':
       return 'online';
     case 'held_by_other':
       return 'degraded';
     case 'pending_takeover':
       return 'maintenance';
     default:
-      return 'offline';
+      return 'online';
   }
 }
 
@@ -137,7 +140,7 @@ function ActiveGroupRoster({
   const total = data?.total ?? 0;
 
   const unassign = useUnassignAthlete();
-  const assign = useAssignAthlete();
+  const assign = useAssignAthlete({ suppressErrorToast: true });
 
   const otherGroups = React.useMemo(
     () => groups.filter((g) => g.id !== group.id),
@@ -152,11 +155,20 @@ function ActiveGroupRoster({
         otherGroups,
         onUnassign: (athleteId) =>
           unassign.mutate({ tournamentAthleteId: athleteId }),
-        onMove: (athleteId, targetGroupId) =>
-          assign.mutate({
-            groupId: targetGroupId,
-            tournamentAthleteId: athleteId,
-          }),
+        onMove: (athleteId, targetGroupId) => {
+          void toast.promise(
+            assign.mutateAsync({
+              groupId: targetGroupId,
+              tournamentAthleteId: athleteId,
+            }),
+            {
+              loading: 'Moving athlete…',
+              success: 'Moved to group',
+              error: (err) =>
+                err instanceof Error ? err.message : 'Move failed',
+            }
+          );
+        },
       }),
     [group, readOnly, otherGroups, unassign, assign]
   );
@@ -207,7 +219,8 @@ function ActiveGroupRoster({
           )}
           {(group.beltMin != null || group.beltMax != null) && (
             <Badge variant="outline" className="text-xs">
-              Belt {group.beltMin ?? 0}–{group.beltMax ?? 10}
+              {getBeltLabel(group.beltMin ?? 0)}–
+              {getBeltLabel(group.beltMax ?? 10)}
             </Badge>
           )}
           {(group.weightMin != null || group.weightMax != null) && (

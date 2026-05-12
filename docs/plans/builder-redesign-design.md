@@ -37,7 +37,7 @@ In scope:
 - New `useBuilderManagerQuery` URL-state hook.
 - Server-side rewrite of `tournamentAthlete.list` (oRPC schema + DAL + client hooks).
 - Bottom-toolbar quick actions: Refresh, Auto-assign all (+ dialog), Lifecycle button (reusing existing `tournament.setStatus`), Lease summary popover.
-- Dialog file split: `add-group`, `edit-tournament`, `delete-tournament`, `group-settings-drawer`, plus new `auto-assign-all-dialog` and `lifecycle-confirm-dialog`.
+- Dialog file split: `add-group`, `edit-tournament`, `delete-tournament`, `group-settings-sheet`, plus new `auto-assign-all-dialog` and `lifecycle-confirm-dialog`.
 
 Out of scope (deferred, may show up as follow-up tasks):
 
@@ -76,7 +76,7 @@ src/features/dashboard/tournament/builder/
 │       ├── add-group-dialog.tsx                  # split from builder/dialogs.tsx
 │       ├── edit-tournament-dialog.tsx            # split from builder/dialogs.tsx
 │       ├── delete-tournament-dialog.tsx          # split from builder/dialogs.tsx
-│       ├── group-settings-drawer.tsx             # moved from groups/
+│       ├── group-settings-sheet.tsx             # moved from groups/
 │       ├── auto-assign-all-dialog.tsx            # new
 │       └── lifecycle-confirm-dialog.tsx          # new (reused for Activate + Complete)
 └── brackets/                                     # UNCHANGED this round
@@ -207,7 +207,7 @@ export function GroupsTab({ tournamentId, groups, readOnly }: Props) {
         onAdd={() => setShowAddGroup(true)}
         onOpenSettings={...}
       />
-      <GroupSettingsDrawer ... />
+      <GroupSettingsSheet ... />
       <AddGroupDialog ... />
     </DndContext>
   );
@@ -260,7 +260,7 @@ Visual:
   - Constraint badges from `group.gender/beltMin/beltMax/weightMin/weightMax`.
   - `Status` pill (existing component) for lease status.
   - `Take over` button visible when `leaseInfo?.leaseStatus === 'held_by_other'`.
-  - `Settings` opens `GroupSettingsDrawer`.
+  - `Settings` opens `GroupSettingsSheet`.
   - Second line: counts.
 
 - Uses `useDataTable` w/ controlled state from local `useState` for `pagination` and `sorting` (kept ephemeral — not in URL; resets on group switch).
@@ -525,7 +525,7 @@ Split `builder/dialogs.tsx` into per-dialog files under `components/dialogs/`:
 - `add-group-dialog.tsx` — owned by groups-tab; opened by `+ Add Group` rail button.
 - `edit-tournament-dialog.tsx` — owned by builder root; opened by bottom toolbar Edit.
 - `delete-tournament-dialog.tsx` — owned by builder root; opened by bottom toolbar Delete.
-- `group-settings-drawer.tsx` — moved from `groups/`; owned by groups-tab.
+- `group-settings-sheet.tsx` — moved from `groups/`; owned by groups-tab.
 - `auto-assign-all-dialog.tsx` — **new**:
   - Lists groups, splitting into "Will run" (no matches yet) and "Skipped" (has matches).
   - "Run" button triggers `useAutoAssignGroup` per eligible group sequentially (or `Promise.all` — sequential is safer for write conflicts; final call: sequential).

@@ -178,7 +178,7 @@ function TournamentBuilder({
         />
       }
     >
-      <div className="relative flex-1 overflow-hidden p-4">
+      <div className="relative flex-1 overflow-hidden">
         {tab === 'groups' ? (
           <GroupsTab
             tournamentId={tournamentId}
@@ -239,7 +239,7 @@ function leaseToStatusVariant(
     case 'pending_takeover':
       return 'maintenance';
     default:
-      return 'offline';
+      return 'online';
   }
 }
 

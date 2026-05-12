@@ -144,7 +144,7 @@ export function BuilderBottomToolbar({
           </Popover>
         </div>
 
-        <Separator orientation="vertical" className="mx-2 h-6" />
+        <Separator orientation="vertical" className="mx-2 my-auto h-6" />
 
         <div className="flex items-center gap-1">
           <Button
@@ -219,7 +219,7 @@ export function BuilderBottomToolbar({
             </Button>
           </DisabledWhenReadOnly>
 
-          <Separator orientation="vertical" className="mx-1 h-6" />
+          <Separator orientation="vertical" className="mx-2 my-auto h-6" />
 
           <Button variant="outline" size="sm" asChild className="gap-2">
             <Link

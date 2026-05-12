@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Search, SlidersHorizontal, UserPlus } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import {
   parseAsInteger,
   parseAsString,
@@ -7,22 +7,14 @@ import {
   useQueryStates,
 } from 'nuqs';
 import { useBuilderManagerQuery } from '../../../hooks/use-builder-manager-query';
+import {
+  PoolBeltFilter,
+  PoolGenderSelect,
+  PoolSearchInput,
+  PoolWeightFilter,
+} from './filters';
 import { AthletePoolRow } from './athlete-pool-row';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTournamentAthletesInfinite } from '@/queries/tournament-athletes';
 
@@ -113,155 +105,26 @@ export function AthletePool({
         </div>
 
         <div className="flex flex-col gap-2">
-          <div className="relative">
-            <Search className="text-muted-foreground absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2" />
-            <Input
-              placeholder="Search name or affiliation..."
-              value={poolQuery ?? ''}
-              onChange={(e) => void setFilters({ q: e.target.value || null })}
-              className="h-8 pl-8 text-xs"
-            />
-          </div>
+          <PoolSearchInput
+            value={poolQuery}
+            onChange={(q) => void setFilters({ q })}
+          />
 
           <div className="flex gap-2">
-            <Select
-              value={poolGender ?? 'all'}
-              onValueChange={(v) =>
-                void setFilters({
-                  poolGender: v === 'all' ? null : (v as 'M' | 'F'),
-                })
-              }
-            >
-              <SelectTrigger className="h-8 flex-1 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="M">M</SelectItem>
-                <SelectItem value="F">F</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8 px-2 text-xs"
-                >
-                  Belt
-                  {(poolBeltMin != null || poolBeltMax != null) && (
-                    <Badge
-                      variant="secondary"
-                      className="ml-1 px-1 text-[10px]"
-                    >
-                      {poolBeltMin ?? 0}-{poolBeltMax ?? 10}
-                    </Badge>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-56" align="start">
-                <div className="flex flex-col gap-2">
-                  <p className="text-xs font-medium">Belt range</p>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      min={0}
-                      max={10}
-                      placeholder="Min"
-                      value={poolBeltMin ?? ''}
-                      onChange={(e) =>
-                        void setFilters({
-                          poolBeltMin:
-                            e.target.value === ''
-                              ? null
-                              : Number(e.target.value),
-                        })
-                      }
-                      className="h-8 text-xs"
-                    />
-                    <span className="text-muted-foreground text-xs">–</span>
-                    <Input
-                      type="number"
-                      min={0}
-                      max={10}
-                      placeholder="Max"
-                      value={poolBeltMax ?? ''}
-                      onChange={(e) =>
-                        void setFilters({
-                          poolBeltMax:
-                            e.target.value === ''
-                              ? null
-                              : Number(e.target.value),
-                        })
-                      }
-                      className="h-8 text-xs"
-                    />
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8 px-2 text-xs"
-                >
-                  <SlidersHorizontal className="size-3" />
-                  kg
-                  {(poolWeightMin != null || poolWeightMax != null) && (
-                    <Badge
-                      variant="secondary"
-                      className="ml-1 px-1 text-[10px]"
-                    >
-                      {poolWeightMin ?? 0}-{poolWeightMax ?? 300}
-                    </Badge>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-56" align="start">
-                <div className="flex flex-col gap-2">
-                  <p className="text-xs font-medium">Weight range (kg)</p>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      min={0}
-                      max={300}
-                      placeholder="Min"
-                      value={poolWeightMin ?? ''}
-                      onChange={(e) =>
-                        void setFilters({
-                          poolWeightMin:
-                            e.target.value === ''
-                              ? null
-                              : Number(e.target.value),
-                        })
-                      }
-                      className="h-8 text-xs"
-                    />
-                    <span className="text-muted-foreground text-xs">–</span>
-                    <Input
-                      type="number"
-                      min={0}
-                      max={300}
-                      placeholder="Max"
-                      value={poolWeightMax ?? ''}
-                      onChange={(e) =>
-                        void setFilters({
-                          poolWeightMax:
-                            e.target.value === ''
-                              ? null
-                              : Number(e.target.value),
-                        })
-                      }
-                      className="h-8 text-xs"
-                    />
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+            <PoolGenderSelect
+              value={poolGender}
+              onChange={(next) => void setFilters({ poolGender: next })}
+            />
+            <PoolBeltFilter
+              poolBeltMin={poolBeltMin}
+              poolBeltMax={poolBeltMax}
+              onPatch={(patch) => void setFilters(patch)}
+            />
+            <PoolWeightFilter
+              poolWeightMin={poolWeightMin}
+              poolWeightMax={poolWeightMax}
+              onPatch={(patch) => void setFilters(patch)}
+            />
           </div>
         </div>
       </div>

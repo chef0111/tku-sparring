@@ -1,3 +1,4 @@
+import { TrashIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -7,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Spinner } from '@/components/ui/spinner';
 import { useDeleteTournament } from '@/queries/tournaments';
 
 interface DeleteTournamentDialogProps {
@@ -28,11 +30,18 @@ export function DeleteTournamentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Tournament</DialogTitle>
-          <DialogDescription>
-            Are you sure you want to delete &quot;{tournamentName}&quot;? This
-            will permanently remove all groups, athletes, and matches. This
-            action cannot be undone.
+          <DialogTitle className="text-destructive text-lg">
+            Delete Tournament
+          </DialogTitle>
+          <DialogDescription className="space-y-2">
+            <p>
+              Are you sure you want to delete{' '}
+              <b>&quot;{tournamentName}&quot;</b>?
+            </p>
+            <p>
+              This will permanently remove all groups, athletes, and matches.
+              This action cannot be undone.
+            </p>
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -44,7 +53,17 @@ export function DeleteTournamentDialog({
             disabled={mutation.isPending}
             onClick={() => mutation.mutate({ id: tournamentId })}
           >
-            {mutation.isPending ? 'Deleting...' : 'Delete Tournament'}
+            {mutation.isPending ? (
+              <>
+                <Spinner className="text-destructive" />
+                Deleting...
+              </>
+            ) : (
+              <>
+                <TrashIcon className="text-destructive" />
+                Delete
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

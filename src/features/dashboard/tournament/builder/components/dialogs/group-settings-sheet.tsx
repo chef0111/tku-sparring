@@ -1,30 +1,29 @@
-import { Trash2 } from 'lucide-react';
+import { SaveIcon, Trash2 } from 'lucide-react';
 import type { GroupData } from '@/features/dashboard/types';
 import {
   Sheet,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { SelectItem } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import { useAppForm } from '@/components/form/hooks';
 import { useDeleteGroup, useUpdateGroup } from '@/queries/groups';
+import { Spinner } from '@/components/ui/spinner';
 
-interface GroupSettingsDrawerProps {
+interface GroupSettingsSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   group: GroupData | null;
 }
 
-export function GroupSettingsDrawer({
+export function GroupSettingsSheet({
   open,
   onOpenChange,
   group,
-}: GroupSettingsDrawerProps) {
+}: GroupSettingsSheetProps) {
   if (!group) return null;
 
   return (
@@ -52,10 +51,12 @@ function GroupSettingsForm({ group, onClose }: GroupSettingsFormProps) {
   const updateGroup = useUpdateGroup({ onSuccess: onClose });
   const deleteGroup = useDeleteGroup({ onSuccess: onClose });
 
+  const GENDER_ANY = '__any__' as const;
+
   const form = useAppForm({
     defaultValues: {
       name: group.name,
-      gender: group.gender ?? '',
+      gender: group.gender ?? GENDER_ANY,
       beltMin: group.beltMin ?? undefined,
       beltMax: group.beltMax ?? undefined,
       weightMin: group.weightMin ?? undefined,
@@ -67,7 +68,8 @@ function GroupSettingsForm({ group, onClose }: GroupSettingsFormProps) {
       updateGroup.mutate({
         id: group.id,
         name: value.name,
-        gender: value.gender === '' ? null : (value.gender as 'M' | 'F'),
+        gender:
+          value.gender === GENDER_ANY ? null : (value.gender as 'M' | 'F'),
         beltMin: value.beltMin ?? null,
         beltMax: value.beltMax ?? null,
         weightMin: value.weightMin ?? null,
@@ -80,7 +82,7 @@ function GroupSettingsForm({ group, onClose }: GroupSettingsFormProps) {
 
   return (
     <form
-      className="flex flex-1 flex-col gap-4 px-1 py-2"
+      className="flex flex-1 flex-col gap-4 px-4 py-2"
       onSubmit={(e) => {
         e.preventDefault();
         form.handleSubmit();
@@ -95,7 +97,7 @@ function GroupSettingsForm({ group, onClose }: GroupSettingsFormProps) {
       <form.AppField name="gender">
         {(field) => (
           <field.Select label="Gender Constraint" placeholder="Any">
-            <SelectItem value="">Any</SelectItem>
+            <SelectItem value={GENDER_ANY}>Any</SelectItem>
             <SelectItem value="M">Male</SelectItem>
             <SelectItem value="F">Female</SelectItem>
           </field.Select>
@@ -152,9 +154,7 @@ function GroupSettingsForm({ group, onClose }: GroupSettingsFormProps) {
         )}
       </form.AppField>
 
-      <Separator />
-
-      <SheetFooter className="flex-row gap-2">
+      <div className="flex gap-2 p-0 pt-6">
         <Button
           type="button"
           variant="destructive"
@@ -166,13 +166,28 @@ function GroupSettingsForm({ group, onClose }: GroupSettingsFormProps) {
           Delete Group
         </Button>
         <div className="flex-1" />
-        <Button type="button" variant="outline" size="sm" onClick={onClose}>
+        <Button
+          type="button"
+          variant="outline"
+          className="h-8.5"
+          onClick={onClose}
+        >
           Cancel
         </Button>
         <Button type="submit" size="sm" disabled={updateGroup.isPending}>
-          Save
+          {updateGroup.isPending ? (
+            <>
+              <Spinner className="text-primary-foreground" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <SaveIcon />
+              <span>Save</span>
+            </>
+          )}
         </Button>
-      </SheetFooter>
+      </div>
     </form>
   );
 }
