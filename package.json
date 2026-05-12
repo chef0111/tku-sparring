@@ -45,7 +45,7 @@
     "@orpc/json-schema": "^1.14.2",
     "@orpc/openapi": "^1.14.2",
     "@orpc/server": "^1.14.2",
-    "@orpc/tanstack-query": "^1.14.2",
+    "@orpc/tanstack-query": "^1.14.3",
     "@orpc/zod": "^1.14.2",
     "@prisma/client": "6.19",
     "@radix-ui/react-direction": "^1.1.1",
