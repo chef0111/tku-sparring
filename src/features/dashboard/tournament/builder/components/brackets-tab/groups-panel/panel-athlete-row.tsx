@@ -1,5 +1,5 @@
 import { useDraggable } from '@dnd-kit/core';
-import { EllipsisVertical } from 'lucide-react';
+import { GripVertical } from 'lucide-react';
 import type { TournamentAthleteData } from '@/features/dashboard/types';
 import { cn } from '@/lib/utils';
 
@@ -41,7 +41,7 @@ export function PanelAthleteRow({
         data-slot="panel-athlete-drag"
         className="text-muted-foreground flex size-6 shrink-0 items-center justify-center rounded-sm text-xs"
       >
-        <EllipsisVertical className="size-3.5" />
+        <GripVertical className="size-3.5" />
       </button>
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium">{athlete.name}</p>

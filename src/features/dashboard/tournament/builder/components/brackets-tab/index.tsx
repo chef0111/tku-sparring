@@ -72,6 +72,14 @@ export function BracketsTab({
   const athletes = athletesQuery.data?.items ?? [];
   const selectedGroup = groups.find((g) => g.id === selectedGroupId);
 
+  const matchForDetailPanel = React.useMemo(() => {
+    if (!selectedMatch) return null;
+    return (
+      (matches as Array<MatchData>).find((m) => m.id === selectedMatch.id) ??
+      selectedMatch
+    );
+  }, [matches, selectedMatch]);
+
   const assignedRound0TaIds = React.useMemo(() => {
     const s = new Set<string>();
     for (const m of matches) {
@@ -233,6 +241,8 @@ export function BracketsTab({
   const toolbarDisabled = matches.length === 0;
   const athleteCount = selectedGroup?._count.tournamentAthletes ?? 0;
   const isPoolLoading = matchesQuery.isPending || athletesQuery.isPending;
+  const maxBracketRound =
+    matches.length > 0 ? Math.max(...matches.map((m) => m.round)) : 0;
 
   return (
     <DndContext
@@ -273,6 +283,8 @@ export function BracketsTab({
           selectedGroupId={selectedGroupId}
           onSelect={setSelectedGroupId}
           athletes={panelPoolAthletes}
+          matches={matches as Array<MatchData>}
+          onOpenMatch={handleSlotClick}
           readOnly={readOnly}
           slotReturnEnabled={matches.length > 0}
           groupAthleteCount={athleteCount}
@@ -289,12 +301,13 @@ export function BracketsTab({
       </DragOverlay>
 
       <MatchDetailPanel
-        match={selectedMatch}
+        match={matchForDetailPanel}
         open={panelOpen}
         onOpenChange={setPanelOpen}
         athletes={athletes}
         readOnly={readOnly}
         tournamentStatus={tournamentStatus}
+        maxBracketRound={maxBracketRound}
       />
     </DndContext>
   );
