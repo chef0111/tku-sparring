@@ -5,29 +5,21 @@ import {
   CreateGroupSchema,
   UnassignAthleteSchema,
   UpdateGroupSchema,
-} from './groups.dto';
-import {
-  assignAthlete,
-  autoAssign,
-  create,
-  deleteGroup,
-  findById,
-  findByTournamentId,
-  unassignAthlete,
-  update,
-} from './groups.dal';
+} from './dto';
+import { GroupDAL } from './dal';
 import { authedProcedure } from '@/orpc/middleware';
 
 export const listGroups = authedProcedure
   .input(z.object({ tournamentId: z.string() }))
   .handler(async ({ input }) => {
-    return findByTournamentId(input.tournamentId);
+    const groups = await GroupDAL.findByTournamentId(input.tournamentId);
+    return groups;
   });
 
 export const getGroup = authedProcedure
   .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {
-    const group = await findById(input.id);
+    const group = await GroupDAL.findById(input.id);
     if (!group) {
       throw new Error('Group not found');
     }
@@ -37,36 +29,42 @@ export const getGroup = authedProcedure
 export const createGroup = authedProcedure
   .input(CreateGroupSchema)
   .handler(async ({ input }) => {
-    return create(input);
+    const group = await GroupDAL.create(input);
+    return group;
   });
 
 export const updateGroup = authedProcedure
   .input(UpdateGroupSchema)
   .handler(async ({ input }) => {
     const { id, ...data } = input;
-    return update(id, data);
+    const group = await GroupDAL.update(id, data);
+    return group;
   });
 
 export const removeGroup = authedProcedure
   .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {
-    return deleteGroup(input.id);
+    const group = await GroupDAL.deleteGroup(input.id);
+    return group;
   });
 
 export const autoAssignGroup = authedProcedure
   .input(AutoAssignSchema)
   .handler(async ({ input }) => {
-    return autoAssign(input);
+    const result = await GroupDAL.autoAssign(input);
+    return result;
   });
 
 export const assignAthleteToGroup = authedProcedure
   .input(AssignAthleteSchema)
   .handler(async ({ input }) => {
-    return assignAthlete(input);
+    const athlete = await GroupDAL.assignAthlete(input);
+    return athlete;
   });
 
 export const unassignAthleteFromGroup = authedProcedure
   .input(UnassignAthleteSchema)
   .handler(async ({ input }) => {
-    return unassignAthlete(input);
+    const athlete = await GroupDAL.unassignAthlete(input);
+    return athlete;
   });

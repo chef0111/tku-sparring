@@ -8,7 +8,7 @@ import { getGroupRosterColumns } from './group-roster-columns';
 import { GroupRosterEmptyState } from './group-roster-empty-state';
 import type { PaginationState, SortingState } from '@tanstack/react-table';
 import type { GroupData } from '@/features/dashboard/types';
-import type { ListTournamentAthletesDTO } from '@/orpc/tournament-athletes/tournament-athletes.dto';
+import type { ListTournamentAthletesDTO } from '@/orpc/tournament-athletes/dto';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Status, StatusIndicator, StatusLabel } from '@/components/ui/status';

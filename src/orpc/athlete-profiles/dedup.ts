@@ -1,7 +1,4 @@
-import {
-  findByAthleteCodeAndName,
-  findPossibleDuplicates,
-} from './athlete-profiles.dal';
+import { AthleteProfileDAL } from './dal';
 
 export interface DedupResult {
   isDuplicate: boolean;
@@ -22,7 +19,7 @@ export async function runDedupCheck(input: {
   excludeId?: string;
 }): Promise<DedupResult> {
   if (input.athleteCode) {
-    const hardMatch = await findByAthleteCodeAndName(
+    const hardMatch = await AthleteProfileDAL.findByAthleteCodeAndName(
       input.athleteCode,
       input.name,
       input.excludeId
@@ -34,7 +31,7 @@ export async function runDedupCheck(input: {
     return { isDuplicate: false, isHardBlock: false, matches: [] };
   }
 
-  const softMatches = await findPossibleDuplicates({
+  const softMatches = await AthleteProfileDAL.findPossibleDuplicates({
     name: input.name,
     affiliation: input.affiliation,
     weight: input.weight,

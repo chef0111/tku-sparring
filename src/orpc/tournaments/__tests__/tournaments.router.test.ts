@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { SetTournamentStatusSchema } from '../tournaments.dto';
+import { SetTournamentStatusSchema } from '../dto';
 import router from '@/orpc/router';
 
 describe('tournament router registration', () => {

@@ -8,7 +8,7 @@ import { AthletesActionBar } from './athletes-action-bar';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { AthleteProfileData } from '@/features/dashboard/types';
 
-import type { AthleteProfilesDTO } from '@/orpc/athlete-profiles/athlete-profiles.dto';
+import type { AthleteProfilesDTO } from '@/orpc/athlete-profiles/dto';
 import { useAthleteProfiles } from '@/queries/athlete-profiles';
 import { useFeatureFlags } from '@/contexts/feature-flags';
 import { useDataTable } from '@/hooks/use-data-table';

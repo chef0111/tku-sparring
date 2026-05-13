@@ -11,7 +11,7 @@ import type {
   CheckDuplicateDTO,
   CreateAthleteProfileDTO,
   UpdateAthleteProfileDTO,
-} from '@/orpc/athlete-profiles/athlete-profiles.dto';
+} from '@/orpc/athlete-profiles/dto';
 import { DEFAULT_SORTING } from '@/config/athlete';
 import { client } from '@/orpc/client';
 

@@ -1,13 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  assignSlot,
-  generateBracket,
-  resetBracket,
-  shuffleBracket,
-  swapSlots,
-} from '../matches.dal';
-import { recordTournamentActivity } from '@/orpc/activity/tournament-activity.dal';
+import { MatchDAL } from '../dal';
+import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
@@ -26,7 +20,7 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-vi.mock('@/orpc/activity/tournament-activity.dal', () => ({
+vi.mock('@/orpc/activity/dal', () => ({
   recordTournamentActivity: vi.fn(),
 }));
 
@@ -71,7 +65,7 @@ describe('generateBracket', () => {
     });
     vi.mocked(prisma.match.findMany).mockResolvedValue([]);
 
-    await generateBracket({ groupId: 'group-1' }, 'admin-1');
+    await MatchDAL.generateBracket({ groupId: 'group-1' }, 'admin-1');
 
     const creates = vi
       .mocked(prisma.match.create)
@@ -94,7 +88,7 @@ describe('generateBracket', () => {
     vi.mocked(prisma.group.findUnique).mockResolvedValue(draftGroup as never);
     vi.mocked(prisma.match.count).mockResolvedValue(1);
     await expect(
-      generateBracket({ groupId: 'group-1' }, 'admin-1')
+      MatchDAL.generateBracket({ groupId: 'group-1' }, 'admin-1')
     ).rejects.toThrow(/already exist/);
   });
 });
@@ -105,7 +99,7 @@ describe('resetBracket', () => {
     vi.mocked(prisma.match.updateMany).mockResolvedValue({ count: 3 } as never);
     vi.mocked(prisma.match.findMany).mockResolvedValue([]);
 
-    await resetBracket('group-1', 'admin-1');
+    await MatchDAL.resetBracket('group-1', 'admin-1');
 
     expect(prisma.match.updateMany).toHaveBeenCalledWith({
       where: { groupId: 'group-1' },
@@ -134,7 +128,7 @@ describe('assignSlot', () => {
     } as never);
 
     await expect(
-      assignSlot(
+      MatchDAL.assignSlot(
         { matchId: 'm1', side: 'red', tournamentAthleteId: 'ta1' },
         'admin'
       )
@@ -156,7 +150,7 @@ describe('assignSlot', () => {
     } as never);
 
     await expect(
-      assignSlot(
+      MatchDAL.assignSlot(
         { matchId: 'm1', side: 'blue', tournamentAthleteId: 'ta1' },
         'admin'
       )
@@ -195,7 +189,7 @@ describe('swapSlots', () => {
       .mockResolvedValueOnce(b as never);
 
     await expect(
-      swapSlots(
+      MatchDAL.swapSlots(
         {
           matchAId: 'ma',
           sideA: 'red',
@@ -213,7 +207,7 @@ describe('shuffleBracket', () => {
     vi.mocked(prisma.group.findUnique).mockResolvedValue(draftGroup as never);
     vi.mocked(prisma.match.findMany).mockResolvedValue([]);
 
-    await expect(shuffleBracket('group-1', 'admin')).rejects.toThrow(
+    await expect(MatchDAL.shuffleBracket('group-1', 'admin')).rejects.toThrow(
       /Generate a bracket first/
     );
   });
@@ -288,7 +282,7 @@ describe('shuffleBracket', () => {
     vi.mocked(prisma.match.update).mockResolvedValue({} as never);
     vi.mocked(prisma.match.findUnique).mockResolvedValue(null);
 
-    await shuffleBracket('group-1', 'admin');
+    await MatchDAL.shuffleBracket('group-1', 'admin');
 
     const updates = vi.mocked(prisma.match.update).mock.calls.map((c) => c[0]);
     const r0Update = updates.find((u) => u.where.id === 'm0');

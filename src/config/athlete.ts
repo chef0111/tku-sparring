@@ -1,4 +1,4 @@
-import type { AthleteProfilesDTO } from '@/orpc/athlete-profiles/athlete-profiles.dto';
+import type { AthleteProfilesDTO } from '@/orpc/athlete-profiles/dto';
 
 export const BELT_LEVELS = [
   { value: 0, label: 'White I' },

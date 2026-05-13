@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { bulkCreate, findByTournamentId } from '../tournament-athletes.dal';
+import { TournamentAthleteDAL } from '../dal';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
@@ -38,7 +38,10 @@ describe('bulkCreate', () => {
     });
 
     const profiles = [profile('p1'), profile('p2')];
-    const result = await bulkCreate('tournament-1', profiles);
+    const result = await TournamentAthleteDAL.bulkCreate(
+      'tournament-1',
+      profiles
+    );
 
     expect(prisma.tournamentAthlete.createMany).toHaveBeenCalledWith({
       data: expect.arrayContaining([
@@ -68,7 +71,10 @@ describe('bulkCreate', () => {
     });
 
     const profiles = [profile('p1'), profile('p2')];
-    const result = await bulkCreate('tournament-1', profiles);
+    const result = await TournamentAthleteDAL.bulkCreate(
+      'tournament-1',
+      profiles
+    );
 
     const callArgs = vi.mocked(prisma.tournamentAthlete.createMany).mock
       .calls[0]?.[0];
@@ -85,7 +91,10 @@ describe('bulkCreate', () => {
     ]);
 
     const profiles = [profile('p1'), profile('p2')];
-    const result = await bulkCreate('tournament-1', profiles);
+    const result = await TournamentAthleteDAL.bulkCreate(
+      'tournament-1',
+      profiles
+    );
 
     expect(prisma.tournamentAthlete.createMany).not.toHaveBeenCalled();
     expect(result).toHaveLength(0);
@@ -93,7 +102,9 @@ describe('bulkCreate', () => {
 });
 
 describe('findByTournamentId', () => {
-  type ListInput = Parameters<typeof findByTournamentId>[0];
+  type ListInput = Parameters<
+    typeof TournamentAthleteDAL.findByTournamentId
+  >[0];
 
   const baseInput: ListInput = {
     tournamentId: 'tournament-1',
@@ -120,7 +131,10 @@ describe('findByTournamentId', () => {
 
   it('filters unassigned athletes when unassignedOnly is true', async () => {
     mockResult([], 0);
-    await findByTournamentId({ ...baseInput, unassignedOnly: true });
+    await TournamentAthleteDAL.findByTournamentId({
+      ...baseInput,
+      unassignedOnly: true,
+    });
 
     const args = getFindManyArgs();
     expect(args?.where).toMatchObject({
@@ -135,7 +149,10 @@ describe('findByTournamentId', () => {
 
   it('filters by groupId when provided and unassignedOnly is false', async () => {
     mockResult([], 0);
-    await findByTournamentId({ ...baseInput, groupId: 'group-1' });
+    await TournamentAthleteDAL.findByTournamentId({
+      ...baseInput,
+      groupId: 'group-1',
+    });
 
     const args = getFindManyArgs();
     expect(args?.where).toMatchObject({
@@ -146,7 +163,7 @@ describe('findByTournamentId', () => {
 
   it('prefers unassignedOnly over groupId when both are set', async () => {
     mockResult([], 0);
-    await findByTournamentId({
+    await TournamentAthleteDAL.findByTournamentId({
       ...baseInput,
       unassignedOnly: true,
       groupId: 'group-1',
@@ -164,7 +181,7 @@ describe('findByTournamentId', () => {
 
   it('combines unassignedOnly with query filter (AND, not overwriting OR)', async () => {
     mockResult([], 0);
-    await findByTournamentId({
+    await TournamentAthleteDAL.findByTournamentId({
       ...baseInput,
       unassignedOnly: true,
       query: 'lee',
@@ -188,7 +205,10 @@ describe('findByTournamentId', () => {
 
   it('builds case-insensitive OR query for name and affiliation', async () => {
     mockResult([], 0);
-    await findByTournamentId({ ...baseInput, query: 'john' });
+    await TournamentAthleteDAL.findByTournamentId({
+      ...baseInput,
+      query: 'john',
+    });
 
     const args = getFindManyArgs();
     expect(args?.where).toMatchObject({
@@ -206,7 +226,10 @@ describe('findByTournamentId', () => {
 
   it('filters by gender using `in`', async () => {
     mockResult([], 0);
-    await findByTournamentId({ ...baseInput, gender: ['M'] });
+    await TournamentAthleteDAL.findByTournamentId({
+      ...baseInput,
+      gender: ['M'],
+    });
 
     const args = getFindManyArgs();
     expect(args?.where).toMatchObject({ gender: { in: ['M'] } });
@@ -214,7 +237,7 @@ describe('findByTournamentId', () => {
 
   it('uses beltLevel `in` when beltLevels is provided', async () => {
     mockResult([], 0);
-    await findByTournamentId({
+    await TournamentAthleteDAL.findByTournamentId({
       ...baseInput,
       beltLevels: [1, 3, 5],
       beltLevelMin: 0,
@@ -227,7 +250,7 @@ describe('findByTournamentId', () => {
 
   it('uses beltLevel gte/lte when only min/max are provided', async () => {
     mockResult([], 0);
-    await findByTournamentId({
+    await TournamentAthleteDAL.findByTournamentId({
       ...baseInput,
       beltLevelMin: 2,
       beltLevelMax: 6,
@@ -239,7 +262,7 @@ describe('findByTournamentId', () => {
 
   it('filters weight by gte/lte when provided', async () => {
     mockResult([], 0);
-    await findByTournamentId({
+    await TournamentAthleteDAL.findByTournamentId({
       ...baseInput,
       weightMin: 50,
       weightMax: 70,
@@ -251,7 +274,7 @@ describe('findByTournamentId', () => {
 
   it('honors sorting by mapping {id, desc} to prisma orderBy', async () => {
     mockResult([], 0);
-    await findByTournamentId({
+    await TournamentAthleteDAL.findByTournamentId({
       ...baseInput,
       sorting: [
         { id: 'name', desc: false },
@@ -265,7 +288,7 @@ describe('findByTournamentId', () => {
 
   it('defaults to createdAt asc when sorting is empty', async () => {
     mockResult([], 0);
-    await findByTournamentId(baseInput);
+    await TournamentAthleteDAL.findByTournamentId(baseInput);
 
     const args = getFindManyArgs();
     expect(args?.orderBy).toEqual([{ createdAt: 'asc' }]);
@@ -275,7 +298,7 @@ describe('findByTournamentId', () => {
     const items = [{ id: 'a1' }, { id: 'a2' }];
     mockResult(items, 42);
 
-    const result = await findByTournamentId({
+    const result = await TournamentAthleteDAL.findByTournamentId({
       ...baseInput,
       page: 3,
       perPage: 10,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { RespondTakeoverSchema } from '../lease.dto';
+import { RespondTakeoverSchema } from '../dto';
 import router from '@/orpc/router';
 
 describe('lease router registration', () => {

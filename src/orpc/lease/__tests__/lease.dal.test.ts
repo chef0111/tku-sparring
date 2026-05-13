@@ -1,13 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  acquire,
-  heartbeat,
-  listForTournament,
-  release,
-  requestTakeover,
-  respondTakeover,
-} from '../lease.dal';
+import { LeaseDAL } from '../dal';
 import { publishLeaseEvent } from '../lease-stream';
 import { prisma } from '@/lib/db';
 
@@ -120,7 +113,7 @@ describe('lease DAL', () => {
       createdLease as never
     );
 
-    const result = await acquire({
+    const result = await LeaseDAL.acquire({
       groupId: 'group-1',
       deviceId: 'device-1',
       adminId: 'admin-1',
@@ -161,7 +154,7 @@ describe('lease DAL', () => {
     );
 
     await expect(
-      acquire({
+      LeaseDAL.acquire({
         groupId: 'group-1',
         deviceId: 'device-1',
         adminId: 'admin-1',
@@ -185,7 +178,7 @@ describe('lease DAL', () => {
     );
 
     await expect(
-      acquire({
+      LeaseDAL.acquire({
         groupId: 'group-1',
         deviceId: 'device-1',
         adminId: 'admin-1',
@@ -201,7 +194,7 @@ describe('lease DAL', () => {
     );
 
     await expect(
-      acquire({
+      LeaseDAL.acquire({
         groupId: 'group-1',
         deviceId: 'device-2',
         adminId: 'admin-2',
@@ -221,7 +214,7 @@ describe('lease DAL', () => {
     );
 
     await expect(
-      acquire({
+      LeaseDAL.acquire({
         groupId: 'group-1',
         deviceId: 'device-1',
         adminId: 'admin-1',
@@ -248,7 +241,7 @@ describe('lease DAL', () => {
       updatedLease as never
     );
 
-    const result = await heartbeat({
+    const result = await LeaseDAL.heartbeat({
       groupId: 'group-1',
       deviceId: 'device-1',
       adminId: 'admin-1',
@@ -274,7 +267,7 @@ describe('lease DAL', () => {
     );
 
     await expect(
-      heartbeat({
+      LeaseDAL.heartbeat({
         groupId: 'group-1',
         deviceId: 'device-1',
         adminId: 'admin-other',
@@ -299,7 +292,7 @@ describe('lease DAL', () => {
       count: 2,
     } as never);
 
-    const result = await release({
+    const result = await LeaseDAL.release({
       groupId: 'group-1',
       deviceId: 'device-1',
       adminId: 'admin-1',
@@ -345,7 +338,7 @@ describe('lease DAL', () => {
     );
 
     await expect(
-      release({
+      LeaseDAL.release({
         groupId: 'group-1',
         deviceId: 'device-1',
         adminId: 'admin-1',
@@ -364,7 +357,7 @@ describe('lease DAL', () => {
     );
 
     await expect(
-      release({
+      LeaseDAL.release({
         groupId: 'group-1',
         deviceId: 'device-1',
         adminId: 'admin-other',
@@ -390,7 +383,7 @@ describe('lease DAL', () => {
       createdRequest as never
     );
 
-    const result = await requestTakeover({
+    const result = await LeaseDAL.requestTakeover({
       groupId: 'group-1',
       deviceId: 'device-requester',
       adminId: 'admin-requester',
@@ -426,7 +419,7 @@ describe('lease DAL', () => {
       existingRequest as never
     );
 
-    const result = await requestTakeover({
+    const result = await LeaseDAL.requestTakeover({
       groupId: 'group-1',
       deviceId: 'device-requester',
       adminId: 'admin-requester',
@@ -458,7 +451,7 @@ describe('lease DAL', () => {
       .mockResolvedValueOnce({ count: 0 } as never)
       .mockResolvedValueOnce({ count: 1 } as never);
 
-    const result = await requestTakeover({
+    const result = await LeaseDAL.requestTakeover({
       groupId: 'group-1',
       deviceId: 'device-requester',
       adminId: 'admin-requester',
@@ -500,7 +493,7 @@ describe('lease DAL', () => {
       replacementRequest as never
     );
 
-    const result = await requestTakeover({
+    const result = await LeaseDAL.requestTakeover({
       groupId: 'group-1',
       deviceId: 'device-requester',
       adminId: 'admin-requester',
@@ -542,7 +535,7 @@ describe('lease DAL', () => {
       uniqueConstraintError()
     );
 
-    const result = await requestTakeover({
+    const result = await LeaseDAL.requestTakeover({
       groupId: 'group-1',
       deviceId: 'device-requester',
       adminId: 'admin-requester',
@@ -577,7 +570,7 @@ describe('lease DAL', () => {
       replacementRequest as never
     );
 
-    const result = await requestTakeover({
+    const result = await LeaseDAL.requestTakeover({
       groupId: 'group-1',
       deviceId: 'device-requester',
       adminId: 'admin-requester',
@@ -620,7 +613,7 @@ describe('lease DAL', () => {
     );
 
     await expect(
-      requestTakeover({
+      LeaseDAL.requestTakeover({
         groupId: 'group-1',
         deviceId: 'device-requester',
         adminId: 'admin-requester',
@@ -659,7 +652,7 @@ describe('lease DAL', () => {
       count: 3,
     } as never);
 
-    const result = await respondTakeover({
+    const result = await LeaseDAL.respondTakeover({
       requestId: 'request-1',
       approve: true,
       adminId: 'admin-holder',
@@ -712,7 +705,7 @@ describe('lease DAL', () => {
     );
 
     await expect(
-      respondTakeover({
+      LeaseDAL.respondTakeover({
         requestId: 'request-1',
         approve: true,
         adminId: 'admin-holder',
@@ -742,7 +735,7 @@ describe('lease DAL', () => {
       deniedRequest as never
     );
 
-    const result = await respondTakeover({
+    const result = await LeaseDAL.respondTakeover({
       requestId: 'request-1',
       approve: false,
       adminId: 'admin-holder',
@@ -784,7 +777,7 @@ describe('lease DAL', () => {
       },
     ] as never);
 
-    await listForTournament({
+    await LeaseDAL.listForTournament({
       tournamentId: 'tournament-1',
     });
 
@@ -808,7 +801,7 @@ describe('lease DAL', () => {
       },
     ] as never);
 
-    const result = await listForTournament({
+    const result = await LeaseDAL.listForTournament({
       tournamentId: 'tournament-1',
       deviceId: 'device-requester',
     });

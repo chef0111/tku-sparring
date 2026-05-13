@@ -4,7 +4,7 @@ import {
   CheckDuplicateSchema,
   CreateAthleteProfileSchema,
   UpdateAthleteProfileSchema,
-} from '../athlete-profiles.dto';
+} from '../dto';
 
 describe('CreateAthleteProfileSchema', () => {
   const valid = {
