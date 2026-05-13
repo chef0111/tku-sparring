@@ -16,6 +16,7 @@ vi.mock('../athlete-profiles.dal', () => ({
 const existingProfile = {
   id: 'existing-id',
   name: 'Nguyen Van A',
+  nameSortKey: 'a',
   gender: 'M',
   beltLevel: 5,
   weight: 65,

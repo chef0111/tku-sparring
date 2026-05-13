@@ -39,13 +39,13 @@ const draftGroup = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.mocked(prisma.$transaction).mockImplementation(async (arg) => {
+  vi.mocked(prisma.$transaction).mockImplementation(async (arg: unknown) => {
     if (typeof arg === 'function') {
       return arg(prisma as never);
     }
     if (Array.isArray(arg)) {
       return Promise.all(
-        arg.map((op) =>
+        arg.map((op: unknown) =>
           typeof op === 'object' && op && 'then' in op ? op : op
         )
       );
@@ -62,13 +62,13 @@ describe('generateBracket', () => {
       { id: 'ta1', athleteProfileId: 'ap1', beltLevel: 3, weight: 60 },
       { id: 'ta2', athleteProfileId: 'ap2', beltLevel: 3, weight: 62 },
     ] as never);
-    vi.mocked(prisma.match.create).mockImplementation(
-      ({ data }: { data: { round: number; matchIndex: number } }) =>
-        Promise.resolve({
-          id: `m-${data.round}-${data.matchIndex}`,
-          ...data,
-        }) as never
-    );
+    vi.mocked(prisma.match.create).mockImplementation((args) => {
+      const data = args.data as { round: number; matchIndex: number };
+      return Promise.resolve({
+        id: `m-${data.round}-${data.matchIndex}`,
+        ...data,
+      }) as never;
+    });
     vi.mocked(prisma.match.findMany).mockResolvedValue([]);
 
     await generateBracket({ groupId: 'group-1' }, 'admin-1');
@@ -254,7 +254,7 @@ describe('shuffleBracket', () => {
     };
 
     let findManyCalls = 0;
-    vi.mocked(prisma.match.findMany).mockImplementation((args) => {
+    vi.mocked(prisma.match.findMany).mockImplementation(((args) => {
       findManyCalls++;
       const w = args?.where as { round?: number } | undefined;
       if (findManyCalls === 1) {
@@ -277,7 +277,7 @@ describe('shuffleBracket', () => {
         ] as never);
       }
       return Promise.resolve([] as never);
-    });
+    }) as typeof prisma.match.findMany);
 
     vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue([
       { id: 'ta-locked', athleteProfileId: 'p1', beltLevel: 5, weight: 70 },

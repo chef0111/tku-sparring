@@ -4,6 +4,10 @@ import type {
   UpdateTournamentAthleteDTO,
 } from './tournament-athletes.dto';
 import { prisma } from '@/lib/db';
+import {
+  getNameSortKey,
+  orderFieldForColumnId,
+} from '@/lib/sort/name-sort-key';
 
 /** MongoDB: `field: null` does not match documents where the field is omitted. */
 const UNASSIGNED_GROUP_FILTER = {
@@ -71,7 +75,9 @@ export async function findByTournamentId(input: ListTournamentAthletesDTO) {
   const orderBy =
     sorting.length > 0
       ? sorting.map((s) => ({
-          [s.id]: s.desc ? ('desc' as const) : ('asc' as const),
+          [orderFieldForColumnId(s.id)]: s.desc
+            ? ('desc' as const)
+            : ('asc' as const),
         }))
       : [{ createdAt: 'asc' as const }];
 
@@ -118,6 +124,7 @@ export async function bulkCreate(
       tournamentId,
       athleteProfileId: p.id,
       name: p.name,
+      nameSortKey: getNameSortKey(p.name),
       gender: p.gender,
       beltLevel: p.beltLevel,
       weight: p.weight,

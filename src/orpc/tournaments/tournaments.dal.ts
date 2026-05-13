@@ -9,6 +9,7 @@ import type {
   UpdateTournamentDTO,
 } from './tournaments.dto';
 import { prisma } from '@/lib/db';
+import { getNameSortKey } from '@/lib/sort/name-sort-key';
 
 type SortableField = 'name' | 'status' | 'athletes' | 'createdAt';
 
@@ -37,7 +38,7 @@ function toOrderBy(
         },
       };
     case 'name':
-      return { name: direction };
+      return { nameSortKey: direction };
     case 'status':
       return { status: direction };
     case 'createdAt':
@@ -191,7 +192,12 @@ export async function findById(id: string) {
 }
 
 export async function create(data: CreateTournamentDTO) {
-  return await prisma.tournament.create({ data });
+  return await prisma.tournament.create({
+    data: {
+      ...data,
+      nameSortKey: getNameSortKey(data.name),
+    },
+  });
 }
 
 export async function update(
@@ -200,7 +206,12 @@ export async function update(
 ) {
   return await prisma.tournament.update({
     where: { id },
-    data,
+    data: {
+      ...data,
+      ...(data.name !== undefined
+        ? { nameSortKey: getNameSortKey(data.name) }
+        : {}),
+    },
   });
 }
 
