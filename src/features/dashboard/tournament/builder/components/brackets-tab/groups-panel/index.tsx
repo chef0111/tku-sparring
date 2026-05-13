@@ -1,6 +1,7 @@
 import { useDroppable } from '@dnd-kit/core';
 import { BetweenHorizonalEnd } from 'lucide-react';
-import { BracketActionQueueSection } from './bracket-action-queue-section';
+import { GroupsPanelSkeleton } from '../skeletons';
+import { BracketActionQueue } from './bracket-action-queue';
 import { GroupsTabsHeader } from './groups-tabs-header';
 import { PanelAthleteRow } from './panel-athlete-row';
 import type {
@@ -15,7 +16,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
-import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 interface GroupsPanelProps {
@@ -56,7 +56,7 @@ export function GroupsPanel({
     slotReturnEnabled && !readOnly && groupAthleteCount > 0;
 
   return (
-    <aside className="bg-sidebar/30 flex h-full min-h-0 w-xs shrink-0 flex-col border-l">
+    <aside className="bg-sidebar/50 flex h-full min-h-0 w-xs shrink-0 flex-col border-l">
       <GroupsTabsHeader
         groups={groups}
         selectedGroupId={selectedGroupId}
@@ -71,31 +71,34 @@ export function GroupsPanel({
       >
         <div className="flex flex-col gap-1.5 p-2">
           {isPoolLoading ? (
-            <div className="flex flex-col gap-1.5">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="bg-card flex items-center gap-2 rounded-md border px-2 py-2"
-                >
-                  <Skeleton className="size-6 shrink-0 rounded-sm" />
-                  <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                    <Skeleton className="h-4 w-full max-w-44" />
-                    <Skeleton className="h-3 w-full max-w-28" />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <GroupsPanelSkeleton showPanelHint={showArrangedHint} />
           ) : athletes.length > 0 ? (
-            athletes.map((a) => (
-              <PanelAthleteRow
-                key={a.id}
-                athlete={a}
-                groupId={selectedGroupId ?? ''}
-                readOnly={readOnly}
-              />
-            ))
+            <>
+              <header className="flex flex-col gap-1 px-0.5">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="bg-primary/80 size-1.5 shrink-0 rounded-full"
+                    aria-hidden
+                  />
+                  <p className="text-muted-foreground text-sm font-semibold tracking-wide uppercase">
+                    {groups.find((g) => g.id === selectedGroupId)?.name}
+                  </p>
+                </div>
+                <p className="text-muted-foreground text-xs leading-snug">
+                  Drag & drop athletes to bracket
+                </p>
+              </header>
+              {athletes.map((a) => (
+                <PanelAthleteRow
+                  key={a.id}
+                  athlete={a}
+                  groupId={selectedGroupId ?? ''}
+                  readOnly={readOnly}
+                />
+              ))}
+            </>
           ) : matches.length > 0 ? (
-            <BracketActionQueueSection
+            <BracketActionQueue
               matches={matches}
               onOpenMatch={onOpenMatch}
               showPanelHint={showArrangedHint}

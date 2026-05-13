@@ -9,7 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
 
 interface GroupsTabsHeaderProps {
   groups: Array<GroupData>;
@@ -47,7 +46,7 @@ export function GroupsTabsHeader({
           requestAnimationFrame(() => scrollTriggerIntoView(v));
         }}
       >
-        <div className="scrollbar-thin overflow-x-auto overflow-y-hidden pr-9">
+        <div className="scrollbar-thin overflow-x-auto overflow-y-hidden pr-10">
           <TabsList variant="line" className="h-auto min-w-min flex-nowrap">
             {groups.map((g) => (
               <TabsTrigger
@@ -59,10 +58,7 @@ export function GroupsTabsHeader({
                 value={g.id}
                 className="shrink-0"
               >
-                {g.name}{' '}
-                <span className="text-muted-foreground text-xs tabular-nums">
-                  ({g._count.tournamentAthletes})
-                </span>
+                {g.name}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -79,27 +75,23 @@ export function GroupsTabsHeader({
               type="button"
               variant="ghost"
               size="icon"
-              className="size-full rounded-none"
+              className="size-full rounded-none border-none"
               aria-label="All groups"
             >
               <MoreHorizontal />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
+          <DropdownMenuContent
+            align="end"
+            alignOffset={4}
+            className="max-h-64 overflow-y-auto"
+          >
             {groups.map((g) => (
               <DropdownMenuItem
                 key={g.id}
                 onSelect={() => handlePickFromMenu(g.id)}
               >
-                <span className="truncate">{g.name}</span>{' '}
-                <span
-                  className={cn(
-                    'text-muted-foreground text-xs tabular-nums',
-                    g.id === selectedGroupId && 'text-foreground font-medium'
-                  )}
-                >
-                  ({g._count.tournamentAthletes})
-                </span>
+                <span className="truncate">{g.name}</span>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>

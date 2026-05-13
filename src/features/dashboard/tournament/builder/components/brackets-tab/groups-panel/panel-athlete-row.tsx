@@ -39,7 +39,7 @@ export function PanelAthleteRow({
       <button
         type="button"
         data-slot="panel-athlete-drag"
-        className="text-muted-foreground flex size-6 shrink-0 items-center justify-center rounded-sm text-xs"
+        className="text-muted-foreground flex size-6 shrink-0 cursor-grab items-center justify-center rounded-sm text-xs"
       >
         <GripVertical className="size-3.5" />
       </button>

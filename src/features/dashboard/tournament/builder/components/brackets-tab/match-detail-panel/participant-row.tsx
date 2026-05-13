@@ -33,9 +33,9 @@ export function ParticipantRow({
           <p className="text-muted-foreground text-sm italic">EMPTY</p>
         )}
       </div>
-      {isWinner ? (
-        <Crown className="text-primary shrink-0" aria-hidden />
-      ) : null}
+      {isWinner && (
+        <Crown className="text-primary mr-1 size-5 shrink-0" aria-hidden />
+      )}
     </div>
   );
 }

@@ -25,8 +25,8 @@ export function buildBracketActionQueue(
     if (emptyRed && emptyBlue) continue;
 
     const reasons: Array<string> = [];
-    if (emptyRed) reasons.push('Open red corner');
-    if (emptyBlue) reasons.push('Open blue corner');
+    if (emptyRed) reasons.push('No opponent');
+    if (emptyBlue) reasons.push('No opponent');
 
     const bothFilled = !emptyRed && !emptyBlue;
     if (bothFilled && m.winnerTournamentAthleteId == null) {

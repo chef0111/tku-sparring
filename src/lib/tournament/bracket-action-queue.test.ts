@@ -109,6 +109,6 @@ describe('buildBracketActionQueue', () => {
     ];
     const q = buildBracketActionQueue(matches);
     expect(q).toHaveLength(1);
-    expect(q[0]!.reasons).toEqual(['Open blue corner']);
+    expect(q[0]!.reasons).toEqual(['No opponent']);
   });
 });

@@ -1,5 +1,6 @@
 import type { MatchStatus } from '@/features/dashboard/types';
 import { Status, StatusIndicator } from '@/components/ui/status';
+import { cn } from '@/lib/utils';
 
 const MATCH_STATUS_TONE: Record<
   MatchStatus,
@@ -16,11 +17,17 @@ const LABEL: Record<MatchStatus, string> = {
   complete: 'Complete',
 };
 
-export function MatchSheetStatus({ status }: { status: MatchStatus }) {
+export function MatchSheetStatus({
+  status,
+  className,
+}: {
+  status: MatchStatus;
+  className?: string;
+}) {
   const tone = MATCH_STATUS_TONE[status] ?? 'maintenance';
 
   return (
-    <Status status={tone}>
+    <Status status={tone} className={cn(className)}>
       <StatusIndicator />
       <span className="text-foreground text-xs font-medium">
         {LABEL[status] ?? status}

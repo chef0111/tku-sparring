@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { BracketViewToolbar } from '../bracket-view-toolbar';
 import { BracketMatchNode } from './bracket-match-node';
 import type { MatchPosition } from '@/lib/tournament/bracket-layout';
 import type {
@@ -76,7 +77,8 @@ export function BracketCanvas({
     [matches, thirdPlaceMatch]
   );
 
-  const { containerRef, transform, handlers } = usePanZoom(width, height);
+  const { containerRef, transform, handlers, reset, zoomIn, zoomOut } =
+    usePanZoom(width, height);
 
   const connectors = React.useMemo(
     () => buildConnectors(positions),
@@ -162,6 +164,7 @@ export function BracketCanvas({
           ))}
         </div>
       </div>
+      <BracketViewToolbar onFit={reset} onZoomIn={zoomIn} onZoomOut={zoomOut} />
     </div>
   );
 }
