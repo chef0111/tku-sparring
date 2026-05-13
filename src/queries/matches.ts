@@ -10,15 +10,16 @@ import type {
   UpdateScoreDTO,
 } from '@/orpc/matches/matches.dto';
 import type { MatchData } from '@/features/dashboard/types';
-import type { BracketDnDMutationContext } from '@/lib/queries/match';
+import type { BracketDnDMutationContext } from '@/lib/queries/matches';
 import { client } from '@/orpc/client';
 import { invalidateOrpcGroupListQueries } from '@/queries/groups';
 import {
   applyOptimisticAssign,
   applyOptimisticSetLock,
   applyOptimisticSwap,
+  applyOptimisticSwapParticipants,
   findMatchListQueryKey,
-} from '@/lib/queries/match';
+} from '@/lib/queries/matches';
 
 export function useMatches(groupId: string | null) {
   return useQuery({
@@ -215,16 +216,34 @@ export function useSetWinner(options?: { onSuccess?: () => void }) {
 }
 
 export function useSwapParticipants(options?: { onSuccess?: () => void }) {
+  const queryClient = useQueryClient();
   const invalidate = useInvalidateMatches();
 
   return useMutation({
     mutationFn: (data: SwapParticipantsDTO) =>
       client.match.swapParticipants(data),
-    onSuccess: () => {
-      invalidate();
-      toast.success('Participants swapped');
-      options?.onSuccess?.();
+    onMutate: async (input): Promise<BracketDnDMutationContext | undefined> => {
+      const queryKey = findMatchListQueryKey(queryClient, input.matchId);
+      if (!queryKey) return undefined;
+
+      await queryClient.cancelQueries({ queryKey });
+      const previousMatches =
+        queryClient.getQueryData<Array<MatchData>>(queryKey);
+      queryClient.setQueryData<Array<MatchData>>(queryKey, (old) => {
+        if (!old) return old;
+        return applyOptimisticSwapParticipants(old, input);
+      });
+      return { queryKey, previousMatches };
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err, _input, context) => {
+      if (context?.queryKey && context.previousMatches !== undefined) {
+        queryClient.setQueryData(context.queryKey, context.previousMatches);
+      }
+      toast.error(err.message);
+    },
+    onSettled: (_data, error) => {
+      void invalidate();
+      if (!error) options?.onSuccess?.();
+    },
   });
 }
