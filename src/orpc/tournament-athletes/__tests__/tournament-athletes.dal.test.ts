@@ -46,6 +46,7 @@ describe('bulkCreate', () => {
           tournamentId: 'tournament-1',
           athleteProfileId: 'p1',
           name: 'Athlete p1',
+          nameSortKey: 'p1',
           gender: 'M',
           beltLevel: 3,
           weight: 55,
@@ -259,7 +260,7 @@ describe('findByTournamentId', () => {
     });
 
     const args = getFindManyArgs();
-    expect(args?.orderBy).toEqual([{ name: 'asc' }, { weight: 'desc' }]);
+    expect(args?.orderBy).toEqual([{ nameSortKey: 'asc' }, { weight: 'desc' }]);
   });
 
   it('defaults to createdAt asc when sorting is empty', async () => {

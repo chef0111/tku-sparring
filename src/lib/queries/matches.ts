@@ -2,6 +2,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import type {
   AssignSlotDTO,
   SetLockDTO,
+  SwapParticipantsDTO,
   SwapSlotsDTO,
 } from '@/orpc/matches/matches.dto';
 import type { MatchData } from '@/features/dashboard/types';
@@ -133,6 +134,43 @@ export function applyOptimisticSwap(
   const b = read(mb, input.sideB);
   write(ma, input.sideA, b.ta, b.prof);
   write(mb, input.sideB, a.ta, a.prof);
+  return out;
+}
+
+export function applyOptimisticSwapParticipants(
+  matches: Array<MatchData>,
+  input: SwapParticipantsDTO
+): Array<MatchData> {
+  const out = matches.map((m) => ({ ...m }));
+  const m = out.find((x) => x.id === input.matchId);
+  if (!m) return out;
+
+  const prevRedTa = m.redTournamentAthleteId;
+  const prevRedProf = m.redAthleteId;
+  const prevBlueTa = m.blueTournamentAthleteId;
+  const prevBlueProf = m.blueAthleteId;
+
+  m.redTournamentAthleteId = input.redTournamentAthleteId;
+  m.blueTournamentAthleteId = input.blueTournamentAthleteId;
+
+  m.redAthleteId =
+    input.redTournamentAthleteId === prevBlueTa
+      ? prevBlueProf
+      : input.redTournamentAthleteId === prevRedTa
+        ? prevRedProf
+        : input.redTournamentAthleteId
+          ? findProfileId(matches, input.redTournamentAthleteId)
+          : null;
+
+  m.blueAthleteId =
+    input.blueTournamentAthleteId === prevRedTa
+      ? prevRedProf
+      : input.blueTournamentAthleteId === prevBlueTa
+        ? prevBlueProf
+        : input.blueTournamentAthleteId
+          ? findProfileId(matches, input.blueTournamentAthleteId)
+          : null;
+
   return out;
 }
 

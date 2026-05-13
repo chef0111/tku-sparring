@@ -28,8 +28,8 @@ export const Route = createFileRoute('/dashboard/athletes/')({
           </Button>
         </div>
       </SiteHeader>
-      <div className="p-4">
-        <Skeleton className="mb-6 h-7 w-64" />
+      <div className="mx-auto w-full max-w-7xl p-6">
+        <Skeleton className="mb-8 h-7 w-64" />
         <DataTableSkeleton columnCount={7} filterCount={4} rowCount={10} />
       </div>
     </div>

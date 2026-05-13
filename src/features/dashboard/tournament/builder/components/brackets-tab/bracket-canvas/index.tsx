@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { BracketViewToolbar } from '../bracket-view-toolbar';
 import { BracketMatchNode } from './bracket-match-node';
 import type { MatchPosition } from '@/lib/tournament/bracket-layout';
 import type {
@@ -12,6 +13,7 @@ import {
   buildConnectors,
   buildLayout,
 } from '@/lib/tournament/bracket-layout';
+import { getBracketRoundLabel } from '@/lib/tournament/bracket-round-label';
 import { usePanZoom } from '@/features/dashboard/tournament/builder/hooks/use-pan-zoom';
 import { cn } from '@/lib/utils';
 
@@ -75,7 +77,8 @@ export function BracketCanvas({
     [matches, thirdPlaceMatch]
   );
 
-  const { containerRef, transform, handlers } = usePanZoom(width, height);
+  const { containerRef, transform, handlers, reset, zoomIn, zoomOut } =
+    usePanZoom(width, height);
 
   const connectors = React.useMemo(
     () => buildConnectors(positions),
@@ -91,7 +94,7 @@ export function BracketCanvas({
   return (
     <div
       ref={containerRef}
-      className="relative size-full min-h-0 overflow-hidden"
+      className="canvas-background relative size-full min-h-0 overflow-hidden pl-6"
       {...handlers}
     >
       <div
@@ -111,16 +114,13 @@ export function BracketCanvas({
         >
           {roundNums.map((round) => {
             const maxRound = roundNums[roundNums.length - 1]!;
-            let label: string;
-            if (round === maxRound) label = 'Final';
-            else if (round === maxRound - 1) label = 'Semifinal';
-            else label = `Round ${round + 1}`;
+            const label = getBracketRoundLabel(round, maxRound);
 
             return (
               <text
                 key={round}
                 x={PADDING + round * ROUND_GAP + MATCH_W / 2}
-                y={8}
+                y={10}
                 textAnchor="middle"
                 className="fill-muted-foreground text-xs font-medium tracking-wider uppercase"
               >
@@ -129,15 +129,16 @@ export function BracketCanvas({
             );
           })}
 
-          {connectors.map((line, i) => (
-            <line
+          {connectors.map((c, i) => (
+            <path
               key={i}
-              x1={line.x1}
-              y1={line.y1}
-              x2={line.x2}
-              y2={line.y2}
-              className={statusColor.pending}
+              d={c.d}
+              fill="none"
+              strokeLinecap="butt"
+              strokeLinejoin="miter"
+              strokeMiterlimit={4}
               strokeWidth={1.5}
+              className={statusColor.pending}
             />
           ))}
 
@@ -163,6 +164,7 @@ export function BracketCanvas({
           ))}
         </div>
       </div>
+      <BracketViewToolbar onFit={reset} onZoomIn={zoomIn} onZoomOut={zoomOut} />
     </div>
   );
 }

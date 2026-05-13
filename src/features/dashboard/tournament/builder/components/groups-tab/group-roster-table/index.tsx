@@ -12,12 +12,12 @@ import type { ListTournamentAthletesDTO } from '@/orpc/tournament-athletes/tourn
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Status, StatusIndicator, StatusLabel } from '@/components/ui/status';
-import { Skeleton } from '@/components/ui/skeleton';
 import { DataTable } from '@/components/data-table/data-table';
 import { getBeltLabel } from '@/config/athlete';
 import { useTournamentAthletes } from '@/queries/tournament-athletes';
 import { useAssignAthlete, useUnassignAthlete } from '@/queries/groups';
 import { cn } from '@/lib/utils';
+import { DataTableSkeleton } from '@/components/data-table/data-table-skeleton';
 
 type LeaseStatus =
   | 'available'
@@ -127,7 +127,7 @@ function ActiveGroupRoster({
     desc: s.desc,
   })) as ListTournamentAthletesDTO['sorting'];
 
-  const { data, isPending } = useTournamentAthletes({
+  const { data, isFetching } = useTournamentAthletes({
     tournamentId,
     groupId: group.id,
     unassignedOnly: false,
@@ -290,12 +290,13 @@ function ActiveGroupRoster({
         ref={setNodeRef}
         className={cn('flex-1 overflow-auto p-4', isOver && 'bg-primary/5')}
       >
-        {isPending && items.length === 0 ? (
-          <div className="space-y-2">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-10 w-full" />
-            ))}
-          </div>
+        {isFetching && !data ? (
+          <DataTableSkeleton
+            columnCount={columns.length}
+            withViewOptions={false}
+            withPagination={false}
+            rowCount={10}
+          />
         ) : total === 0 ? (
           <GroupRosterEmptyState
             variant="no-athletes"

@@ -6,6 +6,10 @@ import type {
 import type { AthleteProfileData } from '@/features/dashboard/types';
 import { prisma } from '@/lib/db';
 import { filterColumns } from '@/lib/data-table/filter-columns';
+import {
+  getNameSortKey,
+  orderFieldForColumnId,
+} from '@/lib/sort/name-sort-key';
 import { athleteProfileFilterMap } from '@/lib/data-table/mappings/athlete-profiles';
 import { getValidFilters } from '@/lib/data-table/utils';
 
@@ -85,7 +89,9 @@ export async function findMany(input: AthleteProfilesDTO) {
   const orderBy =
     sorting.length > 0
       ? sorting.map((s) => ({
-          [s.id]: s.desc ? ('desc' as const) : ('asc' as const),
+          [orderFieldForColumnId(s.id)]: s.desc
+            ? ('desc' as const)
+            : ('asc' as const),
         }))
       : [{ createdAt: 'desc' as const }];
 
@@ -99,10 +105,12 @@ export async function findMany(input: AthleteProfilesDTO) {
     prisma.athleteProfile.count({ where }),
   ]);
 
-  const items: Array<AthleteProfileData> = rows.map((row) => ({
-    ...row,
-    athleteCode: row.athleteCode ?? '',
-  }));
+  const items: Array<AthleteProfileData> = rows.map(
+    ({ nameSortKey: _nameSortKey, ...row }) => ({
+      ...row,
+      athleteCode: row.athleteCode ?? '',
+    })
+  );
 
   return { items, total };
 }
@@ -146,14 +154,27 @@ export async function findPossibleDuplicates(input: {
 export async function create(
   data: Omit<CreateAthleteProfileDTO, 'confirmDuplicate'>
 ) {
-  return prisma.athleteProfile.create({ data });
+  return prisma.athleteProfile.create({
+    data: {
+      ...data,
+      nameSortKey: getNameSortKey(data.name),
+    },
+  });
 }
 
 export async function update(
   id: string,
   data: Omit<UpdateAthleteProfileDTO, 'id'>
 ) {
-  return prisma.athleteProfile.update({ where: { id }, data });
+  return prisma.athleteProfile.update({
+    where: { id },
+    data: {
+      ...data,
+      ...(data.name !== undefined
+        ? { nameSortKey: getNameSortKey(data.name) }
+        : {}),
+    },
+  });
 }
 
 export async function deleteProfile(id: string) {

@@ -5,6 +5,7 @@ export const MATCH_H = 70;
 export const ROUND_GAP = 280;
 export const PADDING = 24;
 export const ATHLETE_ROW_H = MATCH_H / 2;
+export const CONNECTOR_CORNER_RADIUS = 8;
 
 export interface MatchPosition {
   x: number;
@@ -77,8 +78,61 @@ export function buildLayout(
   return { positions, width: maxX, height: maxY };
 }
 
+export interface BracketConnectorPath {
+  d: string;
+}
+
+/** Child → stub: horizontal, one fillet at the child-side corner, vertical to the bus (sharp at parent Y). */
+export function buildConnectorChildLeg(
+  childRightX: number,
+  childMidY: number,
+  midX: number,
+  parentMidY: number,
+  radius: number = CONNECTOR_CORNER_RADIUS
+): string {
+  const dy = Math.abs(parentMidY - childMidY);
+  const dx = midX - childRightX;
+  if (dy < 0.5 || dx <= 0) {
+    return `M ${childRightX} ${childMidY} L ${midX} ${parentMidY}`;
+  }
+  const r = Math.min(
+    radius,
+    dx * 0.45,
+    dy * 0.45,
+    dx / 2 - 0.25,
+    dy / 2 - 0.25
+  );
+  const rr = Math.max(2, r);
+  const down = parentMidY > childMidY;
+
+  if (down) {
+    return [
+      `M ${childRightX} ${childMidY}`,
+      `L ${midX - rr} ${childMidY}`,
+      `A ${rr} ${rr} 0 0 1 ${midX} ${childMidY + rr}`,
+      `L ${midX} ${parentMidY}`,
+    ].join(' ');
+  }
+
+  return [
+    `M ${childRightX} ${childMidY}`,
+    `L ${midX - rr} ${childMidY}`,
+    `A ${rr} ${rr} 0 0 0 ${midX} ${childMidY - rr}`,
+    `L ${midX} ${parentMidY}`,
+  ].join(' ');
+}
+
+/** Shared horizontal from stub column into the parent match (draw once per parent). */
+export function buildConnectorTrunk(
+  midX: number,
+  parentMidY: number,
+  parentLeftX: number
+): string {
+  return `M ${midX} ${parentMidY} L ${parentLeftX} ${parentMidY}`;
+}
+
 export function buildConnectors(positions: Array<MatchPosition>) {
-  const lines: Array<{ x1: number; y1: number; x2: number; y2: number }> = [];
+  const paths: Array<BracketConnectorPath> = [];
   const posMap = new Map<string, MatchPosition>();
   for (const p of positions) {
     posMap.set(`${p.match.round}-${p.match.matchIndex}`, p);
@@ -97,16 +151,22 @@ export function buildConnectors(positions: Array<MatchPosition>) {
     const parentLeftX = pos.x;
     const midX = parentLeftX - (ROUND_GAP - MATCH_W) / 2;
 
+    let hasChild = false;
     for (const child of [childA, childB]) {
       if (!child) continue;
+      hasChild = true;
       const childMidY = child.y + MATCH_H / 2;
       const childRightX = child.x + MATCH_W;
-      lines.push({ x1: childRightX, y1: childMidY, x2: midX, y2: childMidY });
-      lines.push({ x1: midX, y1: childMidY, x2: midX, y2: parentMidY });
+      paths.push({
+        d: buildConnectorChildLeg(childRightX, childMidY, midX, parentMidY),
+      });
     }
-
-    lines.push({ x1: midX, y1: parentMidY, x2: parentLeftX, y2: parentMidY });
+    if (hasChild) {
+      paths.push({
+        d: buildConnectorTrunk(midX, parentMidY, parentLeftX),
+      });
+    }
   }
 
-  return lines;
+  return paths;
 }

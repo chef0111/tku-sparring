@@ -1,5 +1,9 @@
 import * as React from 'react';
-import { ArrowLeftRight, Crown, Minus, Plus } from 'lucide-react';
+import { ArrowLeftRight, Crown } from 'lucide-react';
+import { SlotLocks } from './slot-locks';
+import { MatchSheetStatus } from './match-sheet-status';
+import { ParticipantRow } from './participant-row';
+import { ScoreControl } from './score-control';
 import type {
   MatchData,
   TournamentAthleteData,
@@ -12,35 +16,28 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Spinner } from '@/components/ui/spinner';
 import {
+  useSetLock,
   useSetWinner,
   useSwapParticipants,
   useUpdateScore,
 } from '@/queries/matches';
-import { cn } from '@/lib/utils';
+import { getBracketRoundLabel } from '@/lib/tournament/bracket-round-label';
 
-interface MatchDetailPanelProps {
+export interface MatchDetailPanelProps {
   match: MatchData | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   athletes: Array<TournamentAthleteData>;
   readOnly: boolean;
   tournamentStatus: string;
+  maxBracketRound: number;
 }
-
-const statusConfig: Record<
-  string,
-  { label: string; variant: 'default' | 'secondary' | 'outline' }
-> = {
-  pending: { label: 'Pending', variant: 'secondary' },
-  active: { label: 'Active', variant: 'default' },
-  complete: { label: 'Complete', variant: 'outline' },
-};
 
 export function MatchDetailPanel({
   match,
@@ -49,6 +46,7 @@ export function MatchDetailPanel({
   athletes,
   readOnly,
   tournamentStatus,
+  maxBracketRound,
 }: MatchDetailPanelProps) {
   const [redWins, setRedWins] = React.useState(0);
   const [blueWins, setBlueWins] = React.useState(0);
@@ -58,6 +56,7 @@ export function MatchDetailPanel({
   const updateScore = useUpdateScore({ onSuccess: () => onOpenChange(false) });
   const setWinner = useSetWinner({ onSuccess: () => onOpenChange(false) });
   const swapParticipants = useSwapParticipants();
+  const setLock = useSetLock();
 
   React.useEffect(() => {
     if (match) {
@@ -78,13 +77,20 @@ export function MatchDetailPanel({
     ? athleteMap.get(match.blueTournamentAthleteId)
     : null;
 
-  const status = statusConfig[match.status] ?? statusConfig.pending;
   const canEdit = !readOnly && match.status !== 'complete';
   const canSwap =
     !readOnly &&
     (tournamentStatus === 'draft' || tournamentStatus === 'active');
+  const canToggleLocks =
+    !readOnly &&
+    (tournamentStatus === 'draft' || tournamentStatus === 'active');
   const hasScoreWinner = redWins >= 2 || blueWins >= 2;
   const scoreDirty = redWins !== match.redWins || blueWins !== match.blueWins;
+
+  const roundLabel = getBracketRoundLabel(
+    match.round,
+    Math.max(maxBracketRound, match.round)
+  );
 
   function handleSaveScore() {
     if (!match) return;
@@ -109,37 +115,53 @@ export function MatchDetailPanel({
     });
   }
 
+  function handleLockChange(side: 'red' | 'blue', locked: boolean) {
+    if (!match) return;
+    setLock.mutate({ matchId: match.id, side, locked });
+  }
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="sm:max-w-md">
-        <SheetHeader>
+      <SheetContent
+        side="right"
+        className="flex w-full flex-col gap-0 p-0 sm:max-w-md"
+      >
+        <SheetHeader className="gap-2 border-b px-6 pt-6 pb-4">
           <SheetTitle>
-            Round {match.round + 1} — Match {match.matchIndex + 1}
+            {roundLabel} — Match {match.matchIndex + 1}
           </SheetTitle>
-          <SheetDescription className="flex items-center gap-2">
-            <Badge variant={status!.variant}>{status!.label}</Badge>
+          <SheetDescription className="flex flex-wrap items-center gap-2">
+            <MatchSheetStatus status={match.status} />
             <span className="text-muted-foreground text-xs">
               Best of {match.bestOf}
             </span>
+            {match.redLocked || match.blueLocked ? (
+              <span className="text-muted-foreground text-xs">
+                {match.redLocked && match.blueLocked
+                  ? 'Both athletes locked'
+                  : match.redLocked
+                    ? 'Red locked'
+                    : 'Blue locked'}
+              </span>
+            ) : null}
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex flex-col gap-6 overflow-y-auto px-4 pb-2">
-          {/* Participants */}
-          <section className="space-y-3">
+        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-6 py-4">
+          <section className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium">Participants</h4>
-              {canSwap && (
+              {canSwap ? (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleSwap}
                   disabled={swapParticipants.isPending}
                 >
-                  <ArrowLeftRight className="mr-1 size-3.5" />
+                  <ArrowLeftRight data-icon="inline-start" />
                   Swap
                 </Button>
-              )}
+              ) : null}
             </div>
 
             <ParticipantRow
@@ -148,7 +170,7 @@ export function MatchDetailPanel({
               isWinner={
                 match.winnerId != null && match.winnerId === match.redAthleteId
               }
-              colorClass="bg-red-500"
+              dotClassName="bg-destructive"
             />
             <ParticipantRow
               label="Blue"
@@ -156,14 +178,23 @@ export function MatchDetailPanel({
               isWinner={
                 match.winnerId != null && match.winnerId === match.blueAthleteId
               }
-              colorClass="bg-blue-500"
+              dotClassName="bg-blue-500"
             />
           </section>
 
+          {canToggleLocks && (
+            <SlotLocks
+              matchId={match.id}
+              redLocked={match.redLocked}
+              blueLocked={match.blueLocked}
+              isPending={setLock.isPending}
+              onLockChange={handleLockChange}
+            />
+          )}
+
           <Separator />
 
-          {/* Score */}
-          <section className="space-y-3">
+          <section className="flex flex-col gap-3">
             <h4 className="text-sm font-medium">Score</h4>
             <div className="flex items-center justify-center gap-6">
               <ScoreControl
@@ -171,73 +202,76 @@ export function MatchDetailPanel({
                 value={redWins}
                 onChange={setRedWins}
                 disabled={!canEdit}
-                colorClass="text-red-500"
               />
-              <span className="text-muted-foreground text-2xl font-light">
-                —
-              </span>
+              <Separator
+                orientation="horizontal"
+                className="bg-muted-foreground mt-4 min-h-0.5 max-w-8"
+              />
               <ScoreControl
                 label="Blue"
                 value={blueWins}
                 onChange={setBlueWins}
                 disabled={!canEdit}
-                colorClass="text-blue-500"
               />
             </div>
 
-            {hasScoreWinner && (
-              <p className="text-center text-xs text-emerald-600">
+            {hasScoreWinner ? (
+              <p className="text-primary text-center text-xs font-medium">
                 Winner:{' '}
                 {redWins >= 2
                   ? (redAthlete?.name ?? 'Red')
                   : (blueAthlete?.name ?? 'Blue')}
               </p>
-            )}
+            ) : null}
           </section>
 
           <Separator />
 
-          {/* Manual Winner Override */}
-          {canEdit && !hasScoreWinner && (
-            <section className="space-y-3">
+          {canEdit && !hasScoreWinner ? (
+            <section className="flex flex-col gap-3">
               {!showManualWinner ? (
                 <Button
                   variant="outline"
-                  size="sm"
                   className="w-full"
                   onClick={() => setShowManualWinner(true)}
                 >
-                  <Crown className="mr-1 size-3.5" />
-                  Set Winner Manually
+                  <Crown data-icon="inline-start" />
+                  Set winner manually
                 </Button>
               ) : (
-                <div className="space-y-3">
-                  <h4 className="text-sm font-medium">Manual Winner</h4>
-                  <div className="space-y-2">
-                    <Label htmlFor="reason">Reason (optional)</Label>
-                    <Input
-                      id="reason"
-                      placeholder="e.g. Disqualification, injury..."
-                      value={manualReason}
-                      onChange={(e) => setManualReason(e.target.value)}
-                    />
-                  </div>
+                <div className="flex flex-col gap-3">
+                  <h4 className="text-sm font-medium">Manual winner</h4>
+                  <FieldGroup>
+                    <Field>
+                      <FieldLabel htmlFor="match-detail-reason">
+                        Reason (optional)
+                      </FieldLabel>
+                      <Input
+                        id="match-detail-reason"
+                        placeholder="e.g. Disqualification, injury…"
+                        value={manualReason}
+                        onChange={(e) => setManualReason(e.target.value)}
+                      />
+                    </Field>
+                  </FieldGroup>
                   <div className="flex gap-2">
                     <Button
                       size="sm"
-                      className="flex-1 bg-red-500 hover:bg-red-600"
+                      variant="destructive"
+                      className="flex-1"
                       onClick={() => handleSetWinner('red')}
                       disabled={!redAthlete || setWinner.isPending}
                     >
-                      Red Wins
+                      Red wins
                     </Button>
                     <Button
                       size="sm"
-                      className="flex-1 bg-blue-500 hover:bg-blue-600"
+                      variant="default"
+                      className="flex-1"
                       onClick={() => handleSetWinner('blue')}
                       disabled={!blueAthlete || setWinner.isPending}
                     >
-                      Blue Wins
+                      Blue wins
                     </Button>
                   </div>
                   <Button
@@ -251,98 +285,28 @@ export function MatchDetailPanel({
                 </div>
               )}
             </section>
-          )}
+          ) : null}
         </div>
 
-        <SheetFooter>
-          {canEdit && (
+        <SheetFooter className="mt-auto border-t px-6 py-4">
+          {canEdit ? (
             <Button
               className="w-full"
               onClick={handleSaveScore}
               disabled={!scoreDirty || updateScore.isPending}
             >
-              {updateScore.isPending ? 'Saving…' : 'Save Score'}
+              {updateScore.isPending ? (
+                <>
+                  <Spinner data-icon="inline-start" />
+                  Saving…
+                </>
+              ) : (
+                'Save score'
+              )}
             </Button>
-          )}
+          ) : null}
         </SheetFooter>
       </SheetContent>
     </Sheet>
-  );
-}
-
-function ParticipantRow({
-  label: _label,
-  athlete,
-  isWinner,
-  colorClass,
-}: {
-  label: string;
-  athlete: TournamentAthleteData | undefined | null;
-  isWinner: boolean;
-  colorClass: string;
-}) {
-  return (
-    <div
-      className={cn(
-        'flex items-center gap-3 rounded-md border p-2.5',
-        isWinner && 'border-emerald-500/40 bg-emerald-500/5'
-      )}
-    >
-      <div className={cn('size-2.5 rounded-full', colorClass)} />
-      <div className="min-w-0 flex-1">
-        {athlete ? (
-          <>
-            <p className="truncate text-sm font-medium">{athlete.name}</p>
-            <p className="text-muted-foreground text-xs">
-              {athlete.affiliation}
-            </p>
-          </>
-        ) : (
-          <p className="text-muted-foreground text-sm italic">EMPTY</p>
-        )}
-      </div>
-      {isWinner && <Crown className="size-4 text-emerald-500" />}
-    </div>
-  );
-}
-
-function ScoreControl({
-  label,
-  value,
-  onChange,
-  disabled,
-  colorClass,
-}: {
-  label: string;
-  value: number;
-  onChange: (v: number) => void;
-  disabled: boolean;
-  colorClass: string;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-1">
-      <span className={cn('text-xs font-medium', colorClass)}>{label}</span>
-      <div className="flex items-center gap-1">
-        <Button
-          variant="outline"
-          size="icon-sm"
-          onClick={() => onChange(Math.max(0, value - 1))}
-          disabled={disabled || value <= 0}
-        >
-          <Minus className="size-3" />
-        </Button>
-        <span className="w-8 text-center text-xl font-semibold tabular-nums">
-          {value}
-        </span>
-        <Button
-          variant="outline"
-          size="icon-sm"
-          onClick={() => onChange(Math.min(2, value + 1))}
-          disabled={disabled || value >= 2}
-        >
-          <Plus className="size-3" />
-        </Button>
-      </div>
-    </div>
   );
 }

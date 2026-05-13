@@ -10,9 +10,10 @@ import { toast } from 'sonner';
 import { Trophy } from 'lucide-react';
 import { BracketCanvas } from './bracket-canvas';
 import { BracketToolbar } from './bracket-toolbar';
-import { EmptyBracketState, LoadingBracketState } from './empty-bracket-state';
+import { EmptyBracketState } from './empty-bracket-state';
 import { GroupsPanel } from './groups-panel';
 import { MatchDetailPanel } from './match-detail-panel';
+import { LoadingBracketState } from './skeletons';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type { GroupData, MatchData } from '@/features/dashboard/types';
 import { useAssignSlot, useMatches, useSwapSlots } from '@/queries/matches';
@@ -71,6 +72,14 @@ export function BracketsTab({
   const matches = matchesQuery.data ?? [];
   const athletes = athletesQuery.data?.items ?? [];
   const selectedGroup = groups.find((g) => g.id === selectedGroupId);
+
+  const matchForDetailPanel = React.useMemo(() => {
+    if (!selectedMatch) return null;
+    return (
+      (matches as Array<MatchData>).find((m) => m.id === selectedMatch.id) ??
+      selectedMatch
+    );
+  }, [matches, selectedMatch]);
 
   const assignedRound0TaIds = React.useMemo(() => {
     const s = new Set<string>();
@@ -232,6 +241,9 @@ export function BracketsTab({
 
   const toolbarDisabled = matches.length === 0;
   const athleteCount = selectedGroup?._count.tournamentAthletes ?? 0;
+  const isPoolLoading = matchesQuery.isPending || athletesQuery.isPending;
+  const maxBracketRound =
+    matches.length > 0 ? Math.max(...matches.map((m) => m.round)) : 0;
 
   return (
     <DndContext
@@ -272,9 +284,12 @@ export function BracketsTab({
           selectedGroupId={selectedGroupId}
           onSelect={setSelectedGroupId}
           athletes={panelPoolAthletes}
+          matches={matches as Array<MatchData>}
+          onOpenMatch={handleSlotClick}
           readOnly={readOnly}
           slotReturnEnabled={matches.length > 0}
           groupAthleteCount={athleteCount}
+          isPoolLoading={isPoolLoading}
         />
       </div>
 
@@ -287,12 +302,13 @@ export function BracketsTab({
       </DragOverlay>
 
       <MatchDetailPanel
-        match={selectedMatch}
+        match={matchForDetailPanel}
         open={panelOpen}
         onOpenChange={setPanelOpen}
         athletes={athletes}
         readOnly={readOnly}
         tournamentStatus={tournamentStatus}
+        maxBracketRound={maxBracketRound}
       />
     </DndContext>
   );

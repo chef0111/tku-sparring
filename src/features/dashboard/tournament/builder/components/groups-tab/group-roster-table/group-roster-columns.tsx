@@ -77,8 +77,12 @@ export function getGroupRosterColumns({
     {
       id: 'name',
       accessorKey: 'name',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Name" />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader
+          column={column}
+          state={table.getState()}
+          label="Name"
+        />
       ),
       cell: ({ row }) => (
         <NameCell
@@ -88,25 +92,45 @@ export function getGroupRosterColumns({
         />
       ),
       enableSorting: true,
+      enableHiding: false,
     },
     {
       id: 'gender',
       accessorKey: 'gender',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Gender" />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader
+          column={column}
+          state={table.getState()}
+          label="Gender"
+        />
       ),
-      cell: ({ row }) => (
-        <Badge variant="outline" className="text-xs">
-          {getGenderLabel(row.original.gender)}
-        </Badge>
-      ),
-      enableSorting: true,
+      cell: ({ row }) => {
+        const gender = getGenderLabel(row.original.gender);
+        const className =
+          gender === 'Male'
+            ? 'bg-blue-500/10 border-blue-500/20 text-blue-500'
+            : 'bg-amber-500/10 border-amber-500/20 text-amber-500';
+        return (
+          <Badge
+            variant="outline"
+            className={cn('scale-110 font-medium', className)}
+          >
+            {gender}
+          </Badge>
+        );
+      },
+      enableSorting: false,
+      enableHiding: false,
     },
     {
       id: 'beltLevel',
       accessorKey: 'beltLevel',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Belt" />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader
+          column={column}
+          state={table.getState()}
+          label="Belt"
+        />
       ),
       cell: ({ row }) => (
         <span className="text-sm tabular-nums">
@@ -114,17 +138,23 @@ export function getGroupRosterColumns({
         </span>
       ),
       enableSorting: true,
+      enableHiding: false,
     },
     {
       id: 'weight',
       accessorKey: 'weight',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} label="Weight" />
+      header: ({ column, table }) => (
+        <DataTableColumnHeader
+          column={column}
+          state={table.getState()}
+          label="Weight"
+        />
       ),
       cell: ({ row }) => (
         <span className="text-sm tabular-nums">{row.original.weight}kg</span>
       ),
       enableSorting: true,
+      enableHiding: false,
     },
     // {
     //   id: 'violations',

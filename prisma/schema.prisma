@@ -74,9 +74,10 @@ model Verification {
 }
 
 model Tournament {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  status    String   @default("draft")
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  nameSortKey  String   @default("")
+  status       String   @default("draft")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -145,6 +146,7 @@ model AthleteProfile {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   athleteCode String?
   name        String
+  nameSortKey String   @default("")
   gender      String
   beltLevel   Int
   weight      Float
@@ -169,8 +171,9 @@ model TournamentAthlete {
   status           String  @default("selected")
   notes            String?
 
-  name        String
-  gender      String
+  name         String
+  nameSortKey  String   @default("")
+  gender       String
   beltLevel   Int
   weight      Float
   affiliation String
