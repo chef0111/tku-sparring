@@ -13,6 +13,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 interface GroupsPanelProps {
@@ -23,6 +24,7 @@ interface GroupsPanelProps {
   readOnly: boolean;
   slotReturnEnabled: boolean;
   groupAthleteCount: number;
+  isPoolLoading?: boolean;
 }
 
 export function GroupsPanel({
@@ -33,6 +35,7 @@ export function GroupsPanel({
   readOnly,
   slotReturnEnabled,
   groupAthleteCount,
+  isPoolLoading = false,
 }: GroupsPanelProps) {
   const poolDrop = useDroppable({
     id: `bracket-panel-pool-${selectedGroupId ?? 'none'}`,
@@ -52,10 +55,28 @@ export function GroupsPanel({
       />
       <div
         ref={poolDrop.setNodeRef}
-        className={cn('min-h-0 flex-1 overflow-y-auto transition-colors')}
+        className={cn(
+          'min-h-0 flex-1 overflow-y-auto transition-colors',
+          poolDrop.isOver && slotReturnEnabled && !readOnly && 'bg-primary/5'
+        )}
       >
         <div className="flex flex-col gap-1.5 p-2">
-          {athletes.length === 0 ? (
+          {isPoolLoading ? (
+            <div className="flex flex-col gap-1.5">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-card flex items-center gap-2 rounded-md border px-2 py-2"
+                >
+                  <Skeleton className="size-6 shrink-0 rounded-sm" />
+                  <div className="min-w-0 flex-1 space-y-1.5">
+                    <Skeleton className="h-4 w-full max-w-44" />
+                    <Skeleton className="h-3 w-full max-w-28" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : athletes.length === 0 ? (
             <Empty className="border-none px-2 py-8">
               {groupAthleteCount === 0 ? (
                 <EmptyHeader>

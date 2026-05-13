@@ -12,12 +12,21 @@ import type {
   UpdateTournamentAthleteDTO,
 } from '@/orpc/tournament-athletes/tournament-athletes.dto';
 import { client } from '@/orpc/client';
+import { listAthletePlaceholderKey } from '@/lib/queries/tournament-athletes';
 
 export function useTournamentAthletes(input: ListTournamentAthletesDTO) {
+  const placeholderKey = listAthletePlaceholderKey(input);
   return useQuery({
     queryKey: ['tournamentAthlete', 'list', input] as const,
     queryFn: () => client.tournamentAthlete.list(input),
-    placeholderData: keepPreviousData,
+    placeholderData: (previousData, previousQuery) => {
+      if (!previousData || !previousQuery) return undefined;
+      const prevInput = previousQuery.queryKey[2] as ListTournamentAthletesDTO;
+      if (listAthletePlaceholderKey(prevInput) !== placeholderKey) {
+        return undefined;
+      }
+      return previousData;
+    },
   });
 }
 

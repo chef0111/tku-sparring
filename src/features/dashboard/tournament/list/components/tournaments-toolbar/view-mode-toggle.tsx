@@ -1,68 +1,51 @@
 import * as React from 'react';
 import { LayoutGrid, List } from 'lucide-react';
+import { parseAsStringEnum, useQueryState } from 'nuqs';
 
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 export type TournamentsViewMode = 'grid' | 'list';
 
 const STORAGE_KEY = 'tku-tournaments-view';
-const DEFAULT_MODE: TournamentsViewMode = 'grid';
 
-const listeners = new Set<() => void>();
-let currentMode: TournamentsViewMode = DEFAULT_MODE;
-let hasHydrated = false;
-
-function readFromStorage(): TournamentsViewMode {
-  if (typeof window === 'undefined') return DEFAULT_MODE;
-  try {
-    const value = window.localStorage.getItem(STORAGE_KEY);
-    return value === 'list' || value === 'grid' ? value : DEFAULT_MODE;
-  } catch {
-    return DEFAULT_MODE;
-  }
-}
-
-function hydrateOnce() {
-  if (hasHydrated || typeof window === 'undefined') return;
-  hasHydrated = true;
-  currentMode = readFromStorage();
-}
-
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
-
-function getSnapshot(): TournamentsViewMode {
-  hydrateOnce();
-  return currentMode;
-}
-
-function getServerSnapshot(): TournamentsViewMode {
-  return DEFAULT_MODE;
-}
-
-function setViewMode(next: TournamentsViewMode) {
-  if (next === currentMode) return;
-  currentMode = next;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, next);
-  } catch {
-    // localStorage may be unavailable (private mode); ignore.
-  }
-  for (const listener of listeners) listener();
-}
+const VIEW_PARSER = parseAsStringEnum(['grid', 'list']).withDefault('grid');
 
 export function useTournamentsViewMode(): [
   TournamentsViewMode,
   (next: TournamentsViewMode) => void,
 ] {
-  const mode = React.useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    getServerSnapshot
+  const [view, setView] = useQueryState('view', VIEW_PARSER);
+  const migrated = React.useRef(false);
+
+  React.useLayoutEffect(() => {
+    if (migrated.current) return;
+    migrated.current = true;
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('view')) return;
+    try {
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      if (stored === 'list' || stored === 'grid') {
+        void setView(stored);
+      }
+    } catch {
+      // localStorage may be unavailable
+    }
+  }, [setView]);
+
+  const setViewPersist = React.useCallback(
+    (next: TournamentsViewMode) => {
+      void setView(next);
+      try {
+        window.localStorage.setItem(STORAGE_KEY, next);
+      } catch {
+        // ignore
+      }
+    },
+    [setView]
   );
-  return [mode, setViewMode];
+
+  return [view, setViewPersist];
 }
 
 interface ViewModeToggleProps {

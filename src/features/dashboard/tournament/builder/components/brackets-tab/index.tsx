@@ -232,6 +232,7 @@ export function BracketsTab({
 
   const toolbarDisabled = matches.length === 0;
   const athleteCount = selectedGroup?._count.tournamentAthletes ?? 0;
+  const isPoolLoading = matchesQuery.isPending || athletesQuery.isPending;
 
   return (
     <DndContext
@@ -275,6 +276,7 @@ export function BracketsTab({
           readOnly={readOnly}
           slotReturnEnabled={matches.length > 0}
           groupAthleteCount={athleteCount}
+          isPoolLoading={isPoolLoading}
         />
       </div>
 
