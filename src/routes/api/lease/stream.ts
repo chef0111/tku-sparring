@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { auth } from '@/lib/auth';
-import { listForTournament } from '@/orpc/lease/lease.dal';
-import { ListLeasesForTournamentSchema } from '@/orpc/lease/lease.dto';
+import { LeaseDAL } from '@/orpc/lease/dal';
+import { ListLeasesForTournamentSchema } from '@/orpc/lease/dto';
 import { subscribeToLeaseEvents } from '@/orpc/lease/lease-stream';
 
 const encoder = new TextEncoder();
@@ -79,7 +79,7 @@ export const Route = createFileRoute('/api/lease/stream')({
             request.signal.addEventListener('abort', onAbort, { once: true });
 
             try {
-              const snapshot = await listForTournament({
+              const snapshot = await LeaseDAL.listForTournament({
                 tournamentId: result.data.tournamentId,
               });
 

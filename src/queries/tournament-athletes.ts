@@ -10,7 +10,7 @@ import type {
   BulkAddAthletesDTO,
   ListTournamentAthletesDTO,
   UpdateTournamentAthleteDTO,
-} from '@/orpc/tournament-athletes/tournament-athletes.dto';
+} from '@/orpc/tournament-athletes/dto';
 import { client } from '@/orpc/client';
 import { listAthletePlaceholderKey } from '@/lib/queries/tournament-athletes';
 

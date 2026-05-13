@@ -6,7 +6,7 @@ import type {
   AutoAssignDTO,
   UnassignAthleteDTO,
   UpdateGroupDTO,
-} from '@/orpc/groups/groups.dto';
+} from '@/orpc/groups/dto';
 import { client, orpc } from '@/orpc/client';
 
 export function useGroups(tournamentId: string) {

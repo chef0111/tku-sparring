@@ -5,29 +5,25 @@ import {
   CheckDuplicateSchema,
   CreateAthleteProfileSchema,
   UpdateAthleteProfileSchema,
-} from './athlete-profiles.dto';
-import {
-  create,
-  deleteProfile,
-  deleteProfiles,
-  findById,
-  findMany,
-  update,
-} from './athlete-profiles.dal';
-import { runDedupCheck } from './athlete-profiles.dedup';
+} from './dto';
+import { AthleteProfileDAL } from './dal';
+import { runDedupCheck } from './dedup';
 import { authedProcedure } from '@/orpc/middleware';
 
 export const listAthleteProfiles = authedProcedure
   .input(AthleteProfilesSchema)
   .handler(async ({ input }) => {
-    return findMany(input);
+    const profiles = await AthleteProfileDAL.findMany(input);
+    return profiles;
   });
 
 export const getAthleteProfile = authedProcedure
   .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {
-    const profile = await findById(input.id);
-    if (!profile) throw new Error('Athlete profile not found');
+    const profile = await AthleteProfileDAL.findById(input.id);
+    if (!profile) {
+      throw new Error('Athlete profile not found');
+    }
     return profile;
   });
 
@@ -58,7 +54,8 @@ export const createAthleteProfile = authedProcedure
       }
     }
 
-    return create(data);
+    const profile = await AthleteProfileDAL.create(data);
+    return profile;
   });
 
 export const checkDuplicate = authedProcedure
@@ -78,17 +75,20 @@ export const updateAthleteProfile = authedProcedure
   .input(UpdateAthleteProfileSchema)
   .handler(async ({ input }) => {
     const { id, ...data } = input;
-    return update(id, data);
+    const profile = await AthleteProfileDAL.update(id, data);
+    return profile;
   });
 
 export const removeAthleteProfile = authedProcedure
   .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {
-    return deleteProfile(input.id);
+    const profile = await AthleteProfileDAL.deleteProfile(input.id);
+    return profile;
   });
 
 export const bulkDeleteAthleteProfiles = authedProcedure
   .input(BulkDeleteAthleteProfilesSchema)
   .handler(async ({ input }) => {
-    return deleteProfiles(input.ids);
+    const count = await AthleteProfileDAL.deleteProfiles(input.ids);
+    return count;
   });

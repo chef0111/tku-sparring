@@ -1,16 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import * as dal from '../athlete-profiles.dal';
-import { runDedupCheck } from '../athlete-profiles.dedup';
+import { AthleteProfileDAL } from '../dal';
+import { runDedupCheck } from '../dedup';
 
-vi.mock('../athlete-profiles.dal', () => ({
-  findByAthleteCodeAndName: vi.fn(),
-  findPossibleDuplicates: vi.fn(),
-  create: vi.fn(),
-  findMany: vi.fn(),
-  findById: vi.fn(),
-  update: vi.fn(),
-  deleteProfile: vi.fn(),
+vi.mock('../dal', () => ({
+  AthleteProfileDAL: {
+    findByAthleteCodeAndName: vi.fn(),
+    findPossibleDuplicates: vi.fn(),
+    findMany: vi.fn(),
+    findById: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    deleteProfile: vi.fn(),
+    deleteProfiles: vi.fn(),
+  },
 }));
 
 const existingProfile = {
@@ -40,18 +43,20 @@ describe('runDedupCheck', () => {
   });
 
   it('returns no duplicate when no matches exist (no athleteCode)', async () => {
-    vi.mocked(dal.findPossibleDuplicates).mockResolvedValue([]);
+    vi.mocked(AthleteProfileDAL.findPossibleDuplicates).mockResolvedValue([]);
 
     const result = await runDedupCheck(baseInput);
 
     expect(result.isDuplicate).toBe(false);
     expect(result.isHardBlock).toBe(false);
     expect(result.matches).toHaveLength(0);
-    expect(dal.findByAthleteCodeAndName).not.toHaveBeenCalled();
+    expect(AthleteProfileDAL.findByAthleteCodeAndName).not.toHaveBeenCalled();
   });
 
   it('returns hard block when athleteCode + name already exist', async () => {
-    vi.mocked(dal.findByAthleteCodeAndName).mockResolvedValue(existingProfile);
+    vi.mocked(AthleteProfileDAL.findByAthleteCodeAndName).mockResolvedValue(
+      existingProfile
+    );
 
     const result = await runDedupCheck({
       ...baseInput,
@@ -62,11 +67,13 @@ describe('runDedupCheck', () => {
     expect(result.isHardBlock).toBe(true);
     expect(result.matches).toHaveLength(1);
     expect(result.matches[0].id).toBe('existing-id');
-    expect(dal.findPossibleDuplicates).not.toHaveBeenCalled();
+    expect(AthleteProfileDAL.findPossibleDuplicates).not.toHaveBeenCalled();
   });
 
   it('returns no duplicate when athleteCode provided but no collision found', async () => {
-    vi.mocked(dal.findByAthleteCodeAndName).mockResolvedValue(null);
+    vi.mocked(AthleteProfileDAL.findByAthleteCodeAndName).mockResolvedValue(
+      null
+    );
 
     const result = await runDedupCheck({
       ...baseInput,
@@ -76,32 +83,36 @@ describe('runDedupCheck', () => {
     expect(result.isDuplicate).toBe(false);
     expect(result.isHardBlock).toBe(false);
     // Soft check skipped when athleteCode is provided
-    expect(dal.findPossibleDuplicates).not.toHaveBeenCalled();
+    expect(AthleteProfileDAL.findPossibleDuplicates).not.toHaveBeenCalled();
   });
 
   it('returns soft warning when name+affiliation+belt+weight all match (no athleteCode)', async () => {
-    vi.mocked(dal.findPossibleDuplicates).mockResolvedValue([existingProfile]);
+    vi.mocked(AthleteProfileDAL.findPossibleDuplicates).mockResolvedValue([
+      existingProfile,
+    ]);
 
     const result = await runDedupCheck(baseInput);
 
     expect(result.isDuplicate).toBe(true);
     expect(result.isHardBlock).toBe(false);
     expect(result.matches).toHaveLength(1);
-    expect(dal.findByAthleteCodeAndName).not.toHaveBeenCalled();
+    expect(AthleteProfileDAL.findByAthleteCodeAndName).not.toHaveBeenCalled();
   });
 
   it('passes excludeId to DAL functions for edit flows', async () => {
-    vi.mocked(dal.findPossibleDuplicates).mockResolvedValue([]);
+    vi.mocked(AthleteProfileDAL.findPossibleDuplicates).mockResolvedValue([]);
 
     await runDedupCheck({ ...baseInput, excludeId: 'self-id' });
 
-    expect(dal.findPossibleDuplicates).toHaveBeenCalledWith(
+    expect(AthleteProfileDAL.findPossibleDuplicates).toHaveBeenCalledWith(
       expect.objectContaining({ excludeId: 'self-id' })
     );
   });
 
   it('passes excludeId to hard-block check when athleteCode provided', async () => {
-    vi.mocked(dal.findByAthleteCodeAndName).mockResolvedValue(null);
+    vi.mocked(AthleteProfileDAL.findByAthleteCodeAndName).mockResolvedValue(
+      null
+    );
 
     await runDedupCheck({
       ...baseInput,
@@ -109,7 +120,7 @@ describe('runDedupCheck', () => {
       excludeId: 'self-id',
     });
 
-    expect(dal.findByAthleteCodeAndName).toHaveBeenCalledWith(
+    expect(AthleteProfileDAL.findByAthleteCodeAndName).toHaveBeenCalledWith(
       'TKD-001',
       baseInput.name,
       'self-id'

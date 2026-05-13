@@ -1,4 +1,4 @@
-import type { ListTournamentAthletesDTO } from '@/orpc/tournament-athletes/tournament-athletes.dto';
+import type { ListTournamentAthletesDTO } from '@/orpc/tournament-athletes/dto';
 
 export function listAthletePlaceholderKey(
   input: ListTournamentAthletesDTO

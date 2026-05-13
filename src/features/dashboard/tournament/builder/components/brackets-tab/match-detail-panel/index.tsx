@@ -257,8 +257,8 @@ export function MatchDetailPanel({
                   <div className="flex gap-2">
                     <Button
                       size="sm"
-                      variant="destructive"
-                      className="flex-1"
+                      variant="outline"
+                      className="text-destructive! flex-1"
                       onClick={() => handleSetWinner('red')}
                       disabled={!redAthlete || setWinner.isPending}
                     >
@@ -266,8 +266,8 @@ export function MatchDetailPanel({
                     </Button>
                     <Button
                       size="sm"
-                      variant="default"
-                      className="flex-1"
+                      variant="outline"
+                      className="flex-1 text-blue-500!"
                       onClick={() => handleSetWinner('blue')}
                       disabled={!blueAthlete || setWinner.isPending}
                     >

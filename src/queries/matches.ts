@@ -8,7 +8,7 @@ import type {
   SwapParticipantsDTO,
   SwapSlotsDTO,
   UpdateScoreDTO,
-} from '@/orpc/matches/matches.dto';
+} from '@/orpc/matches/dto';
 import type { MatchData } from '@/features/dashboard/types';
 import type { BracketDnDMutationContext } from '@/lib/queries/matches';
 import { client } from '@/orpc/client';

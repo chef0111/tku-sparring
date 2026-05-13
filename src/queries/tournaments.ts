@@ -7,7 +7,7 @@ import {
 } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import type { ListTournamentsDTO } from '@/orpc/tournaments/tournaments.dto';
+import type { ListTournamentsDTO } from '@/orpc/tournaments/dto';
 import { client } from '@/orpc/client';
 
 const ALL_TOURNAMENTS_PER_PAGE = 1000;

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { findById, setStatus } from '../tournaments.dal';
+import { TournamentDAL } from '../dal';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
@@ -90,7 +90,7 @@ describe('tournaments DAL', () => {
     );
     vi.mocked(prisma.match.count).mockResolvedValue(3);
 
-    const result = await findById('tournament-1');
+    const result = await TournamentDAL.findById('tournament-1');
 
     expect(result).toMatchObject({
       id: 'tournament-1',
@@ -130,7 +130,7 @@ describe('tournaments DAL', () => {
       }) as never
     );
 
-    const result = await findById('tournament-1');
+    const result = await TournamentDAL.findById('tournament-1');
 
     expect(result).toMatchObject({
       lifecycle: {
@@ -149,7 +149,7 @@ describe('tournaments DAL', () => {
       status: 'active',
     } as never);
 
-    const result = await setStatus({
+    const result = await TournamentDAL.setStatus({
       id: 'tournament-1',
       status: 'active',
       adminId: 'admin-1',
@@ -190,7 +190,7 @@ describe('tournaments DAL', () => {
       status: 'completed',
     } as never);
 
-    const result = await setStatus({
+    const result = await TournamentDAL.setStatus({
       id: 'tournament-1',
       status: 'completed',
       adminId: 'admin-1',
@@ -229,7 +229,7 @@ describe('tournaments DAL', () => {
     );
 
     await expect(
-      setStatus({
+      TournamentDAL.setStatus({
         id: 'tournament-1',
         status: 'completed',
         adminId: 'admin-1',
@@ -261,7 +261,7 @@ describe('tournaments DAL', () => {
     vi.mocked(prisma.match.count).mockResolvedValue(0);
 
     await expect(
-      setStatus({
+      TournamentDAL.setStatus({
         id: 'tournament-1',
         status: 'completed',
         adminId: 'admin-1',

@@ -11,7 +11,7 @@ import type {
   ReleaseLeaseDTO,
   RequestTakeoverDTO,
   RespondTakeoverDTO,
-} from '@/orpc/lease/lease.dto';
+} from '@/orpc/lease/dto';
 import { client } from '@/orpc/client';
 
 export type LeaseSnapshot = Awaited<

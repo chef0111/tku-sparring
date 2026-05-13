@@ -4,7 +4,7 @@ import type {
   SetLockDTO,
   SwapParticipantsDTO,
   SwapSlotsDTO,
-} from '@/orpc/matches/matches.dto';
+} from '@/orpc/matches/dto';
 import type { MatchData } from '@/features/dashboard/types';
 
 export type MatchListQueryKey = readonly ['match', 'list', string];
