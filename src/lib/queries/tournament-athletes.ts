@@ -1,14 +1,16 @@
 import type { ListTournamentAthletesDTO } from '@/orpc/tournament-athletes/dto';
 
-export function listAthletePlaceholderKey(
+/**
+ * Stable identity for `placeholderData`: same filters / scope, excluding
+ * page, perPage, and sorting so paginating or re-sorting keeps prior rows visible.
+ */
+export function listAthleteListIdentityKey(
   input: ListTournamentAthletesDTO
 ): string {
   return JSON.stringify({
     tournamentId: input.tournamentId,
     groupId: input.groupId ?? null,
     unassignedOnly: input.unassignedOnly ?? false,
-    page: input.page ?? 1,
-    perPage: input.perPage ?? 30,
     query: input.query ?? '',
     gender: input.gender ?? null,
     beltLevels: input.beltLevels ?? null,

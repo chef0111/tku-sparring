@@ -93,6 +93,7 @@ export function getGroupRosterColumns({
       ),
       enableSorting: true,
       enableHiding: false,
+      enableColumnFilter: false,
     },
     {
       id: 'gender',
@@ -121,6 +122,7 @@ export function getGroupRosterColumns({
       },
       enableSorting: false,
       enableHiding: false,
+      enableColumnFilter: false,
     },
     {
       id: 'beltLevel',
@@ -139,6 +141,7 @@ export function getGroupRosterColumns({
       ),
       enableSorting: true,
       enableHiding: false,
+      enableColumnFilter: false,
     },
     {
       id: 'weight',
@@ -155,6 +158,7 @@ export function getGroupRosterColumns({
       ),
       enableSorting: true,
       enableHiding: false,
+      enableColumnFilter: false,
     },
     // {
     //   id: 'violations',

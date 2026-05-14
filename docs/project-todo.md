@@ -4,7 +4,6 @@ This document tracks feature status across the TKU Sparring System.
 
 ## Pending
 
-- Advance Settings: selection view endpoint + device restore
 - Arena Client: match selection via Advance Settings
 - Arena Client: round-end auto-submit + match-end finish flow
 - Arena Client: offline-tolerant scoring + sync on reconnect
@@ -12,6 +11,7 @@ This document tracks feature status across the TKU Sparring System.
 ## Active
 
 - Admin CRM: Audit log (critical actions)
+- Advance Settings: selection view endpoint + device restore
 
 ## Finished
 
