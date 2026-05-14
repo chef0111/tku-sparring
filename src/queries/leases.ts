@@ -43,9 +43,22 @@ export function invalidateLeaseQueries(
   queryClient: QueryClient,
   tournamentId: string
 ) {
-  return queryClient.invalidateQueries({
-    queryKey: ['lease', 'list', tournamentId],
-  });
+  return Promise.all([
+    queryClient.invalidateQueries({
+      queryKey: ['lease', 'list', tournamentId],
+    }),
+    queryClient.invalidateQueries({
+      predicate: (q) => {
+        const k = q.queryKey;
+        return (
+          Array.isArray(k) &&
+          k[0] === 'advanceSettings' &&
+          k[1] === 'selectionCatalog' &&
+          k[3] === tournamentId
+        );
+      },
+    }),
+  ]);
 }
 
 function useInvalidateLeases(tournamentId: string) {

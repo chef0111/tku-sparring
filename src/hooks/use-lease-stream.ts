@@ -35,12 +35,21 @@ export function useLeaseStream(tournamentId: string) {
       void invalidateLeaseQueries(queryClient, tournamentId);
     };
 
+    const handleMatchInvalidate = () => {
+      void queryClient.invalidateQueries({ queryKey: ['match'] });
+    };
+
     eventSource.addEventListener('snapshot', handleSnapshot);
     eventSource.addEventListener('invalidate', handleInvalidate);
+    eventSource.addEventListener('match.invalidate', handleMatchInvalidate);
 
     return () => {
       eventSource.removeEventListener('snapshot', handleSnapshot);
       eventSource.removeEventListener('invalidate', handleInvalidate);
+      eventSource.removeEventListener(
+        'match.invalidate',
+        handleMatchInvalidate
+      );
       eventSource.close();
     };
   }, [queryClient, tournamentId]);

@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { DndContext } from '@dnd-kit/core';
-import { useQueryState } from 'nuqs';
 import { toast } from 'sonner';
 import { useBuilderManagerQuery } from '../../hooks/use-builder-manager-query';
 import { AddGroupDialog } from '../dialogs/add-group-dialog';
@@ -21,8 +20,7 @@ interface GroupsTabProps {
 }
 
 export function GroupsTab({ tournamentId, groups, readOnly }: GroupsTabProps) {
-  const { selectedGroupId } = useBuilderManagerQuery();
-  const [, setSelectedGroup] = useQueryState('group');
+  const { selectedGroupId, setSelectedGroup } = useBuilderManagerQuery();
 
   const deviceId = useDeviceId();
   const { data: leases } = useLeases(tournamentId, deviceId);

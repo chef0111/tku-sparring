@@ -61,6 +61,7 @@ export const advancePlayerGroup = [
 type ComboboxOption = {
   value: string;
   label: string;
+  disabled?: boolean;
 };
 
 export const getTournamentFields = (

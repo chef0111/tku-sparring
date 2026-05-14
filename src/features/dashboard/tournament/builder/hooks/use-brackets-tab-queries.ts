@@ -134,3 +134,7 @@ export function useBracketsTabQueries({
     arenaOrderDisabledTooltip,
   };
 }
+
+export type BracketsTabQueriesSnapshot = ReturnType<
+  typeof useBracketsTabQueries
+>;

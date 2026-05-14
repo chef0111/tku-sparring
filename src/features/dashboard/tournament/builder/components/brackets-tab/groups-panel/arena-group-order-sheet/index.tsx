@@ -31,7 +31,7 @@ export function ArenaGroupOrderSheet({
         showCloseButton
       >
         <SheetHeader className="border-border shrink-0 border-b">
-          <SheetTitle>Arena match order</SheetTitle>
+          <SheetTitle className="text-lg">Arena match order</SheetTitle>
           <SheetDescription>
             Drag groups to set run order on each shared arena. This order is
             used for match numbering across groups.

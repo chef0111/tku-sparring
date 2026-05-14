@@ -1,5 +1,6 @@
 import { Eraser, RefreshCw, Shuffle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTournamentBracket } from '../../context/tournament-bracket/use-tournament-bracket';
 import {
   useRegenerateBracket,
   useResetBracket,
@@ -13,19 +14,13 @@ import {
 } from '@/components/ui/tooltip';
 import { Card } from '@/components/ui/card';
 
-interface BracketToolbarProps {
-  groupId: string | null;
-  disabled: boolean;
-  readOnly: boolean;
-  tournamentStatus: string;
-}
-
-export function BracketToolbar({
-  groupId,
-  disabled,
-  readOnly,
-  tournamentStatus,
-}: BracketToolbarProps) {
+export function BracketToolbar() {
+  const {
+    selectedGroupId: groupId,
+    toolbarDisabled: disabled,
+    readOnly,
+    tournamentStatus,
+  } = useTournamentBracket();
   const shuffle = useShuffleBracket();
   const regenerate = useRegenerateBracket();
   const reset = useResetBracket();

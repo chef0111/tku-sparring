@@ -1,7 +1,11 @@
 import { AdvanceSettingsDAL } from './dal';
-import { SelectionViewSchema } from './dto';
+import { SelectionCatalogSchema, SelectionMatchesSchema } from './dto';
 import { authedProcedure } from '@/orpc/middleware';
 
-export const selectionView = authedProcedure
-  .input(SelectionViewSchema)
-  .handler(async ({ input }) => AdvanceSettingsDAL.selectionView(input));
+export const selectionCatalog = authedProcedure
+  .input(SelectionCatalogSchema)
+  .handler(async ({ input }) => AdvanceSettingsDAL.selectionCatalog(input));
+
+export const selectionMatches = authedProcedure
+  .input(SelectionMatchesSchema)
+  .handler(async ({ input }) => AdvanceSettingsDAL.selectionMatches(input));

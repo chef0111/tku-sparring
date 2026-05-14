@@ -6,6 +6,7 @@ import type {
   MatchData,
   TournamentAthleteData,
 } from '@/features/dashboard/types';
+import { useTournamentBracket } from '@/features/dashboard/tournament/builder/context/tournament-bracket/use-tournament-bracket';
 import {
   MATCH_W,
   PADDING,
@@ -22,19 +23,6 @@ const statusColor: Record<string, string> = {
   active: 'stroke-blue-500',
   complete: 'stroke-emerald-500',
 };
-
-interface BracketCanvasProps {
-  matches: Array<MatchData>;
-  athletes: Array<TournamentAthleteData>;
-  thirdPlaceMatch: boolean;
-  matchLabel: Map<string, number>;
-  onSlotClick: (match: MatchData) => void;
-  readOnly: boolean;
-  showArenaOrderButton?: boolean;
-  arenaOrderDisabled?: boolean;
-  arenaOrderDisabledTooltip?: string;
-  onOpenArenaOrder?: () => void;
-}
 
 function ThirdPlaceLabel({
   matches,
@@ -64,18 +52,20 @@ function ThirdPlaceLabel({
   );
 }
 
-export function BracketCanvas({
-  matches,
-  athletes,
-  thirdPlaceMatch,
-  matchLabel,
-  onSlotClick,
-  readOnly,
-  showArenaOrderButton = false,
-  arenaOrderDisabled = false,
-  arenaOrderDisabledTooltip,
-  onOpenArenaOrder,
-}: BracketCanvasProps) {
+export function BracketCanvas() {
+  const {
+    matches,
+    athletes,
+    selectedGroup,
+    showArenaOrderEntry,
+    arenaOrderEditBlocked,
+    arenaOrderDisabledTooltip,
+    setArenaOrderSheetOpen,
+  } = useTournamentBracket();
+
+  const thirdPlaceMatch = selectedGroup?.thirdPlaceMatch ?? false;
+  const matchList = matches as Array<MatchData>;
+
   const athleteMap = React.useMemo(() => {
     const map = new Map<string, TournamentAthleteData>();
     for (const a of athletes) map.set(a.id, a);
@@ -83,8 +73,8 @@ export function BracketCanvas({
   }, [athletes]);
 
   const { positions, width, height } = React.useMemo(
-    () => buildLayout(matches, thirdPlaceMatch),
-    [matches, thirdPlaceMatch]
+    () => buildLayout(matchList, thirdPlaceMatch),
+    [matchList, thirdPlaceMatch]
   );
 
   const { containerRef, transform, handlers, reset, zoomIn, zoomOut } =
@@ -95,9 +85,9 @@ export function BracketCanvas({
     [positions]
   );
 
-  if (matches.length === 0) return null;
+  if (matchList.length === 0) return null;
 
-  const roundNums = [...new Set(matches.map((m) => m.round))].sort(
+  const roundNums = [...new Set(matchList.map((m) => m.round))].sort(
     (a, b) => a - b
   );
 
@@ -153,7 +143,7 @@ export function BracketCanvas({
           ))}
 
           <ThirdPlaceLabel
-            matches={matches}
+            matches={matchList}
             positions={positions}
             thirdPlaceMatch={thirdPlaceMatch}
           />
@@ -167,11 +157,8 @@ export function BracketCanvas({
             <BracketMatchNode
               key={pos.match.id}
               pos={pos}
-              matches={matches}
+              matches={matchList}
               athleteMap={athleteMap}
-              matchLabel={matchLabel}
-              onSlotClick={onSlotClick}
-              readOnly={readOnly}
             />
           ))}
         </div>
@@ -180,10 +167,10 @@ export function BracketCanvas({
         onFit={reset}
         onZoomIn={zoomIn}
         onZoomOut={zoomOut}
-        showArenaOrderButton={showArenaOrderButton}
-        arenaOrderDisabled={arenaOrderDisabled}
+        showArenaOrderButton={showArenaOrderEntry}
+        arenaOrderDisabled={arenaOrderEditBlocked}
         arenaOrderDisabledTooltip={arenaOrderDisabledTooltip}
-        onOpenArenaOrder={onOpenArenaOrder}
+        onOpenArenaOrder={() => setArenaOrderSheetOpen(true)}
       />
     </div>
   );

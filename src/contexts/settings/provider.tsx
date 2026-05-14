@@ -126,6 +126,10 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       }
 
       resetRoundStats(advance.roundDuration * 1000);
+
+      if (advance.match) {
+        useMatchStore.getState().setMatchId(advance.match);
+      }
     }
 
     resetMatch();

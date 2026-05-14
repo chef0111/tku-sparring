@@ -3,9 +3,10 @@ import { Link } from '@tanstack/react-router';
 import { UserDropdown } from '../user/user-dropdown';
 import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth-client';
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { useSettings } from '@/contexts/settings';
-import { AppSettings } from '@/features/app/settings';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { OfflineIndicator } from '@/features/app/components/offline-indicator';
+import { AppSettings } from '@/features/app/components/settings';
 
 export const Navbar = () => {
   const { data, isPending } = authClient.useSession();
@@ -32,7 +33,8 @@ export const Navbar = () => {
       <div className="flex w-full grow items-center justify-center">
         <h1 className="text-4xl font-bold select-none">TKU Sparring System</h1>
       </div>
-      <div className="flex w-[13vw] shrink-0 items-center justify-end px-2.5">
+      <div className="flex w-[13vw] shrink-0 items-center justify-end gap-2 px-2.5">
+        <OfflineIndicator />
         {isPending ? null : user ? (
           <UserDropdown user={user} />
         ) : (

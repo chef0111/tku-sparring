@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Spinner } from '@/components/ui/spinner';
 import { useSetTournamentStatus } from '@/queries/tournaments';
 
 interface LifecycleConfirmDialogProps {
@@ -62,7 +63,14 @@ export function LifecycleConfirmDialog({
             }
             disabled={mutation.isPending}
           >
-            {mutation.isPending ? 'Saving...' : copy.confirmLabel}
+            {mutation.isPending ? (
+              <>
+                <Spinner className="text-destructive" />
+                Saving...
+              </>
+            ) : (
+              copy.confirmLabel
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

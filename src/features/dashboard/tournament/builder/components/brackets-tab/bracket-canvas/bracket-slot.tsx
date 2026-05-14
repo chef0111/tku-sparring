@@ -88,7 +88,8 @@ export function BracketSlot({
         height: ATHLETE_ROW_H,
       }}
       className={cn(
-        'relative z-2 flex cursor-grab touch-none items-stretch rounded-md border border-transparent bg-transparent active:cursor-grabbing',
+        'relative z-2 flex touch-none items-stretch rounded-md border border-transparent bg-transparent active:cursor-grabbing',
+        athlete ? 'cursor-grab' : 'cursor-pointer',
         locked && 'border-amber-500/60',
         isOver && canDrop && 'ring-primary/40 ring-2',
         isDragging && 'opacity-60'
@@ -110,8 +111,7 @@ export function BracketSlot({
             <Button
               type="button"
               variant="ghost"
-              size="icon"
-              className="size-7 shrink-0"
+              size="icon-xs"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
@@ -126,11 +126,6 @@ export function BracketSlot({
               )}
             </Button>
           )}
-          {athlete?.seed != null && (
-            <span className="text-muted-foreground shrink-0 text-[10px] tabular-nums">
-              {athlete.seed}
-            </span>
-          )}
           <span
             className={cn(
               'min-w-0 text-xs',
@@ -141,11 +136,6 @@ export function BracketSlot({
             {athlete ? athlete.name : emptyLabel}
           </span>
         </div>
-        {athlete && (
-          <p className="text-muted-foreground truncate pl-1 text-[10px]">
-            Belt {athlete.beltLevel} · {athlete.weight} kg
-          </p>
-        )}
       </div>
 
       <div

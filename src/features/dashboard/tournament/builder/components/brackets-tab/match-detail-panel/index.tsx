@@ -1,13 +1,9 @@
-import * as React from 'react';
 import { ArrowLeftRight, Crown } from 'lucide-react';
 import { SlotLocks } from './slot-locks';
 import { MatchSheetStatus } from './match-sheet-status';
 import { ParticipantRow } from './participant-row';
 import { ScoreControl } from './score-control';
-import type {
-  MatchData,
-  TournamentAthleteData,
-} from '@/features/dashboard/types';
+import { useMatchDetailPanel } from './use-match-detail-panel';
 import {
   Sheet,
   SheetContent,
@@ -21,114 +17,26 @@ import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
-import {
-  useSetLock,
-  useSetWinner,
-  useSwapParticipants,
-  useUpdateScore,
-} from '@/queries/matches';
-import { getBracketRoundLabel } from '@/lib/tournament/bracket-round-label';
 
-export interface MatchDetailPanelProps {
-  match: MatchData | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  athletes: Array<TournamentAthleteData>;
-  readOnly: boolean;
-  tournamentStatus: string;
-  maxBracketRound: number;
-}
+export function MatchDetailPanel() {
+  const position = useMatchDetailPanel();
+  if (!position.match) return null;
 
-export function MatchDetailPanel({
-  match,
-  open,
-  onOpenChange,
-  athletes,
-  readOnly,
-  tournamentStatus,
-  maxBracketRound,
-}: MatchDetailPanelProps) {
-  const [redWins, setRedWins] = React.useState(0);
-  const [blueWins, setBlueWins] = React.useState(0);
-  const [showManualWinner, setShowManualWinner] = React.useState(false);
-  const [manualReason, setManualReason] = React.useState('');
-
-  const updateScore = useUpdateScore({ onSuccess: () => onOpenChange(false) });
-  const setWinner = useSetWinner({ onSuccess: () => onOpenChange(false) });
-  const swapParticipants = useSwapParticipants();
-  const setLock = useSetLock();
-
-  React.useEffect(() => {
-    if (match) {
-      setRedWins(match.redWins);
-      setBlueWins(match.blueWins);
-      setShowManualWinner(false);
-      setManualReason('');
-    }
-  }, [match]);
-
-  if (!match) return null;
-
-  const athleteMap = new Map(athletes.map((a) => [a.id, a]));
-  const redAthlete = match.redTournamentAthleteId
-    ? athleteMap.get(match.redTournamentAthleteId)
-    : null;
-  const blueAthlete = match.blueTournamentAthleteId
-    ? athleteMap.get(match.blueTournamentAthleteId)
-    : null;
-
-  const canEdit = !readOnly && match.status !== 'complete';
-  const canSwap =
-    !readOnly &&
-    (tournamentStatus === 'draft' || tournamentStatus === 'active');
-  const canToggleLocks =
-    !readOnly &&
-    (tournamentStatus === 'draft' || tournamentStatus === 'active');
-  const hasScoreWinner = redWins >= 2 || blueWins >= 2;
-  const scoreDirty = redWins !== match.redWins || blueWins !== match.blueWins;
-
-  const roundLabel = getBracketRoundLabel(
-    match.round,
-    Math.max(maxBracketRound, match.round)
-  );
-
-  function handleSaveScore() {
-    if (!match) return;
-    updateScore.mutate({ matchId: match.id, redWins, blueWins });
-  }
-
-  function handleSetWinner(side: 'red' | 'blue') {
-    if (!match) return;
-    setWinner.mutate({
-      matchId: match.id,
-      winnerSide: side,
-      reason: manualReason || undefined,
-    });
-  }
-
-  function handleSwap() {
-    if (!match) return;
-    swapParticipants.mutate({
-      matchId: match.id,
-      redTournamentAthleteId: match.blueTournamentAthleteId,
-      blueTournamentAthleteId: match.redTournamentAthleteId,
-    });
-  }
-
-  function handleLockChange(side: 'red' | 'blue', locked: boolean) {
-    if (!match) return;
-    setLock.mutate({ matchId: match.id, side, locked });
-  }
+  const { match, matchLabel } = position;
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} modal={false}>
+    <Sheet
+      open={position.open}
+      onOpenChange={position.onOpenChange}
+      modal={false}
+    >
       <SheetContent
         side="right"
         className="flex w-full flex-col gap-0 p-0 sm:max-w-md"
       >
         <SheetHeader className="gap-2 border-b px-6 pt-6 pb-4">
           <SheetTitle>
-            {roundLabel} — Match {match.matchIndex + 1}
+            {position.roundLabel} — Match {matchLabel.get(match.id)}
           </SheetTitle>
           <SheetDescription className="flex flex-wrap items-center gap-2">
             <MatchSheetStatus status={match.status} />
@@ -151,12 +59,12 @@ export function MatchDetailPanel({
           <section className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium">Participants</h4>
-              {canSwap ? (
+              {position.canSwap ? (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={handleSwap}
-                  disabled={swapParticipants.isPending}
+                  onClick={position.handleSwap}
+                  disabled={position.swapParticipants.isPending}
                 >
                   <ArrowLeftRight data-icon="inline-start" />
                   Swap
@@ -166,7 +74,7 @@ export function MatchDetailPanel({
 
             <ParticipantRow
               label="Red"
-              athlete={redAthlete}
+              athlete={position.redAthlete}
               isWinner={
                 match.winnerId != null && match.winnerId === match.redAthleteId
               }
@@ -174,7 +82,7 @@ export function MatchDetailPanel({
             />
             <ParticipantRow
               label="Blue"
-              athlete={blueAthlete}
+              athlete={position.blueAthlete}
               isWinner={
                 match.winnerId != null && match.winnerId === match.blueAthleteId
               }
@@ -182,13 +90,13 @@ export function MatchDetailPanel({
             />
           </section>
 
-          {canToggleLocks && (
+          {position.canToggleLocks && (
             <SlotLocks
               matchId={match.id}
               redLocked={match.redLocked}
               blueLocked={match.blueLocked}
-              isPending={setLock.isPending}
-              onLockChange={handleLockChange}
+              isPending={position.setLock.isPending}
+              onLockChange={position.handleLockChange}
             />
           )}
 
@@ -199,9 +107,9 @@ export function MatchDetailPanel({
             <div className="flex items-center justify-center gap-6">
               <ScoreControl
                 label="Red"
-                value={redWins}
-                onChange={setRedWins}
-                disabled={!canEdit}
+                value={position.redWins}
+                onChange={position.setRedWins}
+                disabled={!position.canEdit}
               />
               <Separator
                 orientation="horizontal"
@@ -209,31 +117,31 @@ export function MatchDetailPanel({
               />
               <ScoreControl
                 label="Blue"
-                value={blueWins}
-                onChange={setBlueWins}
-                disabled={!canEdit}
+                value={position.blueWins}
+                onChange={position.setBlueWins}
+                disabled={!position.canEdit}
               />
             </div>
 
-            {hasScoreWinner ? (
+            {position.hasScoreWinner ? (
               <p className="text-primary text-center text-xs font-medium">
                 Winner:{' '}
-                {redWins >= 2
-                  ? (redAthlete?.name ?? 'Red')
-                  : (blueAthlete?.name ?? 'Blue')}
+                {position.redWins >= 2
+                  ? (position.redAthlete?.name ?? 'Red')
+                  : (position.blueAthlete?.name ?? 'Blue')}
               </p>
             ) : null}
           </section>
 
           <Separator />
 
-          {canEdit && !hasScoreWinner ? (
+          {position.canEdit && !position.hasScoreWinner ? (
             <section className="flex flex-col gap-3">
-              {!showManualWinner ? (
+              {!position.showManualWinner ? (
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={() => setShowManualWinner(true)}
+                  onClick={() => position.setShowManualWinner(true)}
                 >
                   <Crown data-icon="inline-start" />
                   Set winner manually
@@ -249,8 +157,10 @@ export function MatchDetailPanel({
                       <Input
                         id="match-detail-reason"
                         placeholder="e.g. Disqualification, injury…"
-                        value={manualReason}
-                        onChange={(e) => setManualReason(e.target.value)}
+                        value={position.manualReason}
+                        onChange={(e) =>
+                          position.setManualReason(e.target.value)
+                        }
                       />
                     </Field>
                   </FieldGroup>
@@ -259,8 +169,10 @@ export function MatchDetailPanel({
                       size="sm"
                       variant="outline"
                       className="text-destructive! flex-1"
-                      onClick={() => handleSetWinner('red')}
-                      disabled={!redAthlete || setWinner.isPending}
+                      onClick={() => position.handleSetWinner('red')}
+                      disabled={
+                        !position.redAthlete || position.setWinner.isPending
+                      }
                     >
                       Red wins
                     </Button>
@@ -268,8 +180,10 @@ export function MatchDetailPanel({
                       size="sm"
                       variant="outline"
                       className="flex-1 text-blue-500!"
-                      onClick={() => handleSetWinner('blue')}
-                      disabled={!blueAthlete || setWinner.isPending}
+                      onClick={() => position.handleSetWinner('blue')}
+                      disabled={
+                        !position.blueAthlete || position.setWinner.isPending
+                      }
                     >
                       Blue wins
                     </Button>
@@ -278,7 +192,7 @@ export function MatchDetailPanel({
                     variant="ghost"
                     size="sm"
                     className="w-full"
-                    onClick={() => setShowManualWinner(false)}
+                    onClick={() => position.setShowManualWinner(false)}
                   >
                     Cancel
                   </Button>
@@ -289,13 +203,13 @@ export function MatchDetailPanel({
         </div>
 
         <SheetFooter className="mt-auto border-t px-6 py-4">
-          {canEdit ? (
+          {position.canEdit ? (
             <Button
               className="w-full"
-              onClick={handleSaveScore}
-              disabled={!scoreDirty || updateScore.isPending}
+              onClick={position.handleSaveScore}
+              disabled={!position.scoreDirty || position.updateScore.isPending}
             >
-              {updateScore.isPending ? (
+              {position.updateScore.isPending ? (
                 <>
                   <Spinner data-icon="inline-start" />
                   Saving…

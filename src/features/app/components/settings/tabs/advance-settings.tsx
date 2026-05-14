@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { IconReload } from '@tabler/icons-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { PlayerAvatar } from '../../hud/player-avatar';
 import { advancePlayerGroup, getTournamentFields } from '../constant/form';
 import { CommonSettings } from './common-settings';
@@ -8,11 +9,45 @@ import { useAppForm } from '@/components/form/hooks';
 import { AdvanceSettingsSchema } from '@/lib/validations';
 import { FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field';
 import { Button } from '@/components/ui/button';
-import { useGroups, useMatches, useTournaments } from '@/hooks/use-tournaments';
+import { authClient } from '@/lib/auth-client';
+import { useDeviceId } from '@/hooks/use-device-id';
+import {
+  arenaSelectionCatalogQueryOptions,
+  arenaSelectionMatchesQueryOptions,
+  useArenaSelectionCatalog,
+  useArenaSelectionMatches,
+} from '@/features/app/hooks/use-arena-selection-view';
 
 export const AdvanceSettings = () => {
+  const { data: session, isPending: sessionPending } = authClient.useSession();
+  const deviceId = useDeviceId();
+  const queryClient = useQueryClient();
   const { formData, updateAdvanceForm, setAdvanceFormState } = useSettings();
   const { advance } = formData;
+
+  const catalogQuery = useArenaSelectionCatalog({
+    deviceId,
+    tournamentId: advance.tournament,
+    enabled: Boolean(session?.user),
+  });
+
+  const matchesQuery = useArenaSelectionMatches({
+    deviceId,
+    tournamentId: advance.tournament,
+    groupId: advance.group,
+    enabled: Boolean(session?.user),
+  });
+
+  const formKey = useMemo(
+    () =>
+      [
+        advance.tournament ?? '',
+        advance.group ?? '',
+        advance.match ?? '',
+        deviceId ?? '',
+      ].join(':'),
+    [advance.group, advance.match, advance.tournament, deviceId]
+  );
 
   const form = useAppForm({
     defaultValues: {
@@ -54,21 +89,71 @@ export const AdvanceSettings = () => {
     return () => subscription.unsubscribe();
   }, [form.store, updateAdvanceForm, setAdvanceFormState]);
 
-  const { data: tournaments, refetch: refetchTournaments } = useTournaments();
-  const { data: groups, isDisabled: groupsDisabled } = useGroups(
-    advance.tournament
-  );
-  const { data: matches, isDisabled: matchesDisabled } = useMatches(
-    advance.group
+  useEffect(() => {
+    const matchId = advance.match;
+    const rows = matchesQuery.data?.matches;
+    if (!matchId || !rows) {
+      return;
+    }
+    const row = rows.find((m) => m.id === matchId);
+    if (!row) {
+      return;
+    }
+    const red = row.redAthleteName ?? 'RED';
+    const blue = row.blueAthleteName ?? 'BLUE';
+    if (
+      advance.redPlayerName === red &&
+      advance.bluePlayerName === blue &&
+      form.getFieldValue('redPlayerName') === red &&
+      form.getFieldValue('bluePlayerName') === blue
+    ) {
+      return;
+    }
+    form.setFieldValue('redPlayerName', red);
+    form.setFieldValue('bluePlayerName', blue);
+    updateAdvanceForm({
+      redPlayerName: red,
+      bluePlayerName: blue,
+    });
+  }, [
+    advance.bluePlayerName,
+    advance.match,
+    advance.redPlayerName,
+    form,
+    matchesQuery.data?.matches,
+    updateAdvanceForm,
+  ]);
+
+  const tournamentOptions = useMemo(
+    () =>
+      (catalogQuery.data?.tournaments ?? []).map((t) => ({
+        value: t.id,
+        label: t.name,
+      })),
+    [catalogQuery.data?.tournaments]
   );
 
-  // Convert to ComboboxData format
-  const tournamentOptions = tournaments.map((t) => ({
-    value: t.id,
-    label: t.name,
-  }));
-  const groupOptions = groups.map((g) => ({ value: g.id, label: g.name }));
-  const matchOptions = matches.map((m) => ({ value: m.id, label: m.name }));
+  const groupOptions = useMemo(
+    () =>
+      (catalogQuery.data?.groups ?? []).map((g) => ({
+        value: g.id,
+        label: g.name,
+        disabled: g.leaseStatus === 'held_by_other',
+      })),
+    [catalogQuery.data?.groups]
+  );
+
+  const matchOptions = useMemo(
+    () =>
+      (matchesQuery.data?.matches ?? []).map((m) => ({
+        value: m.id,
+        label: m.label,
+      })),
+    [matchesQuery.data?.matches]
+  );
+
+  const groupsDisabled = !advance.tournament;
+  const matchesDisabled = !advance.group;
 
   const tournamentFields = getTournamentFields(
     tournamentOptions,
@@ -78,8 +163,28 @@ export const AdvanceSettings = () => {
     matchesDisabled
   );
 
+  const refetchSelection = () => {
+    void queryClient.invalidateQueries({
+      queryKey: arenaSelectionCatalogQueryOptions({
+        deviceId,
+        tournamentId: advance.tournament,
+      }).queryKey,
+    });
+    void queryClient.invalidateQueries({
+      queryKey: arenaSelectionMatchesQueryOptions({
+        deviceId,
+        tournamentId: advance.tournament,
+        groupId: advance.group,
+      }).queryKey,
+    });
+  };
+
+  if (sessionPending) {
+    return null;
+  }
+
   return (
-    <FieldSet className="w-full">
+    <FieldSet key={formKey} className="w-full">
       <FieldGroup className="settings-field-group relative items-center">
         <FieldLabel className="settings-group-label text-2xl!">
           TOURNAMENT SETTINGS
@@ -88,8 +193,9 @@ export const AdvanceSettings = () => {
           variant="outline"
           size="icon-sm"
           className="absolute top-4 right-4"
-          onClick={refetchTournaments}
+          onClick={refetchSelection}
           type="button"
+          disabled={catalogQuery.isFetching || matchesQuery.isFetching}
         >
           <IconReload />
         </Button>
@@ -112,7 +218,7 @@ export const AdvanceSettings = () => {
 
       <FieldGroup className="settings-field-group items-center">
         <FieldLabel className="settings-group-label">
-          ATHELETES INFORMATIONS
+          ATHLETE INFORMATION
         </FieldLabel>
         <FieldGroup className="flex-row">
           {advancePlayerGroup.map((player) => (
