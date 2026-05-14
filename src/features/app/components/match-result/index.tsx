@@ -105,6 +105,7 @@ export const ResultDialog = ({
       <DialogFooter className="flex w-full max-w-7xl items-center justify-center! gap-6">
         <Button
           type="button"
+          variant="outline"
           className="action-btn action-btn-cancel"
           onClick={onCancel}
         >
@@ -112,6 +113,7 @@ export const ResultDialog = ({
         </Button>
         <Button
           type="button"
+          variant="outline"
           className="action-btn action-btn-accept"
           onClick={() => {
             void onAccept();

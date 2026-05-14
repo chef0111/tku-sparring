@@ -3,6 +3,7 @@ import type { PlayerData } from './player-store';
 
 interface MatchState {
   matchId: string;
+  matchLabel: string;
   currentRound: number;
   maxRounds: number;
   roundWinners: Array<Player | null>;
@@ -13,7 +14,7 @@ interface MatchState {
 }
 
 interface MatchActions {
-  setMatchId: (id: string) => void;
+  setMatchDisplay: (input: { id: string; label: string }) => void;
   nextRound: () => void;
   recordRoundWinner: (winner: Player) => void;
   declareWinner: (red: PlayerData, blue: PlayerData) => Player | 'tie';
@@ -27,7 +28,8 @@ interface MatchActions {
 type MatchStore = MatchState & MatchActions;
 
 export const useMatchStore = create<MatchStore>()((set, get) => ({
-  matchId: '001',
+  matchId: 'Match 001',
+  matchLabel: 'MATCH 001',
   currentRound: 1,
   maxRounds: 3,
   roundWinners: [],
@@ -36,8 +38,8 @@ export const useMatchStore = create<MatchStore>()((set, get) => ({
   matchWinner: null,
   isMatchOver: false,
 
-  setMatchId: (id) => {
-    set({ matchId: id });
+  setMatchDisplay: ({ id, label }) => {
+    set({ matchId: id, matchLabel: label });
   },
 
   nextRound: () => {

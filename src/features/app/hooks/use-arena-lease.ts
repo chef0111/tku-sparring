@@ -26,10 +26,12 @@ export function useArenaLease(args: {
   const { tournamentId, groupId, deviceId } = args;
   const queryClient = useQueryClient();
   const { mutateAsync: arenaMutate } = useArenaMutation();
+  const arenaMutateRef = React.useRef(arenaMutate);
+  arenaMutateRef.current = arenaMutate;
 
   useLeaseStream(tournamentId ?? '');
 
-  const leasesQuery = useLeases(tournamentId ?? '', deviceId);
+  const leasesQuery = useLeases(tournamentId, deviceId);
 
   React.useEffect(() => {
     if (!tournamentId || !groupId || !deviceId) {
@@ -37,47 +39,78 @@ export function useArenaLease(args: {
     }
 
     let cancelled = false;
+    let heartbeatId: ReturnType<typeof setInterval> | undefined;
+    let shouldReleaseOnCleanup = false;
+
+    const clearHeartbeat = () => {
+      if (heartbeatId != null) {
+        window.clearInterval(heartbeatId);
+        heartbeatId = undefined;
+      }
+    };
 
     void (async () => {
+      let leaseReady = false;
       try {
         await client.lease.acquire({ groupId, deviceId });
-        invalidateLeaseList(queryClient, tournamentId);
+        leaseReady = true;
       } catch (e) {
-        if (!cancelled) {
+        const msg = e instanceof Error ? e.message : '';
+        if (msg.includes('already controlled by this device')) {
+          leaseReady = true;
+        } else if (!cancelled) {
           toast.error('Could not acquire group lease', {
-            description: e instanceof Error ? e.message : 'Unknown error',
+            description: msg || 'Unknown error',
           });
+          return;
         }
       }
+
+      if (!leaseReady) {
+        return;
+      }
+
+      if (cancelled) {
+        void arenaMutateRef
+          .current({
+            kind: 'lease.release',
+            payload: { groupId, deviceId },
+          })
+          .catch(() => {});
+        return;
+      }
+
+      invalidateLeaseList(queryClient, tournamentId);
+      heartbeatId = window.setInterval(() => {
+        void arenaMutateRef
+          .current({
+            kind: 'lease.heartbeat',
+            payload: { groupId, deviceId },
+          })
+          .catch((e) => {
+            const msg = e instanceof Error ? e.message : '';
+            if (msg.includes('Lease is not held')) {
+              clearHeartbeat();
+              shouldReleaseOnCleanup = false;
+            }
+          });
+      }, HEARTBEAT_MS);
+      shouldReleaseOnCleanup = true;
     })();
-
-    const heartbeat = window.setInterval(() => {
-      void arenaMutate({
-        kind: 'lease.heartbeat',
-        payload: { groupId, deviceId },
-      }).catch(() => {});
-    }, HEARTBEAT_MS);
-
-    const release = () => {
-      void arenaMutate({
-        kind: 'lease.release',
-        payload: { groupId, deviceId },
-      }).catch(() => {});
-    };
-
-    const onBeforeUnload = () => {
-      release();
-    };
-
-    window.addEventListener('beforeunload', onBeforeUnload);
 
     return () => {
       cancelled = true;
-      window.clearInterval(heartbeat);
-      window.removeEventListener('beforeunload', onBeforeUnload);
-      release();
+      clearHeartbeat();
+      if (shouldReleaseOnCleanup) {
+        void arenaMutateRef
+          .current({
+            kind: 'lease.release',
+            payload: { groupId, deviceId },
+          })
+          .catch(() => {});
+      }
     };
-  }, [arenaMutate, deviceId, groupId, queryClient, tournamentId]);
+  }, [deviceId, groupId, queryClient, tournamentId]);
 
   const prevLeaseStatus = React.useRef<string | null>(null);
 

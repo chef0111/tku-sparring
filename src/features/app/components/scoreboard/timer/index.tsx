@@ -40,9 +40,9 @@ export const Timer = () => {
     }))
   );
 
-  const { matchId, currentRound, isMatchOver } = useMatchStore(
+  const { matchLabel, currentRound, isMatchOver } = useMatchStore(
     useShallow((s) => ({
-      matchId: s.matchId,
+      matchLabel: s.matchLabel,
       currentRound: s.currentRound,
       isMatchOver: s.isMatchOver,
     }))
@@ -108,7 +108,7 @@ export const Timer = () => {
 
   return (
     <TimerFrame>
-      <MatchInfo matchId={matchId} />
+      <MatchInfo matchLabel={matchLabel} />
       <div className="relative flex h-54 w-full flex-col items-center justify-center">
         <ClockSection
           time={displayTime}

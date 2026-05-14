@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { IconReload } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { PlayerAvatar } from '../../hud/player-avatar';
@@ -11,6 +11,7 @@ import { FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field';
 import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth-client';
 import { useDeviceId } from '@/hooks/use-device-id';
+import { AdvanceGroupLeaseToggle } from '@/features/app/components/advance-group-lease-toggle';
 import {
   arenaSelectionCatalogQueryOptions,
   arenaSelectionMatchesQueryOptions,
@@ -44,9 +45,16 @@ export const AdvanceSettings = () => {
         advance.tournament ?? '',
         advance.group ?? '',
         advance.match ?? '',
+        advance.matchLabel ?? '',
         deviceId ?? '',
       ].join(':'),
-    [advance.group, advance.match, advance.tournament, deviceId]
+    [
+      advance.group,
+      advance.match,
+      advance.matchLabel,
+      advance.tournament,
+      deviceId,
+    ]
   );
 
   const form = useAppForm({
@@ -63,6 +71,22 @@ export const AdvanceSettings = () => {
       maxHealth: advance.maxHealth,
     },
   });
+
+  const prevTournamentForCascade = useRef<string | null>(advance.tournament);
+
+  useEffect(() => {
+    const t = advance.tournament;
+    const prev = prevTournamentForCascade.current;
+    if (prev === t) {
+      return;
+    }
+    prevTournamentForCascade.current = t;
+
+    if (prev != null && prev !== t) {
+      form.setFieldValue('group', '');
+      form.setFieldValue('match', '');
+    }
+  }, [advance.tournament, form]);
 
   useEffect(() => {
     const subscription = form.store.subscribe(() => {
@@ -88,6 +112,24 @@ export const AdvanceSettings = () => {
     });
     return () => subscription.unsubscribe();
   }, [form.store, updateAdvanceForm, setAdvanceFormState]);
+
+  useEffect(() => {
+    const id = advance.match?.trim() || null;
+    const rows = matchesQuery.data?.matches;
+    let nextLabel: string | null = null;
+    if (id && rows?.length) {
+      nextLabel = rows.find((m) => m.id === id)?.label ?? null;
+    }
+    if (nextLabel === advance.matchLabel) {
+      return;
+    }
+    updateAdvanceForm({ matchLabel: nextLabel });
+  }, [
+    advance.match,
+    advance.matchLabel,
+    matchesQuery.data?.matches,
+    updateAdvanceForm,
+  ]);
 
   useEffect(() => {
     const matchId = advance.match;
@@ -186,19 +228,23 @@ export const AdvanceSettings = () => {
   return (
     <FieldSet key={formKey} className="w-full">
       <FieldGroup className="settings-field-group relative items-center">
-        <FieldLabel className="settings-group-label text-2xl!">
-          TOURNAMENT SETTINGS
+        <FieldLabel className="settings-group-label flex w-full items-center">
+          <span className="grow text-2xl">TOURNAMENT SETTINGS</span>
+          <div className="ml-auto flex items-center gap-2">
+            <AdvanceGroupLeaseToggle />
+            <Button
+              variant="outline"
+              size="icon-sm"
+              onClick={refetchSelection}
+              type="button"
+              title="Refresh tournament data"
+              aria-label="Refresh tournament data"
+              disabled={catalogQuery.isFetching || matchesQuery.isFetching}
+            >
+              <IconReload />
+            </Button>
+          </div>
         </FieldLabel>
-        <Button
-          variant="outline"
-          size="icon-sm"
-          className="absolute top-4 right-4"
-          onClick={refetchSelection}
-          type="button"
-          disabled={catalogQuery.isFetching || matchesQuery.isFetching}
-        >
-          <IconReload />
-        </Button>
         {tournamentFields.map((field) => (
           <FieldGroup key={field.name}>
             <form.AppField name={field.name}>
