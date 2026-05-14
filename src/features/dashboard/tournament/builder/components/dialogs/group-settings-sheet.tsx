@@ -28,10 +28,12 @@ export function GroupSettingsSheet({
   if (!group) return null;
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={onOpenChange} modal={false}>
       <SheetContent className="flex flex-col overflow-y-auto sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>Group Settings</SheetTitle>
+          <SheetTitle className="text-lg font-semibold">
+            Group Settings
+          </SheetTitle>
           <SheetDescription>
             Edit constraints, arena, and preferences for {group.name}.
           </SheetDescription>

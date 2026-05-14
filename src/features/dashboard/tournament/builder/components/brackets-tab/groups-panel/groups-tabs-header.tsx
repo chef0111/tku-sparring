@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import type { GroupData } from '@/features/dashboard/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,9 +5,13 @@ import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useScrollActiveIntoView } from '@/hooks/use-scroll-active-into-view';
 
 interface GroupsTabsHeaderProps {
   groups: Array<GroupData>;
@@ -21,21 +24,22 @@ export function GroupsTabsHeader({
   selectedGroupId,
   onSelect,
 }: GroupsTabsHeaderProps) {
-  const triggersRef = React.useRef<Map<string, HTMLButtonElement>>(new Map());
+  const tabValue =
+    groups.length === 0 ? '' : (selectedGroupId ?? groups[0]?.id ?? '');
+  const groupIdsKey = groups.map((g) => g.id).join();
 
-  function scrollTriggerIntoView(id: string) {
-    const el = triggersRef.current.get(id);
-    el?.scrollIntoView({ inline: 'center', block: 'nearest' });
-  }
+  const { register, scrollIdIntoView } = useScrollActiveIntoView({
+    activeId: tabValue,
+    rerollKey: `${tabValue}:${groupIdsKey}:${groups.length}`,
+    enabled: groups.length > 0,
+  });
 
   function handlePickFromMenu(id: string) {
     onSelect(id);
-    requestAnimationFrame(() => scrollTriggerIntoView(id));
+    scrollIdIntoView(id);
   }
 
   if (groups.length === 0) return null;
-
-  const tabValue = selectedGroupId ?? groups[0]?.id ?? '';
 
   return (
     <div className="relative shrink-0 border-b">
@@ -43,7 +47,7 @@ export function GroupsTabsHeader({
         value={tabValue}
         onValueChange={(v) => {
           onSelect(v);
-          requestAnimationFrame(() => scrollTriggerIntoView(v));
+          scrollIdIntoView(v);
         }}
       >
         <div className="scrollbar-thin overflow-x-auto overflow-y-hidden pr-10">
@@ -52,8 +56,7 @@ export function GroupsTabsHeader({
               <TabsTrigger
                 key={g.id}
                 ref={(el) => {
-                  if (el) triggersRef.current.set(g.id, el);
-                  else triggersRef.current.delete(g.id);
+                  register(g.id, el);
                 }}
                 value={g.id}
                 className="shrink-0"
@@ -84,16 +87,23 @@ export function GroupsTabsHeader({
           <DropdownMenuContent
             align="end"
             alignOffset={4}
-            className="max-h-64 overflow-y-auto"
+            className="max-h-70 w-auto overflow-y-auto"
           >
-            {groups.map((g) => (
-              <DropdownMenuItem
-                key={g.id}
-                onSelect={() => handlePickFromMenu(g.id)}
-              >
-                <span className="truncate">{g.name}</span>
-              </DropdownMenuItem>
-            ))}
+            <DropdownMenuLabel className="text-center text-sm leading-none">
+              Select a group
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuRadioGroup value={selectedGroupId!}>
+              {groups.map((g) => (
+                <DropdownMenuRadioItem
+                  key={g.id}
+                  value={g.id}
+                  onSelect={() => handlePickFromMenu(g.id)}
+                >
+                  <span className="truncate">{g.name}</span>
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

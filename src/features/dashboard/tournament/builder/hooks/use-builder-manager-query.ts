@@ -5,7 +5,7 @@ const TAB = parseAsStringEnum(['groups', 'brackets']).withDefault('groups');
 
 export function useBuilderManagerQuery() {
   const [tab, setTab] = useQueryState('tab', TAB);
-  const [selectedGroupId] = useQueryState('group');
+  const [selectedGroupId, setSelectedGroup] = useQueryState('group');
   const [poolQuery] = useQueryState('q');
   const [poolGender] = useQueryState('poolGender', POOL_GENDER);
   const [poolBeltMin] = useQueryState('poolBeltMin', parseAsInteger);
@@ -17,6 +17,7 @@ export function useBuilderManagerQuery() {
     tab,
     setTab,
     selectedGroupId,
+    setSelectedGroup,
     poolQuery,
     poolGender,
     poolBeltMin,

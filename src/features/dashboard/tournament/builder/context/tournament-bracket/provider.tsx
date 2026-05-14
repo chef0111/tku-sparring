@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { DndContext, DragOverlay } from '@dnd-kit/core';
+import { useBuilderManagerQuery } from '../../hooks/use-builder-manager-query';
 import { useBracketsTabDnd } from '../../hooks/use-brackets-tab-dnd';
 import { useBracketsTabQueries } from '../../hooks/use-brackets-tab-queries';
 import { BracketCanvas } from '../../components/brackets-tab/bracket-canvas';
@@ -26,9 +27,9 @@ function BracketShell({
   readOnly,
   tournamentStatus,
 }: TournamentBracketProviderProps) {
-  const [selectedGroupId, setSelectedGroupId] = React.useState<string | null>(
-    groups[0]?.id ?? null
-  );
+  const { selectedGroupId, setSelectedGroup: setSelectedGroupId } =
+    useBuilderManagerQuery();
+
   const [selectedMatch, setSelectedMatch] = React.useState<MatchData | null>(
     null
   );
@@ -37,12 +38,12 @@ function BracketShell({
 
   React.useEffect(() => {
     if (!selectedGroupId && groups.length > 0) {
-      setSelectedGroupId(groups[0]!.id);
+      void setSelectedGroupId(groups[0]!.id);
     }
     if (selectedGroupId && !groups.find((g) => g.id === selectedGroupId)) {
-      setSelectedGroupId(groups[0]?.id ?? null);
+      void setSelectedGroupId(groups[0]?.id ?? null);
     }
-  }, [groups, selectedGroupId]);
+  }, [groups, selectedGroupId, setSelectedGroupId]);
 
   const data = useBracketsTabQueries({
     tournamentId,
