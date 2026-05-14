@@ -1,6 +1,7 @@
 import { useDroppable } from '@dnd-kit/core';
 import { BetweenHorizonalEnd } from 'lucide-react';
 import { GroupsPanelSkeleton } from '../skeletons';
+import { ArenaOrderRailHint } from './arena-group-order-sheet/arena-order-rail-hint';
 import { BracketActionQueue } from './bracket-action-queue';
 import { GroupsTabsHeader } from './groups-tabs-header';
 import { PanelAthleteRow } from './panel-athlete-row';
@@ -20,12 +21,15 @@ import { cn } from '@/lib/utils';
 
 interface GroupsPanelProps {
   groups: Array<GroupData>;
+  arenaGroupOrder?: unknown;
   selectedGroupId: string | null;
   onSelect: (id: string) => void;
   athletes: Array<TournamentAthleteData>;
   matches: Array<MatchData>;
   onOpenMatch: (match: MatchData) => void;
   readOnly: boolean;
+  isDraft: boolean;
+  onOpenArenaOrder: () => void;
   slotReturnEnabled: boolean;
   groupAthleteCount: number;
   isPoolLoading?: boolean;
@@ -33,12 +37,15 @@ interface GroupsPanelProps {
 
 export function GroupsPanel({
   groups,
+  arenaGroupOrder,
   selectedGroupId,
   onSelect,
   athletes,
   matches,
   onOpenMatch,
   readOnly,
+  isDraft,
+  onOpenArenaOrder,
   slotReturnEnabled,
   groupAthleteCount,
   isPoolLoading = false,
@@ -61,6 +68,13 @@ export function GroupsPanel({
         groups={groups}
         selectedGroupId={selectedGroupId}
         onSelect={onSelect}
+      />
+      <ArenaOrderRailHint
+        groups={groups}
+        arenaGroupOrder={arenaGroupOrder}
+        isDraft={isDraft}
+        readOnly={readOnly}
+        onEdit={onOpenArenaOrder}
       />
       <div
         ref={poolDrop.setNodeRef}

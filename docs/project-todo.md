@@ -11,9 +11,6 @@ This document tracks feature status across the TKU Sparring System.
 
 ## Active
 
-- Admin CRM: Groups tab (constraints, auto-assign, DnD overrides)
-- Admin CRM: Brackets tab (SVG canvas, lock/unlock, shuffle)
-- Admin CRM: Match detail panel (scores, participants, manual winner override)
 - Admin CRM: Audit log (critical actions)
 
 ## Finished
@@ -28,3 +25,6 @@ This document tracks feature status across the TKU Sparring System.
 - Admin CRM: Bulk add athletes to tournament
 - Admin CRM: Tournament lifecycle controls (Draft/Active/Completed)
 - Group Control Lease: API + SSE stream + takeover queue
+- Admin CRM: Groups tab (constraints, auto-assign, DnD overrides)
+- Admin CRM: Brackets tab (SVG canvas, lock/unlock, shuffle)
+- Admin CRM: Match detail panel (scores, participants, manual winner override)

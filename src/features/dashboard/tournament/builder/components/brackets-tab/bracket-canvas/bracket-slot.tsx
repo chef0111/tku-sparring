@@ -13,6 +13,7 @@ export interface BracketSlotProps {
   match: MatchData;
   side: 'red' | 'blue';
   athlete: TournamentAthleteData | null | undefined;
+  emptyLabel: string;
   locked: boolean;
   wins: number;
   isWinner: boolean;
@@ -25,6 +26,7 @@ export function BracketSlot({
   match,
   side,
   athlete,
+  emptyLabel,
   locked,
   wins,
   isWinner,
@@ -100,7 +102,7 @@ export function BracketSlot({
         if (e.key === 'Enter' || e.key === ' ') onSlotClick(match);
       }}
     >
-      <div className={cn('ml-px w-1 shrink-0 rounded-l-lg', sideBar)} />
+      <div className={cn('w-1.5 shrink-0 rounded-l-lg', sideBar)} />
 
       <div className="flex min-w-0 flex-1 flex-col justify-center px-1.5 py-0.5 pl-2">
         <div className="flex min-w-0 items-center gap-1">
@@ -136,7 +138,7 @@ export function BracketSlot({
               isWinner && 'font-semibold text-emerald-600'
             )}
           >
-            {athlete ? athlete.name : 'EMPTY'}
+            {athlete ? athlete.name : emptyLabel}
           </span>
         </div>
         {athlete && (
@@ -148,7 +150,7 @@ export function BracketSlot({
 
       <div
         className={cn(
-          'flex shrink-0 items-center pr-2 font-mono text-xs tabular-nums',
+          'flex shrink-0 items-center pr-2 text-xs font-semibold tabular-nums',
           isWinner ? 'font-semibold text-emerald-600' : 'text-muted-foreground'
         )}
       >

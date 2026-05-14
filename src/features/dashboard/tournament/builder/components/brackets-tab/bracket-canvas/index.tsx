@@ -27,8 +27,13 @@ interface BracketCanvasProps {
   matches: Array<MatchData>;
   athletes: Array<TournamentAthleteData>;
   thirdPlaceMatch: boolean;
+  arenaNumberByMatchId: Map<string, number>;
   onSlotClick: (match: MatchData) => void;
   readOnly: boolean;
+  showArenaOrderButton?: boolean;
+  arenaOrderDisabled?: boolean;
+  arenaOrderDisabledTooltip?: string;
+  onOpenArenaOrder?: () => void;
 }
 
 function ThirdPlaceLabel({
@@ -63,8 +68,13 @@ export function BracketCanvas({
   matches,
   athletes,
   thirdPlaceMatch,
+  arenaNumberByMatchId,
   onSlotClick,
   readOnly,
+  showArenaOrderButton = false,
+  arenaOrderDisabled = false,
+  arenaOrderDisabledTooltip,
+  onOpenArenaOrder,
 }: BracketCanvasProps) {
   const athleteMap = React.useMemo(() => {
     const map = new Map<string, TournamentAthleteData>();
@@ -157,14 +167,24 @@ export function BracketCanvas({
             <BracketMatchNode
               key={pos.match.id}
               pos={pos}
+              matches={matches}
               athleteMap={athleteMap}
+              arenaNumberByMatchId={arenaNumberByMatchId}
               onSlotClick={onSlotClick}
               readOnly={readOnly}
             />
           ))}
         </div>
       </div>
-      <BracketViewToolbar onFit={reset} onZoomIn={zoomIn} onZoomOut={zoomOut} />
+      <BracketViewToolbar
+        onFit={reset}
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
+        showArenaOrderButton={showArenaOrderButton}
+        arenaOrderDisabled={arenaOrderDisabled}
+        arenaOrderDisabledTooltip={arenaOrderDisabledTooltip}
+        onOpenArenaOrder={onOpenArenaOrder}
+      />
     </div>
   );
 }

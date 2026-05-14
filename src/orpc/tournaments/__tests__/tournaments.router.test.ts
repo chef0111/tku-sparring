@@ -12,6 +12,10 @@ describe('tournament router registration', () => {
     expect(tournamentRouter).toBeDefined();
     expect(tournamentRouter).toMatchObject({
       setStatus: expect.anything(),
+      setArenaGroupOrder: expect.anything(),
+      moveGroupArena: expect.anything(),
+      ensureArenaSlot: expect.anything(),
+      retireArena: expect.anything(),
     });
   });
 

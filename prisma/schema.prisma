@@ -78,6 +78,7 @@ model Tournament {
   name         String
   nameSortKey  String   @default("")
   status       String   @default("draft")
+  arenaGroupOrder Json?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

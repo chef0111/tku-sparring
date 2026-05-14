@@ -1,8 +1,12 @@
 import {
   createTournament,
+  ensureArenaSlot,
   getTournament,
   listTournaments,
+  moveGroupArena,
   removeTournament,
+  retireArena,
+  setArenaGroupOrder,
   setTournamentStatus,
   updateTournament,
 } from './tournaments';
@@ -68,6 +72,10 @@ export default {
     create: createTournament,
     update: updateTournament,
     setStatus: setTournamentStatus,
+    setArenaGroupOrder,
+    moveGroupArena,
+    ensureArenaSlot,
+    retireArena,
     delete: removeTournament,
   },
   group: {
