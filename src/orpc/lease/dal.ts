@@ -1,4 +1,5 @@
 import { publishLeaseEvent } from './lease-stream';
+import { resolveGroupLeaseStatus } from './lease-status';
 import type {
   AcquireLeaseDTO,
   HeartbeatLeaseDTO,
@@ -694,27 +695,9 @@ export class LeaseDAL {
     return response.result;
   }
 
-  private static toLeaseStatus(
-    deviceId: string | undefined,
-    lease: {
-      deviceId: string;
-      takeoverRequests: Array<{ requesterDeviceId: string }>;
-    }
-  ) {
-    if (deviceId && lease.deviceId === deviceId) {
-      return 'held_by_me' as const;
-    }
-
-    if (
-      deviceId &&
-      lease.takeoverRequests.some(
-        (request) => request.requesterDeviceId === deviceId
-      )
-    ) {
-      return 'pending_takeover' as const;
-    }
-
-    return 'held_by_other' as const;
+  /** Expire stale leases / takeover rows before read-heavy views. */
+  static async prepareLeaseReadSnapshot() {
+    await LeaseDAL.cleanupLeaseState(new Date());
   }
 
   static async listForTournament(input: ListLeasesForTournamentDTO) {
@@ -747,7 +730,7 @@ export class LeaseDAL {
       acquiredAt: lease.acquiredAt,
       lastHeartbeatAt: lease.lastHeartbeatAt,
       expiresAt: lease.expiresAt,
-      leaseStatus: LeaseDAL.toLeaseStatus(input.deviceId, lease),
+      leaseStatus: resolveGroupLeaseStatus(input.deviceId, lease),
       takeoverRequests: lease.takeoverRequests.map((request) => ({
         id: request.id,
         requesterAdminId: request.requesterAdminId,

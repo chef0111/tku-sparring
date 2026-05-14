@@ -95,7 +95,7 @@ export function BracketsTab({
               matches={data.matches as Array<MatchData>}
               athletes={data.athletes}
               thirdPlaceMatch={data.selectedGroup?.thirdPlaceMatch ?? false}
-              arenaNumberByMatchId={data.arenaNumberByMatchId}
+              matchLabel={data.matchLabel}
               onSlotClick={handleSlotClick}
               readOnly={readOnly}
               showArenaOrderButton={data.showArenaOrderEntry}
@@ -126,6 +126,7 @@ export function BracketsTab({
           slotReturnEnabled={data.matches.length > 0}
           groupAthleteCount={data.athleteCount}
           isPoolLoading={data.isPoolLoading}
+          matchLabel={data.matchLabel}
         />
       </div>
 

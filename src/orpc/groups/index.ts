@@ -50,21 +50,30 @@ export const removeGroup = authedProcedure
 
 export const autoAssignGroup = authedProcedure
   .input(AutoAssignSchema)
-  .handler(async ({ input }) => {
-    const result = await GroupDAL.autoAssign(input);
+  .handler(async ({ input, context }) => {
+    const result = await GroupDAL.autoAssign({
+      ...input,
+      adminId: context.user.id,
+    });
     return result;
   });
 
 export const assignAthleteToGroup = authedProcedure
   .input(AssignAthleteSchema)
-  .handler(async ({ input }) => {
-    const athlete = await GroupDAL.assignAthlete(input);
+  .handler(async ({ input, context }) => {
+    const athlete = await GroupDAL.assignAthlete({
+      ...input,
+      adminId: context.user.id,
+    });
     return athlete;
   });
 
 export const unassignAthleteFromGroup = authedProcedure
   .input(UnassignAthleteSchema)
-  .handler(async ({ input }) => {
-    const athlete = await GroupDAL.unassignAthlete(input);
+  .handler(async ({ input, context }) => {
+    const athlete = await GroupDAL.unassignAthlete({
+      ...input,
+      adminId: context.user.id,
+    });
     return athlete;
   });

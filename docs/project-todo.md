@@ -8,11 +8,6 @@ This document tracks feature status across the TKU Sparring System.
 - Arena Client: round-end auto-submit + match-end finish flow
 - Arena Client: offline-tolerant scoring + sync on reconnect
 
-## Active
-
-- Admin CRM: Audit log (critical actions)
-- Advance Settings: selection view endpoint + device restore
-
 ## Finished
 
 - Arena Client: match configuration (player names, rounds, break time, health)
@@ -28,3 +23,5 @@ This document tracks feature status across the TKU Sparring System.
 - Admin CRM: Groups tab (constraints, auto-assign, DnD overrides)
 - Admin CRM: Brackets tab (SVG canvas, lock/unlock, shuffle)
 - Admin CRM: Match detail panel (scores, participants, manual winner override)
+- Admin CRM: Audit log (Activity panel + critical action logging)
+- Advance Settings: selection view endpoint + device restore (server API)

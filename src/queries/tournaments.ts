@@ -387,12 +387,16 @@ export function useRetireArena() {
 
 export function useSetTournamentStatus(options?: { onSuccess?: () => void }) {
   const invalidate = useInvalidateTournaments();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: { id: string; status: 'active' | 'completed' }) =>
       client.tournament.setStatus(data),
     onSuccess: (tournament) => {
       invalidate();
+      void queryClient.invalidateQueries({
+        queryKey: ['activity', 'list', tournament.id],
+      });
       toast.success(
         tournament.status === 'active'
           ? 'Tournament activated'

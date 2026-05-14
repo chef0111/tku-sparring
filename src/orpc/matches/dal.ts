@@ -674,37 +674,58 @@ export class MatchDAL {
     return updated;
   }
 
-  static async swapParticipants(input: SwapParticipantsDTO, _adminId: string) {
-    const match = await prisma.match.findUnique({
-      where: { id: input.matchId },
-      include: { group: { include: { tournament: true } } },
-    });
-    if (!match) throw new Error('Match not found');
+  static async swapParticipants(input: SwapParticipantsDTO, adminId: string) {
+    return prisma.$transaction(async (tx) => {
+      const match = await tx.match.findUnique({
+        where: { id: input.matchId },
+        include: { group: { include: { tournament: true } } },
+      });
+      if (!match) throw new Error('Match not found');
 
-    const status = match.group.tournament.status;
-    if (status === 'completed') {
-      throw new Error('Cannot swap participants in a completed tournament');
-    }
+      const status = match.group.tournament.status;
+      if (status === 'completed') {
+        throw new Error('Cannot swap participants in a completed tournament');
+      }
 
-    const redAthlete = input.redTournamentAthleteId
-      ? await prisma.tournamentAthlete.findUnique({
-          where: { id: input.redTournamentAthleteId },
-        })
-      : null;
-    const blueAthlete = input.blueTournamentAthleteId
-      ? await prisma.tournamentAthlete.findUnique({
-          where: { id: input.blueTournamentAthleteId },
-        })
-      : null;
+      const redAthlete = input.redTournamentAthleteId
+        ? await tx.tournamentAthlete.findUnique({
+            where: { id: input.redTournamentAthleteId },
+          })
+        : null;
+      const blueAthlete = input.blueTournamentAthleteId
+        ? await tx.tournamentAthlete.findUnique({
+            where: { id: input.blueTournamentAthleteId },
+          })
+        : null;
 
-    return prisma.match.update({
-      where: { id: input.matchId },
-      data: {
-        redTournamentAthleteId: input.redTournamentAthleteId,
-        blueTournamentAthleteId: input.blueTournamentAthleteId,
-        redAthleteId: redAthlete?.athleteProfileId ?? null,
-        blueAthleteId: blueAthlete?.athleteProfileId ?? null,
-      },
+      const updated = await tx.match.update({
+        where: { id: input.matchId },
+        data: {
+          redTournamentAthleteId: input.redTournamentAthleteId,
+          blueTournamentAthleteId: input.blueTournamentAthleteId,
+          redAthleteId: redAthlete?.athleteProfileId ?? null,
+          blueAthleteId: blueAthlete?.athleteProfileId ?? null,
+        },
+      });
+
+      await recordTournamentActivity(
+        {
+          tournamentId: match.tournamentId,
+          adminId,
+          eventType: 'match.swap_participants',
+          entityType: 'match',
+          entityId: input.matchId,
+          payload: {
+            previousRedTournamentAthleteId: match.redTournamentAthleteId,
+            previousBlueTournamentAthleteId: match.blueTournamentAthleteId,
+            redTournamentAthleteId: input.redTournamentAthleteId,
+            blueTournamentAthleteId: input.blueTournamentAthleteId,
+          },
+        },
+        tx
+      );
+
+      return updated;
     });
   }
 }

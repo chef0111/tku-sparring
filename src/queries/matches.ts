@@ -42,6 +42,7 @@ function useInvalidateMatches() {
     void queryClient.invalidateQueries({ queryKey: ['match'] });
     void queryClient.invalidateQueries({ queryKey: ['tournament'] });
     void invalidateOrpcGroupListQueries(queryClient);
+    void queryClient.invalidateQueries({ queryKey: ['activity'] });
   };
 }
 

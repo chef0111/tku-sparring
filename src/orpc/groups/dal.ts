@@ -6,6 +6,7 @@ import type {
   UnassignAthleteDTO,
   UpdateGroupDTO,
 } from './dto';
+import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { prisma } from '@/lib/db';
 
 export class GroupDAL {
@@ -50,54 +51,115 @@ export class GroupDAL {
     return prisma.group.delete({ where: { id } });
   }
 
-  static async autoAssign(input: AutoAssignDTO) {
-    const group = await prisma.group.findUnique({
-      where: { id: input.groupId },
-    });
-    if (!group) throw new Error('Group not found');
+  static async autoAssign(input: AutoAssignDTO & { adminId: string }) {
+    return prisma.$transaction(async (tx) => {
+      const group = await tx.group.findUnique({
+        where: { id: input.groupId },
+      });
+      if (!group) throw new Error('Group not found');
 
-    const where: Prisma.TournamentAthleteWhereInput = {
-      tournamentId: input.tournamentId,
-      AND: [GroupDAL.UNASSIGNED_GROUP_FILTER],
-    };
-
-    if (group.gender) where.gender = group.gender;
-    if (group.beltMin != null || group.beltMax != null) {
-      where.beltLevel = {
-        ...(group.beltMin != null ? { gte: group.beltMin } : {}),
-        ...(group.beltMax != null ? { lte: group.beltMax } : {}),
+      const where: Prisma.TournamentAthleteWhereInput = {
+        tournamentId: input.tournamentId,
+        AND: [GroupDAL.UNASSIGNED_GROUP_FILTER],
       };
-    }
-    if (group.weightMin != null || group.weightMax != null) {
-      where.weight = {
-        ...(group.weightMin != null ? { gte: group.weightMin } : {}),
-        ...(group.weightMax != null ? { lte: group.weightMax } : {}),
-      };
-    }
 
-    const unassigned = await prisma.tournamentAthlete.findMany({ where });
+      if (group.gender) where.gender = group.gender;
+      if (group.beltMin != null || group.beltMax != null) {
+        where.beltLevel = {
+          ...(group.beltMin != null ? { gte: group.beltMin } : {}),
+          ...(group.beltMax != null ? { lte: group.beltMax } : {}),
+        };
+      }
+      if (group.weightMin != null || group.weightMax != null) {
+        where.weight = {
+          ...(group.weightMin != null ? { gte: group.weightMin } : {}),
+          ...(group.weightMax != null ? { lte: group.weightMax } : {}),
+        };
+      }
 
-    if (unassigned.length === 0) return { assigned: 0 };
+      const unassigned = await tx.tournamentAthlete.findMany({ where });
 
-    await prisma.tournamentAthlete.updateMany({
-      where: { id: { in: unassigned.map((a) => a.id) } },
-      data: { groupId: input.groupId, status: 'assigned' },
+      if (unassigned.length === 0) return { assigned: 0 };
+
+      await tx.tournamentAthlete.updateMany({
+        where: { id: { in: unassigned.map((a) => a.id) } },
+        data: { groupId: input.groupId, status: 'assigned' },
+      });
+
+      await recordTournamentActivity(
+        {
+          tournamentId: input.tournamentId,
+          adminId: input.adminId,
+          eventType: 'group.auto_assign',
+          entityType: 'group',
+          entityId: input.groupId,
+          payload: { count: unassigned.length },
+        },
+        tx
+      );
+
+      return { assigned: unassigned.length };
     });
-
-    return { assigned: unassigned.length };
   }
 
-  static async assignAthlete(input: AssignAthleteDTO) {
-    return prisma.tournamentAthlete.update({
-      where: { id: input.tournamentAthleteId },
-      data: { groupId: input.groupId, status: 'assigned' },
+  static async assignAthlete(input: AssignAthleteDTO & { adminId: string }) {
+    return prisma.$transaction(async (tx) => {
+      const updated = await tx.tournamentAthlete.update({
+        where: { id: input.tournamentAthleteId },
+        data: { groupId: input.groupId, status: 'assigned' },
+      });
+
+      await recordTournamentActivity(
+        {
+          tournamentId: updated.tournamentId,
+          adminId: input.adminId,
+          eventType: 'group.athlete_assigned',
+          entityType: 'tournament_athlete',
+          entityId: updated.id,
+          payload: {
+            groupId: input.groupId,
+            name: updated.name,
+          },
+        },
+        tx
+      );
+
+      return updated;
     });
   }
 
-  static async unassignAthlete(input: UnassignAthleteDTO) {
-    return prisma.tournamentAthlete.update({
-      where: { id: input.tournamentAthleteId },
-      data: { groupId: null, status: 'selected' },
+  static async unassignAthlete(
+    input: UnassignAthleteDTO & { adminId: string }
+  ) {
+    return prisma.$transaction(async (tx) => {
+      const current = await tx.tournamentAthlete.findUnique({
+        where: { id: input.tournamentAthleteId },
+      });
+      if (!current) {
+        throw new Error('Tournament athlete not found');
+      }
+
+      const updated = await tx.tournamentAthlete.update({
+        where: { id: input.tournamentAthleteId },
+        data: { groupId: null, status: 'selected' },
+      });
+
+      await recordTournamentActivity(
+        {
+          tournamentId: updated.tournamentId,
+          adminId: input.adminId,
+          eventType: 'group.athlete_unassigned',
+          entityType: 'tournament_athlete',
+          entityId: updated.id,
+          payload: {
+            previousGroupId: current.groupId,
+            name: updated.name,
+          },
+        },
+        tx
+      );
+
+      return updated;
     });
   }
 }

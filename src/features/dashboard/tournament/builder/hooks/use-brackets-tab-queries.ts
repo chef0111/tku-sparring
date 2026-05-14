@@ -49,7 +49,7 @@ export function useBracketsTabQueries({
 
   const arenaGroupOrder = tournamentQuery.data?.arenaGroupOrder;
 
-  const arenaNumberByMatchId = React.useMemo(() => {
+  const matchLabel = React.useMemo(() => {
     if (!selectedGroup) return new Map<string, number>();
     const arenaIdx = selectedGroup.arenaIndex;
     const groupsOnArena = groups.filter((g) => g.arenaIndex === arenaIdx);
@@ -123,7 +123,7 @@ export function useBracketsTabQueries({
     athletes,
     selectedGroup,
     arenaGroupOrder,
-    arenaNumberByMatchId,
+    matchLabel,
     panelPoolAthletes,
     isPoolLoading,
     athleteCount,

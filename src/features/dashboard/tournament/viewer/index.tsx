@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import {
   CheckCircle2,
   Edit,
+  History,
   Layers,
   LayoutGrid,
   Trophy,
@@ -23,6 +24,7 @@ import {
 import { useTournamentReadOnly } from '@/hooks/use-tournament-read-only';
 import { useSetTournamentStatus } from '@/queries/tournaments';
 import { TournamentStatusPill } from '@/features/dashboard/tournament/list/components/tournament-status-pill';
+import { TournamentActivitySheet } from '@/features/dashboard/tournament/tournament-activity-sheet';
 
 type ConfirmStatus = 'active' | 'completed';
 
@@ -38,6 +40,7 @@ export function TournamentViewer({
   tournamentId,
 }: TournamentViewerProps) {
   const isReadOnly = useTournamentReadOnly(tournamentId);
+  const [activityOpen, setActivityOpen] = React.useState(false);
   const [confirmStatus, setConfirmStatus] =
     React.useState<ConfirmStatus | null>(null);
   const setStatusMutation = useSetTournamentStatus({
@@ -78,6 +81,15 @@ export function TournamentViewer({
       >
         <div className="ml-auto flex items-center gap-2">
           <TournamentStatusPill status={tournament.status} />
+          <Button
+            variant="outline"
+            size="sm"
+            type="button"
+            onClick={() => setActivityOpen(true)}
+          >
+            <History className="mr-1 size-4" />
+            Activity
+          </Button>
           <Button variant="outline" size="sm" asChild>
             <Link
               to="/dashboard/tournaments/$id/builder"
@@ -158,6 +170,12 @@ export function TournamentViewer({
           </div>
         </div>
       </div>
+
+      <TournamentActivitySheet
+        tournamentId={tournamentId}
+        open={activityOpen}
+        onOpenChange={setActivityOpen}
+      />
 
       <Dialog
         open={confirmStatus !== null}

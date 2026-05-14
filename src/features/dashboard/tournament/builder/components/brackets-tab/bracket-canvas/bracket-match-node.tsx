@@ -21,7 +21,7 @@ interface BracketMatchNodeProps {
   pos: MatchPosition;
   matches: Array<MatchData>;
   athleteMap: Map<string, TournamentAthleteData>;
-  arenaNumberByMatchId: Map<string, number>;
+  matchLabel: Map<string, number>;
   onSlotClick: (match: MatchData) => void;
   readOnly: boolean;
 }
@@ -30,7 +30,7 @@ export function BracketMatchNode({
   pos,
   matches,
   athleteMap,
-  arenaNumberByMatchId,
+  matchLabel,
   onSlotClick,
   readOnly,
 }: BracketMatchNodeProps) {
@@ -53,15 +53,9 @@ export function BracketMatchNode({
       match.matchIndex,
       'red'
     );
-    const n = feeder ? arenaNumberByMatchId.get(feeder.id) : undefined;
+    const n = feeder ? matchLabel.get(feeder.id) : undefined;
     return n != null ? formatFeederWinnerLabel(n) : 'Winner pending';
-  }, [
-    arenaNumberByMatchId,
-    match.matchIndex,
-    match.round,
-    matches,
-    redAthlete,
-  ]);
+  }, [matchLabel, match.matchIndex, match.round, matches, redAthlete]);
 
   const blueEmptyLabel = React.useMemo(() => {
     if (blueAthlete) return '';
@@ -72,15 +66,9 @@ export function BracketMatchNode({
       match.matchIndex,
       'blue'
     );
-    const n = feeder ? arenaNumberByMatchId.get(feeder.id) : undefined;
+    const n = feeder ? matchLabel.get(feeder.id) : undefined;
     return n != null ? formatFeederWinnerLabel(n) : 'Winner pending';
-  }, [
-    arenaNumberByMatchId,
-    match.matchIndex,
-    match.round,
-    matches,
-    blueAthlete,
-  ]);
+  }, [matchLabel, match.matchIndex, match.round, matches, blueAthlete]);
 
   const isRedWinner =
     match.winnerId != null && match.winnerId === match.redAthleteId;
@@ -114,7 +102,7 @@ export function BracketMatchNode({
       style={{ left: pos.x, top: pos.y, width: MATCH_W, height: MATCH_H }}
     >
       <p className="text-muted-foreground pointer-events-none absolute -top-4 right-0 left-0 truncate text-center text-[10px] leading-none font-medium tabular-nums">
-        Match {arenaNumberByMatchId.get(match.id)}
+        Match {matchLabel.get(match.id)}
       </p>
       <div
         className={cn(

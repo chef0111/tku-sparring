@@ -4,7 +4,7 @@ const POOL_GENDER = parseAsStringEnum(['M', 'F']);
 const TAB = parseAsStringEnum(['groups', 'brackets']).withDefault('groups');
 
 export function useBuilderManagerQuery() {
-  const [tab] = useQueryState('tab', TAB);
+  const [tab, setTab] = useQueryState('tab', TAB);
   const [selectedGroupId] = useQueryState('group');
   const [poolQuery] = useQueryState('q');
   const [poolGender] = useQueryState('poolGender', POOL_GENDER);
@@ -15,6 +15,7 @@ export function useBuilderManagerQuery() {
 
   return {
     tab,
+    setTab,
     selectedGroupId,
     poolQuery,
     poolGender,

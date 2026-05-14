@@ -33,6 +33,7 @@ interface GroupsPanelProps {
   slotReturnEnabled: boolean;
   groupAthleteCount: number;
   isPoolLoading?: boolean;
+  matchLabel: Map<string, number>;
 }
 
 export function GroupsPanel({
@@ -49,6 +50,7 @@ export function GroupsPanel({
   slotReturnEnabled,
   groupAthleteCount,
   isPoolLoading = false,
+  matchLabel,
 }: GroupsPanelProps) {
   const poolDrop = useDroppable({
     id: `bracket-panel-pool-${selectedGroupId ?? 'none'}`,
@@ -116,6 +118,7 @@ export function GroupsPanel({
               matches={matches}
               onOpenMatch={onOpenMatch}
               showPanelHint={showArrangedHint}
+              matchLabel={matchLabel}
             />
           ) : groupAthleteCount === 0 ? (
             <Empty className="border-none px-2 py-8">

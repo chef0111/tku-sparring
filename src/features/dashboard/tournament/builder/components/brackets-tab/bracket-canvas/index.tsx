@@ -27,7 +27,7 @@ interface BracketCanvasProps {
   matches: Array<MatchData>;
   athletes: Array<TournamentAthleteData>;
   thirdPlaceMatch: boolean;
-  arenaNumberByMatchId: Map<string, number>;
+  matchLabel: Map<string, number>;
   onSlotClick: (match: MatchData) => void;
   readOnly: boolean;
   showArenaOrderButton?: boolean;
@@ -68,7 +68,7 @@ export function BracketCanvas({
   matches,
   athletes,
   thirdPlaceMatch,
-  arenaNumberByMatchId,
+  matchLabel,
   onSlotClick,
   readOnly,
   showArenaOrderButton = false,
@@ -169,7 +169,7 @@ export function BracketCanvas({
               pos={pos}
               matches={matches}
               athleteMap={athleteMap}
-              arenaNumberByMatchId={arenaNumberByMatchId}
+              matchLabel={matchLabel}
               onSlotClick={onSlotClick}
               readOnly={readOnly}
             />
