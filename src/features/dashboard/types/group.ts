@@ -48,4 +48,5 @@ export interface MatchData {
   blueLocked: boolean;
   groupId: string;
   tournamentId: string;
+  arenaSequenceRank?: number | null;
 }

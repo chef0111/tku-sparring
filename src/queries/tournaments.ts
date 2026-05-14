@@ -7,8 +7,19 @@ import {
 } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import type { ListTournamentsDTO } from '@/orpc/tournaments/dto';
-import { client } from '@/orpc/client';
+import type {
+  EnsureArenaSlotDTO,
+  ListTournamentsDTO,
+  MoveGroupArenaDTO,
+  RetireArenaDTO,
+} from '@/orpc/tournaments/dto';
+import { client, orpc } from '@/orpc/client';
+import {
+  mergeArenaGroupOrderAfterCrossArenaMove,
+  mergeArenaGroupOrderAfterRetireArena,
+  patchArenaGroupOrderJson,
+} from '@/lib/tournament/arena-group-order';
+import { invalidateOrpcGroupListQueries } from '@/queries/groups';
 
 const ALL_TOURNAMENTS_PER_PAGE = 1000;
 
@@ -104,14 +115,288 @@ export function useUpdateTournament(options?: { onSuccess?: () => void }) {
   });
 }
 
+export function useSetArenaGroupOrder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: {
+      tournamentId: string;
+      arenaIndex: number;
+      groupIds: Array<string>;
+    }) => client.tournament.setArenaGroupOrder(input),
+    onMutate: async (variables) => {
+      const key = tournamentQueryOptions(variables.tournamentId).queryKey;
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData(key);
+      queryClient.setQueryData(key, (old) => {
+        if (!old || typeof old !== 'object') return old;
+        const o = old as Record<string, unknown>;
+        return {
+          ...o,
+          arenaGroupOrder: patchArenaGroupOrderJson(
+            o.arenaGroupOrder,
+            variables.arenaIndex,
+            variables.groupIds
+          ),
+        };
+      });
+      return { previous };
+    },
+    onError: (err, variables, context) => {
+      const key = tournamentQueryOptions(variables.tournamentId).queryKey;
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(key, context.previous);
+      }
+      toast.error(
+        err instanceof Error ? err.message : 'Could not save arena order'
+      );
+    },
+    onSettled: (_data, _err, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: ['tournament', 'get', variables.tournamentId],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ['match', 'list', 'tournament', variables.tournamentId],
+      });
+    },
+  });
+}
+
+export function useMoveGroupBetweenArenas() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: MoveGroupArenaDTO) =>
+      client.tournament.moveGroupArena(input),
+    onMutate: async (variables) => {
+      const tKey = tournamentQueryOptions(variables.tournamentId).queryKey;
+      const gKey = orpc.group.list.queryOptions({
+        input: { tournamentId: variables.tournamentId },
+      }).queryKey;
+
+      await queryClient.cancelQueries({ queryKey: tKey });
+      await queryClient.cancelQueries({ queryKey: gKey });
+
+      const previousTournament = queryClient.getQueryData(tKey);
+      const previousGroups = queryClient.getQueryData(gKey);
+
+      if (
+        !previousTournament ||
+        typeof previousTournament !== 'object' ||
+        !Array.isArray(previousGroups)
+      ) {
+        return { tKey, gKey, previousTournament, previousGroups };
+      }
+
+      const groups = previousGroups as Array<{
+        id: string;
+        arenaIndex: number;
+      }>;
+      const tournament = previousTournament as
+        | Record<string, unknown>
+        | undefined;
+      const arenaGroupOrder = tournament?.arenaGroupOrder;
+
+      const nextJson = mergeArenaGroupOrderAfterCrossArenaMove({
+        arenaGroupOrder,
+        groups,
+        groupId: variables.groupId,
+        fromArena: variables.fromArena,
+        toArena: variables.toArena,
+        insertIndex: variables.insertIndex,
+      });
+
+      queryClient.setQueryData(tKey, (old) => {
+        if (!old || typeof old !== 'object') return old;
+        const o = old as Record<string, unknown>;
+        return {
+          ...o,
+          arenaGroupOrder: nextJson,
+        };
+      });
+
+      queryClient.setQueryData(gKey, (old) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((g: { id: string; arenaIndex: number }) =>
+          g.id === variables.groupId
+            ? { ...g, arenaIndex: variables.toArena }
+            : g
+        );
+      });
+
+      return {
+        previousTournament,
+        previousGroups,
+        tKey,
+        gKey,
+      };
+    },
+    onError: (err, _variables, context) => {
+      if (context?.previousTournament !== undefined) {
+        queryClient.setQueryData(context.tKey, context.previousTournament);
+      }
+      if (context?.previousGroups !== undefined) {
+        queryClient.setQueryData(context.gKey, context.previousGroups);
+      }
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : 'Could not move group between arenas'
+      );
+    },
+    onSettled: (_data, _err, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: ['tournament', 'get', variables.tournamentId],
+      });
+      void invalidateOrpcGroupListQueries(queryClient);
+      void queryClient.invalidateQueries({
+        queryKey: ['match', 'list', 'tournament', variables.tournamentId],
+      });
+    },
+  });
+}
+
+export function useEnsureArenaSlot() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: EnsureArenaSlotDTO) =>
+      client.tournament.ensureArenaSlot(input),
+    onMutate: async (variables) => {
+      const tKey = tournamentQueryOptions(variables.tournamentId).queryKey;
+      await queryClient.cancelQueries({ queryKey: tKey });
+      const previous = queryClient.getQueryData(tKey);
+      queryClient.setQueryData(tKey, (old) => {
+        if (!old || typeof old !== 'object') return old;
+        const o = old as Record<string, unknown>;
+        return {
+          ...o,
+          arenaGroupOrder: patchArenaGroupOrderJson(
+            o.arenaGroupOrder,
+            variables.arenaIndex,
+            []
+          ),
+        };
+      });
+      return { previous, tKey };
+    },
+    onError: (err, _variables, context) => {
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(context.tKey, context.previous);
+      }
+      toast.error(
+        err instanceof Error ? err.message : 'Could not add arena slot'
+      );
+    },
+    onSettled: (_data, _err, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: ['tournament', 'get', variables.tournamentId],
+      });
+    },
+  });
+}
+
+export function useRetireArena() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: RetireArenaDTO) => client.tournament.retireArena(input),
+    onMutate: async (variables) => {
+      const tKey = tournamentQueryOptions(variables.tournamentId).queryKey;
+      const gKey = orpc.group.list.queryOptions({
+        input: { tournamentId: variables.tournamentId },
+      }).queryKey;
+
+      await queryClient.cancelQueries({ queryKey: tKey });
+      await queryClient.cancelQueries({ queryKey: gKey });
+
+      const previousTournament = queryClient.getQueryData(tKey);
+      const previousGroups = queryClient.getQueryData(gKey);
+
+      if (
+        !previousTournament ||
+        typeof previousTournament !== 'object' ||
+        !Array.isArray(previousGroups)
+      ) {
+        return { tKey, gKey, previousTournament, previousGroups };
+      }
+
+      const groups = previousGroups as Array<{
+        id: string;
+        arenaIndex: number;
+      }>;
+      const tournament = previousTournament as
+        | Record<string, unknown>
+        | undefined;
+      const arenaGroupOrder = tournament?.arenaGroupOrder;
+
+      const nextJson = mergeArenaGroupOrderAfterRetireArena({
+        arenaGroupOrder,
+        groups,
+        fromArena: variables.fromArena,
+        toArena: variables.toArena,
+      });
+
+      queryClient.setQueryData(tKey, (old) => {
+        if (!old || typeof old !== 'object') return old;
+        const o = old as Record<string, unknown>;
+        return {
+          ...o,
+          arenaGroupOrder: nextJson,
+        };
+      });
+
+      queryClient.setQueryData(gKey, (old) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((g: { id: string; arenaIndex: number }) =>
+          g.arenaIndex === variables.fromArena
+            ? { ...g, arenaIndex: variables.toArena }
+            : g
+        );
+      });
+
+      return {
+        previousTournament,
+        previousGroups,
+        tKey,
+        gKey,
+      };
+    },
+    onError: (err, _variables, context) => {
+      if (context?.previousTournament !== undefined) {
+        queryClient.setQueryData(context.tKey, context.previousTournament);
+      }
+      if (context?.previousGroups !== undefined) {
+        queryClient.setQueryData(context.gKey, context.previousGroups);
+      }
+      toast.error(
+        err instanceof Error ? err.message : 'Could not remove arena'
+      );
+    },
+    onSettled: (_data, _err, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: ['tournament', 'get', variables.tournamentId],
+      });
+      void invalidateOrpcGroupListQueries(queryClient);
+      void queryClient.invalidateQueries({
+        queryKey: ['match', 'list', 'tournament', variables.tournamentId],
+      });
+    },
+  });
+}
+
 export function useSetTournamentStatus(options?: { onSuccess?: () => void }) {
   const invalidate = useInvalidateTournaments();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: { id: string; status: 'active' | 'completed' }) =>
       client.tournament.setStatus(data),
     onSuccess: (tournament) => {
       invalidate();
+      void queryClient.invalidateQueries({
+        queryKey: ['activity', 'list', tournament.id],
+      });
       toast.success(
         tournament.status === 'active'
           ? 'Tournament activated'

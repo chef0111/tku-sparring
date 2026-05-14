@@ -35,6 +35,7 @@ function useInvalidateGroups() {
     void queryClient.invalidateQueries({ queryKey: ['tournament'] });
     void invalidateOrpcGroupListQueries(queryClient);
     void queryClient.invalidateQueries({ queryKey: ['tournamentAthlete'] });
+    void queryClient.invalidateQueries({ queryKey: ['activity'] });
   };
 }
 

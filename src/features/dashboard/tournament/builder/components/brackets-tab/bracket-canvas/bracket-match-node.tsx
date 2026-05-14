@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { BracketSlot } from './bracket-slot';
 import type {
   MatchData,
@@ -9,19 +10,27 @@ import {
   MATCH_H,
   MATCH_W,
 } from '@/lib/tournament/bracket-layout';
+import {
+  formatFeederWinnerLabel,
+  getFeederMatch,
+} from '@/lib/tournament/arena-match-label';
 import { cn } from '@/lib/utils';
 import { useSetLock } from '@/queries/matches';
 
 interface BracketMatchNodeProps {
   pos: MatchPosition;
+  matches: Array<MatchData>;
   athleteMap: Map<string, TournamentAthleteData>;
+  matchLabel: Map<string, number>;
   onSlotClick: (match: MatchData) => void;
   readOnly: boolean;
 }
 
 export function BracketMatchNode({
   pos,
+  matches,
   athleteMap,
+  matchLabel,
   onSlotClick,
   readOnly,
 }: BracketMatchNodeProps) {
@@ -34,6 +43,32 @@ export function BracketMatchNode({
   const blueAthlete = match.blueTournamentAthleteId
     ? athleteMap.get(match.blueTournamentAthleteId)
     : null;
+
+  const redEmptyLabel = React.useMemo(() => {
+    if (redAthlete) return '';
+    if (match.round === 0) return 'Open';
+    const feeder = getFeederMatch(
+      matches,
+      match.round,
+      match.matchIndex,
+      'red'
+    );
+    const n = feeder ? matchLabel.get(feeder.id) : undefined;
+    return n != null ? formatFeederWinnerLabel(n) : 'Winner pending';
+  }, [matchLabel, match.matchIndex, match.round, matches, redAthlete]);
+
+  const blueEmptyLabel = React.useMemo(() => {
+    if (blueAthlete) return '';
+    if (match.round === 0) return 'Open';
+    const feeder = getFeederMatch(
+      matches,
+      match.round,
+      match.matchIndex,
+      'blue'
+    );
+    const n = feeder ? matchLabel.get(feeder.id) : undefined;
+    return n != null ? formatFeederWinnerLabel(n) : 'Winner pending';
+  }, [matchLabel, match.matchIndex, match.round, matches, blueAthlete]);
 
   const isRedWinner =
     match.winnerId != null && match.winnerId === match.redAthleteId;
@@ -63,9 +98,12 @@ export function BracketMatchNode({
 
   return (
     <div
-      className="absolute z-1"
+      className="absolute z-1 overflow-visible"
       style={{ left: pos.x, top: pos.y, width: MATCH_W, height: MATCH_H }}
     >
+      <p className="text-muted-foreground pointer-events-none absolute -top-4 right-0 left-0 truncate text-center text-[10px] leading-none font-medium tabular-nums">
+        Match {matchLabel.get(match.id)}
+      </p>
       <div
         className={cn(
           'bg-card pointer-events-none absolute inset-0 rounded-md border',
@@ -93,6 +131,7 @@ export function BracketMatchNode({
         match={match}
         side="red"
         athlete={redAthlete}
+        emptyLabel={redEmptyLabel}
         locked={match.redLocked}
         wins={match.redWins}
         isWinner={isRedWinner}
@@ -104,6 +143,7 @@ export function BracketMatchNode({
         match={match}
         side="blue"
         athlete={blueAthlete}
+        emptyLabel={blueEmptyLabel}
         locked={match.blueLocked}
         wins={match.blueWins}
         isWinner={isBlueWinner}

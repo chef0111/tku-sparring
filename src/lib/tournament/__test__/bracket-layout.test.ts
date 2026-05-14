@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildConnectorChildLeg, buildConnectorTrunk } from './bracket-layout';
+import { buildConnectorChildLeg, buildConnectorTrunk } from '../bracket-layout';
 
 describe('buildConnectorChildLeg', () => {
   it('uses a single arc at the child-side corner', () => {

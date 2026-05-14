@@ -28,6 +28,8 @@ export interface TournamentData {
   lifecycle: {
     canComplete: boolean;
   };
+  /** Map of arena index string → ordered group ids (draft arena scheduling). */
+  arenaGroupOrder?: unknown;
   groups: Array<{
     id: string;
     name: string;

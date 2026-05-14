@@ -1,6 +1,7 @@
 import { useDroppable } from '@dnd-kit/core';
 import { BetweenHorizonalEnd } from 'lucide-react';
 import { GroupsPanelSkeleton } from '../skeletons';
+import { ArenaOrderRailHint } from './arena-group-order-sheet/arena-order-rail-hint';
 import { BracketActionQueue } from './bracket-action-queue';
 import { GroupsTabsHeader } from './groups-tabs-header';
 import { PanelAthleteRow } from './panel-athlete-row';
@@ -20,28 +21,36 @@ import { cn } from '@/lib/utils';
 
 interface GroupsPanelProps {
   groups: Array<GroupData>;
+  arenaGroupOrder?: unknown;
   selectedGroupId: string | null;
   onSelect: (id: string) => void;
   athletes: Array<TournamentAthleteData>;
   matches: Array<MatchData>;
   onOpenMatch: (match: MatchData) => void;
   readOnly: boolean;
+  isDraft: boolean;
+  onOpenArenaOrder: () => void;
   slotReturnEnabled: boolean;
   groupAthleteCount: number;
   isPoolLoading?: boolean;
+  matchLabel: Map<string, number>;
 }
 
 export function GroupsPanel({
   groups,
+  arenaGroupOrder,
   selectedGroupId,
   onSelect,
   athletes,
   matches,
   onOpenMatch,
   readOnly,
+  isDraft,
+  onOpenArenaOrder,
   slotReturnEnabled,
   groupAthleteCount,
   isPoolLoading = false,
+  matchLabel,
 }: GroupsPanelProps) {
   const poolDrop = useDroppable({
     id: `bracket-panel-pool-${selectedGroupId ?? 'none'}`,
@@ -61,6 +70,13 @@ export function GroupsPanel({
         groups={groups}
         selectedGroupId={selectedGroupId}
         onSelect={onSelect}
+      />
+      <ArenaOrderRailHint
+        groups={groups}
+        arenaGroupOrder={arenaGroupOrder}
+        isDraft={isDraft}
+        readOnly={readOnly}
+        onEdit={onOpenArenaOrder}
       />
       <div
         ref={poolDrop.setNodeRef}
@@ -102,6 +118,7 @@ export function GroupsPanel({
               matches={matches}
               onOpenMatch={onOpenMatch}
               showPanelHint={showArrangedHint}
+              matchLabel={matchLabel}
             />
           ) : groupAthleteCount === 0 ? (
             <Empty className="border-none px-2 py-8">

@@ -1,7 +1,11 @@
 import { z } from 'zod';
 import {
   CreateTournamentSchema,
+  EnsureArenaSlotSchema,
   ListTournamentsSchema,
+  MoveGroupArenaSchema,
+  RetireArenaSchema,
+  SetArenaGroupOrderSchema,
   SetTournamentStatusSchema,
   UpdateTournamentSchema,
 } from './dto';
@@ -47,6 +51,30 @@ export const setTournamentStatus = authedProcedure
       adminId: context.user.id,
     });
     return tournament;
+  });
+
+export const setArenaGroupOrder = authedProcedure
+  .input(SetArenaGroupOrderSchema)
+  .handler(async ({ input }) => {
+    return TournamentDAL.setArenaGroupOrder(input);
+  });
+
+export const moveGroupArena = authedProcedure
+  .input(MoveGroupArenaSchema)
+  .handler(async ({ input }) => {
+    return TournamentDAL.moveGroupBetweenArenas(input);
+  });
+
+export const ensureArenaSlot = authedProcedure
+  .input(EnsureArenaSlotSchema)
+  .handler(async ({ input }) => {
+    return TournamentDAL.ensureArenaSlot(input);
+  });
+
+export const retireArena = authedProcedure
+  .input(RetireArenaSchema)
+  .handler(async ({ input }) => {
+    return TournamentDAL.retireArena(input);
   });
 
 export const removeTournament = authedProcedure

@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import {
   ArrowLeft,
   CheckCircle2,
+  History,
   Lock,
   PlayCircle,
   RefreshCw,
@@ -37,6 +38,7 @@ interface BuilderBottomToolbarProps {
   onLifecycle?: () => void;
   onEditTournament: () => void;
   onDeleteTournament: () => void;
+  onActivity: () => void;
   leasePopoverContent?: React.ReactNode;
 }
 
@@ -105,6 +107,7 @@ export function BuilderBottomToolbar({
   onEditTournament,
   onDeleteTournament,
   leasePopoverContent,
+  onActivity,
 }: BuilderBottomToolbarProps) {
   const status = tournament.status;
   const showLifecycle = status !== 'completed';
@@ -193,6 +196,10 @@ export function BuilderBottomToolbar({
         </div>
 
         <div className="ml-auto flex items-center gap-1">
+          <Button variant="ghost" size="sm" type="button" onClick={onActivity}>
+            <History className="mr-1 size-4" />
+            Activity
+          </Button>
           <DisabledWhenReadOnly readOnly={readOnly}>
             <Button
               variant="ghost"

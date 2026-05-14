@@ -19,16 +19,21 @@ import {
 } from '@/components/ui/empty';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import { Label } from '@/components/ui/label';
+
+interface BracketActionQueueProps {
+  matches: Array<MatchData>;
+  onOpenMatch: (m: MatchData) => void;
+  showPanelHint: boolean;
+  matchLabel: Map<string, number>;
+}
 
 export function BracketActionQueue({
   matches,
   onOpenMatch,
   showPanelHint,
-}: {
-  matches: Array<MatchData>;
-  onOpenMatch: (m: MatchData) => void;
-  showPanelHint: boolean;
-}) {
+  matchLabel,
+}: BracketActionQueueProps) {
   const maxRound = React.useMemo(
     () => Math.max(...matches.map((m) => m.round)),
     [matches]
@@ -46,9 +51,9 @@ export function BracketActionQueue({
             className="bg-primary/80 size-1.5 shrink-0 rounded-full"
             aria-hidden
           />
-          <p className="text-muted-foreground text-sm font-semibold uppercase">
-            Needs attention
-          </p>
+          <Label className="text-muted-foreground text-sm font-semibold uppercase">
+            Available matches
+          </Label>
           {queue.length > 0 ? (
             <Badge
               variant="secondary"
@@ -83,6 +88,7 @@ export function BracketActionQueue({
               isLast={index === queue.length - 1}
               maxRound={maxRound}
               onOpen={onOpenMatch}
+              matchLabel={matchLabel}
             />
           ))}
         </ul>
@@ -100,6 +106,16 @@ export function BracketActionQueue({
   );
 }
 
+interface QueueRowProps {
+  match: MatchData;
+  reasons: Array<string>;
+  maxRound: number;
+  order: number;
+  isLast: boolean;
+  onOpen: (m: MatchData) => void;
+  matchLabel: Map<string, number>;
+}
+
 function QueueRow({
   match,
   reasons,
@@ -107,14 +123,8 @@ function QueueRow({
   order,
   isLast,
   onOpen,
-}: {
-  match: MatchData;
-  reasons: Array<string>;
-  maxRound: number;
-  order: number;
-  isLast: boolean;
-  onOpen: (m: MatchData) => void;
-}) {
+  matchLabel,
+}: QueueRowProps) {
   const roundLabel = getBracketRoundLabel(match.round, maxRound);
 
   return (
@@ -167,7 +177,7 @@ function QueueRow({
         >
           <CardHeader className="gap-1 p-0">
             <CardTitle className="truncate text-sm font-semibold">
-              {roundLabel} — Match {match.matchIndex + 1}
+              Match {matchLabel.get(match.id)}
             </CardTitle>
           </CardHeader>
           <p className="text-muted-foreground relative truncate text-xs">

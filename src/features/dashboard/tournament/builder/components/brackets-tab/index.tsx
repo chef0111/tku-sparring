@@ -1,38 +1,22 @@
 import * as React from 'react';
-import {
-  DndContext,
-  DragOverlay,
-  MouseSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
-import { toast } from 'sonner';
-import { Trophy } from 'lucide-react';
+import { DndContext, DragOverlay } from '@dnd-kit/core';
+import { useBracketsTabDnd } from '../../hooks/use-brackets-tab-dnd';
+import { useBracketsTabQueries } from '../../hooks/use-brackets-tab-queries';
 import { BracketCanvas } from './bracket-canvas';
 import { BracketToolbar } from './bracket-toolbar';
 import { EmptyBracketState } from './empty-bracket-state';
+import { EmptyGroupsPlaceholder } from './empty-groups-placeholder';
+import { ArenaGroupOrderSheet } from './groups-panel/arena-group-order-sheet';
 import { GroupsPanel } from './groups-panel';
 import { MatchDetailPanel } from './match-detail-panel';
 import { LoadingBracketState } from './skeletons';
-import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type { GroupData, MatchData } from '@/features/dashboard/types';
-import { useAssignSlot, useMatches, useSwapSlots } from '@/queries/matches';
-import { useTournamentAthletes } from '@/queries/tournament-athletes';
 
-interface BracketsTabProps {
+export interface BracketsTabProps {
   tournamentId: string;
   groups: Array<GroupData>;
   readOnly: boolean;
   tournamentStatus: string;
-}
-
-type DragLabel =
-  | { kind: 'panel'; name: string }
-  | { kind: 'slot'; name: string }
-  | null;
-
-function dndErrorMessage(err: unknown, fallback: string): string {
-  return err instanceof Error ? err.message : fallback;
 }
 
 export function BracketsTab({
@@ -48,7 +32,7 @@ export function BracketsTab({
     null
   );
   const [panelOpen, setPanelOpen] = React.useState(false);
-  const [dragLabel, setDragLabel] = React.useState<DragLabel>(null);
+  const [arenaOrderSheetOpen, setArenaOrderSheetOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (!selectedGroupId && groups.length > 0) {
@@ -59,166 +43,26 @@ export function BracketsTab({
     }
   }, [groups, selectedGroupId]);
 
-  const matchesQuery = useMatches(selectedGroupId);
-  const athletesQuery = useTournamentAthletes({
+  const data = useBracketsTabQueries({
     tournamentId,
-    groupId: selectedGroupId ?? undefined,
-    unassignedOnly: false,
-    page: 1,
-    perPage: 200,
-    sorting: [],
+    groups,
+    selectedGroupId,
+    tournamentStatus,
+    readOnly,
   });
 
-  const matches = matchesQuery.data ?? [];
-  const athletes = athletesQuery.data?.items ?? [];
-  const selectedGroup = groups.find((g) => g.id === selectedGroupId);
+  const { sensors, dragLabel, onDragStart, onDragEnd } = useBracketsTabDnd(
+    data.athletes
+  );
 
   const matchForDetailPanel = React.useMemo(() => {
     if (!selectedMatch) return null;
     return (
-      (matches as Array<MatchData>).find((m) => m.id === selectedMatch.id) ??
-      selectedMatch
+      (data.matches as Array<MatchData>).find(
+        (m) => m.id === selectedMatch.id
+      ) ?? selectedMatch
     );
-  }, [matches, selectedMatch]);
-
-  const assignedRound0TaIds = React.useMemo(() => {
-    const s = new Set<string>();
-    for (const m of matches) {
-      if (m.round !== 0) continue;
-      if (m.redTournamentAthleteId) s.add(m.redTournamentAthleteId);
-      if (m.blueTournamentAthleteId) s.add(m.blueTournamentAthleteId);
-    }
-    return s;
-  }, [matches]);
-
-  const panelPoolAthletes = React.useMemo(
-    () => athletes.filter((a) => !assignedRound0TaIds.has(a.id)),
-    [athletes, assignedRound0TaIds]
-  );
-
-  const assignSlot = useAssignSlot();
-  const swapSlots = useSwapSlots();
-
-  const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 4 } })
-  );
-
-  const athleteById = React.useMemo(() => {
-    const m = new Map<string, (typeof athletes)[0]>();
-    for (const a of athletes) m.set(a.id, a);
-    return m;
-  }, [athletes]);
-
-  function handleDragStart(e: DragStartEvent) {
-    const d = e.active.data.current as
-      | { from?: string; tournamentAthleteId?: string }
-      | undefined;
-    if (!d) return;
-    if (d.from === 'panel' && d.tournamentAthleteId) {
-      const a = athleteById.get(d.tournamentAthleteId);
-      setDragLabel({
-        kind: 'panel',
-        name: a?.name ?? 'Athlete',
-      });
-      return;
-    }
-    if (d.from === 'slot') {
-      const taId =
-        'tournamentAthleteId' in d && d.tournamentAthleteId
-          ? d.tournamentAthleteId
-          : null;
-      const a = taId ? athleteById.get(taId) : null;
-      setDragLabel({ kind: 'slot', name: a?.name ?? 'Athlete' });
-    }
-  }
-
-  function handleDragEnd(e: DragEndEvent) {
-    setDragLabel(null);
-    const src = e.active.data.current as
-      | {
-          from?: string;
-          tournamentAthleteId?: string | null;
-          groupId?: string;
-          matchId?: string;
-          side?: 'red' | 'blue';
-        }
-      | undefined;
-    const dst = e.over?.data.current as
-      | {
-          from?: string;
-          groupId?: string | null;
-          matchId?: string;
-          side?: 'red' | 'blue';
-          locked?: boolean;
-        }
-      | undefined;
-
-    if (!src) return;
-    if (e.active.id === e.over?.id) return;
-
-    if (
-      src.from === 'panel' &&
-      src.tournamentAthleteId &&
-      dst?.matchId &&
-      dst.side &&
-      !dst.locked
-    ) {
-      assignSlot.mutate(
-        {
-          matchId: dst.matchId,
-          side: dst.side,
-          tournamentAthleteId: src.tournamentAthleteId,
-        },
-        {
-          onError: (err) => toast.error(dndErrorMessage(err, 'Assign failed')),
-        }
-      );
-      return;
-    }
-
-    if (
-      src.from === 'slot' &&
-      src.matchId &&
-      src.side &&
-      dst?.from === 'panel-drop' &&
-      dst.groupId &&
-      src.groupId === dst.groupId
-    ) {
-      assignSlot.mutate(
-        {
-          matchId: src.matchId,
-          side: src.side,
-          tournamentAthleteId: null,
-        },
-        {
-          onError: (err) =>
-            toast.error(dndErrorMessage(err, 'Could not remove')),
-        }
-      );
-      return;
-    }
-
-    if (
-      src.from === 'slot' &&
-      src.matchId &&
-      src.side &&
-      dst?.matchId &&
-      dst.side &&
-      !dst.locked
-    ) {
-      swapSlots.mutate(
-        {
-          matchAId: src.matchId,
-          sideA: src.side,
-          matchBId: dst.matchId,
-          sideB: dst.side,
-        },
-        {
-          onError: (err) => toast.error(dndErrorMessage(err, 'Swap failed')),
-        }
-      );
-    }
-  }
+  }, [data.matches, selectedMatch]);
 
   function handleSlotClick(match: MatchData) {
     setSelectedMatch(match);
@@ -226,54 +70,43 @@ export function BracketsTab({
   }
 
   if (groups.length === 0) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center gap-3">
-        <div className="bg-muted flex size-16 items-center justify-center rounded-full">
-          <Trophy className="text-muted-foreground size-8" />
-        </div>
-        <h3 className="text-lg font-semibold">No groups yet</h3>
-        <p className="text-muted-foreground max-w-xs text-center text-sm">
-          Create groups and assign athletes before generating brackets.
-        </p>
-      </div>
-    );
+    return <EmptyGroupsPlaceholder />;
   }
-
-  const toolbarDisabled = matches.length === 0;
-  const athleteCount = selectedGroup?._count.tournamentAthletes ?? 0;
-  const isPoolLoading = matchesQuery.isPending || athletesQuery.isPending;
-  const maxBracketRound =
-    matches.length > 0 ? Math.max(...matches.map((m) => m.round)) : 0;
 
   return (
     <DndContext
       sensors={sensors}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
     >
       <div className="flex h-full min-h-0 w-full">
         <div className="relative min-h-0 min-w-0 flex-1">
-          {matchesQuery.isPending ? (
+          {data.matchesQuery.isPending ? (
             <LoadingBracketState />
-          ) : matches.length === 0 ? (
+          ) : data.matches.length === 0 ? (
             <EmptyBracketState
               groupId={selectedGroupId}
               readOnly={readOnly}
               tournamentStatus={tournamentStatus}
-              athleteCount={athleteCount}
+              athleteCount={data.athleteCount}
             />
           ) : (
             <BracketCanvas
-              matches={matches as Array<MatchData>}
-              athletes={athletes}
-              thirdPlaceMatch={selectedGroup?.thirdPlaceMatch ?? false}
+              matches={data.matches as Array<MatchData>}
+              athletes={data.athletes}
+              thirdPlaceMatch={data.selectedGroup?.thirdPlaceMatch ?? false}
+              matchLabel={data.matchLabel}
               onSlotClick={handleSlotClick}
               readOnly={readOnly}
+              showArenaOrderButton={data.showArenaOrderEntry}
+              arenaOrderDisabled={data.arenaOrderEditBlocked}
+              arenaOrderDisabledTooltip={data.arenaOrderDisabledTooltip}
+              onOpenArenaOrder={() => setArenaOrderSheetOpen(true)}
             />
           )}
           <BracketToolbar
             groupId={selectedGroupId}
-            disabled={toolbarDisabled}
+            disabled={data.toolbarDisabled}
             readOnly={readOnly}
             tournamentStatus={tournamentStatus}
           />
@@ -281,15 +114,19 @@ export function BracketsTab({
 
         <GroupsPanel
           groups={groups}
+          arenaGroupOrder={data.arenaGroupOrder}
           selectedGroupId={selectedGroupId}
           onSelect={setSelectedGroupId}
-          athletes={panelPoolAthletes}
-          matches={matches as Array<MatchData>}
+          athletes={data.panelPoolAthletes}
+          matches={data.matches as Array<MatchData>}
           onOpenMatch={handleSlotClick}
           readOnly={readOnly}
-          slotReturnEnabled={matches.length > 0}
-          groupAthleteCount={athleteCount}
-          isPoolLoading={isPoolLoading}
+          isDraft={tournamentStatus === 'draft'}
+          onOpenArenaOrder={() => setArenaOrderSheetOpen(true)}
+          slotReturnEnabled={data.matches.length > 0}
+          groupAthleteCount={data.athleteCount}
+          isPoolLoading={data.isPoolLoading}
+          matchLabel={data.matchLabel}
         />
       </div>
 
@@ -305,10 +142,18 @@ export function BracketsTab({
         match={matchForDetailPanel}
         open={panelOpen}
         onOpenChange={setPanelOpen}
-        athletes={athletes}
+        athletes={data.athletes}
         readOnly={readOnly}
         tournamentStatus={tournamentStatus}
-        maxBracketRound={maxBracketRound}
+        maxBracketRound={data.maxBracketRound}
+      />
+
+      <ArenaGroupOrderSheet
+        open={arenaOrderSheetOpen}
+        onOpenChange={setArenaOrderSheetOpen}
+        tournamentId={tournamentId}
+        groups={groups}
+        readOnly={readOnly}
       />
     </DndContext>
   );

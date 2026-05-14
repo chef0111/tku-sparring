@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { buildBracketActionQueue } from './bracket-action-queue';
-import type { BracketActionQueueItem } from './bracket-action-queue';
+import { buildBracketActionQueue } from '../bracket-action-queue';
+import type { BracketActionQueueItem } from '../bracket-action-queue';
 import type { MatchData } from '@/features/dashboard/types';
 
 function baseMatch(over: Partial<MatchData>): MatchData {

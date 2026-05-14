@@ -121,7 +121,7 @@ export function MatchDetailPanel({
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={onOpenChange} modal={false}>
       <SheetContent
         side="right"
         className="flex w-full flex-col gap-0 p-0 sm:max-w-md"
