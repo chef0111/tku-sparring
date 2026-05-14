@@ -5,11 +5,7 @@ import { ArenaOrderRailHint } from './arena-group-order-sheet/arena-order-rail-h
 import { BracketActionQueue } from './bracket-action-queue';
 import { GroupsTabsHeader } from './groups-tabs-header';
 import { PanelAthleteRow } from './panel-athlete-row';
-import type {
-  GroupData,
-  MatchData,
-  TournamentAthleteData,
-} from '@/features/dashboard/types';
+import { useTournamentBracket } from '@/features/dashboard/tournament/builder/context/tournament-bracket/use-tournament-bracket';
 import {
   Empty,
   EmptyDescription,
@@ -19,39 +15,23 @@ import {
 } from '@/components/ui/empty';
 import { cn } from '@/lib/utils';
 
-interface GroupsPanelProps {
-  groups: Array<GroupData>;
-  arenaGroupOrder?: unknown;
-  selectedGroupId: string | null;
-  onSelect: (id: string) => void;
-  athletes: Array<TournamentAthleteData>;
-  matches: Array<MatchData>;
-  onOpenMatch: (match: MatchData) => void;
-  readOnly: boolean;
-  isDraft: boolean;
-  onOpenArenaOrder: () => void;
-  slotReturnEnabled: boolean;
-  groupAthleteCount: number;
-  isPoolLoading?: boolean;
-  matchLabel: Map<string, number>;
-}
+export function GroupsPanel() {
+  const {
+    groups,
+    arenaGroupOrder,
+    selectedGroupId,
+    setSelectedGroupId,
+    panelPoolAthletes,
+    matches,
+    readOnly,
+    isDraft,
+    setArenaOrderSheetOpen,
+    slotReturnEnabled,
+    athleteCount,
+    isPoolLoading,
+    showArrangedHint,
+  } = useTournamentBracket();
 
-export function GroupsPanel({
-  groups,
-  arenaGroupOrder,
-  selectedGroupId,
-  onSelect,
-  athletes,
-  matches,
-  onOpenMatch,
-  readOnly,
-  isDraft,
-  onOpenArenaOrder,
-  slotReturnEnabled,
-  groupAthleteCount,
-  isPoolLoading = false,
-  matchLabel,
-}: GroupsPanelProps) {
   const poolDrop = useDroppable({
     id: `bracket-panel-pool-${selectedGroupId ?? 'none'}`,
     disabled: readOnly || !selectedGroupId || !slotReturnEnabled,
@@ -61,22 +41,19 @@ export function GroupsPanel({
     },
   });
 
-  const showArrangedHint =
-    slotReturnEnabled && !readOnly && groupAthleteCount > 0;
-
   return (
     <aside className="bg-sidebar/50 flex h-full min-h-0 w-xs shrink-0 flex-col border-l">
       <GroupsTabsHeader
         groups={groups}
         selectedGroupId={selectedGroupId}
-        onSelect={onSelect}
+        onSelect={setSelectedGroupId}
       />
       <ArenaOrderRailHint
         groups={groups}
         arenaGroupOrder={arenaGroupOrder}
         isDraft={isDraft}
         readOnly={readOnly}
-        onEdit={onOpenArenaOrder}
+        onEdit={() => setArenaOrderSheetOpen(true)}
       />
       <div
         ref={poolDrop.setNodeRef}
@@ -88,7 +65,7 @@ export function GroupsPanel({
         <div className="flex flex-col gap-1.5 p-2">
           {isPoolLoading ? (
             <GroupsPanelSkeleton showPanelHint={showArrangedHint} />
-          ) : athletes.length > 0 ? (
+          ) : panelPoolAthletes.length > 0 ? (
             <>
               <header className="flex flex-col gap-1 px-0.5">
                 <div className="flex items-center gap-2">
@@ -104,7 +81,7 @@ export function GroupsPanel({
                   Drag & drop athletes to bracket
                 </p>
               </header>
-              {athletes.map((a) => (
+              {panelPoolAthletes.map((a) => (
                 <PanelAthleteRow
                   key={a.id}
                   athlete={a}
@@ -114,13 +91,8 @@ export function GroupsPanel({
               ))}
             </>
           ) : matches.length > 0 ? (
-            <BracketActionQueue
-              matches={matches}
-              onOpenMatch={onOpenMatch}
-              showPanelHint={showArrangedHint}
-              matchLabel={matchLabel}
-            />
-          ) : groupAthleteCount === 0 ? (
+            <BracketActionQueue />
+          ) : athleteCount === 0 ? (
             <Empty className="border-none px-2 py-8">
               <EmptyHeader>
                 <EmptyTitle>No athletes in this group</EmptyTitle>

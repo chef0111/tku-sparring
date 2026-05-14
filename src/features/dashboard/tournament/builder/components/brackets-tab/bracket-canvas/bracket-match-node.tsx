@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTournamentBracket } from '../../../context/tournament-bracket/use-tournament-bracket';
 import { BracketSlot } from './bracket-slot';
 import type {
   MatchData,
@@ -21,19 +22,14 @@ interface BracketMatchNodeProps {
   pos: MatchPosition;
   matches: Array<MatchData>;
   athleteMap: Map<string, TournamentAthleteData>;
-  matchLabel: Map<string, number>;
-  onSlotClick: (match: MatchData) => void;
-  readOnly: boolean;
 }
 
 export function BracketMatchNode({
   pos,
   matches,
   athleteMap,
-  matchLabel,
-  onSlotClick,
-  readOnly,
 }: BracketMatchNodeProps) {
+  const { matchLabel, handleSlotClick, readOnly } = useTournamentBracket();
   const { match } = pos;
   const setLock = useSetLock();
 
@@ -135,7 +131,7 @@ export function BracketMatchNode({
         locked={match.redLocked}
         wins={match.redWins}
         isWinner={isRedWinner}
-        onSlotClick={onSlotClick}
+        onSlotClick={handleSlotClick}
         onToggleLock={toggleRed}
         readOnly={readOnly}
       />
@@ -147,7 +143,7 @@ export function BracketMatchNode({
         locked={match.blueLocked}
         wins={match.blueWins}
         isWinner={isBlueWinner}
-        onSlotClick={onSlotClick}
+        onSlotClick={handleSlotClick}
         onToggleLock={toggleBlue}
         readOnly={readOnly}
       />

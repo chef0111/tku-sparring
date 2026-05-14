@@ -151,3 +151,5 @@ export function useBracketsTabDnd(athletes: Array<TournamentAthleteData>) {
 
   return { sensors, dragLabel, onDragStart, onDragEnd };
 }
+
+export type BracketsTabDndSnapshot = ReturnType<typeof useBracketsTabDnd>;

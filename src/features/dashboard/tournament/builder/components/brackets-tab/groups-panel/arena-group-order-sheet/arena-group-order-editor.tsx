@@ -6,10 +6,11 @@ import {
 } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, MinusIcon } from 'lucide-react';
+import { GripVertical, MapPin, MinusIcon } from 'lucide-react';
 import type { GroupData } from '@/features/dashboard/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Label } from '@/components/ui/label';
 
 /** Live insert position when dragging a group from another arena. */
 export type ArenaCrossInsertPreview =
@@ -101,7 +102,7 @@ function SortableArenaGroupRow({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'bg-background flex items-center justify-between gap-2 rounded-md border px-2 py-1',
+        'bg-accent dark:bg-background/80 flex items-center justify-between gap-2 rounded-md border px-2 py-1',
         isDragging && 'shadow-md'
       )}
     >
@@ -161,7 +162,6 @@ interface ArenaGroupOrderListProps {
   groupOrder: Array<string>;
   readOnly: boolean;
   crossArenaDropPreview?: ArenaCrossInsertPreview | null;
-  /** When set with `onRequestRetire`, shows a control to open retire flow. */
   showRetireArena?: boolean;
   onRequestRetire?: () => void;
 }
@@ -186,9 +186,10 @@ export function ArenaGroupOrderList({
   return (
     <div className="border-border bg-muted/30 rounded-md border px-2 py-2">
       <div className="mb-1.5 flex items-center justify-between gap-2">
-        <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+        <Label className="text-muted-foreground mx-1 text-xs font-semibold tracking-wide uppercase">
+          <MapPin className="size-3.5" />
           Arena {arenaIndex}
-        </p>
+        </Label>
         {showRetireArena && onRequestRetire ? (
           <Button
             type="button"

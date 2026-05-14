@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { MatchSheetStatus } from '../match-detail-panel/match-sheet-status';
+import { useTournamentBracket } from '../../../context/tournament-bracket/use-tournament-bracket';
 import type { MatchData } from '@/features/dashboard/types';
 import { buildBracketActionQueue } from '@/lib/tournament/bracket-action-queue';
 import { getBracketRoundLabel } from '@/lib/tournament/bracket-round-label';
@@ -21,26 +22,19 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 
-interface BracketActionQueueProps {
-  matches: Array<MatchData>;
-  onOpenMatch: (m: MatchData) => void;
-  showPanelHint: boolean;
-  matchLabel: Map<string, number>;
-}
+export function BracketActionQueue() {
+  const { matches, handleSlotClick, showArrangedHint, matchLabel } =
+    useTournamentBracket();
 
-export function BracketActionQueue({
-  matches,
-  onOpenMatch,
-  showPanelHint,
-  matchLabel,
-}: BracketActionQueueProps) {
+  const matchList = matches as Array<MatchData>;
+
   const maxRound = React.useMemo(
-    () => Math.max(...matches.map((m) => m.round)),
-    [matches]
+    () => Math.max(...matchList.map((m) => m.round)),
+    [matchList]
   );
   const queue = React.useMemo(
-    () => buildBracketActionQueue(matches),
-    [matches]
+    () => buildBracketActionQueue(matchList),
+    [matchList]
   );
 
   return (
@@ -87,14 +81,14 @@ export function BracketActionQueue({
               order={index + 1}
               isLast={index === queue.length - 1}
               maxRound={maxRound}
-              onOpen={onOpenMatch}
+              onOpen={handleSlotClick}
               matchLabel={matchLabel}
             />
           ))}
         </ul>
       )}
 
-      {showPanelHint && (
+      {showArrangedHint && (
         <div className="flex flex-col gap-1.5 pt-0.5">
           <Separator />
           <p className="text-muted-foreground px-0.5 text-xs leading-snug">
