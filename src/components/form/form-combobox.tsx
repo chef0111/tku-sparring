@@ -22,6 +22,7 @@ import {
 export interface ComboboxData {
   label?: string;
   value?: string;
+  disabled?: boolean;
 }
 
 type FormComboboxProps = FormControlProps & {
@@ -110,8 +111,12 @@ export function FormCombobox({
                   <CommandItem
                     key={item.value}
                     className={itemClassName}
+                    disabled={item.disabled}
                     value={item.value}
                     onSelect={() => {
+                      if (item.disabled) {
+                        return;
+                      }
                       field.handleChange(item.value);
                       setOpen(false);
                     }}

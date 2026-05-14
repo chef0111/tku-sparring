@@ -17,6 +17,8 @@ interface ResultDialogProps {
   redWon: number;
   blueWon: number;
   className?: string;
+  onAccept: () => void | Promise<void>;
+  onCancel: () => void;
 }
 
 export const ResultDialog = ({
@@ -24,6 +26,8 @@ export const ResultDialog = ({
   redWon,
   blueWon,
   className,
+  onAccept,
+  onCancel,
 }: ResultDialogProps) => {
   const { redName, redAvatar, blueName, blueAvatar } = usePlayerStore(
     useShallow((s) => ({
@@ -99,8 +103,22 @@ export const ResultDialog = ({
 
       {/* Actions */}
       <DialogFooter className="flex w-full max-w-7xl items-center justify-center! gap-6">
-        <Button className="action-btn action-btn-cancel">CANCEL RESULT</Button>
-        <Button className="action-btn action-btn-accept">ACCEPT RESULT</Button>
+        <Button
+          type="button"
+          className="action-btn action-btn-cancel"
+          onClick={onCancel}
+        >
+          CANCEL RESULT
+        </Button>
+        <Button
+          type="button"
+          className="action-btn action-btn-accept"
+          onClick={() => {
+            void onAccept();
+          }}
+        >
+          ACCEPT RESULT
+        </Button>
       </DialogFooter>
     </DialogContent>
   );

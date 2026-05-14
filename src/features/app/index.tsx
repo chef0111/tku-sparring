@@ -1,9 +1,10 @@
 import { Activity } from 'react';
-import { AppHUD } from './hud';
-import { ResultDialog } from './match-result';
-import { Scoreboard } from './scoreboard';
+import { AppArenaSideEffects } from './components/app-arena-side-effects';
+import { AppHUD } from './components/hud';
+import { ResultDialog } from './components/match-result';
+import { Scoreboard } from './components/scoreboard';
 import { useMatchResult } from '@/hooks/use-match-result';
-import { SettingsProvider } from '@/contexts/settings';
+import { useFinishMatch } from '@/features/app/hooks/use-finish-match';
 import { Navbar } from '@/components/navigation/navbar';
 import { Dialog } from '@/components/ui/dialog';
 import { useMediaQuery } from '@/hooks/use-media-query';
@@ -11,10 +12,12 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 export const AppHome = () => {
   const { isMatchOver, matchWinner, redWon, blueWon, onClose } =
     useMatchResult();
+  const { accept, cancel } = useFinishMatch();
   const isDesktop = useMediaQuery('(min-width: 1024px)');
 
   return (
-    <SettingsProvider>
+    <>
+      <AppArenaSideEffects />
       <Navbar />
       <Activity mode={isDesktop ? 'visible' : 'hidden'}>
         <AppHUD />
@@ -24,9 +27,11 @@ export const AppHome = () => {
             winner={matchWinner}
             redWon={redWon}
             blueWon={blueWon}
+            onAccept={accept}
+            onCancel={cancel}
           />
         </Dialog>
       </Activity>
-    </SettingsProvider>
+    </>
   );
 };

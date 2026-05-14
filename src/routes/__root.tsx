@@ -13,6 +13,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { NotFound } from '@/components/not-found';
 import { cn } from '@/lib/utils';
+import { SettingsProvider } from '@/contexts/settings';
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -73,7 +74,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="dark h-dvh">
         <NuqsAdapter>
-          <TooltipProvider>{children}</TooltipProvider>
+          <TooltipProvider>
+            <SettingsProvider>{children}</SettingsProvider>
+          </TooltipProvider>
         </NuqsAdapter>
         <Toaster richColors closeButton />
         <TanStackDevtools

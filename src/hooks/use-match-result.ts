@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useMatchStore } from '@/stores/match-store';
-import { useTimerStore } from '@/stores/timer-store';
-import { usePlayerStore } from '@/stores/player-store';
 
 export const useMatchResult = () => {
   const { redWon, blueWon, isMatchOver, matchWinner } = useMatchStore(
@@ -16,9 +14,6 @@ export const useMatchResult = () => {
 
   const setMatchOver = useMatchStore((s) => s.setMatchOver);
   const closeMatchResult = useMatchStore((s) => s.closeMatchResult);
-  const resetMatch = useMatchStore((s) => s.resetMatch);
-  const resetTimer = useTimerStore((s) => s.reset);
-  const resetPlayers = usePlayerStore((s) => s.resetAll);
 
   const prevRedWon = useRef(redWon);
   const prevBlueWon = useRef(blueWon);
@@ -43,10 +38,7 @@ export const useMatchResult = () => {
 
   const handleCloseDialog = useCallback(() => {
     closeMatchResult();
-    resetMatch();
-    resetTimer();
-    resetPlayers();
-  }, [closeMatchResult, resetMatch, resetTimer, resetPlayers]);
+  }, [closeMatchResult]);
 
   return {
     isMatchOver,

@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { publishLeaseEvent, subscribeToLeaseEvents } from './lease-stream';
+import {
+  publishLeaseEvent,
+  publishMatchInvalidateEvent,
+  subscribeToLeaseEvents,
+} from './lease-stream';
 
 describe('lease stream publisher', () => {
   it('isolates throwing listeners so publish does not fail', () => {
@@ -35,5 +39,20 @@ describe('lease stream publisher', () => {
 
     unsubscribeBroken();
     unsubscribeHealthy();
+  });
+
+  it('notifies subscribers on match.invalidate publish', () => {
+    const listener = vi.fn();
+    const unsubscribe = subscribeToLeaseEvents('t-1', listener);
+
+    publishMatchInvalidateEvent('t-1');
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(listener).toHaveBeenCalledWith({
+      type: 'match.invalidate',
+      tournamentId: 't-1',
+    });
+
+    unsubscribe();
   });
 });

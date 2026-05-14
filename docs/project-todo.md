@@ -4,11 +4,13 @@ This document tracks feature status across the TKU Sparring System.
 
 ## Pending
 
+## Active
+
+## Finished
+
 - Arena Client: match selection via Advance Settings
 - Arena Client: round-end auto-submit + match-end finish flow
 - Arena Client: offline-tolerant scoring + sync on reconnect
-
-## Finished
 
 - Arena Client: match configuration (player names, rounds, break time, health)
 - Arena Client: scoring system (6-point scoring, critical hit feedback)

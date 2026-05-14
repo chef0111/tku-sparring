@@ -76,7 +76,7 @@ export const AppSettings = () => {
                   )}
                 >
                   {disabled && (
-                    <div className="bg-background/80 absolute top-0 left-0 z-50 flex h-full w-full items-center justify-center rounded-md backdrop-blur-sm">
+                    <div className="bg-background/80 absolute top-0 left-0 z-50 flex size-full items-center justify-center rounded-md supports-backdrop-filter:backdrop-blur-sm">
                       <Unauthorized />
                     </div>
                   )}

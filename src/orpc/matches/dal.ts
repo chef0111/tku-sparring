@@ -10,6 +10,7 @@ import type {
   UpdateScoreDTO,
 } from './dto';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
+import { publishMatchInvalidateEvent } from '@/orpc/lease/lease-stream';
 import { prisma } from '@/lib/db';
 
 export class MatchDAL {
@@ -626,6 +627,8 @@ export class MatchDAL {
       },
     });
 
+    publishMatchInvalidateEvent(match.tournamentId);
+
     return updated;
   }
 
@@ -670,6 +673,8 @@ export class MatchDAL {
         reason: input.reason,
       },
     });
+
+    publishMatchInvalidateEvent(match.tournamentId);
 
     return updated;
   }

@@ -3,7 +3,15 @@ export interface LeaseStreamInvalidateEvent {
   tournamentId: string;
 }
 
-type LeaseStreamEvent = LeaseStreamInvalidateEvent;
+export interface MatchInvalidateEvent {
+  type: 'match.invalidate';
+  tournamentId: string;
+}
+
+export type LeaseStreamEvent =
+  | LeaseStreamInvalidateEvent
+  | MatchInvalidateEvent;
+
 type LeaseStreamListener = (event: LeaseStreamEvent) => void;
 
 const leaseStreamListeners = new Map<string, Set<LeaseStreamListener>>();
@@ -49,4 +57,8 @@ export function publishLeaseEvent(event: LeaseStreamEvent) {
   if (listeners.size === 0) {
     leaseStreamListeners.delete(event.tournamentId);
   }
+}
+
+export function publishMatchInvalidateEvent(tournamentId: string) {
+  publishLeaseEvent({ type: 'match.invalidate', tournamentId });
 }

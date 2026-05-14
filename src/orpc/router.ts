@@ -65,7 +65,10 @@ import {
   respondTakeover,
 } from './lease';
 import { listForTournament as listActivityForTournament } from './activity';
-import { selectionView as advanceSettingsSelectionView } from './advance-settings';
+import {
+  selectionCatalog as advanceSettingsSelectionCatalog,
+  selectionMatches as advanceSettingsSelectionMatches,
+} from './advance-settings';
 import { getLastSelection, setLastSelection } from './device-last-selection';
 
 export default {
@@ -137,7 +140,8 @@ export default {
     listForTournament: listActivityForTournament,
   },
   advanceSettings: {
-    selectionView: advanceSettingsSelectionView,
+    selectionCatalog: advanceSettingsSelectionCatalog,
+    selectionMatches: advanceSettingsSelectionMatches,
   },
   device: {
     lastSelection: {
