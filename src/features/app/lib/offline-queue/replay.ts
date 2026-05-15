@@ -1,8 +1,5 @@
 import { deleteById, incrementAttempts, peekOrdered } from './queue';
-import type {
-  MatchClaimHeartbeatDTO,
-  ReleaseMatchClaimDTO,
-} from '@/orpc/arena-match-claim/dto';
+import type { ReleaseMatchClaimDTO } from '@/orpc/arena-match-claim/dto';
 import type { SetLastSelectionDTO } from '@/orpc/device-last-selection/dto';
 import type { SetWinnerDTO, UpdateScoreDTO } from '@/orpc/matches/dto';
 
@@ -19,11 +16,6 @@ async function dispatchRow(row: ArenaMutationRow) {
       return;
     case 'device.lastSelection.set':
       await client.device.lastSelection.set(row.payload as SetLastSelectionDTO);
-      return;
-    case 'arenaMatchClaim.heartbeat':
-      await client.arenaMatchClaim.heartbeat(
-        row.payload as MatchClaimHeartbeatDTO
-      );
       return;
     case 'arenaMatchClaim.release':
       await client.arenaMatchClaim.release(row.payload as ReleaseMatchClaimDTO);

@@ -63,7 +63,6 @@ import {
 } from './advance-settings';
 import {
   claim as arenaMatchClaim,
-  heartbeat as arenaMatchClaimHeartbeat,
   release as arenaMatchClaimRelease,
 } from './arena-match-claim';
 import { getLastSelection, setLastSelection } from './device-last-selection';
@@ -134,7 +133,6 @@ export default {
   },
   arenaMatchClaim: {
     claim: arenaMatchClaim,
-    heartbeat: arenaMatchClaimHeartbeat,
     release: arenaMatchClaimRelease,
   },
   device: {

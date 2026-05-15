@@ -233,13 +233,21 @@ export function useAdvanceSettings(args: {
         tournamentId: advance.tournament,
       }).queryKey,
     });
-    void queryClient.invalidateQueries({
-      queryKey: arenaSelectionMatchesQueryOptions({
-        deviceId,
-        tournamentId: advance.tournament,
-        groupId: advance.group,
-      }).queryKey,
-    });
+    if (
+      deviceId &&
+      advance.tournament &&
+      advance.tournament.length > 0 &&
+      advance.group &&
+      advance.group.length > 0
+    ) {
+      void queryClient.invalidateQueries({
+        queryKey: arenaSelectionMatchesQueryOptions({
+          deviceId,
+          tournamentId: advance.tournament,
+          groupId: advance.group,
+        }).queryKey,
+      });
+    }
   }, [advance.group, advance.tournament, deviceId, queryClient]);
 
   return { tournamentFields, refetchSelection };

@@ -1,9 +1,5 @@
 import { ArenaMatchClaimDAL } from './dal';
-import {
-  ClaimMatchSchema,
-  MatchClaimHeartbeatSchema,
-  ReleaseMatchClaimSchema,
-} from './dto';
+import { ClaimMatchSchema, ReleaseMatchClaimSchema } from './dto';
 import { authedProcedure } from '@/orpc/middleware';
 
 export const claim = authedProcedure
@@ -13,16 +9,6 @@ export const claim = authedProcedure
       matchId: input.matchId,
       groupId: input.groupId,
       tournamentId: input.tournamentId,
-      deviceId: input.deviceId,
-      userId: context.user.id,
-    });
-  });
-
-export const heartbeat = authedProcedure
-  .input(MatchClaimHeartbeatSchema)
-  .handler(async ({ context, input }) => {
-    return ArenaMatchClaimDAL.heartbeat({
-      matchId: input.matchId,
       deviceId: input.deviceId,
       userId: context.user.id,
     });
