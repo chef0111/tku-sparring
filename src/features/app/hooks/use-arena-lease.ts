@@ -26,67 +26,141 @@ export function useArenaLease(args: {
   const { tournamentId, groupId, deviceId } = args;
   const queryClient = useQueryClient();
   const { mutateAsync: arenaMutate } = useArenaMutation();
+  const arenaMutateRef = React.useRef(arenaMutate);
+  arenaMutateRef.current = arenaMutate;
 
   useLeaseStream(tournamentId ?? '');
 
-  const leasesQuery = useLeases(tournamentId ?? '', deviceId);
+  const leasesQuery = useLeases(tournamentId, deviceId);
 
   React.useEffect(() => {
     if (!tournamentId || !groupId || !deviceId) {
       return;
     }
 
+    if (!leasesQuery.isFetched) {
+      return;
+    }
+
+    const rowSnapshot = leasesQuery.data?.find((l) => l.groupId === groupId);
+    const snapshotStatus = rowSnapshot?.leaseStatus;
+
+    if (
+      snapshotStatus === 'held_by_other' ||
+      snapshotStatus === 'pending_takeover'
+    ) {
+      return;
+    }
+
     let cancelled = false;
+    let heartbeatId: number | undefined;
+    let shouldReleaseOnCleanup = false;
+
+    const clearHeartbeat = () => {
+      if (heartbeatId != null) {
+        window.clearInterval(heartbeatId);
+        heartbeatId = undefined;
+      }
+    };
 
     void (async () => {
-      try {
-        await client.lease.acquire({ groupId, deviceId });
-        invalidateLeaseList(queryClient, tournamentId);
-      } catch (e) {
-        if (!cancelled) {
-          toast.error('Could not acquire group lease', {
-            description: e instanceof Error ? e.message : 'Unknown error',
-          });
+      let leaseReady = false;
+      /** True only when we actually called acquire (not snapshot skip / idempotent). */
+      let didCallAcquire = false;
+      if (snapshotStatus === 'held_by_me') {
+        leaseReady = true;
+      } else {
+        try {
+          await client.lease.acquire({ groupId, deviceId });
+          leaseReady = true;
+          didCallAcquire = true;
+        } catch (e) {
+          let msg = '';
+          if (e instanceof Error) {
+            msg = e.message;
+          } else if (
+            typeof e === 'object' &&
+            e !== null &&
+            'message' in e &&
+            typeof (e as { message: unknown }).message === 'string'
+          ) {
+            msg = (e as { message: string }).message;
+          }
+          if (msg.includes('already controlled by this device')) {
+            leaseReady = true;
+          } else if (!cancelled) {
+            toast.error('Could not acquire group lease', {
+              description: msg || 'Unknown error',
+            });
+            return;
+          }
         }
       }
+
+      if (!leaseReady) {
+        return;
+      }
+
+      if (cancelled) {
+        void arenaMutateRef
+          .current({
+            kind: 'lease.release',
+            payload: { groupId, deviceId },
+          })
+          .catch(() => {});
+        return;
+      }
+
+      if (didCallAcquire) {
+        invalidateLeaseList(queryClient, tournamentId);
+      }
+      heartbeatId = window.setInterval(() => {
+        void arenaMutateRef
+          .current({
+            kind: 'lease.heartbeat',
+            payload: { groupId, deviceId },
+          })
+          .catch((e) => {
+            const msg = e instanceof Error ? e.message : '';
+            if (msg.includes('Lease is not held')) {
+              clearHeartbeat();
+              shouldReleaseOnCleanup = false;
+            }
+          });
+      }, HEARTBEAT_MS);
+      shouldReleaseOnCleanup = true;
     })();
-
-    const heartbeat = window.setInterval(() => {
-      void arenaMutate({
-        kind: 'lease.heartbeat',
-        payload: { groupId, deviceId },
-      }).catch(() => {});
-    }, HEARTBEAT_MS);
-
-    const release = () => {
-      void arenaMutate({
-        kind: 'lease.release',
-        payload: { groupId, deviceId },
-      }).catch(() => {});
-    };
-
-    const onBeforeUnload = () => {
-      release();
-    };
-
-    window.addEventListener('beforeunload', onBeforeUnload);
 
     return () => {
       cancelled = true;
-      window.clearInterval(heartbeat);
-      window.removeEventListener('beforeunload', onBeforeUnload);
-      release();
+      clearHeartbeat();
+      if (shouldReleaseOnCleanup) {
+        void arenaMutateRef
+          .current({
+            kind: 'lease.release',
+            payload: { groupId, deviceId },
+          })
+          .catch(() => {});
+      }
     };
-  }, [arenaMutate, deviceId, groupId, queryClient, tournamentId]);
+  }, [deviceId, groupId, leasesQuery.isFetched, queryClient, tournamentId]);
+
+  const leaseRowDigest = React.useMemo(() => {
+    const row = leasesQuery.data?.find((l) => l.groupId === groupId);
+    if (!row) {
+      return '';
+    }
+    return `${row.leaseStatus}:${row.takeoverRequests.map((r) => `${r.id}:${r.status}`).join(',')}`;
+  }, [leasesQuery.data, groupId]);
 
   const prevLeaseStatus = React.useRef<string | null>(null);
 
   React.useEffect(() => {
-    if (!tournamentId || !groupId || !deviceId || !leasesQuery.data) {
+    if (!tournamentId || !groupId || !deviceId || leaseRowDigest === '') {
       return;
     }
 
-    const row = leasesQuery.data.find((l) => l.groupId === groupId);
+    const row = leasesQuery.data?.find((l) => l.groupId === groupId);
     if (!row) {
       return;
     }
@@ -142,5 +216,5 @@ export function useArenaLease(args: {
     }
 
     prevLeaseStatus.current = status;
-  }, [deviceId, groupId, leasesQuery.data, queryClient, tournamentId]);
+  }, [deviceId, groupId, leaseRowDigest, queryClient, tournamentId]);
 }

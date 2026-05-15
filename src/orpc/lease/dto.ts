@@ -32,7 +32,7 @@ export const RespondTakeoverSchema = z.object({
 });
 
 export const ListLeasesForTournamentSchema = z.object({
-  tournamentId: z.string(),
+  tournamentId: z.string().min(1, 'tournamentId is required'),
   deviceId: z.string().optional(),
 });
 

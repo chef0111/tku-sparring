@@ -16,6 +16,7 @@ export type AdvanceFormData = StandardFormData & {
   tournament: string | null;
   group: string | null;
   match: string | null;
+  matchLabel: string | null;
 };
 
 export type FormData = {
@@ -45,6 +46,7 @@ export const defaultAdvanceFormData: AdvanceFormData = {
   tournament: null,
   group: null,
   match: null,
+  matchLabel: null,
 };
 
 export const defaultFormData: FormData = {

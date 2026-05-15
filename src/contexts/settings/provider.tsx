@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { toast } from 'sonner';
 import { useShallow } from 'zustand/react/shallow';
+import { useQueryClient } from '@tanstack/react-query';
 import { SettingsContext, defaultFormData } from './context';
 import type { ReactNode } from 'react';
 import type {
@@ -13,8 +14,12 @@ import type {
 import { usePlayerStore } from '@/stores/player-store';
 import { useTimerStore } from '@/stores/timer-store';
 import { useMatchStore } from '@/stores/match-store';
+import { useDeviceId } from '@/hooks/use-device-id';
+import { arenaSelectionMatchesQueryOptions } from '@/features/app/hooks/use-arena-selection-view';
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
+  const queryClient = useQueryClient();
+  const deviceId = useDeviceId();
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'standard' | 'advance'>(
     'standard'
@@ -128,7 +133,30 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       resetRoundStats(advance.roundDuration * 1000);
 
       if (advance.match) {
-        useMatchStore.getState().setMatchId(advance.match);
+        let label = advance.matchLabel?.trim() ?? '';
+        if (!label && advance.tournament && advance.group && deviceId) {
+          const cached = queryClient.getQueryData(
+            arenaSelectionMatchesQueryOptions({
+              deviceId,
+              tournamentId: advance.tournament,
+              groupId: advance.group,
+            }).queryKey
+          ) as { matches: Array<{ id: string; label: string }> } | undefined;
+          label =
+            cached?.matches
+              ?.find((m) => m.id === advance.match)
+              ?.label?.trim() ?? '';
+        }
+        if (!label) {
+          label =
+            advance.match.length > 8
+              ? `Match ${advance.match.slice(-6)}`
+              : advance.match;
+        }
+        useMatchStore.getState().setMatchDisplay({
+          id: advance.match,
+          label,
+        });
       }
     }
 
@@ -144,7 +172,9 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     setIsOpen(false);
   }, [
     activeTab,
+    deviceId,
     formData,
+    queryClient,
     setMaxHealth,
     setRoundDuration,
     setBreakDuration,

@@ -18,16 +18,37 @@ export type LeaseSnapshot = Awaited<
   ReturnType<typeof client.lease.listForTournament>
 >;
 
-export function leasesQueryOptions(tournamentId: string, deviceId?: string) {
+function normalizeTournamentId(
+  tournamentId: string | null | undefined
+): string | null {
+  if (tournamentId == null || tournamentId === '') {
+    return null;
+  }
+  return tournamentId;
+}
+
+export function leasesQueryOptions(
+  tournamentId: string | null | undefined,
+  deviceId?: string
+) {
+  const id = normalizeTournamentId(tournamentId);
   return queryOptions({
-    queryKey: ['lease', 'list', tournamentId, deviceId ?? null] as const,
-    queryFn: () => client.lease.listForTournament({ tournamentId, deviceId }),
+    queryKey: ['lease', 'list', id, deviceId ?? null] as const,
+    queryFn: () =>
+      client.lease.listForTournament({
+        tournamentId: id!,
+        deviceId,
+      }),
+    enabled: id != null,
     staleTime: 30_000,
     gcTime: 5 * 60 * 1000,
   });
 }
 
-export function useLeases(tournamentId: string, deviceId?: string) {
+export function useLeases(
+  tournamentId: string | null | undefined,
+  deviceId?: string
+) {
   return useQuery(leasesQueryOptions(tournamentId, deviceId));
 }
 

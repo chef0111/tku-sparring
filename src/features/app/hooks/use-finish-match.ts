@@ -69,7 +69,10 @@ export function useFinishMatch() {
     resetMatch();
     resetTimer();
     resetPlayers();
-    updateAdvanceForm({ match: null });
+    updateAdvanceForm({
+      match: null,
+      matchLabel: null,
+    });
     setActiveTab('advance');
     setIsOpen(true);
   }, [

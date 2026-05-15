@@ -40,6 +40,13 @@ function writeLocal(data: Persisted) {
   }
 }
 
+function toPersistId(value: string | null | undefined): string | null {
+  if (value == null || value === '') {
+    return null;
+  }
+  return value;
+}
+
 /** Server-first restore + persist selection for Advance Settings. */
 export function useArenaLastSelection() {
   const deviceId = useDeviceId();
@@ -114,20 +121,25 @@ export function useArenaLastSelection() {
       return;
     }
 
+    const tournamentId = toPersistId(next.tournament);
+    const groupId = toPersistId(next.group);
+    const matchId = toPersistId(next.match);
+
     writeLocal({
-      tournamentId: next.tournament,
-      groupId: next.group,
-      matchId: next.match,
+      tournamentId,
+      groupId,
+      matchId,
     });
 
-    if (session?.user) {
+    // Server row is only meaningful once tournament + group are chosen (match optional).
+    if (session?.user && tournamentId && groupId) {
       void mutateAsync({
         kind: 'device.lastSelection.set',
         payload: {
           deviceId,
-          tournamentId: next.tournament,
-          groupId: next.group,
-          matchId: next.match,
+          tournamentId,
+          groupId,
+          matchId,
         },
       }).catch(() => {});
     }

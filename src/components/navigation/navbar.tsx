@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth-client';
 import { useSettings } from '@/contexts/settings';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
-import { OfflineIndicator } from '@/features/app/components/offline-indicator';
 import { AppSettings } from '@/features/app/components/settings';
 
 export const Navbar = () => {
@@ -33,8 +32,7 @@ export const Navbar = () => {
       <div className="flex w-full grow items-center justify-center">
         <h1 className="text-4xl font-bold select-none">TKU Sparring System</h1>
       </div>
-      <div className="flex w-[13vw] shrink-0 items-center justify-end gap-2 px-2.5">
-        <OfflineIndicator />
+      <div className="flex w-[13vw] shrink-0 items-center justify-end gap-1 px-2.5">
         {isPending ? null : user ? (
           <UserDropdown user={user} />
         ) : (
