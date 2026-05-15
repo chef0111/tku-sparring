@@ -1,5 +1,44 @@
 import type { MatchData } from '@/features/dashboard/types';
 
+/** Round-0 athlete vs empty slot: no shared arena display number (advanced row). */
+export function excludedFromArenaDisplaySequence(match: MatchData): boolean {
+  if (match.round !== 0) return false;
+  const hasRed = match.redTournamentAthleteId != null;
+  const hasBlue = match.blueTournamentAthleteId != null;
+  return hasRed !== hasBlue;
+}
+
+/** Public bracket header: `Match {n}` or **Advanced** when this row has no arena number. */
+export function formatArenaMatchHeaderLine(
+  displayNumber: number | null | undefined
+): string {
+  return displayNumber != null ? `Match ${displayNumber}` : 'Advanced';
+}
+
+/**
+ * Placeholder for an upper-round slot fed by a completed or pending feeder.
+ * When the feeder has no arena number (advanced), prefer the winner's name if known.
+ */
+export function formatFeederWinnerPlaceholder(
+  feeder: MatchData,
+  arenaNumberById: ReadonlyMap<string, number | null>,
+  resolveAthleteName?: (
+    tournamentAthleteId: string
+  ) => string | null | undefined
+): string {
+  const n = arenaNumberById.get(feeder.id);
+  if (n != null) return formatFeederWinnerLabel(n);
+  if (
+    feeder.status === 'complete' &&
+    feeder.winnerTournamentAthleteId &&
+    resolveAthleteName
+  ) {
+    const name = resolveAthleteName(feeder.winnerTournamentAthleteId);
+    if (name) return name;
+  }
+  return 'Advanced';
+}
+
 /**
  * Order matches in a single `(group, round)` bucket: `matchIndex` ascending,
  * except when `thirdPlaceMatch` and this is that group's max round with two matches
@@ -90,10 +129,12 @@ export function buildManualRankMapFromMatches(
 /**
  * One shared `k` for all groups on the same arena: round-major, then `groupOrder`,
  * then optional manual rank within `(round, group)`.
+ * Every match in `input.matches` gets a map entry: `number` or `null` when excluded
+ * ({@link excludedFromArenaDisplaySequence}).
  */
 export function buildSharedArenaMatchNumberById(
   input: ArenaCrossGroupOrderInput
-): Map<string, number> {
+): Map<string, number | null> {
   const safeArena = Math.max(1, input.arenaIndex);
   const base = safeArena * 100;
   const groupMeta = new Map(input.groups.map((g) => [g.id, g]));
@@ -141,10 +182,21 @@ export function buildSharedArenaMatchNumberById(
     }
   }
 
-  const map = new Map<string, number>();
-  ordered.forEach((m, i) => {
-    map.set(m.id, base + i + 1);
-  });
+  const map = new Map<string, number | null>();
+  let seq = 0;
+  for (const m of ordered) {
+    if (excludedFromArenaDisplaySequence(m)) {
+      map.set(m.id, null);
+    } else {
+      seq += 1;
+      map.set(m.id, base + seq);
+    }
+  }
+  for (const m of input.matches) {
+    if (!map.has(m.id)) {
+      map.set(m.id, null);
+    }
+  }
   return map;
 }
 
@@ -152,7 +204,7 @@ export function buildArenaMatchNumberById(
   matches: Array<MatchData>,
   arenaIndex: number,
   thirdPlaceMatch: boolean
-): Map<string, number> {
+): Map<string, number | null> {
   const gid = matches[0]?.groupId;
   if (!gid) return new Map();
   return buildSharedArenaMatchNumberById({

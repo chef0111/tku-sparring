@@ -28,7 +28,8 @@ This document captures bracket generation behavior and match labeling for the to
 
 ## Match display numbers (arena sequence)
 
-- Display numbers are `**arenaIndex * 100` + a 1-based sequence\*\* (e.g. Arena 1 → 101, 102, …; Arena 2 → 201, 202, …).
+- Display numbers are `arenaIndex * 100` + a **1-based sequence** shared across all groups on that arena (e.g. Arena 1 → 101, 102, …; Arena 2 → 201, 202, …).
+- **Round 0 advanced rows** (exactly one athlete vs **Open** / empty) are **not** assigned a display number: the map stores `null` for that match id so the sequence does not advance for that row. The bracket header shows **Advanced** instead of `Match {n}`; upper-round placeholders use **Winner {n}** when the feeder has a number, otherwise the advancer’s name when known, otherwise **Advanced** (see `formatArenaMatchHeaderLine` / `formatFeederWinnerPlaceholder` in [`src/lib/tournament/arena-match-label.ts`](../src/lib/tournament/arena-match-label.ts)).
 - **Third-Place Match** is numbered **immediately before the Final** within the same ordering rules below.
 - Example for an 8-athlete bracket in Arena 1 (single group, third-place on): Match 107 (Third-Place), Match 108 (Final).
 
@@ -38,7 +39,7 @@ When several groups share one `arenaIndex`, they share **one** sequence for that
 
 1. **Round** ascending (all of round 0, then all of round 1, …).
 2. Within each round, **group order**: an ordered list of `groupId`s for that arena (default: order of groups in the tournament list until a saved arena order exists).
-3. Within each `(round, group)` bucket: matches follow bracket order (`matchIndex`, with third-place before final on the final round when that toggle is on). Optional per-match `arenaSequenceRank` can override order inside that bucket.
+3. Within each `(round, group)` bucket: matches follow bracket order (`matchIndex`, with third-place before final on the final round when that toggle is on), **counting only matches that receive a display number** for the global arena sequence. Optional per-match `arenaSequenceRank` can override order inside that bucket among numbered matches; advanced rows keep `null` and do not consume the next integer.
 
 Example: Groups **A** and **B** on Arena 1, same structure, group order `[A, B]`. Match `round` is zero-based (the canvas labels `round === 0` as **Round 1**, then **Semifinal**, **Final**, etc.):
 
@@ -51,5 +52,5 @@ Example: Groups **A** and **B** on Arena 1, same structure, group order `[A, B]`
 ## Builder UI labels
 
 - **Round 0**, empty athlete slot: show **Open** (not a “winner” placeholder).
-- **Round ≥ 1**, empty athlete slot: show `**Winner {n}`**, where `**n**` is the **display number** of that side’s **feeder match** in the same group, resolved using the **shared arena map\*\* above so `n` matches arena scheduling across all groups on that arena.
-- Full match titles elsewhere may use **Match {n}** (same `n`).
+- **Round ≥ 1**, empty athlete slot: when the feeder has an arena display number, show **`Winner {n}`** where **`n`** is that feeder’s number from the shared arena map. When the feeder has **no** display number (round-0 advanced), show the **advancing athlete’s name** if the feeder is already complete, otherwise **Advanced**.
+- Full match titles use **`Match {n}`** when **`n`** is present; for advanced rows with **`n` null**, show **Advanced** (no numeric id).

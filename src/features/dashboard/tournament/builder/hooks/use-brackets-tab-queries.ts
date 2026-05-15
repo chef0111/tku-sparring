@@ -50,7 +50,7 @@ export function useBracketsTabQueries({
   const arenaGroupOrder = tournamentQuery.data?.arenaGroupOrder;
 
   const matchLabel = React.useMemo(() => {
-    if (!selectedGroup) return new Map<string, number>();
+    if (!selectedGroup) return new Map<string, number | null>();
     const arenaIdx = selectedGroup.arenaIndex;
     const groupsOnArena = groups.filter((g) => g.arenaIndex === arenaIdx);
     const saved = savedArenaGroupIds(arenaGroupOrder, arenaIdx);
@@ -68,7 +68,7 @@ export function useBracketsTabQueries({
           selectedGroup.thirdPlaceMatch
         );
       }
-      return new Map<string, number>();
+      return new Map<string, number | null>();
     }
     const manual = buildManualRankMapFromMatches(arenaMatches);
     return buildSharedArenaMatchNumberById({

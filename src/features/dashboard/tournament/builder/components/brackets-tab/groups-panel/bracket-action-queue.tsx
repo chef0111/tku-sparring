@@ -4,6 +4,7 @@ import { useTournamentBracket } from '../../../context/tournament-bracket/use-to
 import type { MatchData } from '@/features/dashboard/types';
 import { buildBracketActionQueue } from '@/lib/tournament/bracket-action-queue';
 import { getBracketRoundLabel } from '@/lib/tournament/bracket-round-label';
+import { formatArenaMatchHeaderLine } from '@/lib/tournament/arena-match-label';
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
@@ -107,7 +108,7 @@ interface QueueRowProps {
   order: number;
   isLast: boolean;
   onOpen: (m: MatchData) => void;
-  matchLabel: Map<string, number>;
+  matchLabel: Map<string, number | null>;
 }
 
 function QueueRow({
@@ -171,7 +172,7 @@ function QueueRow({
         >
           <CardHeader className="gap-1 p-0">
             <CardTitle className="truncate text-sm font-semibold">
-              Match {matchLabel.get(match.id)}
+              {formatArenaMatchHeaderLine(matchLabel.get(match.id))}
             </CardTitle>
           </CardHeader>
           <p className="text-muted-foreground relative truncate text-xs">
