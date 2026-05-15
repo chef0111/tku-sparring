@@ -24,10 +24,12 @@ describe('tournament router registration', () => {
       SetTournamentStatusSchema.parse({
         id: 'tournament-1',
         status: 'active',
+        force: true,
       })
     ).toEqual({
       id: 'tournament-1',
       status: 'active',
+      force: true,
     });
 
     expect(() =>

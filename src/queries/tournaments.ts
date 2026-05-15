@@ -13,6 +13,7 @@ import type {
   MoveGroupArenaDTO,
   RetireArenaDTO,
 } from '@/orpc/tournaments/dto';
+import type { TournamentStatus } from '@/features/dashboard/types';
 import { client, orpc } from '@/orpc/client';
 import {
   mergeArenaGroupOrderAfterCrossArenaMove,
@@ -390,18 +391,28 @@ export function useSetTournamentStatus(options?: { onSuccess?: () => void }) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { id: string; status: 'active' | 'completed' }) =>
-      client.tournament.setStatus(data),
-    onSuccess: (tournament) => {
+    mutationFn: (data: {
+      id: string;
+      status: TournamentStatus;
+      force?: boolean;
+    }) => client.tournament.setStatus(data),
+    onSuccess: (tournament, variables) => {
       invalidate();
       void queryClient.invalidateQueries({
         queryKey: ['activity', 'list', tournament.id],
       });
-      toast.success(
-        tournament.status === 'active'
-          ? 'Tournament activated'
-          : 'Tournament completed'
-      );
+      void queryClient.invalidateQueries({
+        queryKey: ['match', 'list', 'tournament', tournament.id],
+      });
+      if (variables.force) {
+        toast.success(`Tournament status set to ${tournament.status}`);
+      } else {
+        toast.success(
+          tournament.status === 'active'
+            ? 'Tournament activated'
+            : 'Tournament completed'
+        );
+      }
       options?.onSuccess?.();
     },
     onError: (err) => toast.error(err.message),

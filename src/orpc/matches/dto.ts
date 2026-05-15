@@ -94,6 +94,11 @@ export const ResetBracketSchema = z.object({
   groupId: z.string(),
 });
 
+export const AdminSetMatchStatusSchema = z.object({
+  matchId: z.string(),
+  status: MatchStatusSchema,
+});
+
 export const AssignSlotSchema = z.object({
   matchId: z.string(),
   side: z.enum(['red', 'blue']),
@@ -119,5 +124,6 @@ export type GenerateBracketDTO = z.infer<typeof GenerateBracketSchema>;
 export type ShuffleBracketDTO = z.infer<typeof ShuffleBracketSchema>;
 export type RegenerateBracketDTO = z.infer<typeof RegenerateBracketSchema>;
 export type ResetBracketDTO = z.infer<typeof ResetBracketSchema>;
+export type AdminSetMatchStatusDTO = z.infer<typeof AdminSetMatchStatusSchema>;
 export type AssignSlotDTO = z.infer<typeof AssignSlotSchema>;
 export type SwapSlotsDTO = z.infer<typeof SwapSlotsSchema>;

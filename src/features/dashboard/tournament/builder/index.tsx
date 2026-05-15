@@ -6,7 +6,7 @@ import { BuilderBottomToolbar } from './components/builder-shell/builder-bottom-
 import { EditTournamentDialog } from './components/dialogs/edit-tournament-dialog';
 import { DeleteTournamentDialog } from './components/dialogs/delete-tournament-dialog';
 import { AutoAssignAllDialog } from './components/dialogs/auto-assign-all-dialog';
-import { LifecycleConfirmDialog } from './components/dialogs/lifecycle-confirm-dialog';
+import { TournamentStatusDialog } from './components/dialogs/tournament-status-dialog';
 import { GroupsTab } from './components/groups-tab';
 import { BracketsTab } from './components/brackets-tab';
 import { useTournamentBuilder } from './hooks/use-tournament-builder';
@@ -15,7 +15,7 @@ import { TournamentActivitySheet } from '@/features/dashboard/tournament/tournam
 import LoadingScreen from '@/components/navigation/loading';
 import { Button } from '@/components/ui/button';
 import { useTournamentRealtimeStream } from '@/hooks/use-tournament-realtime-stream';
-import { useTournament } from '@/queries/tournaments';
+import { useSetTournamentStatus, useTournament } from '@/queries/tournaments';
 import { useGroups } from '@/queries/groups';
 
 interface TournamentBuilderPageProps {
@@ -72,6 +72,10 @@ function TournamentBuilderActive({
 }: TournamentBuilderActiveProps) {
   const b = useTournamentBuilder({ tournament, groups, tournamentId });
 
+  const setTournamentStatusMutation = useSetTournamentStatus({
+    onSuccess: () => b.setPendingAdminStatus(null),
+  });
+
   return (
     <BuilderShell
       readOnly={b.isReadOnly}
@@ -88,10 +92,10 @@ function TournamentBuilderActive({
           tournament={tournament}
           readOnly={b.isReadOnly}
           isRefreshing={b.isRefreshing}
-          canCompleteTournament={tournament.lifecycle.canComplete}
+          isSettingTournamentStatus={setTournamentStatusMutation.isPending}
           onRefresh={b.handleRefresh}
           onAutoAssignAll={() => b.setShowAutoAssignAll(true)}
-          onLifecycle={b.handleLifecycle}
+          onAdminStatusIntent={b.handleAdminStatusIntent}
           onEditTournament={() => {
             if (!b.isReadOnly) b.setShowEditTournament(true);
           }}
@@ -142,17 +146,24 @@ function TournamentBuilderActive({
         tournamentId={tournamentId}
         groups={groups}
       />
-      {b.lifecycleTarget !== null && (
-        <LifecycleConfirmDialog
-          open={b.lifecycleTarget !== null}
-          onOpenChange={(v) => {
-            if (!v) b.setLifecycleTarget(null);
-          }}
-          target={b.lifecycleTarget}
-          tournamentId={tournamentId}
-          tournamentName={tournament.name}
-        />
-      )}
+      <TournamentStatusDialog
+        open={b.pendingAdminStatus !== null}
+        onOpenChange={(open) => {
+          if (!open) b.setPendingAdminStatus(null);
+        }}
+        tournamentName={tournament.name}
+        fromStatus={tournament.status}
+        toStatus={b.pendingAdminStatus}
+        isPending={setTournamentStatusMutation.isPending}
+        onConfirm={() => {
+          if (!b.pendingAdminStatus) return;
+          setTournamentStatusMutation.mutate({
+            id: tournamentId,
+            status: b.pendingAdminStatus,
+            force: true,
+          });
+        }}
+      />
     </BuilderShell>
   );
 }

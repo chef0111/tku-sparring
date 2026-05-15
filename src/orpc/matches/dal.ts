@@ -1,4 +1,6 @@
+import { MatchStatusSchema } from './dto';
 import type {
+  AdminSetMatchStatusDTO,
   AssignSlotDTO,
   CreateMatchDTO,
   GenerateBracketDTO,
@@ -790,5 +792,63 @@ export class MatchDAL {
 
       return updated;
     });
+  }
+
+  private static readonly MATCH_STATUS_RANK: Record<string, number> = {
+    pending: 0,
+    active: 1,
+    complete: 2,
+  };
+
+  static async adminSetMatchStatus(
+    input: AdminSetMatchStatusDTO,
+    adminId: string
+  ) {
+    const match = await prisma.match.findUnique({
+      where: { id: input.matchId },
+    });
+    if (!match) throw new Error('Match not found');
+
+    const current = MatchStatusSchema.parse(match.status);
+    const next = input.status;
+    const curRank = MatchDAL.MATCH_STATUS_RANK[current] ?? 0;
+    const nextRank = MatchDAL.MATCH_STATUS_RANK[next] ?? 0;
+    const isDowngrade = nextRank < curRank;
+
+    if (isDowngrade && match.winnerTournamentAthleteId) {
+      await MatchDAL.clearWinnerAdvancement(match);
+    }
+
+    const updated = await prisma.match.update({
+      where: { id: input.matchId },
+      data: {
+        status: next,
+        ...(isDowngrade
+          ? {
+              redWins: 0,
+              blueWins: 0,
+              winnerId: null,
+              winnerTournamentAthleteId: null,
+            }
+          : {}),
+      },
+    });
+
+    await recordTournamentActivity({
+      tournamentId: match.tournamentId,
+      adminId,
+      eventType: 'match.status_admin',
+      entityType: 'match',
+      entityId: input.matchId,
+      payload: {
+        fromStatus: current,
+        toStatus: next,
+        clearedScores: isDowngrade,
+      },
+    });
+
+    publishMatchInvalidateEvent(match.tournamentId);
+
+    return updated;
   }
 }

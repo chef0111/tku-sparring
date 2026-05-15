@@ -42,8 +42,10 @@ export function summarizeTournamentActivity(
 ): string {
   const p = payloadObject(payload);
   switch (eventType) {
-    case 'tournament.status_change':
-      return `Tournament status changed from ${String(p.fromStatus)} to ${String(p.toStatus)}`;
+    case 'tournament.status_change': {
+      const forced = p.forced === true ? ' (admin override)' : '';
+      return `Tournament status changed from ${String(p.fromStatus)} to ${String(p.toStatus)}${forced}`;
+    }
     case 'bracket.generate':
       return `Bracket generated (${String(p.mode ?? 'full')})`;
     case 'bracket.reset':
@@ -56,6 +58,8 @@ export function summarizeTournamentActivity(
       return `Match score updated (${String(p.redWins ?? '?')}-${String(p.blueWins ?? '?')})`;
     case 'match.winner_override':
       return `Winner manually set (${String(p.winnerSide ?? '')})`;
+    case 'match.status_admin':
+      return `Match status set to ${String(p.toStatus ?? '')}${p.clearedScores === true ? ' (scores cleared)' : ''}`;
     case 'match.swap_participants':
       return 'Match participants swapped';
     case 'group.athlete_assigned':

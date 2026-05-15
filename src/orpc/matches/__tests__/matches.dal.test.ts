@@ -12,6 +12,7 @@ vi.mock('@/lib/db', () => ({
       create: vi.fn(),
       findMany: vi.fn(),
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
       update: vi.fn(),
       updateMany: vi.fn(),
     },
@@ -22,6 +23,10 @@ vi.mock('@/lib/db', () => ({
 
 vi.mock('@/orpc/activity/dal', () => ({
   recordTournamentActivity: vi.fn(),
+}));
+
+vi.mock('@/lib/tournament/tournament-sse-bus', () => ({
+  publishMatchInvalidateEvent: vi.fn(),
 }));
 
 const draftGroup = {
@@ -289,6 +294,88 @@ describe('shuffleBracket', () => {
     expect(r0Update?.data).toMatchObject({
       redTournamentAthleteId: 'ta-locked',
       redAthleteId: 'apx',
+    });
+  });
+});
+
+describe('MatchDAL.adminSetMatchStatus', () => {
+  it('downgrades from complete to active and clears wins and winners', async () => {
+    const match = {
+      id: 'm1',
+      status: 'complete',
+      redWins: 2,
+      blueWins: 0,
+      winnerId: 'p-red',
+      winnerTournamentAthleteId: 'ta-red',
+      tournamentId: 't-1',
+      groupId: 'g-1',
+      round: 0,
+      matchIndex: 0,
+    };
+    vi.mocked(prisma.match.findUnique).mockResolvedValue(match as never);
+    vi.mocked(prisma.match.findFirst).mockResolvedValue(null);
+    vi.mocked(prisma.match.update).mockResolvedValue({
+      ...match,
+      status: 'active',
+      redWins: 0,
+      blueWins: 0,
+      winnerId: null,
+      winnerTournamentAthleteId: null,
+    } as never);
+
+    await MatchDAL.adminSetMatchStatus(
+      { matchId: 'm1', status: 'active' },
+      'admin-1'
+    );
+
+    expect(prisma.match.update).toHaveBeenCalledWith({
+      where: { id: 'm1' },
+      data: {
+        status: 'active',
+        redWins: 0,
+        blueWins: 0,
+        winnerId: null,
+        winnerTournamentAthleteId: null,
+      },
+    });
+    expect(vi.mocked(recordTournamentActivity)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'match.status_admin',
+        payload: expect.objectContaining({
+          clearedScores: true,
+          toStatus: 'active',
+        }),
+      })
+    );
+  });
+
+  it('upgrade to complete does not clear scores', async () => {
+    const match = {
+      id: 'm1',
+      status: 'pending',
+      redWins: 0,
+      blueWins: 0,
+      winnerId: null,
+      winnerTournamentAthleteId: null,
+      tournamentId: 't-1',
+      groupId: 'g-1',
+      round: 0,
+      matchIndex: 0,
+    };
+    vi.mocked(prisma.match.findUnique).mockResolvedValue(match as never);
+    vi.mocked(prisma.match.update).mockResolvedValue({
+      ...match,
+      status: 'complete',
+    } as never);
+
+    await MatchDAL.adminSetMatchStatus(
+      { matchId: 'm1', status: 'complete' },
+      'admin-1'
+    );
+
+    expect(prisma.match.update).toHaveBeenCalledWith({
+      where: { id: 'm1' },
+      data: { status: 'complete' },
     });
   });
 });

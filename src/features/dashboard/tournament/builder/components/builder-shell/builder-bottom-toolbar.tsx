@@ -2,17 +2,27 @@ import * as React from 'react';
 import { Link } from '@tanstack/react-router';
 import {
   ArrowLeft,
-  CheckCircle2,
   History,
-  PlayCircle,
   RefreshCw,
   Settings,
   Trash2,
   Zap,
 } from 'lucide-react';
-import type { TournamentData } from '@/features/dashboard/types';
+import type {
+  TournamentData,
+  TournamentStatus,
+} from '@/features/dashboard/types';
+import { TOURNAMENT_STATUSES } from '@/features/dashboard/types';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Tooltip,
   TooltipContent,
@@ -24,10 +34,10 @@ interface BuilderBottomToolbarProps {
   tournament: TournamentData;
   readOnly: boolean;
   isRefreshing?: boolean;
-  canCompleteTournament?: boolean;
+  isSettingTournamentStatus?: boolean;
   onRefresh?: () => void;
   onAutoAssignAll?: () => void;
-  onLifecycle?: () => void;
+  onAdminStatusIntent: (next: TournamentStatus) => void;
   onEditTournament: () => void;
   onDeleteTournament: () => void;
   onActivity: () => void;
@@ -51,64 +61,30 @@ function DisabledWhenReadOnly({
   );
 }
 
-function LifecycleButtonWrapper({
-  readOnly,
-  blockedByReadiness,
-  children,
-}: {
-  readOnly: boolean;
-  blockedByReadiness: boolean;
-  children: React.ReactElement;
-}) {
-  if (readOnly) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="inline-flex">{children}</span>
-        </TooltipTrigger>
-        <TooltipContent>Tournament completed</TooltipContent>
-      </Tooltip>
-    );
-  }
-  if (blockedByReadiness) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="inline-flex">{children}</span>
-        </TooltipTrigger>
-        <TooltipContent>
-          All groups must have winners before completing.
-        </TooltipContent>
-      </Tooltip>
-    );
-  }
-  return children;
-}
+const STATUS_LABEL: Record<TournamentStatus, string> = {
+  draft: 'Draft',
+  active: 'Active',
+  completed: 'Completed',
+};
 
 export function BuilderBottomToolbar({
   tournament,
   readOnly,
   isRefreshing,
-  canCompleteTournament,
+  isSettingTournamentStatus,
   onRefresh,
   onAutoAssignAll,
-  onLifecycle,
+  onAdminStatusIntent,
   onEditTournament,
   onDeleteTournament,
   onActivity,
 }: BuilderBottomToolbarProps) {
   const status = tournament.status;
-  const showLifecycle = status !== 'completed';
-  const lifecycleLabel =
-    status === 'draft' ? 'Activate' : 'Complete tournament';
-  const LifecycleIcon = status === 'draft' ? PlayCircle : CheckCircle2;
-  const lifecycleBlockedByReadiness =
-    status === 'active' && canCompleteTournament === false;
 
   return (
     <TooltipProvider delayDuration={200}>
       <footer className="bg-sidebar/70 supports-backdrop-filter:bg-sidebar/50 flex h-12 items-center gap-2 border-t px-4">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="sm"
@@ -135,23 +111,26 @@ export function BuilderBottomToolbar({
             </Button>
           </DisabledWhenReadOnly>
 
-          {showLifecycle && (
-            <LifecycleButtonWrapper
-              readOnly={readOnly}
-              blockedByReadiness={lifecycleBlockedByReadiness}
-            >
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={readOnly || lifecycleBlockedByReadiness}
-                onClick={() => onLifecycle?.()}
-                className="gap-2"
-              >
-                <LifecycleIcon className="size-4" />
-                <span>{lifecycleLabel}</span>
-              </Button>
-            </LifecycleButtonWrapper>
-          )}
+          <Select
+            value={status}
+            disabled={Boolean(isSettingTournamentStatus)}
+            onValueChange={(v) => {
+              onAdminStatusIntent(v as TournamentStatus);
+            }}
+          >
+            <SelectTrigger size="sm" className="w-35">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {TOURNAMENT_STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {STATUS_LABEL[s]}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
 
         <Separator orientation="vertical" className="mx-2 my-auto h-6" />
