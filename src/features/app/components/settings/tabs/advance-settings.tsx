@@ -19,12 +19,30 @@ import {
   useArenaSelectionMatches,
 } from '@/features/app/hooks/use-arena-selection-view';
 
+const SELECTION_MATCHES_POLL_MS = 4 * 1000;
+
 export const AdvanceSettings = () => {
   const { data: session, isPending: sessionPending } = authClient.useSession();
   const deviceId = useDeviceId();
   const queryClient = useQueryClient();
-  const { formData, updateAdvanceForm, setAdvanceFormState } = useSettings();
+  const {
+    formData,
+    updateAdvanceForm,
+    setAdvanceFormState,
+    activeTab,
+    isOpen,
+  } = useSettings();
   const { advance } = formData;
+
+  const pollSelectionMatches =
+    isOpen &&
+    activeTab === 'advance' &&
+    Boolean(
+      advance.tournament &&
+      advance.tournament.length > 0 &&
+      advance.group &&
+      advance.group.length > 0
+    );
 
   const catalogQuery = useArenaSelectionCatalog({
     deviceId,
@@ -38,7 +56,7 @@ export const AdvanceSettings = () => {
     tournamentId: advance.tournament,
     groupId: advance.group,
     enabled: Boolean(session?.user),
-    refetchInterval: false,
+    refetchInterval: pollSelectionMatches ? SELECTION_MATCHES_POLL_MS : false,
   });
 
   const formKey = useMemo(
