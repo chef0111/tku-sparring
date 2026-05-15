@@ -5,6 +5,7 @@ import { FormBase } from './form-base';
 import { useFieldContext } from './hooks';
 import type { FormControlProps } from './form-base';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import {
   Command,
   CommandEmpty,
@@ -20,7 +21,9 @@ import {
 } from '@/components/ui/popover';
 
 export interface ComboboxData {
-  label?: string;
+  /** Closed trigger text when `label` is a React node (falls back to string `label`). */
+  triggerLabel?: string;
+  label?: React.ReactNode;
   value?: string;
   disabled?: boolean;
 }
@@ -29,6 +32,7 @@ type FormComboboxProps = FormControlProps & {
   data: Array<ComboboxData>;
   type: string;
   disabled?: boolean;
+  pending?: boolean;
   itemClassName?: string;
 };
 
@@ -37,6 +41,7 @@ export function FormCombobox({
   type,
   descPosition,
   disabled,
+  pending = false,
   itemClassName,
   ...props
 }: FormComboboxProps) {
@@ -44,6 +49,14 @@ export function FormCombobox({
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
   const [open, setOpen] = React.useState(false);
+
+  const triggerDisabled = Boolean(disabled || pending);
+
+  React.useEffect(() => {
+    if (pending) {
+      setOpen(false);
+    }
+  }, [pending]);
 
   const [width, setWidth] = React.useState(200);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
@@ -72,7 +85,10 @@ export function FormCombobox({
     [data]
   );
 
-  const selectedLabel = items.find((i) => i.value === field.state.value)?.label;
+  const selected = items.find((i) => i.value === field.state.value);
+  const selectedLabel =
+    selected?.triggerLabel ??
+    (typeof selected?.label === 'string' ? selected.label : undefined);
 
   return (
     <FormBase {...props} descPosition={descPosition}>
@@ -81,8 +97,9 @@ export function FormCombobox({
           <Button
             ref={triggerRef}
             aria-invalid={isInvalid}
+            aria-busy={pending}
             className="w-full justify-between font-normal"
-            disabled={disabled}
+            disabled={triggerDisabled}
             id={field.name}
             type="button"
             variant="outline"
@@ -91,7 +108,11 @@ export function FormCombobox({
             <span className="truncate">
               {selectedLabel ?? `Select ${type}...`}
             </span>
-            <IconChevronDown className="text-muted-foreground size-4 shrink-0" />
+            {pending ? (
+              <Spinner className="size-4 shrink-0" />
+            ) : (
+              <IconChevronDown className="text-muted-foreground size-4 shrink-0" />
+            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent
@@ -99,34 +120,46 @@ export function FormCombobox({
           className="w-auto max-w-(--radix-popover-content-available-width) min-w-(--radix-popover-trigger-width) p-0"
           style={{ width }}
         >
-          <Command>
-            <CommandInput
-              className="min-w-[calc(var(--radix-popover-trigger-width)-2.5rem)]"
-              placeholder={`Search ${type}...`}
-            />
-            <CommandEmpty>{`No ${type} found.`}</CommandEmpty>
-            <CommandList>
-              <CommandGroup>
-                {items.map((item) => (
-                  <CommandItem
-                    key={item.value}
-                    className={itemClassName}
-                    disabled={item.disabled}
-                    value={item.value}
-                    onSelect={() => {
-                      if (item.disabled) {
-                        return;
-                      }
-                      field.handleChange(item.value);
-                      setOpen(false);
-                    }}
-                  >
-                    {item.label}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
+          <div className="relative">
+            <Command>
+              <CommandInput
+                className="min-w-[calc(var(--radix-popover-trigger-width)-2.5rem)]"
+                placeholder={`Search ${type}...`}
+                disabled={pending}
+              />
+              <CommandEmpty>{`No ${type} found.`}</CommandEmpty>
+              <CommandList>
+                <CommandGroup>
+                  {items.map((item) => (
+                    <CommandItem
+                      key={item.value}
+                      className={itemClassName}
+                      disabled={item.disabled}
+                      value={item.value}
+                      onSelect={() => {
+                        if (item.disabled) {
+                          return;
+                        }
+                        field.handleChange(item.value);
+                        setOpen(false);
+                      }}
+                    >
+                      {item.label}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+            {pending ? (
+              <div
+                className="bg-background/80 absolute inset-0 flex flex-col items-center justify-center gap-2 backdrop-blur-[1px]"
+                aria-live="polite"
+              >
+                <Spinner className="size-6 shrink-0" />
+                <span className="text-muted-foreground text-xs">Loading…</span>
+              </div>
+            ) : null}
+          </div>
         </PopoverContent>
       </Popover>
     </FormBase>

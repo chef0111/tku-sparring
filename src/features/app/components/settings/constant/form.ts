@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 export const avatarGroup = [
   {
     label: 'PLAYER 1 AVATAR',
@@ -60,8 +62,14 @@ export const advancePlayerGroup = [
 
 type ComboboxOption = {
   value: string;
-  label: string;
+  label: ReactNode;
+  triggerLabel?: string;
   disabled?: boolean;
+};
+
+export type TournamentFieldPending = {
+  group?: boolean;
+  match?: boolean;
 };
 
 export const getTournamentFields = (
@@ -69,7 +77,8 @@ export const getTournamentFields = (
   groupOptions: Array<ComboboxOption>,
   matchOptions: Array<ComboboxOption>,
   groupsDisabled: boolean,
-  matchesDisabled: boolean
+  matchesDisabled: boolean,
+  pending?: TournamentFieldPending
 ) => [
   {
     name: 'tournament' as const,
@@ -77,6 +86,7 @@ export const getTournamentFields = (
     type: 'tournaments',
     label: 'SELECT TOURNAMENT',
     disabled: false,
+    pending: false,
   },
   {
     name: 'group' as const,
@@ -84,6 +94,7 @@ export const getTournamentFields = (
     type: 'groups',
     label: 'SELECT GROUP',
     disabled: groupsDisabled,
+    pending: Boolean(pending?.group),
   },
   {
     name: 'match' as const,
@@ -91,5 +102,6 @@ export const getTournamentFields = (
     type: 'matches',
     label: 'SELECT MATCH',
     disabled: matchesDisabled,
+    pending: Boolean(pending?.match),
   },
 ];

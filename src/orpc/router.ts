@@ -56,19 +56,16 @@ import {
   removeTournamentAthleteRecord,
   updateTournamentAthleteRecord,
 } from './tournament-athletes';
-import {
-  acquire as acquireLease,
-  heartbeat as heartbeatLease,
-  listForTournamentLeases,
-  release as releaseLease,
-  requestTakeover,
-  respondTakeover,
-} from './lease';
 import { listForTournament as listActivityForTournament } from './activity';
 import {
   selectionCatalog as advanceSettingsSelectionCatalog,
   selectionMatches as advanceSettingsSelectionMatches,
 } from './advance-settings';
+import {
+  claim as arenaMatchClaim,
+  heartbeat as arenaMatchClaimHeartbeat,
+  release as arenaMatchClaimRelease,
+} from './arena-match-claim';
 import { getLastSelection, setLastSelection } from './device-last-selection';
 
 export default {
@@ -128,20 +125,17 @@ export default {
     remove: removeTournamentAthleteRecord,
     bulkRemove: bulkRemoveTournamentAthleteRecords,
   },
-  lease: {
-    acquire: acquireLease,
-    heartbeat: heartbeatLease,
-    release: releaseLease,
-    requestTakeover,
-    respondTakeover,
-    listForTournament: listForTournamentLeases,
-  },
   activity: {
     listForTournament: listActivityForTournament,
   },
   advanceSettings: {
     selectionCatalog: advanceSettingsSelectionCatalog,
     selectionMatches: advanceSettingsSelectionMatches,
+  },
+  arenaMatchClaim: {
+    claim: arenaMatchClaim,
+    heartbeat: arenaMatchClaimHeartbeat,
+    release: arenaMatchClaimRelease,
   },
   device: {
     lastSelection: {

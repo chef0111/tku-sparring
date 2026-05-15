@@ -1,8 +1,4 @@
-import {
-  keepPreviousData,
-  queryOptions,
-  useQuery,
-} from '@tanstack/react-query';
+import { queryOptions, useQuery } from '@tanstack/react-query';
 
 import { client } from '@/orpc/client';
 
@@ -26,8 +22,10 @@ export function arenaSelectionCatalogQueryOptions(args: {
         deviceId: deviceId!,
         tournamentId: catalogTournamentId ?? undefined,
       }),
-    staleTime: 30_000,
+    staleTime: Number.POSITIVE_INFINITY,
     gcTime: 5 * 60 * 1000,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -54,8 +52,10 @@ export function arenaSelectionMatchesQueryOptions(args: {
         tournamentId: tid!,
         groupId: gid!,
       }),
-    staleTime: 30_000,
+    staleTime: Number.POSITIVE_INFINITY,
     gcTime: 5 * 60 * 1000,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -63,11 +63,14 @@ export function useArenaSelectionCatalog(args: {
   deviceId: string | undefined;
   tournamentId: string | null;
   enabled?: boolean;
+  /** When set, refetches on this interval while the query is active (e.g. settings dialog open). */
+  refetchInterval?: number | false;
 }) {
-  const { enabled = true, ...rest } = args;
+  const { enabled = true, refetchInterval = false, ...rest } = args;
   return useQuery({
     ...arenaSelectionCatalogQueryOptions(rest),
     enabled: Boolean(rest.deviceId && enabled),
+    refetchInterval,
   });
 }
 
@@ -76,8 +79,9 @@ export function useArenaSelectionMatches(args: {
   tournamentId: string | null;
   groupId: string | null;
   enabled?: boolean;
+  refetchInterval?: number | false;
 }) {
-  const { enabled = true, ...rest } = args;
+  const { enabled = true, refetchInterval = false, ...rest } = args;
   const hasScope = Boolean(
     rest.deviceId &&
     rest.tournamentId &&
@@ -88,6 +92,6 @@ export function useArenaSelectionMatches(args: {
   return useQuery({
     ...arenaSelectionMatchesQueryOptions(rest),
     enabled: hasScope && enabled,
-    placeholderData: keepPreviousData,
+    refetchInterval,
   });
 }

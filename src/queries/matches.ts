@@ -43,6 +43,10 @@ function useInvalidateMatches() {
     void queryClient.invalidateQueries({ queryKey: ['tournament'] });
     void invalidateOrpcGroupListQueries(queryClient);
     void queryClient.invalidateQueries({ queryKey: ['activity'] });
+    void queryClient.invalidateQueries({
+      predicate: (q) =>
+        Array.isArray(q.queryKey) && q.queryKey[0] === 'advanceSettings',
+    });
   };
 }
 
@@ -196,6 +200,20 @@ export function useUpdateScore(options?: { onSuccess?: () => void }) {
     onSuccess: () => {
       invalidate();
       toast.success('Score updated');
+      options?.onSuccess?.();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+}
+
+export function useResetMatchScore(options?: { onSuccess?: () => void }) {
+  const invalidate = useInvalidateMatches();
+
+  return useMutation({
+    mutationFn: (data: UpdateScoreDTO) => client.match.updateScore(data),
+    onSuccess: () => {
+      invalidate();
+      toast.success('Match reset');
       options?.onSuccess?.();
     },
     onError: (err) => toast.error(err.message),

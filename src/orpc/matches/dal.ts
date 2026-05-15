@@ -10,7 +10,7 @@ import type {
   UpdateScoreDTO,
 } from './dto';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
-import { publishMatchInvalidateEvent } from '@/orpc/lease/lease-stream';
+import { publishMatchInvalidateEvent } from '@/lib/tournament/tournament-sse-bus';
 import { prisma } from '@/lib/db';
 
 export class MatchDAL {
@@ -243,6 +243,42 @@ export class MatchDAL {
             blueAthleteId: winner?.athleteProfileId ?? null,
           },
     });
+  }
+
+  private static async clearWinnerAdvancement(match: {
+    groupId: string;
+    round: number;
+    matchIndex: number;
+    winnerTournamentAthleteId: string | null;
+  }) {
+    const wta = match.winnerTournamentAthleteId;
+    if (!wta) return;
+
+    const nextRound = match.round + 1;
+    const nextMatchIndex = Math.floor(match.matchIndex / 2);
+    const isRedSide = match.matchIndex % 2 === 0;
+
+    const nextMatch = await prisma.match.findFirst({
+      where: {
+        groupId: match.groupId,
+        round: nextRound,
+        matchIndex: nextMatchIndex,
+      },
+    });
+
+    if (!nextMatch) return;
+
+    if (isRedSide && nextMatch.redTournamentAthleteId === wta) {
+      await prisma.match.update({
+        where: { id: nextMatch.id },
+        data: { redTournamentAthleteId: null, redAthleteId: null },
+      });
+    } else if (!isRedSide && nextMatch.blueTournamentAthleteId === wta) {
+      await prisma.match.update({
+        where: { id: nextMatch.id },
+        data: { blueTournamentAthleteId: null, blueAthleteId: null },
+      });
+    }
   }
 
   static async resetBracket(groupId: string, adminId: string) {
@@ -579,6 +615,18 @@ export class MatchDAL {
     const bestOf = match.bestOf;
     const winsNeeded = Math.ceil(bestOf / 2);
 
+    const willBeComplete =
+      input.redWins >= winsNeeded || input.blueWins >= winsNeeded;
+
+    const hadCompleted =
+      match.status === 'complete' ||
+      match.redWins >= winsNeeded ||
+      match.blueWins >= winsNeeded;
+
+    if (!willBeComplete && hadCompleted && match.winnerTournamentAthleteId) {
+      await MatchDAL.clearWinnerAdvancement(match);
+    }
+
     let winnerId: string | null = null;
     let winnerTournamentAthleteId: string | null = null;
     let status: string = match.status;
@@ -592,7 +640,17 @@ export class MatchDAL {
       winnerTournamentAthleteId = match.blueTournamentAthleteId;
       status = 'complete';
     } else if (input.redWins > 0 || input.blueWins > 0) {
+      winnerId = null;
+      winnerTournamentAthleteId = null;
       status = 'active';
+    } else {
+      winnerId = null;
+      winnerTournamentAthleteId = null;
+      // 0–0: back to selectable in arena list (selectionMatches only lists `pending`).
+      status =
+        match.redTournamentAthleteId && match.blueTournamentAthleteId
+          ? 'pending'
+          : 'active';
     }
 
     const updated = await prisma.match.update({

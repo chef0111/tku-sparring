@@ -10,8 +10,6 @@ import { GroupsRail } from './groups-rail';
 import type { DragEndEvent } from '@dnd-kit/core';
 import type { GroupData } from '@/features/dashboard/types';
 import { useAssignAthlete } from '@/queries/groups';
-import { useLeases, useRequestLeaseTakeover } from '@/queries/leases';
-import { useDeviceId } from '@/hooks/use-device-id';
 
 interface GroupsTabProps {
   tournamentId: string;
@@ -22,18 +20,7 @@ interface GroupsTabProps {
 export function GroupsTab({ tournamentId, groups, readOnly }: GroupsTabProps) {
   const { selectedGroupId, setSelectedGroup } = useBuilderManagerQuery();
 
-  const deviceId = useDeviceId();
-  const { data: leases } = useLeases(tournamentId, deviceId);
-  const requestTakeover = useRequestLeaseTakeover(tournamentId);
   const assignAthlete = useAssignAthlete({ suppressErrorToast: true });
-
-  const leaseMap = React.useMemo(() => {
-    const map = new Map<string, NonNullable<typeof leases>[number]>();
-    for (const lease of leases ?? []) {
-      map.set(lease.groupId, lease);
-    }
-    return map;
-  }, [leases]);
 
   const [showAddGroup, setShowAddGroup] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
@@ -84,11 +71,6 @@ export function GroupsTab({ tournamentId, groups, readOnly }: GroupsTabProps) {
     setSettingsOpen(true);
   };
 
-  const handleRequestTakeover = (groupId: string) => {
-    if (!deviceId) return;
-    requestTakeover.mutate({ groupId, deviceId });
-  };
-
   return (
     <DndContext onDragEnd={handleDragEnd}>
       <div className="flex h-full min-h-0 w-full">
@@ -102,16 +84,11 @@ export function GroupsTab({ tournamentId, groups, readOnly }: GroupsTabProps) {
           tournamentId={tournamentId}
           groups={groups}
           readOnly={readOnly}
-          leaseInfo={
-            selectedGroupId ? leaseMap.get(selectedGroupId) : undefined
-          }
           onOpenSettings={handleOpenSettings}
-          onRequestTakeover={handleRequestTakeover}
         />
         <GroupsRail
           groups={groups}
           selectedGroupId={selectedGroupId}
-          leaseMap={leaseMap}
           readOnly={readOnly}
           onSelect={(id) => void setSelectedGroup(id)}
           onAdd={() => setShowAddGroup(true)}

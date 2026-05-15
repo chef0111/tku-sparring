@@ -19,6 +19,7 @@ import {
 } from '@/lib/tournament/arena-group-order';
 import { prisma } from '@/lib/db';
 import { getNameSortKey } from '@/lib/sort/name-sort-key';
+import { publishTournamentSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
 
 type SortableField = 'name' | 'status' | 'athletes' | 'createdAt';
 
@@ -224,7 +225,7 @@ export class TournamentDAL {
   }
 
   static async setStatus(input: SetTournamentStatusDTO & { adminId: string }) {
-    return prisma.$transaction(async (tx) => {
+    const updatedTournament = await prisma.$transaction(async (tx) => {
       const tournament = await TournamentDAL.findTournamentWithLifecycle(
         input.id,
         tx
@@ -265,6 +266,8 @@ export class TournamentDAL {
 
       return updatedTournament;
     });
+    publishTournamentSelectionInvalidate(input.id);
+    return updatedTournament;
   }
 
   static async setArenaGroupOrder(input: SetArenaGroupOrderDTO) {
@@ -312,6 +315,7 @@ export class TournamentDAL {
     if (!full) {
       throw new Error('Tournament not found');
     }
+    publishTournamentSelectionInvalidate(input.tournamentId);
     return full;
   }
 
@@ -376,6 +380,7 @@ export class TournamentDAL {
     if (!full) {
       throw new Error('Tournament not found');
     }
+    publishTournamentSelectionInvalidate(input.tournamentId);
     return full;
   }
 
@@ -417,6 +422,7 @@ export class TournamentDAL {
     if (!full) {
       throw new Error('Tournament not found');
     }
+    publishTournamentSelectionInvalidate(input.tournamentId);
     return full;
   }
 
@@ -472,6 +478,7 @@ export class TournamentDAL {
     if (!full) {
       throw new Error('Tournament not found');
     }
+    publishTournamentSelectionInvalidate(input.tournamentId);
     return full;
   }
 

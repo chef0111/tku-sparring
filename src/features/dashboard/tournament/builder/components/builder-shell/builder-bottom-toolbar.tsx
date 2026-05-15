@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   CheckCircle2,
   History,
-  Lock,
   PlayCircle,
   RefreshCw,
   Settings,
@@ -15,11 +14,6 @@ import type { TournamentData } from '@/features/dashboard/types';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -28,8 +22,6 @@ import {
 
 interface BuilderBottomToolbarProps {
   tournament: TournamentData;
-  leasedByMeCount: number;
-  totalGroups: number;
   readOnly: boolean;
   isRefreshing?: boolean;
   canCompleteTournament?: boolean;
@@ -39,7 +31,6 @@ interface BuilderBottomToolbarProps {
   onEditTournament: () => void;
   onDeleteTournament: () => void;
   onActivity: () => void;
-  leasePopoverContent?: React.ReactNode;
 }
 
 function DisabledWhenReadOnly({
@@ -96,8 +87,6 @@ function LifecycleButtonWrapper({
 
 export function BuilderBottomToolbar({
   tournament,
-  leasedByMeCount,
-  totalGroups,
   readOnly,
   isRefreshing,
   canCompleteTournament,
@@ -106,7 +95,6 @@ export function BuilderBottomToolbar({
   onLifecycle,
   onEditTournament,
   onDeleteTournament,
-  leasePopoverContent,
   onActivity,
 }: BuilderBottomToolbarProps) {
   const status = tournament.status;
@@ -117,38 +105,9 @@ export function BuilderBottomToolbar({
   const lifecycleBlockedByReadiness =
     status === 'active' && canCompleteTournament === false;
 
-  const leaseDisabled = totalGroups === 0;
-
   return (
     <TooltipProvider delayDuration={200}>
       <footer className="bg-sidebar/70 supports-backdrop-filter:bg-sidebar/50 flex h-12 items-center gap-2 border-t px-4">
-        <div className="flex items-center gap-1">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={leaseDisabled}
-                className="gap-2"
-              >
-                <Lock className="size-4" />
-                <span>
-                  {leasedByMeCount}/{totalGroups} locked by you
-                </span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-72 p-0">
-              {leasePopoverContent ?? (
-                <div className="text-muted-foreground p-3 text-sm">
-                  No groups yet.
-                </div>
-              )}
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <Separator orientation="vertical" className="mx-2 my-auto h-6" />
-
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
@@ -194,6 +153,8 @@ export function BuilderBottomToolbar({
             </LifecycleButtonWrapper>
           )}
         </div>
+
+        <Separator orientation="vertical" className="mx-2 my-auto h-6" />
 
         <div className="ml-auto flex items-center gap-1">
           <Button variant="ghost" size="sm" type="button" onClick={onActivity}>

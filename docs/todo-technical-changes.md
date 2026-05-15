@@ -39,10 +39,10 @@ Reference: current schema in [prisma/schema.prisma](prisma/schema.prisma).
   - Match score update with audit logging
 - Add a slim "selection view" endpoint for Advance Settings (tournament/group/match lookup).
   - Tournament fields: `id`, `name`, `status`
-  - Group fields: `id`, `name`, `tournamentId`, `status`, `leaseStatus`, `arenaId` or `arenaLabel`
-  - Match fields: `id`, `name`, `groupId`, `status`, `redAthleteName`, `blueAthleteName`
+  - Group fields: `id`, `name`, `tournamentId`, `status`, `arenaIndex` / arena label (`Arena N`)
+  - Match fields: `id`, `name`, `groupId`, `status`, `redAthleteName`, `blueAthleteName`; plus optional **`claimStatus`** (`none`|`held_by_me`|`held_by_other`) for Advance combobox badges and disabled rows
   - Status values: Tournament `draft|active|completed`, Group `draft|active|completed`, Match `pending|active|complete`
-  - Lease status values: `available`, `held_by_me`, `held_by_other`, `pending_takeover`
+  - Per-device match reservation via **`ArenaMatchClaim`** (TTL + heartbeat); no group-level lease
   - Match naming: `Match {arenaIndex}{sequence}`, sequence starts at 01 per arena (e.g., Match 101, 102)
   - Match sequence source: bracket order at generation time (manual scheduling deferred)
 
@@ -57,7 +57,7 @@ Reference: current schema in [prisma/schema.prisma](prisma/schema.prisma).
 - Query patterns should align with existing query hooks in [src/queries/tournaments.ts](src/queries/tournaments.ts) and [src/queries/groups.ts](src/queries/groups.ts).
 - Bracket rendering should be deterministic and derived from Match records.
 - Locks are per athlete and applied during shuffle and drag operations.
-- Lease presence is delivered by SSE from the server, and refreshed locally via heartbeat mutations.
+- Match reservation / coordination uses **tournament realtime** (Socket.io `invalidate` events) plus **`ArenaMatchClaim`** heartbeat on the arena client; outdated group **lease** concepts are retired.
 
 ### Non-functional Constraints
 

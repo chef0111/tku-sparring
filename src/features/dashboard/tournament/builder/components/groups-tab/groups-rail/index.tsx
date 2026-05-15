@@ -3,20 +3,9 @@ import { GroupRailRow } from './group-rail-row';
 import type { GroupData } from '@/features/dashboard/types';
 import { Button } from '@/components/ui/button';
 
-type LeaseStatus =
-  | 'available'
-  | 'held_by_me'
-  | 'held_by_other'
-  | 'pending_takeover';
-
-interface LeaseInfo {
-  leaseStatus: LeaseStatus;
-}
-
 interface GroupsRailProps {
   groups: Array<GroupData>;
   selectedGroupId: string | null;
-  leaseMap: Map<string, LeaseInfo>;
   readOnly: boolean;
   onSelect: (groupId: string) => void;
   onAdd: () => void;
@@ -26,7 +15,6 @@ interface GroupsRailProps {
 export function GroupsRail({
   groups,
   selectedGroupId,
-  leaseMap,
   readOnly,
   onSelect,
   onAdd,
@@ -60,7 +48,6 @@ export function GroupsRail({
                 group={group}
                 active={group.id === selectedGroupId}
                 readOnly={readOnly}
-                leaseInfo={leaseMap.get(group.id)}
                 onSelect={onSelect}
                 onOpenSettings={onOpenSettings}
               />

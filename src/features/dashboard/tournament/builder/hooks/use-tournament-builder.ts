@@ -2,14 +2,9 @@ import * as React from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBuilderManagerQuery } from './use-builder-manager-query';
 import type { GroupData, TournamentData } from '@/features/dashboard/types';
-import type { LeaseSnapshot } from '@/queries/leases';
 import { invalidateOrpcGroupListQueries } from '@/queries/groups';
-import { useLeases } from '@/queries/leases';
-import { useDeviceId } from '@/hooks/use-device-id';
 import { useTournamentReadOnly } from '@/hooks/use-tournament-read-only';
 import { authClient } from '@/lib/auth-client';
-
-type LeaseEntry = LeaseSnapshot[number];
 
 export interface UseTournamentBuilderArgs {
   tournament: TournamentData;
@@ -22,6 +17,8 @@ export function useTournamentBuilder({
   groups,
   tournamentId,
 }: UseTournamentBuilderArgs) {
+  void groups;
+
   const isReadOnly = useTournamentReadOnly(tournamentId);
   const { tab, setTab } = useBuilderManagerQuery();
   const queryClient = useQueryClient();
@@ -46,27 +43,13 @@ export function useTournamentBuilder({
   const { data: sessionData } = authClient.useSession();
   const user = sessionData?.user;
 
-  const deviceId = useDeviceId();
-  const { data: leases } = useLeases(tournamentId, deviceId);
-  const leasedByMeCount = React.useMemo(
-    () =>
-      (leases ?? []).filter((lease) => lease.leaseStatus === 'held_by_me')
-        .length,
-    [leases]
-  );
-  const leaseMap = React.useMemo(() => {
-    const map = new Map<string, LeaseEntry>();
-    for (const lease of leases ?? []) map.set(lease.groupId, lease);
-    return map;
-  }, [leases]);
-
   const handleRefresh = React.useCallback(async () => {
     setIsRefreshing(true);
     try {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['tournament'] }),
         invalidateOrpcGroupListQueries(queryClient),
-        queryClient.invalidateQueries({ queryKey: ['lease'] }),
+        queryClient.invalidateQueries({ queryKey: ['match'] }),
         queryClient.invalidateQueries({ queryKey: ['tournamentAthlete'] }),
       ]);
     } finally {
@@ -98,8 +81,6 @@ export function useTournamentBuilder({
     setLifecycleTarget,
     isRefreshing,
     user,
-    leasedByMeCount,
-    leaseMap,
     handleRefresh,
     handleLifecycle,
   };

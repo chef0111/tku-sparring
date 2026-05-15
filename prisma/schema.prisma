@@ -85,7 +85,6 @@ model Tournament {
 
   groups             Group[]
   matches            Match[]
-  groupControlLeases GroupControlLease[]
   activities         TournamentActivity[]
   tournamentAthletes TournamentAthlete[]
 
@@ -107,12 +106,29 @@ model Group {
   updatedAt       DateTime @updatedAt
 
   tournament         Tournament         @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
-  controlLease       GroupControlLease?
   matches            Match[]
   tournamentAthletes TournamentAthlete[]
 
   @@index([tournamentId])
   @@map("group")
+}
+
+model ArenaMatchClaim {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  matchId      String   @unique @db.ObjectId
+  groupId      String   @db.ObjectId
+  tournamentId String   @db.ObjectId
+  deviceId     String
+  userId       String   @db.String
+  expiresAt    DateTime
+  updatedAt    DateTime @updatedAt
+
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@index([tournamentId])
+  @@index([groupId])
+  @@index([expiresAt])
+  @@map("arena_match_claim")
 }
 
 model Match {
@@ -136,8 +152,9 @@ model Match {
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
 
-  group      Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  group             Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  tournament        Tournament       @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  arenaMatchClaim   ArenaMatchClaim?
 
   @@index([groupId])
   @@index([tournamentId])
@@ -224,40 +241,4 @@ model DeviceLastSelection {
   @@unique([userId, deviceId])
   @@index([deviceId])
   @@map("device_last_selection")
-}
-
-model GroupControlLease {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  groupId         String   @db.ObjectId
-  tournamentId    String   @db.ObjectId
-  adminId         String   @db.String
-  deviceId        String
-  acquiredAt      DateTime
-  lastHeartbeatAt DateTime
-  expiresAt       DateTime
-
-  group            Group                 @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  tournament       Tournament            @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
-  takeoverRequests LeaseTakeoverRequest[]
-
-  @@unique([groupId])
-  @@index([tournamentId])
-  @@index([expiresAt])
-  @@map("group_control_lease")
-}
-
-model LeaseTakeoverRequest {
-  id                String   @id @default(auto()) @map("_id") @db.ObjectId
-  leaseId           String   @db.ObjectId
-  requesterDeviceId String
-  requesterAdminId  String   @db.String
-  createdAt         DateTime @default(now())
-  status            String   @default("pending")
-
-  lease GroupControlLease @relation(fields: [leaseId], references: [id], onDelete: Cascade)
-
-  @@unique([leaseId, requesterDeviceId, requesterAdminId])
-  @@index([leaseId, status, createdAt])
-  @@index([requesterDeviceId])
-  @@map("lease_takeover_request")
 }

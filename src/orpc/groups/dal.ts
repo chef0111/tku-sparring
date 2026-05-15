@@ -8,6 +8,7 @@ import type {
 } from './dto';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { prisma } from '@/lib/db';
+import { publishTournamentSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
 
 export class GroupDAL {
   private static readonly UNASSIGNED_GROUP_FILTER = {
@@ -40,19 +41,32 @@ export class GroupDAL {
   }
 
   static async create(data: CreateGroupDTO) {
-    return prisma.group.create({ data });
+    const created = await prisma.group.create({ data });
+    publishTournamentSelectionInvalidate(created.tournamentId);
+    return created;
   }
 
   static async update(id: string, data: Omit<UpdateGroupDTO, 'id'>) {
-    return prisma.group.update({ where: { id }, data });
+    const updated = await prisma.group.update({ where: { id }, data });
+    publishTournamentSelectionInvalidate(updated.tournamentId);
+    return updated;
   }
 
   static async deleteGroup(id: string) {
-    return prisma.group.delete({ where: { id } });
+    const existing = await prisma.group.findUnique({
+      where: { id },
+      select: { tournamentId: true },
+    });
+    if (!existing) {
+      throw new Error('Group not found');
+    }
+    const deleted = await prisma.group.delete({ where: { id } });
+    publishTournamentSelectionInvalidate(existing.tournamentId);
+    return deleted;
   }
 
   static async autoAssign(input: AutoAssignDTO & { adminId: string }) {
-    return prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
       const group = await tx.group.findUnique({
         where: { id: input.groupId },
       });
@@ -100,38 +114,42 @@ export class GroupDAL {
 
       return { assigned: unassigned.length };
     });
+    publishTournamentSelectionInvalidate(input.tournamentId);
+    return result;
   }
 
   static async assignAthlete(input: AssignAthleteDTO & { adminId: string }) {
-    return prisma.$transaction(async (tx) => {
-      const updated = await tx.tournamentAthlete.update({
+    const updated = await prisma.$transaction(async (tx) => {
+      const row = await tx.tournamentAthlete.update({
         where: { id: input.tournamentAthleteId },
         data: { groupId: input.groupId, status: 'assigned' },
       });
 
       await recordTournamentActivity(
         {
-          tournamentId: updated.tournamentId,
+          tournamentId: row.tournamentId,
           adminId: input.adminId,
           eventType: 'group.athlete_assigned',
           entityType: 'tournament_athlete',
-          entityId: updated.id,
+          entityId: row.id,
           payload: {
             groupId: input.groupId,
-            name: updated.name,
+            name: row.name,
           },
         },
         tx
       );
 
-      return updated;
+      return row;
     });
+    publishTournamentSelectionInvalidate(updated.tournamentId);
+    return updated;
   }
 
   static async unassignAthlete(
     input: UnassignAthleteDTO & { adminId: string }
   ) {
-    return prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(async (tx) => {
       const current = await tx.tournamentAthlete.findUnique({
         where: { id: input.tournamentAthleteId },
       });
@@ -139,27 +157,29 @@ export class GroupDAL {
         throw new Error('Tournament athlete not found');
       }
 
-      const updated = await tx.tournamentAthlete.update({
+      const row = await tx.tournamentAthlete.update({
         where: { id: input.tournamentAthleteId },
         data: { groupId: null, status: 'selected' },
       });
 
       await recordTournamentActivity(
         {
-          tournamentId: updated.tournamentId,
+          tournamentId: row.tournamentId,
           adminId: input.adminId,
           eventType: 'group.athlete_unassigned',
           entityType: 'tournament_athlete',
-          entityId: updated.id,
+          entityId: row.id,
           payload: {
             previousGroupId: current.groupId,
-            name: updated.name,
+            name: row.name,
           },
         },
         tx
       );
 
-      return updated;
+      return row;
     });
+    publishTournamentSelectionInvalidate(updated.tournamentId);
+    return updated;
   }
 }

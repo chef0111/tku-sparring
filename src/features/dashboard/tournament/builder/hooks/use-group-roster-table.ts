@@ -10,51 +10,11 @@ import { getGroupRosterColumns } from '@/features/dashboard/tournament/builder/c
 import { useTournamentAthletes } from '@/queries/tournament-athletes';
 import { useAssignAthlete, useUnassignAthlete } from '@/queries/groups';
 
-type LeaseStatus =
-  | 'available'
-  | 'held_by_me'
-  | 'held_by_other'
-  | 'pending_takeover';
-
-export interface GroupRosterLeaseInfo {
-  leaseStatus: LeaseStatus;
-}
-
-export function leaseToStatusVariant(
-  status?: LeaseStatus
-): 'online' | 'offline' | 'degraded' | 'maintenance' {
-  switch (status) {
-    case 'held_by_me':
-    case 'available':
-      return 'online';
-    case 'held_by_other':
-      return 'degraded';
-    case 'pending_takeover':
-      return 'maintenance';
-    default:
-      return 'online';
-  }
-}
-
-export function leaseStatusLabel(status?: LeaseStatus): string {
-  switch (status) {
-    case 'held_by_me':
-      return 'You';
-    case 'held_by_other':
-      return 'Locked';
-    case 'pending_takeover':
-      return 'Pending';
-    default:
-      return 'Free';
-  }
-}
-
 export interface UseGroupRosterTableArgs {
   group: GroupData;
   tournamentId: string;
   groups: Array<GroupData>;
   readOnly: boolean;
-  leaseInfo?: GroupRosterLeaseInfo;
 }
 
 export function useGroupRosterTable({
@@ -62,7 +22,6 @@ export function useGroupRosterTable({
   tournamentId,
   groups,
   readOnly,
-  leaseInfo,
 }: UseGroupRosterTableArgs) {
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex: 0,
@@ -102,12 +61,12 @@ export function useGroupRosterTable({
 
   const groupRef = React.useRef(group);
   groupRef.current = group;
-  const otherGroupsRef = React.useRef<Array<GroupData>>([]);
 
   const otherGroups = React.useMemo(
     () => groups.filter((g) => g.id !== group.id),
     [groups, group.id]
   );
+  const otherGroupsRef = React.useRef<Array<GroupData>>([]);
   otherGroupsRef.current = otherGroups;
   const otherGroupsKey = otherGroups.map((g) => g.id).join(',');
 
@@ -182,9 +141,6 @@ export function useGroupRosterTable({
     data: { groupId: group.id },
   });
 
-  const statusVariant = leaseToStatusVariant(leaseInfo?.leaseStatus);
-  const leaseStatusText = leaseStatusLabel(leaseInfo?.leaseStatus);
-
   const showRosterSkeleton = isPending && !data;
 
   return {
@@ -198,7 +154,5 @@ export function useGroupRosterTable({
     violationCount,
     setNodeRef,
     isOver,
-    statusVariant,
-    leaseStatusText,
   };
 }

@@ -15,14 +15,14 @@ vi.mock('@/orpc/client', () => ({
       updateScore: vi.fn().mockResolvedValue(undefined),
       setWinner: vi.fn().mockResolvedValue(undefined),
     },
-    lease: {
-      heartbeat: vi.fn().mockResolvedValue(undefined),
-      release: vi.fn().mockResolvedValue(undefined),
-    },
     device: {
       lastSelection: {
         set: vi.fn().mockResolvedValue(undefined),
       },
+    },
+    arenaMatchClaim: {
+      heartbeat: vi.fn().mockResolvedValue(undefined),
+      release: vi.fn().mockResolvedValue(undefined),
     },
   },
 }));

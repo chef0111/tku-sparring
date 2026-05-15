@@ -3,7 +3,6 @@ import { ArrowLeft, Trophy } from 'lucide-react';
 import { BuilderShell } from './components/builder-shell';
 import { BuilderHeader } from './components/builder-shell/builder-header';
 import { BuilderBottomToolbar } from './components/builder-shell/builder-bottom-toolbar';
-import { LeaseSummaryList } from './components/lease-summary-list';
 import { EditTournamentDialog } from './components/dialogs/edit-tournament-dialog';
 import { DeleteTournamentDialog } from './components/dialogs/delete-tournament-dialog';
 import { AutoAssignAllDialog } from './components/dialogs/auto-assign-all-dialog';
@@ -15,7 +14,7 @@ import type { GroupData, TournamentData } from '@/features/dashboard/types';
 import { TournamentActivitySheet } from '@/features/dashboard/tournament/tournament-activity-sheet';
 import LoadingScreen from '@/components/navigation/loading';
 import { Button } from '@/components/ui/button';
-import { useLeaseStream } from '@/hooks/use-lease-stream';
+import { useTournamentRealtimeStream } from '@/hooks/use-tournament-realtime-stream';
 import { useTournament } from '@/queries/tournaments';
 import { useGroups } from '@/queries/groups';
 
@@ -24,7 +23,7 @@ interface TournamentBuilderPageProps {
 }
 
 export function TournamentBuilderPage({ id }: TournamentBuilderPageProps) {
-  useLeaseStream(id);
+  useTournamentRealtimeStream(id);
 
   const tournamentQuery = useTournament(id);
   const groupsQuery = useGroups(id);
@@ -87,8 +86,6 @@ function TournamentBuilderActive({
       footer={
         <BuilderBottomToolbar
           tournament={tournament}
-          leasedByMeCount={b.leasedByMeCount}
-          totalGroups={groups.length}
           readOnly={b.isReadOnly}
           isRefreshing={b.isRefreshing}
           canCompleteTournament={tournament.lifecycle.canComplete}
@@ -101,9 +98,6 @@ function TournamentBuilderActive({
           onDeleteTournament={() => {
             if (!b.isReadOnly) b.setShowDeleteTournament(true);
           }}
-          leasePopoverContent={
-            <LeaseSummaryList groups={groups} leaseMap={b.leaseMap} />
-          }
           onActivity={() => b.setActivityOpen(true)}
         />
       }

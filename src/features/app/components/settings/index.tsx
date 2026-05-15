@@ -2,6 +2,7 @@ import { settingTabs } from './constant/tabs';
 import { Unauthorized } from './unauthorized';
 import { useSettings } from '@/contexts/settings';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import {
   DialogContent,
   DialogFooter,
@@ -22,9 +23,16 @@ export const AppSettings = () => {
   const { data } = authClient.useSession();
   const isLoggedIn = !!data?.user;
 
-  const { setIsOpen, applySettings, formState, activeTab, setActiveTab } =
-    useSettings();
-  const isConfirmDisabled = !formState.isDirty || !formState.isValid;
+  const {
+    setIsOpen,
+    applySettings,
+    applySettingsPending,
+    formState,
+    activeTab,
+    setActiveTab,
+  } = useSettings();
+  const isConfirmDisabled =
+    !formState.isDirty || !formState.isValid || applySettingsPending;
 
   return (
     <DialogContent
@@ -105,7 +113,14 @@ export const AppSettings = () => {
           onClick={applySettings}
           disabled={isConfirmDisabled}
         >
-          Confirm
+          {applySettingsPending ? (
+            <>
+              <Spinner className="text-primary-foreground" />
+              Applying…
+            </>
+          ) : (
+            'Confirm'
+          )}
         </Button>
       </DialogFooter>
     </DialogContent>

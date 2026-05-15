@@ -4,7 +4,7 @@ import { TournamentViewer } from './viewer';
 import { TournamentViewerLoading } from './viewer/loading';
 import type { GroupData, TournamentData } from '../types';
 import { Button } from '@/components/ui/button';
-import { useLeaseStream } from '@/hooks/use-lease-stream';
+import { useTournamentRealtimeStream } from '@/hooks/use-tournament-realtime-stream';
 import { useTournament } from '@/queries/tournaments';
 import { useGroups } from '@/queries/groups';
 
@@ -13,7 +13,7 @@ interface TournamentPageProps {
 }
 
 export function TournamentPage({ id }: TournamentPageProps) {
-  useLeaseStream(id);
+  useTournamentRealtimeStream(id);
 
   const tournamentQuery = useTournament(id);
   const groupsQuery = useGroups(id);

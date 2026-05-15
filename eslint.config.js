@@ -10,6 +10,7 @@ export default [
       'dist/**',
       'eslint.config.js',
       '.agents/**',
+      '**/server.js',
     ],
   },
   {
