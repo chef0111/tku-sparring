@@ -112,7 +112,7 @@ export type SelectionGroupRow = {
   arenaLabel: string;
 };
 
-export type MatchClaimSelectionStatus = 'none' | 'held_by_me' | 'held_by_other';
+export type MatchClaimStatus = 'none' | 'held_by_me' | 'held_by_other';
 
 export type SelectionMatchRow = {
   id: string;
@@ -123,7 +123,7 @@ export type SelectionMatchRow = {
   blueAthleteName: string | null;
   /** Exclusive lock held by another device. */
   disabled: boolean;
-  claimStatus: MatchClaimSelectionStatus;
+  claimStatus: MatchClaimStatus;
 };
 
 export class AdvanceSettingsDAL {
@@ -179,7 +179,8 @@ export class AdvanceSettingsDAL {
 
   static async selectionMatches(input: SelectionMatchesDTO) {
     const now = new Date();
-    await ArenaMatchClaimDAL.cleanupExpired(now);
+    // Intentionally no cleanup here: this is a read path. Expired rows are ignored
+    // via `expiresAt > now` in activeClaimsByMatchId; claim() runs cleanupExpired.
 
     const { tournamentId, groupId } = input;
 
