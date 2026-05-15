@@ -7,6 +7,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { SelectItem } from '@/components/ui/select';
 import { useAppForm } from '@/components/form/hooks';
@@ -53,6 +58,9 @@ interface GroupSettingsFormProps {
 function GroupSettingsForm({ group, onClose }: GroupSettingsFormProps) {
   const updateGroup = useUpdateGroup({ onSuccess: onClose });
   const deleteGroup = useDeleteGroup({ onSuccess: onClose });
+
+  const athleteCount = group._count.tournamentAthletes;
+  const thirdPlaceAllowed = athleteCount >= 4;
 
   const GENDER_ANY = '__any__' as const;
 
@@ -165,9 +173,25 @@ function GroupSettingsForm({ group, onClose }: GroupSettingsFormProps) {
         </form.AppField>
       </div>
 
-      <form.AppField name="thirdPlaceMatch">
-        {(field) => <field.Checkbox label="Third-place match" />}
-      </form.AppField>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="w-fit">
+            <form.AppField name="thirdPlaceMatch">
+              {(field) => (
+                <field.Checkbox
+                  label="Third-place match"
+                  disabled={!thirdPlaceAllowed}
+                />
+              )}
+            </form.AppField>
+          </div>
+        </TooltipTrigger>
+        {!thirdPlaceAllowed && (
+          <TooltipContent side="right" className="max-w-xs">
+            Third-place match needs at least 4 athletes in the group.
+          </TooltipContent>
+        )}
+      </Tooltip>
 
       <form.AppField name="arenaIndex">
         {(field) => (

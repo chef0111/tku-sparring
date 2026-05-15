@@ -41,7 +41,7 @@ A human-readable match identifier that encodes arena and sequence (e.g., Match 1
 _Avoid_: Match code
 
 **Third-Place Match**:
-A dedicated match between the semifinal losers to determine third place in a group.
+A dedicated match between the semifinal losers to determine third place in a group. It is only materialized when the group has **at least four athletes** and the per-group toggle is on.
 _Avoid_: Consolation bout
 
 **Advance Settings**:
@@ -57,7 +57,7 @@ _Avoid_: Setup wizard
 - There is **no** group-level control lease or takeover queue in the current product model.
 - An **Arena** runs one **Group** at a time in the MVP workflow.
 - A **Match Label** encodes the arena index and the per-arena sequence number.
-- A **Third-Place Match** belongs to a **Group** and is created only when the group toggle is enabled.
+- A **Third-Place Match** belongs to a **Group** and is created only when the group toggle is enabled **and** the group has at least four athletes assigned.
 
 ## Example dialogue
 

@@ -236,12 +236,16 @@ export class TournamentDAL {
       }
 
       const currentStatus = TournamentStatusSchema.parse(tournament.status);
-      TournamentDAL.assertNextStatus(currentStatus, input.status);
+      const force = Boolean(input.force);
 
-      if (input.status === 'completed' && !tournament.lifecycle.canComplete) {
-        throw new Error(
-          'Tournament cannot be completed until every group has winner results'
-        );
+      if (!force) {
+        TournamentDAL.assertNextStatus(currentStatus, input.status);
+
+        if (input.status === 'completed' && !tournament.lifecycle.canComplete) {
+          throw new Error(
+            'Tournament cannot be completed until every group has winner results'
+          );
+        }
       }
 
       const updatedTournament = await tx.tournament.update({
@@ -259,6 +263,7 @@ export class TournamentDAL {
           payload: {
             fromStatus: currentStatus,
             toStatus: input.status,
+            ...(force ? { forced: true } : {}),
           },
         },
         tx

@@ -8,6 +8,7 @@ export const TOURNAMENT_ACTIVITY_EVENT_TYPES = [
   'bracket.regenerate',
   'match.score_edit',
   'match.winner_override',
+  'match.status_admin',
   'match.swap_participants',
   'group.athlete_assigned',
   'group.athlete_unassigned',

@@ -1,6 +1,6 @@
 {
   "name": "tku-sparring",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "private": true,
   "type": "module",
   "description": "A modern, user-friendly web application for managing Taekwondo sparring matches.",

@@ -1,7 +1,11 @@
 import * as React from 'react';
-import type { TournamentAthleteData } from '@/features/dashboard/types';
+import type {
+  MatchStatus,
+  TournamentAthleteData,
+} from '@/features/dashboard/types';
 import { useTournamentBracket } from '@/features/dashboard/tournament/builder/context/tournament-bracket/use-tournament-bracket';
 import {
+  useAdminSetMatchStatus,
   useResetMatchScore,
   useSetLock,
   useSetWinner,
@@ -9,6 +13,16 @@ import {
   useUpdateScore,
 } from '@/queries/matches';
 import { getBracketRoundLabel } from '@/lib/tournament/bracket-round-label';
+
+const MATCH_STATUS_RANK: Record<MatchStatus, number> = {
+  pending: 0,
+  active: 1,
+  complete: 2,
+};
+
+function isMatchStatusDowngrade(from: MatchStatus, to: MatchStatus) {
+  return MATCH_STATUS_RANK[to] < MATCH_STATUS_RANK[from];
+}
 
 export function useMatchDetailPanel() {
   const {
@@ -26,12 +40,17 @@ export function useMatchDetailPanel() {
   const [blueWins, setBlueWins] = React.useState(0);
   const [showManualWinner, setShowManualWinner] = React.useState(false);
   const [manualReason, setManualReason] = React.useState('');
+  const [pendingMatchStatus, setPendingMatchStatus] =
+    React.useState<MatchStatus | null>(null);
 
   const updateScore = useUpdateScore({ onSuccess: () => onOpenChange(false) });
   const resetMatchScore = useResetMatchScore();
   const setWinner = useSetWinner({ onSuccess: () => onOpenChange(false) });
   const swapParticipants = useSwapParticipants();
   const setLock = useSetLock();
+  const adminSetMatchStatus = useAdminSetMatchStatus({
+    onSuccess: () => setPendingMatchStatus(null),
+  });
 
   React.useEffect(() => {
     if (match) {
@@ -39,6 +58,7 @@ export function useMatchDetailPanel() {
       setBlueWins(match.blueWins);
       setShowManualWinner(false);
       setManualReason('');
+      setPendingMatchStatus(null);
     }
   }, [match]);
 
@@ -75,7 +95,40 @@ export function useMatchDetailPanel() {
     !readOnly &&
     (tournamentStatus === 'draft' || tournamentStatus === 'active');
 
+  const canChangeMatchStatus =
+    !!match &&
+    !readOnly &&
+    (tournamentStatus === 'draft' || tournamentStatus === 'active');
+
   const hasScoreWinner = redWins >= 2 || blueWins >= 2;
+  const hasCompletedWinner =
+    !!match &&
+    match.status === 'complete' &&
+    (match.winnerTournamentAthleteId != null || match.winnerId != null);
+  const showWinnerSummary = hasScoreWinner || hasCompletedWinner;
+
+  const winnerSummaryName = React.useMemo(() => {
+    if (!match) return '';
+    if (hasScoreWinner) {
+      return redWins >= 2
+        ? (redAthlete?.name ?? 'Red')
+        : (blueAthlete?.name ?? 'Blue');
+    }
+    if (match.winnerTournamentAthleteId === match.redTournamentAthleteId) {
+      return redAthlete?.name ?? 'Red';
+    }
+    if (match.winnerTournamentAthleteId === match.blueTournamentAthleteId) {
+      return blueAthlete?.name ?? 'Blue';
+    }
+    if (match.winnerId && match.winnerId === match.redAthleteId) {
+      return redAthlete?.name ?? 'Red';
+    }
+    if (match.winnerId && match.winnerId === match.blueAthleteId) {
+      return blueAthlete?.name ?? 'Blue';
+    }
+    return 'Winner';
+  }, [match, hasScoreWinner, redWins, blueWins, redAthlete, blueAthlete]);
+
   const scoreDirty =
     !!match && (redWins !== match.redWins || blueWins !== match.blueWins);
 
@@ -136,6 +189,26 @@ export function useMatchDetailPanel() {
     );
   }, [match, resetMatchScore]);
 
+  const handleMatchStatusSelect = React.useCallback(
+    (next: MatchStatus) => {
+      if (!match || next === match.status) return;
+      if (isMatchStatusDowngrade(match.status, next)) {
+        setPendingMatchStatus(next);
+        return;
+      }
+      adminSetMatchStatus.mutate({ matchId: match.id, status: next });
+    },
+    [adminSetMatchStatus, match]
+  );
+
+  const confirmPendingMatchStatus = React.useCallback(() => {
+    if (!match || !pendingMatchStatus) return;
+    adminSetMatchStatus.mutate({
+      matchId: match.id,
+      status: pendingMatchStatus,
+    });
+  }, [adminSetMatchStatus, match, pendingMatchStatus]);
+
   return {
     match,
     matchLabel,
@@ -155,7 +228,14 @@ export function useMatchDetailPanel() {
     canResetMatch,
     canSwap,
     canToggleLocks,
+    canChangeMatchStatus,
+    pendingMatchStatus,
+    setPendingMatchStatus,
+    handleMatchStatusSelect,
+    confirmPendingMatchStatus,
     hasScoreWinner,
+    showWinnerSummary,
+    winnerSummaryName,
     scoreDirty,
     roundLabel,
     handleSaveScore,
@@ -168,5 +248,6 @@ export function useMatchDetailPanel() {
     swapParticipants,
     setWinner,
     setLock,
+    adminSetMatchStatus,
   };
 }

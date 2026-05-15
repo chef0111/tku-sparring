@@ -3,6 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TournamentDAL } from '../dal';
 import { prisma } from '@/lib/db';
 
+vi.mock('@/lib/tournament/tournament-sse-bus', () => ({
+  publishTournamentSelectionInvalidate: vi.fn(),
+}));
+
 vi.mock('@/lib/db', () => ({
   prisma: {
     $transaction: vi.fn(),
@@ -221,6 +225,40 @@ describe('tournaments DAL', () => {
       id: 'tournament-1',
       status: 'completed',
     });
+  });
+
+  it('allows any status transition when force is true', async () => {
+    vi.mocked(prisma.tournament.findUnique).mockResolvedValue(
+      tournamentRecord({
+        status: 'completed',
+      }) as never
+    );
+    vi.mocked(prisma.tournament.update).mockResolvedValue({
+      id: 'tournament-1',
+      status: 'active',
+    } as never);
+
+    const result = await TournamentDAL.setStatus({
+      id: 'tournament-1',
+      status: 'active',
+      adminId: 'admin-1',
+      force: true,
+    });
+
+    expect(prisma.tournament.update).toHaveBeenCalledWith({
+      where: { id: 'tournament-1' },
+      data: { status: 'active' },
+    });
+    expect(prisma.tournamentActivity.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        payload: expect.objectContaining({
+          fromStatus: 'completed',
+          toStatus: 'active',
+          forced: true,
+        }),
+      }),
+    });
+    expect(result).toEqual({ id: 'tournament-1', status: 'active' });
   });
 
   it('rejects skipping directly from draft to completed', async () => {

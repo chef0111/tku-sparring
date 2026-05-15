@@ -1,7 +1,11 @@
 import * as React from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBuilderManagerQuery } from './use-builder-manager-query';
-import type { GroupData, TournamentData } from '@/features/dashboard/types';
+import type {
+  GroupData,
+  TournamentData,
+  TournamentStatus,
+} from '@/features/dashboard/types';
 import { invalidateOrpcGroupListQueries } from '@/queries/groups';
 import { useTournamentReadOnly } from '@/hooks/use-tournament-read-only';
 import { authClient } from '@/lib/auth-client';
@@ -27,17 +31,19 @@ export function useTournamentBuilder({
   const [showEditTournament, setShowEditTournament] = React.useState(false);
   const [showDeleteTournament, setShowDeleteTournament] = React.useState(false);
   const [showAutoAssignAll, setShowAutoAssignAll] = React.useState(false);
-  const [lifecycleTarget, setLifecycleTarget] = React.useState<
-    'active' | 'completed' | null
-  >(null);
+  const [pendingAdminStatus, setPendingAdminStatus] =
+    React.useState<TournamentStatus | null>(null);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
+  const prevReadOnlyRef = React.useRef(isReadOnly);
 
   React.useEffect(() => {
-    if (!isReadOnly) return;
+    const wasEditable = !prevReadOnlyRef.current;
+    prevReadOnlyRef.current = isReadOnly;
+    if (!wasEditable || !isReadOnly) return;
     setShowEditTournament(false);
     setShowDeleteTournament(false);
     setShowAutoAssignAll(false);
-    setLifecycleTarget(null);
+    setPendingAdminStatus(null);
   }, [isReadOnly]);
 
   const { data: sessionData } = authClient.useSession();
@@ -57,13 +63,13 @@ export function useTournamentBuilder({
     }
   }, [queryClient]);
 
-  const handleLifecycle = React.useCallback(() => {
-    if (tournament.status === 'draft') {
-      setLifecycleTarget('active');
-    } else if (tournament.status === 'active') {
-      setLifecycleTarget('completed');
-    }
-  }, [tournament.status]);
+  const handleAdminStatusIntent = React.useCallback(
+    (target: TournamentStatus) => {
+      if (target === tournament.status) return;
+      setPendingAdminStatus(target);
+    },
+    [tournament.status]
+  );
 
   return {
     isReadOnly,
@@ -77,11 +83,11 @@ export function useTournamentBuilder({
     setShowDeleteTournament,
     showAutoAssignAll,
     setShowAutoAssignAll,
-    lifecycleTarget,
-    setLifecycleTarget,
+    pendingAdminStatus,
+    setPendingAdminStatus,
     isRefreshing,
     user,
     handleRefresh,
-    handleLifecycle,
+    handleAdminStatusIntent,
   };
 }

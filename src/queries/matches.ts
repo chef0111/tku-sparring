@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type {
+  AdminSetMatchStatusDTO,
   AssignSlotDTO,
   GenerateBracketDTO,
   SetLockDTO,
@@ -200,6 +201,21 @@ export function useUpdateScore(options?: { onSuccess?: () => void }) {
     onSuccess: () => {
       invalidate();
       toast.success('Score updated');
+      options?.onSuccess?.();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+}
+
+export function useAdminSetMatchStatus(options?: { onSuccess?: () => void }) {
+  const invalidate = useInvalidateMatches();
+
+  return useMutation({
+    mutationFn: (data: AdminSetMatchStatusDTO) =>
+      client.match.adminSetMatchStatus(data),
+    onSuccess: () => {
+      invalidate();
+      toast.success('Match status updated');
       options?.onSuccess?.();
     },
     onError: (err) => toast.error(err.message),

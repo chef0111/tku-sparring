@@ -17,6 +17,9 @@ describe('getNormalizedEvents', () => {
     expect(opts.find((o) => o.value === 'match.score_edit')?.label).toBe(
       'Match – Score edit'
     );
+    expect(opts.find((o) => o.value === 'match.status_admin')?.label).toBe(
+      'Match – Status admin'
+    );
     expect(opts.find((o) => o.value === 'match.swap_participants')?.label).toBe(
       'Match – Swap participants'
     );

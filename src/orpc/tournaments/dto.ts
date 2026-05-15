@@ -28,6 +28,7 @@ export const UpdateTournamentSchema = z.object({
 export const SetTournamentStatusSchema = z.object({
   id: z.string(),
   status: TournamentStatusSchema,
+  force: z.boolean().optional(),
 });
 
 export const SetArenaGroupOrderSchema = z.object({

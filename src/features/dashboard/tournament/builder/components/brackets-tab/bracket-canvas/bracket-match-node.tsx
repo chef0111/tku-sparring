@@ -12,7 +12,8 @@ import {
   MATCH_W,
 } from '@/lib/tournament/bracket-layout';
 import {
-  formatFeederWinnerLabel,
+  formatArenaMatchHeaderLine,
+  formatFeederWinnerPlaceholder,
   getFeederMatch,
 } from '@/lib/tournament/arena-match-label';
 import { cn } from '@/lib/utils';
@@ -40,6 +41,12 @@ export function BracketMatchNode({
     ? athleteMap.get(match.blueTournamentAthleteId)
     : null;
 
+  const resolveTaName = React.useCallback(
+    (tournamentAthleteId: string) =>
+      athleteMap.get(tournamentAthleteId)?.name ?? null,
+    [athleteMap]
+  );
+
   const redEmptyLabel = React.useMemo(() => {
     if (redAthlete) return '';
     if (match.round === 0) return 'Open';
@@ -49,9 +56,16 @@ export function BracketMatchNode({
       match.matchIndex,
       'red'
     );
-    const n = feeder ? matchLabel.get(feeder.id) : undefined;
-    return n != null ? formatFeederWinnerLabel(n) : 'Winner pending';
-  }, [matchLabel, match.matchIndex, match.round, matches, redAthlete]);
+    if (!feeder) return 'Winner pending';
+    return formatFeederWinnerPlaceholder(feeder, matchLabel, resolveTaName);
+  }, [
+    matchLabel,
+    match.matchIndex,
+    match.round,
+    matches,
+    redAthlete,
+    resolveTaName,
+  ]);
 
   const blueEmptyLabel = React.useMemo(() => {
     if (blueAthlete) return '';
@@ -62,9 +76,16 @@ export function BracketMatchNode({
       match.matchIndex,
       'blue'
     );
-    const n = feeder ? matchLabel.get(feeder.id) : undefined;
-    return n != null ? formatFeederWinnerLabel(n) : 'Winner pending';
-  }, [matchLabel, match.matchIndex, match.round, matches, blueAthlete]);
+    if (!feeder) return 'Winner pending';
+    return formatFeederWinnerPlaceholder(feeder, matchLabel, resolveTaName);
+  }, [
+    matchLabel,
+    match.matchIndex,
+    match.round,
+    matches,
+    blueAthlete,
+    resolveTaName,
+  ]);
 
   const isRedWinner =
     match.winnerId != null && match.winnerId === match.redAthleteId;
@@ -98,7 +119,7 @@ export function BracketMatchNode({
       style={{ left: pos.x, top: pos.y, width: MATCH_W, height: MATCH_H }}
     >
       <p className="text-muted-foreground pointer-events-none absolute -top-4 right-0 left-0 truncate text-center text-[10px] leading-none font-medium tabular-nums">
-        Match {matchLabel.get(match.id)}
+        {formatArenaMatchHeaderLine(matchLabel.get(match.id))}
       </p>
       <div
         className={cn(

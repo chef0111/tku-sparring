@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import {
+  AdminSetMatchStatusSchema,
   AssignSlotSchema,
   CreateMatchSchema,
   GenerateBracketSchema,
@@ -58,6 +59,12 @@ export const updateMatch = authedProcedure
     const { id, ...data } = input;
     const match = await MatchDAL.update(id, data);
     return match;
+  });
+
+export const adminSetMatchStatusEndpoint = authedProcedure
+  .input(AdminSetMatchStatusSchema)
+  .handler(async ({ input, context }) => {
+    return MatchDAL.adminSetMatchStatus(input, context.user.id);
   });
 
 export const removeMatch = authedProcedure

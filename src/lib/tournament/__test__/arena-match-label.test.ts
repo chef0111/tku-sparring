@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   buildArenaMatchNumberById,
   buildSharedArenaMatchNumberById,
+  excludedFromArenaDisplaySequence,
+  formatArenaMatchHeaderLine,
   formatFeederWinnerLabel,
+  formatFeederWinnerPlaceholder,
   getFeederMatch,
   sortMatchesForArenaSequence,
 } from '../arena-match-label';
@@ -50,7 +53,125 @@ describe('sortMatchesForArenaSequence', () => {
   });
 });
 
+describe('excludedFromArenaDisplaySequence', () => {
+  it('is true for round 0 with exactly one tournament athlete', () => {
+    expect(
+      excludedFromArenaDisplaySequence(
+        m('a', 0, 0, {
+          redTournamentAthleteId: 't1',
+          blueTournamentAthleteId: null,
+        })
+      )
+    ).toBe(true);
+    expect(
+      excludedFromArenaDisplaySequence(
+        m('b', 0, 0, {
+          blueTournamentAthleteId: 't2',
+          redTournamentAthleteId: null,
+        })
+      )
+    ).toBe(true);
+  });
+
+  it('is false when both or neither sides have an athlete in round 0', () => {
+    expect(excludedFromArenaDisplaySequence(m('c', 0, 0))).toBe(false);
+    expect(
+      excludedFromArenaDisplaySequence(
+        m('d', 0, 0, {
+          redTournamentAthleteId: 't1',
+          blueTournamentAthleteId: 't2',
+        })
+      )
+    ).toBe(false);
+  });
+
+  it('is false for rounds after round 0', () => {
+    expect(
+      excludedFromArenaDisplaySequence(
+        m('e', 1, 0, {
+          redTournamentAthleteId: 't1',
+          blueTournamentAthleteId: null,
+        })
+      )
+    ).toBe(false);
+  });
+});
+
+describe('formatArenaMatchHeaderLine', () => {
+  it('uses Advanced when display number is null or undefined', () => {
+    expect(formatArenaMatchHeaderLine(null)).toBe('Advanced');
+    expect(formatArenaMatchHeaderLine(undefined)).toBe('Advanced');
+  });
+
+  it('prefixes Match when a number is present', () => {
+    expect(formatArenaMatchHeaderLine(205)).toBe('Match 205');
+  });
+});
+
+describe('formatFeederWinnerPlaceholder', () => {
+  it('uses Winner n when feeder has an arena number', () => {
+    const map = new Map<string, number | null>([['f', 205]]);
+    const feeder = m('f', 0, 0, {
+      status: 'complete',
+      winnerTournamentAthleteId: 'w',
+    });
+    expect(formatFeederWinnerPlaceholder(feeder, map)).toBe('Winner 205');
+  });
+
+  it('uses winner name when no arena number but match is complete', () => {
+    const map = new Map<string, number | null>([['f', null]]);
+    const feeder = m('f', 0, 0, {
+      status: 'complete',
+      winnerTournamentAthleteId: 'ta-x',
+    });
+    expect(formatFeederWinnerPlaceholder(feeder, map, () => 'Pat Lee')).toBe(
+      'Pat Lee'
+    );
+  });
+
+  it('falls back to Advanced when no number and no name', () => {
+    const map = new Map<string, number | null>([['f', null]]);
+    const feeder = m('f', 0, 0, { status: 'pending' });
+    expect(formatFeederWinnerPlaceholder(feeder, map)).toBe('Advanced');
+  });
+});
+
 describe('buildArenaMatchNumberById', () => {
+  it('skips sequence for round-0 advanceds; every id has a map entry', () => {
+    const matches = [
+      m('bye0', 0, 0, {
+        redTournamentAthleteId: 't1',
+        blueTournamentAthleteId: null,
+      }),
+      m('bye1', 0, 1, {
+        blueTournamentAthleteId: 't2',
+        redTournamentAthleteId: null,
+      }),
+      m('real', 0, 2, {
+        redTournamentAthleteId: 't3',
+        blueTournamentAthleteId: 't4',
+      }),
+      m('bye3', 0, 3, {
+        redTournamentAthleteId: 't5',
+        blueTournamentAthleteId: null,
+      }),
+      m('sf0', 1, 0),
+      m('sf1', 1, 1),
+      m('fn', 2, 0),
+    ];
+    const map = buildArenaMatchNumberById(matches, 1, false);
+    for (const x of matches) {
+      expect(map.has(x.id)).toBe(true);
+    }
+    expect(map.get('bye0')).toBeNull();
+    expect(map.get('bye1')).toBeNull();
+    expect(map.get('real')).toBe(101);
+    expect(map.get('bye3')).toBeNull();
+    expect(map.get('sf0')).toBe(102);
+    expect(map.get('sf1')).toBe(103);
+    expect(map.get('fn')).toBe(104);
+  });
+
   it('assigns 101..108 for an 8-bracket with third on arena 1', () => {
     const matches = [
       m('r0-0', 0, 0),
@@ -71,6 +192,9 @@ describe('buildArenaMatchNumberById', () => {
     expect(map.get('r1-1')).toBe(106);
     expect(map.get('tp')).toBe(107);
     expect(map.get('fn')).toBe(108);
+    for (const x of matches) {
+      expect(map.has(x.id)).toBe(true);
+    }
   });
 
   it('uses arena 2 base 200', () => {
@@ -78,6 +202,9 @@ describe('buildArenaMatchNumberById', () => {
     const map = buildArenaMatchNumberById(matches, 2, false);
     expect(map.get('a')).toBe(201);
     expect(map.get('b')).toBe(202);
+    for (const x of matches) {
+      expect(map.has(x.id)).toBe(true);
+    }
   });
 });
 
@@ -120,6 +247,9 @@ describe('buildSharedArenaMatchNumberById', () => {
     expect(map.get('B-r1-1')).toBe(112);
     expect(map.get('A-fn')).toBe(113);
     expect(map.get('B-fn')).toBe(114);
+    for (const x of matches) {
+      expect(map.has(x.id)).toBe(true);
+    }
   });
 
   it('reverses per-round group priority when groupOrder is flipped', () => {

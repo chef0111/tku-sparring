@@ -23,6 +23,7 @@ import {
 } from './groups';
 
 import {
+  adminSetMatchStatusEndpoint,
   assignSlotEndpoint,
   createMatch,
   generateBracketEndpoint,
@@ -95,6 +96,7 @@ export default {
     get: getMatch,
     create: createMatch,
     update: updateMatch,
+    adminSetMatchStatus: adminSetMatchStatusEndpoint,
     delete: removeMatch,
     updateScore: updateScoreEndpoint,
     setWinner: setWinnerEndpoint,
