@@ -101,6 +101,34 @@ export function useMatchDetailPanel() {
     (tournamentStatus === 'draft' || tournamentStatus === 'active');
 
   const hasScoreWinner = redWins >= 2 || blueWins >= 2;
+  const hasCompletedWinner =
+    !!match &&
+    match.status === 'complete' &&
+    (match.winnerTournamentAthleteId != null || match.winnerId != null);
+  const showWinnerSummary = hasScoreWinner || hasCompletedWinner;
+
+  const winnerSummaryName = React.useMemo(() => {
+    if (!match) return '';
+    if (hasScoreWinner) {
+      return redWins >= 2
+        ? (redAthlete?.name ?? 'Red')
+        : (blueAthlete?.name ?? 'Blue');
+    }
+    if (match.winnerTournamentAthleteId === match.redTournamentAthleteId) {
+      return redAthlete?.name ?? 'Red';
+    }
+    if (match.winnerTournamentAthleteId === match.blueTournamentAthleteId) {
+      return blueAthlete?.name ?? 'Blue';
+    }
+    if (match.winnerId && match.winnerId === match.redAthleteId) {
+      return redAthlete?.name ?? 'Red';
+    }
+    if (match.winnerId && match.winnerId === match.blueAthleteId) {
+      return blueAthlete?.name ?? 'Blue';
+    }
+    return 'Winner';
+  }, [match, hasScoreWinner, redWins, blueWins, redAthlete, blueAthlete]);
+
   const scoreDirty =
     !!match && (redWins !== match.redWins || blueWins !== match.blueWins);
 
@@ -206,6 +234,8 @@ export function useMatchDetailPanel() {
     handleMatchStatusSelect,
     confirmPendingMatchStatus,
     hasScoreWinner,
+    showWinnerSummary,
+    winnerSummaryName,
     scoreDirty,
     roundLabel,
     handleSaveScore,

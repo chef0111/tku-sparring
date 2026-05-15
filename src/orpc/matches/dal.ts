@@ -11,6 +11,7 @@ import type {
   UpdateMatchDTO,
   UpdateScoreDTO,
 } from './dto';
+import { buildSlotMap } from '@/lib/tournament/bracket-seeding';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { publishMatchInvalidateEvent } from '@/lib/tournament/tournament-sse-bus';
 import { prisma } from '@/lib/db';
@@ -135,7 +136,7 @@ export class MatchDAL {
       }
     }
 
-    if (group.thirdPlaceMatch && totalRounds >= 2) {
+    if (group.thirdPlaceMatch && athletes.length >= 4) {
       matches.push({
         round: totalRounds,
         matchIndex: 0,
@@ -197,8 +198,8 @@ export class MatchDAL {
             status: 'complete',
             winnerTournamentAthleteId: winnerId,
             winnerId: winnerProfileId,
-            redWins: match.redTournamentAthleteId ? 2 : 0,
-            blueWins: match.blueTournamentAthleteId ? 2 : 0,
+            redWins: 0,
+            blueWins: 0,
           },
         });
 
@@ -358,10 +359,39 @@ export class MatchDAL {
       }
     }
 
+    const bracketSizeFromTree = round0.length * 2;
+    const bracketSize = MatchDAL.nextPowerOfTwo(athletes.length);
+    if (bracketSizeFromTree !== bracketSize) {
+      throw new Error(
+        'Bracket shell size does not match athlete count; regenerate the bracket.'
+      );
+    }
+
+    const slotMapSeeds = buildSlotMap(bracketSize);
+    const lockedSeedPositions = new Set<number>();
+    for (const m of round0) {
+      if (m.redLocked && m.redTournamentAthleteId) {
+        const slotIdx = m.matchIndex * 2;
+        lockedSeedPositions.add(slotMapSeeds[slotIdx]!);
+      }
+      if (m.blueLocked && m.blueTournamentAthleteId) {
+        const slotIdx = m.matchIndex * 2 + 1;
+        lockedSeedPositions.add(slotMapSeeds[slotIdx]!);
+      }
+    }
+
     const pool = athletes.filter((a) => !lockedIds.has(a.id));
     const shuffled = MatchDAL.shuffleAthletePool(pool);
 
+    const seedToAthlete = new Map<number, (typeof athletes)[number]>();
     let si = 0;
+    for (let seed = 1; seed <= bracketSize; seed++) {
+      if (seed > athletes.length) continue;
+      if (lockedSeedPositions.has(seed)) continue;
+      const next = shuffled[si++] ?? null;
+      if (next) seedToAthlete.set(seed, next);
+    }
+
     for (const m of round0) {
       let redTa = m.redTournamentAthleteId;
       let blueTa = m.blueTournamentAthleteId;
@@ -369,14 +399,26 @@ export class MatchDAL {
       let blueProfile = m.blueAthleteId;
 
       if (!m.redLocked) {
-        const next = shuffled[si++] ?? null;
-        redTa = next?.id ?? null;
-        redProfile = next?.athleteProfileId ?? null;
+        const seed = slotMapSeeds[m.matchIndex * 2]!;
+        if (seed > athletes.length) {
+          redTa = null;
+          redProfile = null;
+        } else {
+          const placed = seedToAthlete.get(seed);
+          redTa = placed?.id ?? null;
+          redProfile = placed?.athleteProfileId ?? null;
+        }
       }
       if (!m.blueLocked) {
-        const next = shuffled[si++] ?? null;
-        blueTa = next?.id ?? null;
-        blueProfile = next?.athleteProfileId ?? null;
+        const seed = slotMapSeeds[m.matchIndex * 2 + 1]!;
+        if (seed > athletes.length) {
+          blueTa = null;
+          blueProfile = null;
+        } else {
+          const placed = seedToAthlete.get(seed);
+          blueTa = placed?.id ?? null;
+          blueProfile = placed?.athleteProfileId ?? null;
+        }
       }
 
       await prisma.match.update({

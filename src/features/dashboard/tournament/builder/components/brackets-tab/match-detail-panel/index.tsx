@@ -167,12 +167,9 @@ export function MatchDetailPanel() {
                 />
               </div>
 
-              {position.hasScoreWinner ? (
+              {position.showWinnerSummary ? (
                 <p className="text-primary text-center text-xs font-medium">
-                  Winner:{' '}
-                  {position.redWins >= 2
-                    ? (position.redAthlete?.name ?? 'Red')
-                    : (position.blueAthlete?.name ?? 'Blue')}
+                  Winner: {position.winnerSummaryName}
                 </p>
               ) : null}
             </section>

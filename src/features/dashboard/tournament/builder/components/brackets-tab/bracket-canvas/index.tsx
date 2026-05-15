@@ -122,7 +122,7 @@ export function BracketCanvas() {
                 x={PADDING + round * ROUND_GAP + MATCH_W / 2}
                 y={10}
                 textAnchor="middle"
-                className="fill-muted-foreground text-xs font-medium tracking-wider uppercase"
+                className="fill-muted-foreground text-sm font-semibold tracking-wider uppercase"
               >
                 {label}
               </text>

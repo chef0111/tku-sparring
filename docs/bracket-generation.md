@@ -13,10 +13,18 @@ This document captures bracket generation behavior and match labeling for the to
 - For a match at round `r > 0` and index `i`, the **red** feeder is the match at `(r - 1, 2i)` and the **blue** feeder is `(r - 1, 2i + 1)` in the same group.
 - Round 0 holds initial placements (seeds, BYEs, open slots).
 
+## Round-0 placement (shuffle)
+
+- The bracket shell size is the next power of two ≥ group athlete count.
+- **Shuffle** assigns athletes to **seed positions** `1 … N` using a uniform random permutation of the (unlocked) pool, then maps seeds to physical slots via the standard tournament **slot order** from `buildSlotMap` (e.g. size 8: `[1, 8, 4, 5, 2, 7, 3, 6]`). Seeds `N+1 … bracketSize` are BYEs.
+- After shuffle, **athlete vs BYE** opening matches are marked **complete** with **0–0** on the board; the athlete is still recorded as the winner and advances to the next round.
+- Each opening-round match therefore has at least one athlete or one BYE slot that will pair with a real athlete; there are no “phantom” round-0 matches with both sides empty.
+
 ## Third-Place Match
 
-- When enabled, a dedicated Third-Place Match is created and wired to the semifinal losers.
+- When enabled **and the group has at least four athletes**, a dedicated Third-Place Match is created and wired to the semifinal losers.
 - The Third-Place Match is part of the bracket canvas and audit trail.
+- In the group settings UI, the third-place option is disabled until the group has four or more athletes.
 
 ## Match display numbers (arena sequence)
 

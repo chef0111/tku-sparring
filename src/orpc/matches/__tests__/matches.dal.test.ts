@@ -96,6 +96,65 @@ describe('generateBracket', () => {
       MatchDAL.generateBracket({ groupId: 'group-1' }, 'admin-1')
     ).rejects.toThrow(/already exist/);
   });
+
+  it('does not create third-place match when athletes < 4 even if toggle on', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      ...draftGroup,
+      thirdPlaceMatch: true,
+    } as never);
+    vi.mocked(prisma.match.count).mockResolvedValue(0);
+    vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue([
+      { id: 'ta1', athleteProfileId: 'ap1', beltLevel: 3, weight: 60 },
+      { id: 'ta2', athleteProfileId: 'ap2', beltLevel: 3, weight: 62 },
+      { id: 'ta3', athleteProfileId: 'ap3', beltLevel: 3, weight: 64 },
+    ] as never);
+    vi.mocked(prisma.match.create).mockImplementation((args) => {
+      const data = args.data as { round: number; matchIndex: number };
+      return Promise.resolve({
+        id: `m-${data.round}-${data.matchIndex}`,
+        ...data,
+      }) as never;
+    });
+    vi.mocked(prisma.match.findMany).mockResolvedValue([]);
+
+    await MatchDAL.generateBracket({ groupId: 'group-1' }, 'admin-1');
+
+    const creates = vi
+      .mocked(prisma.match.create)
+      .mock.calls.map((c) => c[0].data as { round: number });
+    expect(creates.some((row) => row.round === 2)).toBe(false);
+    expect(creates.length).toBe(3);
+  });
+
+  it('creates third-place match when toggle on and athletes >= 4', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      ...draftGroup,
+      thirdPlaceMatch: true,
+    } as never);
+    vi.mocked(prisma.match.count).mockResolvedValue(0);
+    vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue([
+      { id: 'ta1', athleteProfileId: 'ap1', beltLevel: 3, weight: 60 },
+      { id: 'ta2', athleteProfileId: 'ap2', beltLevel: 3, weight: 62 },
+      { id: 'ta3', athleteProfileId: 'ap3', beltLevel: 3, weight: 64 },
+      { id: 'ta4', athleteProfileId: 'ap4', beltLevel: 3, weight: 66 },
+    ] as never);
+    vi.mocked(prisma.match.create).mockImplementation((args) => {
+      const data = args.data as { round: number; matchIndex: number };
+      return Promise.resolve({
+        id: `m-${data.round}-${data.matchIndex}`,
+        ...data,
+      }) as never;
+    });
+    vi.mocked(prisma.match.findMany).mockResolvedValue([]);
+
+    await MatchDAL.generateBracket({ groupId: 'group-1' }, 'admin-1');
+
+    const creates = vi
+      .mocked(prisma.match.create)
+      .mock.calls.map((c) => c[0].data as { round: number });
+    expect(creates.filter((row) => row.round === 2)).toHaveLength(1);
+    expect(creates.length).toBe(4);
+  });
 });
 
 describe('resetBracket', () => {
@@ -295,6 +354,104 @@ describe('shuffleBracket', () => {
       redTournamentAthleteId: 'ta-locked',
       redAthleteId: 'apx',
     });
+  });
+
+  it('places 5 athletes without phantom round-0 and with one contested opening match', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue(draftGroup as never);
+
+    const baseR0 = (i: number) => ({
+      id: `r0-${i}`,
+      round: 0,
+      matchIndex: i,
+      redLocked: false,
+      blueLocked: false,
+      redTournamentAthleteId: null as string | null,
+      blueTournamentAthleteId: null as string | null,
+      redAthleteId: null as string | null,
+      blueAthleteId: null as string | null,
+      redWins: 0,
+      blueWins: 0,
+      winnerId: null,
+      winnerTournamentAthleteId: null,
+      status: 'pending',
+    });
+    const r0 = [0, 1, 2, 3].map(baseR0);
+    const r1 = [0, 1].map((i) => ({
+      id: `r1-${i}`,
+      round: 1,
+      matchIndex: i,
+      redLocked: false,
+      blueLocked: false,
+      redTournamentAthleteId: null,
+      blueTournamentAthleteId: null,
+      redAthleteId: null,
+      blueAthleteId: null,
+      redWins: 0,
+      blueWins: 0,
+      winnerId: null,
+      winnerTournamentAthleteId: null,
+      status: 'pending',
+    }));
+    const r2 = {
+      id: 'r2-0',
+      round: 2,
+      matchIndex: 0,
+      redLocked: false,
+      blueLocked: false,
+      redTournamentAthleteId: null,
+      blueTournamentAthleteId: null,
+      redAthleteId: null,
+      blueAthleteId: null,
+      redWins: 0,
+      blueWins: 0,
+      winnerId: null,
+      winnerTournamentAthleteId: null,
+      status: 'pending',
+    };
+
+    vi.mocked(prisma.match.findMany).mockResolvedValue([
+      ...r0,
+      ...r1,
+      r2,
+    ] as never);
+
+    vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue(
+      ['ta1', 'ta2', 'ta3', 'ta4', 'ta5'].map((id, ix) => ({
+        id,
+        athleteProfileId: `ap${ix + 1}`,
+        beltLevel: 3,
+        weight: 60,
+      })) as never
+    );
+
+    vi.mocked(prisma.match.update).mockResolvedValue({} as never);
+    vi.mocked(prisma.match.findUnique).mockResolvedValue(null);
+
+    await MatchDAL.shuffleBracket('group-1', 'admin');
+
+    const updates = vi.mocked(prisma.match.update).mock.calls.map((c) => c[0]);
+    const r0Updates = updates.filter((u) =>
+      String(u.where.id).startsWith('r0-')
+    );
+    expect(r0Updates).toHaveLength(4);
+
+    let bothFilled = 0;
+    let oneFilled = 0;
+    let bothEmpty = 0;
+    for (const u of r0Updates) {
+      const d = u.data as {
+        redTournamentAthleteId: string | null;
+        blueTournamentAthleteId: string | null;
+      };
+      const r = d.redTournamentAthleteId != null;
+      const b = d.blueTournamentAthleteId != null;
+      if (r && b) bothFilled++;
+      else if (r !== b) oneFilled++;
+      else bothEmpty++;
+    }
+    expect(bothFilled).toBe(1);
+    expect(oneFilled).toBe(3);
+    expect(bothEmpty).toBe(0);
   });
 });
 

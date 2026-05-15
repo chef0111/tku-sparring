@@ -261,7 +261,7 @@ UAC:
 
 - Global athletes are managed in a dedicated route; tournament builder uses selected pool only.
 - De-dup rules are enforced before creating athlete profiles.
-- Seeding algorithm: sort by belt (higher first), then weight ascending; seed placements follow standard bracket seeding; ties randomized within tier.
+- Seeding algorithm: round-0 placement uses the standard tournament slot map for the next-power-of-two bracket size. Athletes are randomly assigned to seed positions 1..N; positions N+1..bracketSize are BYEs. This balances BYEs across opposite branches of the tree. **Shuffle** applies this mapping (locked slots are preserved).
 - Bracket format is single-elimination only; optional third-place match per group.
 - Bracket generation is Draft-only and creates Match records; regeneration deletes and recreates Draft matches.
 - Active tournaments allow score edits but no shuffle; bracket changes require explicit unlock.
