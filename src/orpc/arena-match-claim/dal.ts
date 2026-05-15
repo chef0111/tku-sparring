@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db';
 import { publishTournamentSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
 
-const CLAIM_TTL_MS = 60_000;
+const CLAIM_TTL_MS = 30 * 60 * 1000;
 
 export class ArenaMatchClaimDAL {
   private static expiresAt(now: Date) {
@@ -120,29 +120,6 @@ export class ArenaMatchClaimDAL {
 
     publishTournamentSelectionInvalidate(input.tournamentId);
     return row;
-  }
-
-  static async heartbeat(
-    input: { matchId: string; deviceId: string; userId: string },
-    db: Pick<typeof prisma, 'arenaMatchClaim'> = prisma
-  ) {
-    const now = new Date();
-    await this.cleanupExpired(now);
-
-    const row = await db.arenaMatchClaim.findUnique({
-      where: { matchId: input.matchId },
-    });
-
-    if (!row || row.deviceId !== input.deviceId) {
-      throw new Error('Match claim is not held by this device');
-    }
-
-    return db.arenaMatchClaim.update({
-      where: { matchId: input.matchId },
-      data: {
-        expiresAt: this.expiresAt(now),
-      },
-    });
   }
 
   static async release(

@@ -21,7 +21,6 @@ vi.mock('@/orpc/client', () => ({
       },
     },
     arenaMatchClaim: {
-      heartbeat: vi.fn().mockResolvedValue(undefined),
       release: vi.fn().mockResolvedValue(undefined),
     },
   },

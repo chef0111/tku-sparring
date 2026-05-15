@@ -1,9 +1,6 @@
 import * as React from 'react';
 
-import type {
-  MatchClaimHeartbeatDTO,
-  ReleaseMatchClaimDTO,
-} from '@/orpc/arena-match-claim/dto';
+import type { ReleaseMatchClaimDTO } from '@/orpc/arena-match-claim/dto';
 
 import type { ArenaMutation } from '@/features/app/lib/offline-queue/types';
 import { enqueue } from '@/features/app/lib/offline-queue/queue';
@@ -21,11 +18,6 @@ async function runMutationDirect(mutation: ArenaMutation) {
       return;
     case 'device.lastSelection.set':
       await client.device.lastSelection.set(mutation.payload);
-      return;
-    case 'arenaMatchClaim.heartbeat':
-      await client.arenaMatchClaim.heartbeat(
-        mutation.payload as MatchClaimHeartbeatDTO
-      );
       return;
     case 'arenaMatchClaim.release':
       await client.arenaMatchClaim.release(

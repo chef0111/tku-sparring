@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from '@tanstack/react-query';
+import { queryOptions, skipToken, useQuery } from '@tanstack/react-query';
 
 import { client } from '@/orpc/client';
 
@@ -89,9 +89,11 @@ export function useArenaSelectionMatches(args: {
     rest.groupId &&
     rest.groupId.length > 0
   );
+  const base = arenaSelectionMatchesQueryOptions(rest);
+  const canRun = hasScope && enabled;
   return useQuery({
-    ...arenaSelectionMatchesQueryOptions(rest),
-    enabled: hasScope && enabled,
-    refetchInterval,
+    ...base,
+    queryFn: canRun ? base.queryFn : skipToken,
+    refetchInterval: canRun ? refetchInterval : false,
   });
 }
