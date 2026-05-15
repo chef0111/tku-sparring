@@ -20,6 +20,10 @@ _Avoid_: Court, mat
 A single contest between two athletes within a group bracket.
 _Avoid_: Game, bout
 
+**Match transition**:
+A rules-only change from one **Match** state to another, including score edits, admin status changes, winner overrides, and whether bracket advancement must be applied or cleared.
+_Avoid_: Match patch, score helper
+
 **AthleteProfile**:
 A global athlete identity record shared across tournaments.
 _Avoid_: Player, user

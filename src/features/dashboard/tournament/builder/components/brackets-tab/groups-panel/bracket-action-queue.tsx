@@ -4,7 +4,7 @@ import { useTournamentBracket } from '../../../context/tournament-bracket/use-to
 import type { MatchData } from '@/features/dashboard/types';
 import { buildBracketActionQueue } from '@/lib/tournament/bracket-action-queue';
 import { getBracketRoundLabel } from '@/lib/tournament/bracket-round-label';
-import { formatArenaMatchHeaderLine } from '@/lib/tournament/arena-match-label';
+import { formatMatchHeaderLine } from '@/lib/tournament/arena-match-label';
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
@@ -172,7 +172,11 @@ function QueueRow({
         >
           <CardHeader className="gap-1 p-0">
             <CardTitle className="truncate text-sm font-semibold">
-              {formatArenaMatchHeaderLine(matchLabel.get(match.id))}
+              {formatMatchHeaderLine(matchLabel.get(match.id), {
+                bothSlotsOpen:
+                  match.redTournamentAthleteId == null &&
+                  match.blueTournamentAthleteId == null,
+              })}
             </CardTitle>
           </CardHeader>
           <p className="text-muted-foreground relative truncate text-xs">

@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildArenaMatchNumberById,
-  buildSharedArenaMatchNumberById,
-  excludedFromArenaDisplaySequence,
-  formatArenaMatchHeaderLine,
+  buildMatchNumber,
+  excludedFromArenaSequence,
   formatFeederWinnerLabel,
   formatFeederWinnerPlaceholder,
+  formatMatchHeaderLine,
   getFeederMatch,
-  sortMatchesForArenaSequence,
+  sortMatchesInRound,
 } from '../arena-match-label';
 import type { MatchData } from '@/features/dashboard/types';
 
@@ -39,24 +39,27 @@ function m(
   };
 }
 
-describe('sortMatchesForArenaSequence', () => {
-  it('orders third-place before final in arena sequence when enabled', () => {
-    const matches = [m('f', 2, 0), m('t', 2, 1), m('a', 0, 0)];
-    const sorted = sortMatchesForArenaSequence(matches, true);
-    expect(sorted.map((x) => x.id)).toEqual(['a', 't', 'f']);
+describe('sortMatchesInRound', () => {
+  it('orders third-place before final on the max round when enabled', () => {
+    const sorted = sortMatchesInRound([m('f', 2, 0), m('t', 2, 1)], true, 2, 2);
+    expect(sorted.map((x) => x.id)).toEqual(['t', 'f']);
   });
 
-  it('keeps final-round natural index order when third-place is off', () => {
-    const matches = [m('f', 2, 0), m('a', 0, 0)];
-    const sorted = sortMatchesForArenaSequence(matches, false);
-    expect(sorted.map((x) => x.id)).toEqual(['a', 'f']);
+  it('sorts by matchIndex ascending when third-place ordering does not apply', () => {
+    const sorted = sortMatchesInRound(
+      [m('b', 1, 1), m('a', 1, 0)],
+      false,
+      2,
+      1
+    );
+    expect(sorted.map((x) => x.id)).toEqual(['a', 'b']);
   });
 });
 
-describe('excludedFromArenaDisplaySequence', () => {
+describe('excludedFromArenaSequence', () => {
   it('is true for round 0 with exactly one tournament athlete', () => {
     expect(
-      excludedFromArenaDisplaySequence(
+      excludedFromArenaSequence(
         m('a', 0, 0, {
           redTournamentAthleteId: 't1',
           blueTournamentAthleteId: null,
@@ -64,7 +67,7 @@ describe('excludedFromArenaDisplaySequence', () => {
       )
     ).toBe(true);
     expect(
-      excludedFromArenaDisplaySequence(
+      excludedFromArenaSequence(
         m('b', 0, 0, {
           blueTournamentAthleteId: 't2',
           redTournamentAthleteId: null,
@@ -73,10 +76,10 @@ describe('excludedFromArenaDisplaySequence', () => {
     ).toBe(true);
   });
 
-  it('is false when both or neither sides have an athlete in round 0', () => {
-    expect(excludedFromArenaDisplaySequence(m('c', 0, 0))).toBe(false);
+  it('is false when both or neither sides have an athlete in round 0 (without bracket meta)', () => {
+    expect(excludedFromArenaSequence(m('c', 0, 0))).toBe(false);
     expect(
-      excludedFromArenaDisplaySequence(
+      excludedFromArenaSequence(
         m('d', 0, 0, {
           redTournamentAthleteId: 't1',
           blueTournamentAthleteId: 't2',
@@ -85,9 +88,26 @@ describe('excludedFromArenaDisplaySequence', () => {
     ).toBe(false);
   });
 
-  it('is false for rounds after round 0', () => {
+  it('excludes round-0 BYE vs BYE when both standard seeds exceed athlete count', () => {
+    const meta = new Map([
+      [
+        'g',
+        {
+          athleteCount: 3,
+          round0MatchCount: 4,
+          distinctRound0TournamentAthleteCount: 0,
+        },
+      ],
+    ]);
+    const phantom = m('phantom', 0, 1, { groupId: 'g' });
+    expect(excludedFromArenaSequence(phantom, meta)).toBe(true);
+    const real = m('real', 0, 0, { groupId: 'g' });
+    expect(excludedFromArenaSequence(real, meta)).toBe(false);
+  });
+
+  it('is false for rounds after round 0 when a tournament athlete is already placed', () => {
     expect(
-      excludedFromArenaDisplaySequence(
+      excludedFromArenaSequence(
         m('e', 1, 0, {
           redTournamentAthleteId: 't1',
           blueTournamentAthleteId: null,
@@ -95,16 +115,107 @@ describe('excludedFromArenaDisplaySequence', () => {
       )
     ).toBe(false);
   });
+
+  it('excludes upper round when exactly one round-0 feeder is a phantom (both slots open)', () => {
+    const matches = [
+      m('r0-0', 0, 0, {
+        redTournamentAthleteId: 't1',
+        blueTournamentAthleteId: 't2',
+      }),
+      m('r0-1', 0, 1),
+      m('sf0', 1, 0),
+    ];
+    expect(excludedFromArenaSequence(m('sf0', 1, 0), undefined, matches)).toBe(
+      true
+    );
+  });
+
+  it('does not exclude upper round when no round-0 feeder is a phantom', () => {
+    const matches = [
+      m('r0-0', 0, 0, {
+        redTournamentAthleteId: 't1',
+        blueTournamentAthleteId: null,
+      }),
+      m('r0-1', 0, 1, {
+        redTournamentAthleteId: 't2',
+        blueTournamentAthleteId: null,
+      }),
+      m('sf0', 1, 0),
+    ];
+    expect(excludedFromArenaSequence(m('sf0', 1, 0), undefined, matches)).toBe(
+      false
+    );
+  });
+
+  it('does not exclude upper round when both round-0 feeders are phantoms', () => {
+    const matches = [m('r0-0', 0, 0), m('r0-1', 0, 1), m('sf0', 1, 0)];
+    expect(excludedFromArenaSequence(m('sf0', 1, 0), undefined, matches)).toBe(
+      false
+    );
+  });
+
+  it('still excludes upper round fed by one phantom r0 row when this match already has one TA', () => {
+    const matches = [
+      m('r0-0', 0, 0, {
+        redTournamentAthleteId: 't1',
+        blueTournamentAthleteId: 't2',
+      }),
+      m('r0-1', 0, 1),
+      m('sf0', 1, 0, {
+        redTournamentAthleteId: 't9',
+        blueTournamentAthleteId: null,
+      }),
+    ];
+    expect(excludedFromArenaSequence(m('sf0', 1, 0), undefined, matches)).toBe(
+      true
+    );
+  });
+
+  it('excludes fully empty round-0 when distinct TAs on r0 already cover full roster', () => {
+    const meta = new Map([
+      [
+        'g1',
+        {
+          athleteCount: 5,
+          round0MatchCount: 4,
+          distinctRound0TournamentAthleteCount: 5,
+        },
+      ],
+    ]);
+    expect(
+      excludedFromArenaSequence(m('empty-mid', 0, 1, { groupId: 'g1' }), meta)
+    ).toBe(true);
+  });
+
+  it('does not exclude fully empty round-0 when k < n (roster not yet saturated on r0)', () => {
+    const meta = new Map([
+      [
+        'g1',
+        {
+          athleteCount: 5,
+          round0MatchCount: 4,
+          distinctRound0TournamentAthleteCount: 4,
+        },
+      ],
+    ]);
+    expect(
+      excludedFromArenaSequence(m('empty-mid', 0, 1, { groupId: 'g1' }), meta)
+    ).toBe(false);
+  });
 });
 
-describe('formatArenaMatchHeaderLine', () => {
+describe('formatMatchHeaderLine', () => {
   it('uses Advanced when display number is null or undefined', () => {
-    expect(formatArenaMatchHeaderLine(null)).toBe('Advanced');
-    expect(formatArenaMatchHeaderLine(undefined)).toBe('Advanced');
+    expect(formatMatchHeaderLine(null)).toBe('Advanced');
+    expect(formatMatchHeaderLine(undefined)).toBe('Advanced');
+  });
+
+  it('uses empty string when unnumbered and both slots are open', () => {
+    expect(formatMatchHeaderLine(null, { bothSlotsOpen: true })).toBe('');
   });
 
   it('prefixes Match when a number is present', () => {
-    expect(formatArenaMatchHeaderLine(205)).toBe('Match 205');
+    expect(formatMatchHeaderLine(205)).toBe('Match 205');
   });
 });
 
@@ -129,10 +240,10 @@ describe('formatFeederWinnerPlaceholder', () => {
     );
   });
 
-  it('falls back to Advanced when no number and no name', () => {
+  it('falls back to Open when no number and no name', () => {
     const map = new Map<string, number | null>([['f', null]]);
     const feeder = m('f', 0, 0, { status: 'pending' });
-    expect(formatFeederWinnerPlaceholder(feeder, map)).toBe('Advanced');
+    expect(formatFeederWinnerPlaceholder(feeder, map)).toBe('Open');
   });
 });
 
@@ -206,9 +317,63 @@ describe('buildArenaMatchNumberById', () => {
       expect(map.has(x.id)).toBe(true);
     }
   });
+
+  it('skips numbering for round-0 BYE vs BYE when athleteCount is passed', () => {
+    const gid = 'g1';
+    const matches = [
+      m('r0-0', 0, 0, { groupId: gid }),
+      m('r0-1', 0, 1, { groupId: gid }),
+      m('r0-2', 0, 2, { groupId: gid }),
+      m('r0-3', 0, 3, { groupId: gid }),
+      m('r1-0', 1, 0, { groupId: gid }),
+      m('r1-1', 1, 1, { groupId: gid }),
+      m('fn', 2, 0, { groupId: gid }),
+    ];
+    const map = buildArenaMatchNumberById(matches, 1, false, 3);
+    expect(map.get('r0-1')).toBeNull();
+    expect(map.get('r0-0')).toBe(101);
+    expect(map.get('r0-2')).toBe(102);
+    expect(map.get('r0-3')).toBe(103);
+    expect(map.get('r1-0')).toBe(104);
+    expect(map.get('r1-1')).toBe(105);
+    expect(map.get('fn')).toBe(106);
+  });
+
+  it('skips empty round-0 when k >= n even if both seeds are <= n (saturated roster)', () => {
+    const gid = 'g1';
+    const matches = [
+      m('r0-0', 0, 0, {
+        groupId: gid,
+        redTournamentAthleteId: 't1',
+        blueTournamentAthleteId: 't2',
+      }),
+      m('r0-1', 0, 1, { groupId: gid }),
+      m('r0-2', 0, 2, {
+        groupId: gid,
+        redTournamentAthleteId: 't3',
+        blueTournamentAthleteId: 't4',
+      }),
+      m('r0-3', 0, 3, {
+        groupId: gid,
+        redTournamentAthleteId: 't5',
+        blueTournamentAthleteId: null,
+      }),
+      m('r1-0', 1, 0, { groupId: gid }),
+      m('r1-1', 1, 1, { groupId: gid }),
+      m('fn', 2, 0, { groupId: gid }),
+    ];
+    const map = buildArenaMatchNumberById(matches, 1, false, 5);
+    expect(map.get('r0-1')).toBeNull();
+    expect(map.get('r0-0')).toBe(101);
+    expect(map.get('r0-2')).toBe(102);
+    expect(map.get('r0-3')).toBeNull();
+    expect(map.get('r1-0')).toBeNull();
+    expect(map.get('r1-1')).toBe(103);
+    expect(map.get('fn')).toBe(104);
+  });
 });
 
-describe('buildSharedArenaMatchNumberById', () => {
+describe('buildMatchNumber', () => {
   function mG(
     id: string,
     round: number,
@@ -228,7 +393,7 @@ describe('buildSharedArenaMatchNumberById', () => {
       ...[0, 1].map((i) => mG(`B-r1-${i}`, 1, i, 'gb')),
       mG('B-fn', 2, 0, 'gb'),
     ];
-    const map = buildSharedArenaMatchNumberById({
+    const map = buildMatchNumber({
       arenaIndex: 1,
       groups: [
         { id: 'ga', thirdPlaceMatch: false },
@@ -254,7 +419,7 @@ describe('buildSharedArenaMatchNumberById', () => {
 
   it('reverses per-round group priority when groupOrder is flipped', () => {
     const matches = [mG('A0', 0, 0, 'ga'), mG('B0', 0, 0, 'gb')];
-    const mapAB = buildSharedArenaMatchNumberById({
+    const mapAB = buildMatchNumber({
       arenaIndex: 1,
       groups: [
         { id: 'ga', thirdPlaceMatch: false },
@@ -263,7 +428,7 @@ describe('buildSharedArenaMatchNumberById', () => {
       matches,
       groupOrder: ['ga', 'gb'],
     });
-    const mapBA = buildSharedArenaMatchNumberById({
+    const mapBA = buildMatchNumber({
       arenaIndex: 1,
       groups: [
         { id: 'ga', thirdPlaceMatch: false },
@@ -287,7 +452,7 @@ describe('buildSharedArenaMatchNumberById', () => {
       ['a', 2],
       ['b', 1],
     ]);
-    const map = buildSharedArenaMatchNumberById({
+    const map = buildMatchNumber({
       arenaIndex: 1,
       groups: [{ id: 'g', thirdPlaceMatch: false }],
       matches,
