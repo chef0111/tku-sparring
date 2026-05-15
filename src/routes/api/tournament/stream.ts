@@ -1,13 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod';
+
 import { auth } from '@/lib/auth';
-import { LeaseDAL } from '@/orpc/lease/dal';
-import { ListLeasesForTournamentSchema } from '@/orpc/lease/dto';
-import { subscribeToLeaseEvents } from '@/orpc/lease/lease-stream';
+import { subscribeToTournamentSseEvents } from '@/lib/tournament/tournament-sse-bus';
 
 const encoder = new TextEncoder();
 const HEARTBEAT_INTERVAL_MS = 20_000;
-const streamSearchSchema = ListLeasesForTournamentSchema.pick({
-  tournamentId: true,
+const streamSearchSchema = z.object({
+  tournamentId: z.string().min(1),
 });
 
 function encodeComment(comment: string) {
@@ -18,7 +18,7 @@ function encodeEvent(event: string, data: unknown) {
   return encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
 }
 
-export const Route = createFileRoute('/api/lease/stream')({
+export const Route = createFileRoute('/api/tournament/stream')({
   server: {
     handlers: {
       GET: async ({ request }) => {
@@ -37,10 +37,11 @@ export const Route = createFileRoute('/api/lease/stream')({
           return new Response('Invalid tournamentId', { status: 400 });
         }
 
+        const tournamentId = result.data.tournamentId;
         let cleanup = () => {};
 
         const stream = new ReadableStream<Uint8Array>({
-          async start(controller) {
+          start(controller) {
             let closed = false;
 
             const safeEnqueue = (chunk: Uint8Array) => {
@@ -68,7 +69,7 @@ export const Route = createFileRoute('/api/lease/stream')({
               try {
                 controller.close();
               } catch {
-                // The stream may already be closed if a disconnect raced with publish.
+                // Stream may already be closed if a disconnect raced with publish.
               }
             };
 
@@ -79,18 +80,16 @@ export const Route = createFileRoute('/api/lease/stream')({
             request.signal.addEventListener('abort', onAbort, { once: true });
 
             try {
-              const snapshot = await LeaseDAL.listForTournament({
-                tournamentId: result.data.tournamentId,
-              });
-
               if (closed || request.signal.aborted) {
                 return;
               }
 
-              const unsubscribe = subscribeToLeaseEvents(
-                result.data.tournamentId,
+              const unsubscribe = subscribeToTournamentSseEvents(
+                tournamentId,
                 (event) => {
-                  safeEnqueue(encodeEvent(event.type, event));
+                  if (event.type === 'invalidate') {
+                    safeEnqueue(encodeEvent('invalidate', event));
+                  }
                 }
               );
               const heartbeat = setInterval(() => {
@@ -104,12 +103,17 @@ export const Route = createFileRoute('/api/lease/stream')({
               };
 
               safeEnqueue(encodeComment('connected'));
-              safeEnqueue(encodeEvent('snapshot', snapshot));
-              // Resync after subscription so mutations during snapshot creation are refetched.
               safeEnqueue(
                 encodeEvent('invalidate', {
                   type: 'invalidate',
-                  tournamentId: result.data.tournamentId,
+                  tournamentId,
+                })
+              );
+
+              safeEnqueue(
+                encodeEvent('invalidate', {
+                  type: 'invalidate',
+                  tournamentId,
                 })
               );
             } catch (error) {

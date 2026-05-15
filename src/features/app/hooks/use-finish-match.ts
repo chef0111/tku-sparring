@@ -55,6 +55,14 @@ export function useFinishMatch() {
 
     if (deviceId) {
       await mutateAsync({
+        kind: 'arenaMatchClaim.release',
+        payload: {
+          matchId: selectedMatchId,
+          deviceId,
+        },
+      });
+
+      await mutateAsync({
         kind: 'device.lastSelection.set',
         payload: {
           deviceId,

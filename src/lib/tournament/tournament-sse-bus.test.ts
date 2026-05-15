@@ -1,38 +1,32 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import {
-  publishLeaseEvent,
   publishMatchInvalidateEvent,
-  subscribeToLeaseEvents,
-} from './lease-stream';
+  publishTournamentSelectionInvalidate,
+  subscribeToTournamentSseEvents,
+} from './tournament-sse-bus';
 
-describe('lease stream publisher', () => {
+describe('tournament sse bus', () => {
   it('isolates throwing listeners so publish does not fail', () => {
     const brokenListener = vi.fn(() => {
       throw new Error('stream closed');
     });
     const healthyListener = vi.fn();
-    const unsubscribeBroken = subscribeToLeaseEvents(
+    const unsubscribeBroken = subscribeToTournamentSseEvents(
       'tournament-1',
       brokenListener
     );
-    const unsubscribeHealthy = subscribeToLeaseEvents(
+    const unsubscribeHealthy = subscribeToTournamentSseEvents(
       'tournament-1',
       healthyListener
     );
 
     expect(() =>
-      publishLeaseEvent({
-        type: 'invalidate',
-        tournamentId: 'tournament-1',
-      })
+      publishTournamentSelectionInvalidate('tournament-1')
     ).not.toThrow();
     expect(healthyListener).toHaveBeenCalledTimes(1);
 
-    publishLeaseEvent({
-      type: 'invalidate',
-      tournamentId: 'tournament-1',
-    });
+    publishTournamentSelectionInvalidate('tournament-1');
 
     expect(brokenListener).toHaveBeenCalledTimes(1);
     expect(healthyListener).toHaveBeenCalledTimes(2);
@@ -41,15 +35,15 @@ describe('lease stream publisher', () => {
     unsubscribeHealthy();
   });
 
-  it('notifies subscribers on match.invalidate publish', () => {
+  it('aliases publishMatchInvalidateEvent to selection invalidate', () => {
     const listener = vi.fn();
-    const unsubscribe = subscribeToLeaseEvents('t-1', listener);
+    const unsubscribe = subscribeToTournamentSseEvents('t-1', listener);
 
     publishMatchInvalidateEvent('t-1');
 
     expect(listener).toHaveBeenCalledTimes(1);
     expect(listener).toHaveBeenCalledWith({
-      type: 'match.invalidate',
+      type: 'invalidate',
       tournamentId: 't-1',
     });
 

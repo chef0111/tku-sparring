@@ -64,16 +64,6 @@ export function summarizeTournamentActivity(
       return `Unassigned ${String(p.name ?? 'athlete')} from a group`;
     case 'group.auto_assign':
       return `Auto-assigned ${String(p.count ?? 0)} athlete(s) to a group`;
-    case 'lease.acquire':
-      return 'Group control lease acquired';
-    case 'lease.release':
-      return 'Group control lease released';
-    case 'lease.takeover_request':
-      return 'Takeover requested for group control';
-    case 'lease.takeover_approve':
-      return 'Takeover approved';
-    case 'lease.takeover_deny':
-      return 'Takeover denied';
     default:
       return eventType.replace(/\./g, ' ');
   }

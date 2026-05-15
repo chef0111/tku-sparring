@@ -68,14 +68,14 @@ describe('listTournamentActivity', () => {
 
     await listTournamentActivity({
       tournamentId: 't1',
-      eventTypes: ['lease.acquire', 'lease.release'],
+      eventTypes: ['bracket.generate', 'bracket.regenerate'],
     });
 
     expect(prisma.tournamentActivity.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
           tournamentId: 't1',
-          eventType: { in: ['lease.acquire', 'lease.release'] },
+          eventType: { in: ['bracket.generate', 'bracket.regenerate'] },
         }),
       })
     );

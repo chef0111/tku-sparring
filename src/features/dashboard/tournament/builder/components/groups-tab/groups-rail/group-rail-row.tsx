@@ -5,46 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Status, StatusIndicator } from '@/components/ui/status';
 import { cn } from '@/lib/utils';
 
-type LeaseStatus =
-  | 'available'
-  | 'held_by_me'
-  | 'held_by_other'
-  | 'pending_takeover';
-
-interface LeaseInfo {
-  leaseStatus: LeaseStatus;
-}
-
 interface GroupRailRowProps {
   group: GroupData;
   active: boolean;
   readOnly: boolean;
-  leaseInfo?: LeaseInfo;
   onSelect: (groupId: string) => void;
   onOpenSettings: (group: GroupData) => void;
-}
-
-function leaseToStatusVariant(
-  status?: LeaseStatus
-): 'online' | 'offline' | 'degraded' | 'maintenance' {
-  switch (status) {
-    case 'held_by_me':
-    case 'available':
-      return 'online';
-    case 'held_by_other':
-      return 'degraded';
-    case 'pending_takeover':
-      return 'maintenance';
-    default:
-      return 'online';
-  }
 }
 
 export function GroupRailRow({
   group,
   active,
   readOnly,
-  leaseInfo,
   onSelect,
   onOpenSettings,
 }: GroupRailRowProps) {
@@ -67,10 +39,7 @@ export function GroupRailRow({
         onClick={() => onSelect(group.id)}
         className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2 text-left"
       >
-        <Status
-          status={leaseToStatusVariant(leaseInfo?.leaseStatus)}
-          className="h-2 w-2 shrink-0 px-0"
-        >
+        <Status status="online" className="h-2 w-2 shrink-0 px-0">
           <StatusIndicator />
         </Status>
         <span className="min-w-0 flex-1 truncate text-sm font-medium">

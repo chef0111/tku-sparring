@@ -12,11 +12,6 @@ export const TOURNAMENT_ACTIVITY_EVENT_TYPES = [
   'group.athlete_assigned',
   'group.athlete_unassigned',
   'group.auto_assign',
-  'lease.acquire',
-  'lease.release',
-  'lease.takeover_request',
-  'lease.takeover_approve',
-  'lease.takeover_deny',
 ] as const;
 
 export type TournamentActivityEventType =

@@ -33,7 +33,7 @@ Primary value:
 - Multi-role permissions beyond System Admin.
 - Double-elimination, round robin, or Swiss brackets.
 - Public-facing bracket view or spectator UX.
-- Real-time collaborative editing of brackets or groups beyond presence and control lease.
+- Real-time collaborative editing of brackets or groups beyond per-match reservation (see **Arena match claim** in [CONTEXT.md](CONTEXT.md)).
 - Automated tournament completion without admin confirmation.
 - Advanced hardware integration beyond existing scoring inputs.
 
@@ -49,7 +49,7 @@ In scope:
 - Custom SVG bracket canvas with DnD-kit interactions.
 - Match records created in Draft; bracket locked in Active.
 - Audit log for critical actions.
-- Group control lease to indicate which group is active in an arena.
+- **Arena match claim** (per selectable match, TTL + heartbeat) so only one device can apply a match at a time; live updates via SSE.
 - Arena client for match execution and scoring.
 - Arena-side selection flow (Advance Settings) with per-device restore.
 - Round-end score submission and match-end finalization.
@@ -104,7 +104,6 @@ UAC:
 - User can create, edit, and delete athlete profiles.
 - De-dup: if `athleteCode` + `name` already exist, block creation with a clear error.
 - If `athleteCode` missing, show "possible duplicate" warning when a match on name + affiliation + weight + belt is detected, requiring manual confirmation.
-- Filters and operators match the existing data-table capabilities from [src/config/data-table.ts](src/config/data-table.ts).
 
 ### 2) Add Athletes to Tournament (Bulk Action)
 
@@ -135,7 +134,7 @@ What the user sees:
 - "Auto-assign" button to apply constraints.
 - Warning badges for out-of-range athletes, with a "Fix assignments" action.
 - Per-group settings drawer with third-place match toggle (default OFF).
-- Group status badge using the Status component: Online when the current device holds the lease, Degraded when another device holds it.
+- Group status badge in Advance Settings reflects selection / lifecycle (e.g. Selected, Open, Finished), not group-wide leases.
 
 Data / Inputs:
 
@@ -143,7 +142,7 @@ Data / Inputs:
 - Constraints: gender (M/F), belt range, weight range
 - Third-place match toggle
 - Manual athlete placement via drag-and-drop
-- Group selection to acquire a Group Control Lease (adminId, deviceId)
+- Device identity (`deviceId`) for arena/API calls and per-match claims
 - Arena assignment (manual dropdown)
 
 UAC:
@@ -152,13 +151,8 @@ UAC:
 - Auto-assign uses only the selected athlete pool and group constraints.
 - Manual drag-and-drop overrides auto-assignment.
 - If constraints are changed, existing assignments remain but show "out of range" warnings until fixed.
-- Selecting a group acquires a Group Control Lease with a heartbeat; the current device displays Online status.
-- Devices that do not hold the lease display Degraded status and can request takeover.
-- Takeover requires confirmation from the current holder.
-- In Advance Settings, groups leased by other devices remain visible but disabled with Degraded status and a Takeover action.
-- Takeover approval prompts the current holder via action toast (Approve/Deny).
+- Advance Settings lists groups and selectable matches independently; matches **in use by another device** show Degraded/In use and cannot be chosen until released or TTL expiry.
 - Advance Settings auto-restores the last selected tournament, group, and match per device after login.
-- If the restored group is leased by another device, keep it selected but disabled with Degraded status and a Takeover action.
 - Admin can assign each group to an arena using a dropdown in Groups tab.
 - Arena list is configured per tournament in the builder (default 3: Arena 1-3).
 - Arena labels are editable, defaulting to "Arena 1-N".
@@ -234,13 +228,12 @@ What the user sees:
 
 Data / Inputs:
 
-- Event types: manual winner override, score edit, reseed/shuffle, group assignment changes, lease acquire, lease release, takeover request, takeover approve/deny
+- Event types: manual winner override, score edit, reseed/shuffle, group assignment changes
 
 UAC:
 
 - Each listed event captures who did it, when, and the affected entity (group/match/athlete).
-- Lease heartbeats are not logged.
-- Lease audit entries appear in the same Activity panel, filtered by event type.
+- Match-claim renewals are not logged as activity rows.
 - Activity list is filterable by event type (optional for MVP).
 
 ### 8) Arena Client (Match Execution)
@@ -261,7 +254,7 @@ UAC:
 - Arena devices restore the last selected tournament, group, and match per device.
 - Round-end results are submitted automatically.
 - "Finish Match" finalizes the match, then the operator opens the menu, chooses "Advance Settings", selects a match via combobox, and confirms.
-- If the device loses the Group Control Lease during a match, the match may finish but the next match requires re-acquire.
+- Match execution keeps the active **Arena match claim** refreshed while a bout is mounted; expiry or conflicts surface when selecting/applying another match.
 - If the device goes offline, scoring continues locally and syncs on reconnect.
 
 ## Functional Requirements
@@ -273,16 +266,11 @@ UAC:
 - Bracket generation is Draft-only and creates Match records; regeneration deletes and recreates Draft matches.
 - Active tournaments allow score edits but no shuffle; bracket changes require explicit unlock.
 - Completed tournaments are read-only.
-- Selecting a group in Advance Settings creates a Group Control Lease with a short TTL and heartbeat.
-- Other devices can see group usage status and request takeover.
-- Group Control Lease is per group (not per match).
-- Lease updates are pushed via SSE; clients still send heartbeats to extend leases.
-- SSE stream is scoped per tournament and includes all group leases.
-- Takeover requires approval by the current holder.
-- If no response is received, takeover waits for lease expiry (no forced takeover).
-- Lease TTL is 60s with heartbeat every 20s and a 2x missed-heartbeat tolerance.
-- Lease identity uses a persistent device UUID stored in localStorage.
-- Clients attempt explicit lease release on page unload; TTL remains the source of truth.
+- Applying Advance Settings succeeds only after `**arenaMatchClaim.claim`\*\* for the chosen match; another device holding a non-expired claim blocks Apply for that row.
+- **Arena match claims** use a ~60s TTL; the arena sends **heartbeats** on the configured interval while a Mongo ObjectId-shaped match id is active.
+- **SSE** broadcasts `**invalidate`\*\* for a tournament so all clients refresh Advance selection queries (`selectionCatalog`, `selectionMatches`) and bracket `match` queries.
+- Coordinating identity uses a persistent **device UUID** in `localStorage`.
+- **Finish Match** releases the claim and clears the advance form match field; explicit release on unload is best-effort; TTL remains the safety net.
 - Performance targets: 256 athletes per tournament, 8 groups per tournament, 32 athletes per group.
 - Arena client is a separate experience from the admin CRM.
 - Arena selection uses Advance Settings as the primary flow for MVP.
@@ -305,12 +293,10 @@ UAC:
   - Athlete registry + de-dup
   - Tournament builder (Groups/Brackets)
   - Bracket generation + audit log
-
 - Phase 2: Arena Client Integration
   - Advance Settings API integration
-  - Lease + SSE presence
+  - Match claims + tournament SSE for selection sync
   - Round-end submission + Finish Match flow
-
 - Phase 3: Hardening + Scale
   - Offline tolerance improvements
   - Performance tuning for 256 athletes

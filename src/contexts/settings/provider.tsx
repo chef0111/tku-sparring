@@ -16,6 +16,7 @@ import { useTimerStore } from '@/stores/timer-store';
 import { useMatchStore } from '@/stores/match-store';
 import { useDeviceId } from '@/hooks/use-device-id';
 import { arenaSelectionMatchesQueryOptions } from '@/features/app/hooks/use-arena-selection-view';
+import { client } from '@/orpc/client';
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
@@ -105,71 +106,112 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       }
 
       resetRoundStats(standard.roundDuration * 1000);
+
+      resetMatch();
+      resetAll();
+
+      toast.success('Settings applied', {
+        description: 'Applied latest settings for the next matches.',
+        className: 'min-w-8! mx-auto inset-x-0 justify-center',
+        position: 'top-center',
+      });
+
+      setIsOpen(false);
     } else {
-      const { advance } = formData;
+      void (async () => {
+        const { advance } = formData;
 
-      if (advance.maxHealth > 0) {
-        setMaxHealth(advance.maxHealth);
-      }
-      if (advance.roundDuration > 0) {
-        setRoundDuration(advance.roundDuration * 1000);
-      }
-      if (advance.breakDuration > 0) {
-        setBreakDuration(advance.breakDuration * 1000);
-      }
-      if (advance.redPlayerName) {
-        setPlayerName('red', advance.redPlayerName);
-      }
-      if (advance.bluePlayerName) {
-        setPlayerName('blue', advance.bluePlayerName);
-      }
-      if (advance.redPlayerAvatar) {
-        setPlayerAvatar('red', advance.redPlayerAvatar);
-      }
-      if (advance.bluePlayerAvatar) {
-        setPlayerAvatar('blue', advance.bluePlayerAvatar);
-      }
+        if (advance.maxHealth > 0) {
+          setMaxHealth(advance.maxHealth);
+        }
+        if (advance.roundDuration > 0) {
+          setRoundDuration(advance.roundDuration * 1000);
+        }
+        if (advance.breakDuration > 0) {
+          setBreakDuration(advance.breakDuration * 1000);
+        }
+        if (advance.redPlayerName) {
+          setPlayerName('red', advance.redPlayerName);
+        }
+        if (advance.bluePlayerName) {
+          setPlayerName('blue', advance.bluePlayerName);
+        }
+        if (advance.redPlayerAvatar) {
+          setPlayerAvatar('red', advance.redPlayerAvatar);
+        }
+        if (advance.bluePlayerAvatar) {
+          setPlayerAvatar('blue', advance.bluePlayerAvatar);
+        }
 
-      resetRoundStats(advance.roundDuration * 1000);
+        resetRoundStats(advance.roundDuration * 1000);
 
-      if (advance.match) {
-        let label = advance.matchLabel?.trim() ?? '';
-        if (!label && advance.tournament && advance.group && deviceId) {
-          const cached = queryClient.getQueryData(
-            arenaSelectionMatchesQueryOptions({
-              deviceId,
-              tournamentId: advance.tournament,
+        if (advance.match && deviceId && advance.tournament && advance.group) {
+          try {
+            await client.arenaMatchClaim.claim({
+              matchId: advance.match,
               groupId: advance.group,
-            }).queryKey
-          ) as { matches: Array<{ id: string; label: string }> } | undefined;
-          label =
-            cached?.matches
-              ?.find((m) => m.id === advance.match)
-              ?.label?.trim() ?? '';
+              tournamentId: advance.tournament,
+              deviceId,
+            });
+          } catch {
+            toast.error('Could not reserve this match', {
+              description:
+                'Another device may be using it. Pick a different match.',
+              position: 'top-center',
+            });
+            return;
+          }
         }
-        if (!label) {
-          label =
-            advance.match.length > 8
-              ? `Match ${advance.match.slice(-6)}`
-              : advance.match;
+
+        if (advance.match) {
+          let label = advance.matchLabel?.trim() ?? '';
+          if (!label && advance.tournament && advance.group && deviceId) {
+            const cached = queryClient.getQueryData(
+              arenaSelectionMatchesQueryOptions({
+                deviceId,
+                tournamentId: advance.tournament,
+                groupId: advance.group,
+              }).queryKey
+            ) as { matches: Array<{ id: string; label: string }> } | undefined;
+            label =
+              cached?.matches
+                ?.find((m) => m.id === advance.match)
+                ?.label?.trim() ?? '';
+          }
+          if (!label) {
+            label =
+              advance.match.length > 8
+                ? `Match ${advance.match.slice(-6)}`
+                : advance.match;
+          }
+          useMatchStore.getState().setMatchDisplay({
+            id: advance.match,
+            label,
+          });
+
+          if (deviceId && advance.tournament && advance.group) {
+            await queryClient.invalidateQueries({
+              queryKey: arenaSelectionMatchesQueryOptions({
+                deviceId,
+                tournamentId: advance.tournament,
+                groupId: advance.group,
+              }).queryKey,
+            });
+          }
         }
-        useMatchStore.getState().setMatchDisplay({
-          id: advance.match,
-          label,
+
+        resetMatch();
+        resetAll();
+
+        toast.success('Settings applied', {
+          description: 'Applied latest settings for the next matches.',
+          className: 'min-w-8! mx-auto inset-x-0 justify-center',
+          position: 'top-center',
         });
-      }
+
+        setIsOpen(false);
+      })();
     }
-
-    resetMatch();
-    resetAll();
-
-    toast.success('Settings applied', {
-      description: 'Applied latest settings for the next matches.',
-      className: 'min-w-8! mx-auto inset-x-0 justify-center',
-      position: 'top-center',
-    });
-
-    setIsOpen(false);
   }, [
     activeTab,
     deviceId,

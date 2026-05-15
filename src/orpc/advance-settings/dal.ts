@@ -8,8 +8,7 @@ import {
   resolveArenaGroupOrder,
 } from '@/lib/tournament/arena-match-label';
 import { prisma } from '@/lib/db';
-import { LeaseDAL } from '@/orpc/lease/dal';
-import { resolveGroupLeaseStatus } from '@/orpc/lease/lease-status';
+import { ArenaMatchClaimDAL } from '@/orpc/arena-match-claim/dal';
 
 /**
  * Group `status` for Advance Settings (no `Group.status` column in DB).
@@ -109,10 +108,11 @@ export type SelectionGroupRow = {
   name: string;
   tournamentId: string;
   status: 'draft' | 'active' | 'completed';
-  leaseStatus: ReturnType<typeof resolveGroupLeaseStatus>;
   arenaIndex: number;
   arenaLabel: string;
 };
+
+export type MatchClaimSelectionStatus = 'none' | 'held_by_me' | 'held_by_other';
 
 export type SelectionMatchRow = {
   id: string;
@@ -121,12 +121,13 @@ export type SelectionMatchRow = {
   status: string;
   redAthleteName: string | null;
   blueAthleteName: string | null;
+  /** Exclusive lock held by another device. */
+  disabled: boolean;
+  claimStatus: MatchClaimSelectionStatus;
 };
 
 export class AdvanceSettingsDAL {
   static async selectionCatalog(input: SelectionCatalogDTO) {
-    await LeaseDAL.prepareLeaseReadSnapshot();
-
     const tournaments = await prisma.tournament.findMany({
       select: { id: true, name: true, status: true },
       orderBy: { createdAt: 'desc' },
@@ -145,17 +146,6 @@ export class AdvanceSettingsDAL {
       throw new Error('Tournament not found');
     }
 
-    const leases = await prisma.groupControlLease.findMany({
-      where: { tournamentId: effectiveTournamentId },
-      include: {
-        takeoverRequests: {
-          where: { status: 'pending' },
-          orderBy: { createdAt: 'asc' },
-        },
-      },
-    });
-    const leaseByGroupId = new Map(leases.map((l) => [l.groupId, l]));
-
     const matchStatusRows = await prisma.match.findMany({
       where: { tournamentId: effectiveTournamentId },
       select: { groupId: true, status: true },
@@ -168,18 +158,6 @@ export class AdvanceSettingsDAL {
     }
 
     for (const g of tournament.groups) {
-      const leaseRow = leaseByGroupId.get(g.id) ?? null;
-      const leaseStatus = resolveGroupLeaseStatus(
-        input.deviceId,
-        leaseRow
-          ? {
-              deviceId: leaseRow.deviceId,
-              takeoverRequests: leaseRow.takeoverRequests.map((r) => ({
-                requesterDeviceId: r.requesterDeviceId,
-              })),
-            }
-          : null
-      );
       const matchStatuses = statusesByGroup.get(g.id) ?? [];
       const status = deriveGroupStatusForSelectionView(
         tournament.status,
@@ -190,7 +168,6 @@ export class AdvanceSettingsDAL {
         name: g.name,
         tournamentId: g.tournamentId,
         status,
-        leaseStatus,
         arenaIndex: g.arenaIndex,
         arenaLabel: `Arena ${g.arenaIndex}`,
       });
@@ -200,7 +177,8 @@ export class AdvanceSettingsDAL {
   }
 
   static async selectionMatches(input: SelectionMatchesDTO) {
-    await LeaseDAL.prepareLeaseReadSnapshot();
+    const now = new Date();
+    await ArenaMatchClaimDAL.cleanupExpired(now);
 
     const { tournamentId, groupId } = input;
 
@@ -294,7 +272,30 @@ export class AdvanceSettingsDAL {
         blueAthleteName: m.blueTournamentAthleteId
           ? (nameById.get(m.blueTournamentAthleteId) ?? null)
           : null,
+        disabled: false,
+        claimStatus: 'none',
       });
+    }
+
+    const claimByMatchId = await ArenaMatchClaimDAL.activeClaimsByMatchId(
+      matchesOut.map((x) => x.id),
+      now
+    );
+
+    for (const row of matchesOut) {
+      const claim = claimByMatchId.get(row.id);
+      if (!claim) {
+        row.claimStatus = 'none';
+        row.disabled = false;
+        continue;
+      }
+      if (claim.deviceId === input.deviceId) {
+        row.claimStatus = 'held_by_me';
+        row.disabled = false;
+      } else {
+        row.claimStatus = 'held_by_other';
+        row.disabled = true;
+      }
     }
 
     return { matches: matchesOut };

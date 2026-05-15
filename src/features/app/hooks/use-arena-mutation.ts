@@ -1,5 +1,10 @@
 import * as React from 'react';
 
+import type {
+  MatchClaimHeartbeatDTO,
+  ReleaseMatchClaimDTO,
+} from '@/orpc/arena-match-claim/dto';
+
 import type { ArenaMutation } from '@/features/app/lib/offline-queue/types';
 import { enqueue } from '@/features/app/lib/offline-queue/queue';
 import { replayArenaMutationQueue } from '@/features/app/lib/offline-queue/replay';
@@ -14,14 +19,18 @@ async function runMutationDirect(mutation: ArenaMutation) {
     case 'match.setWinner':
       await client.match.setWinner(mutation.payload);
       return;
-    case 'lease.heartbeat':
-      await client.lease.heartbeat(mutation.payload);
-      return;
-    case 'lease.release':
-      await client.lease.release(mutation.payload);
-      return;
     case 'device.lastSelection.set':
       await client.device.lastSelection.set(mutation.payload);
+      return;
+    case 'arenaMatchClaim.heartbeat':
+      await client.arenaMatchClaim.heartbeat(
+        mutation.payload as MatchClaimHeartbeatDTO
+      );
+      return;
+    case 'arenaMatchClaim.release':
+      await client.arenaMatchClaim.release(
+        mutation.payload as ReleaseMatchClaimDTO
+      );
       return;
     default:
       throw new Error('Unknown mutation kind');

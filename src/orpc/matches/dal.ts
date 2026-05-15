@@ -10,7 +10,7 @@ import type {
   UpdateScoreDTO,
 } from './dto';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
-import { publishMatchInvalidateEvent } from '@/orpc/lease/lease-stream';
+import { publishMatchInvalidateEvent } from '@/lib/tournament/tournament-sse-bus';
 import { prisma } from '@/lib/db';
 
 export class MatchDAL {

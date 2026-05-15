@@ -2,7 +2,6 @@ import { Settings } from 'lucide-react';
 import { GroupViolationCountBadge } from '../out-of-range-badge';
 import { GroupRosterEmptyState } from './group-roster-empty-state';
 import type { GroupData } from '@/features/dashboard/types';
-import type { GroupRosterLeaseInfo } from '@/features/dashboard/tournament/builder/hooks/use-group-roster-table';
 import { useGroupRosterTable } from '@/features/dashboard/tournament/builder/hooks/use-group-roster-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,16 +11,12 @@ import { getBeltLabel } from '@/config/athlete';
 import { cn } from '@/lib/utils';
 import { DataTableSkeleton } from '@/components/data-table/data-table-skeleton';
 
-export type { GroupRosterLeaseInfo };
-
 export interface GroupRosterTableProps {
   group: GroupData | null;
   tournamentId: string;
   groups: Array<GroupData>;
   readOnly: boolean;
-  leaseInfo?: GroupRosterLeaseInfo;
   onOpenSettings: (group: GroupData) => void;
-  onRequestTakeover: (groupId: string) => void;
 }
 
 export function GroupRosterTable({
@@ -29,9 +24,7 @@ export function GroupRosterTable({
   tournamentId,
   groups,
   readOnly,
-  leaseInfo,
   onOpenSettings,
-  onRequestTakeover,
 }: GroupRosterTableProps) {
   if (!group) {
     return (
@@ -47,9 +40,7 @@ export function GroupRosterTable({
       tournamentId={tournamentId}
       groups={groups}
       readOnly={readOnly}
-      leaseInfo={leaseInfo}
       onOpenSettings={onOpenSettings}
-      onRequestTakeover={onRequestTakeover}
     />
   );
 }
@@ -63,16 +54,13 @@ function GroupRosterActive({
   tournamentId,
   groups,
   readOnly,
-  leaseInfo,
   onOpenSettings,
-  onRequestTakeover,
 }: GroupRosterActiveProps) {
   const roster = useGroupRosterTable({
     group,
     tournamentId,
     groups,
     readOnly,
-    leaseInfo,
   });
 
   return (
@@ -99,20 +87,10 @@ function GroupRosterActive({
           <GroupViolationCountBadge count={roster.violationCount} />
 
           <div className="ml-auto flex items-center gap-2">
-            <Status status={roster.statusVariant} className="h-6 px-1.5">
+            <Status status="online" className="h-6 px-1.5">
               <StatusIndicator />
-              <StatusLabel>{roster.leaseStatusText}</StatusLabel>
+              <StatusLabel>Ready</StatusLabel>
             </Status>
-            {!readOnly && leaseInfo?.leaseStatus === 'held_by_other' && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 text-xs"
-                onClick={() => onRequestTakeover(group.id)}
-              >
-                Take over
-              </Button>
-            )}
             {!readOnly && (
               <Button
                 variant="ghost"

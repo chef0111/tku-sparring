@@ -1,13 +1,7 @@
 import { TOURNAMENT_ACTIVITY_EVENT_TYPES } from './event-types';
 import type { TournamentActivityEventType } from './event-types';
 
-const CATEGORY_ORDER = [
-  'tournament',
-  'bracket',
-  'match',
-  'group',
-  'lease',
-] as const;
+const CATEGORY_ORDER = ['tournament', 'bracket', 'match', 'group'] as const;
 
 export type ActivityEventFilterOption = {
   value: TournamentActivityEventType;

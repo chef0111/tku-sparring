@@ -28,13 +28,13 @@ _Avoid_: Player, user
 A per-tournament participation record that links an AthleteProfile to a tournament and (optionally) a group.
 _Avoid_: Competitor
 
-**Group Control Lease**:
-A short-lived lock that marks a group as actively controlled by a specific admin device in the arena.
-_Avoid_: Reservation, checkout
+**Arena match claim**:
+A short-lived server-side reservation tying one **Match** to one **deviceId** (and user) so Advance Settings cannot finalize the same bout on two devices at once. Enforced in `ArenaMatchClaim` with TTL and heartbeats; distinct from any group-wide lock.
+_Avoid_: Group lease, checkout, “group control”
 
-**Takeover Queue**:
-A short-lived list of pending requests for a Group Control Lease that the current holder can review and act on.
-_Avoid_: Waitlist, backlog
+**Tournament selection SSE**:
+A per-tournament **Server-Sent Events** channel that signals clients to **refetch** Advance selection and related match data (`GET /api/tournament/stream`). Payloads are coarse invalidation hints, not authoritative state.
+_Avoid_: Lease stream, websocket
 
 **Match Label**:
 A human-readable match identifier that encodes arena and sequence (e.g., Match 101).
@@ -53,18 +53,18 @@ _Avoid_: Setup wizard
 - A **Tournament** contains many **Groups**.
 - A **Group** contains many **Matches**.
 - A **TournamentAthlete** belongs to exactly one **Tournament** and one **AthleteProfile**.
-- A **Group Control Lease** belongs to a **Group** and is held by one admin device at a time.
-- A **Takeover Queue** belongs to an active **Group Control Lease** and clears when the lease transfers or expires.
+- At most one active **Arena match claim** row exists per **Match** (non-expired); it references `matchId`, `groupId`, `tournamentId`, `deviceId`, `userId`.
+- There is **no** group-level control lease or takeover queue in the current product model.
 - An **Arena** runs one **Group** at a time in the MVP workflow.
 - A **Match Label** encodes the arena index and the per-arena sequence number.
 - A **Third-Place Match** belongs to a **Group** and is created only when the group toggle is enabled.
 
 ## Example dialogue
 
-> **Dev:** "If a **Group** is selected in **Advance Settings**, should we create a **Group Control Lease**?"
-> **Domain expert:** "Yes, selecting a group should mark it as in use so other arenas can see it."
+> **Dev:** "When two devices pick the same **Match** in **Advance Settings**, who wins?"
+> **Domain expert:** "The server keeps one **Arena match claim** per match—the first Apply wins until they finish or the claim TTL expires; the other device sees that row **In use** and picks a different match."
 
 ## Flagged ambiguities
 
-- "host" was suggested for **Group Control Lease**; resolved: keep **Group Control Lease** as the canonical term and use UI labels like "Controller" or "In Use".
-- Takeover requests form a **Takeover Queue**; resolved: the queue is shown to the current holder, can be acted on per request, supports "decline all", and expires after a short fixed window.
+- Historic docs referred to **Group Control Lease** and a **Takeover Queue**; **superseded** by per-match **`ArenaMatchClaim`** + tournament SSE (`docs/sse-group-control-lease.md`, `PRD.md` §MVP / arena flow).
+- UI label for the holder row: **Reserved** (this device); **In use** (other device)—see Advance Settings combobox `Status`.
