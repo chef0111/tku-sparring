@@ -37,7 +37,7 @@ export const systemKeys: Array<KeyEntry> = [
   {
     label: 'Reset round status',
     kbd: () =>
-      navigator.userAgent.toUpperCase().includes('MAC') ? '⌘ + E' : 'Ctrl + E',
+      navigator.userAgent.toUpperCase().includes('MAC') ? '⌘ + R' : 'Ctrl + R',
   },
   {
     label: 'Reset match status',

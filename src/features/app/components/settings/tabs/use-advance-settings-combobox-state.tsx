@@ -157,7 +157,13 @@ export function useAdvanceSettingsComboboxState(args: {
           triggerLabel: g.name,
           label: (
             <span className="flex w-full min-w-0 items-center justify-between gap-2">
-              <span className="truncate">{g.name}</span>
+              <span className="min-w-0 truncate">
+                <span className="font-medium">{g.name}</span>
+                <span className="text-muted-foreground font-normal">
+                  {' '}
+                  — {g.arenaLabel}
+                </span>
+              </span>
               <Status status={st} className="-mr-6">
                 <StatusIndicator />
                 <StatusLabel className="truncate">

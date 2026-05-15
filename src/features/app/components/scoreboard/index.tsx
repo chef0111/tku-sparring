@@ -6,6 +6,8 @@ import type { TemporalState } from 'zundo';
 import type { StoreApi } from 'zustand';
 import type { PlayerStore } from '@/stores/player-store';
 import { usePlayerStore } from '@/stores/player-store';
+import { useMatchStore } from '@/stores/match-store';
+import { useTimerStore } from '@/stores/timer-store';
 import { useSettings } from '@/contexts/settings';
 import { cn } from '@/lib/utils';
 
@@ -30,6 +32,31 @@ export const Scoreboard = ({ className }: ScoreboardProps) => {
       if (temporal) {
         temporal.getState().undo();
       }
+    },
+    [isOpen]
+  );
+
+  useHotkeys(
+    'mod+r',
+    (e) => {
+      e.preventDefault();
+      if (isOpen) return;
+      useTimerStore.getState().reset();
+      usePlayerStore.getState().resetRoundCombatPreserveHealth();
+    },
+    { preventDefault: true },
+    [isOpen]
+  );
+
+  useHotkeys(
+    'mod+m',
+    (e) => {
+      e.preventDefault();
+      if (isOpen) return;
+      useMatchStore.getState().closeMatchResult();
+      useMatchStore.getState().resetMatch();
+      useTimerStore.getState().reset();
+      usePlayerStore.getState().resetMatchCombatPreservePlayers();
     },
     [isOpen]
   );

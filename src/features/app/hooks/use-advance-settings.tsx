@@ -157,13 +157,22 @@ export function useAdvanceSettings(args: {
           triggerLabel: g.name,
           label: (
             <span className="flex w-full min-w-0 items-center justify-between gap-2">
-              <span className="truncate">{g.name}</span>
-              <Status status={st} className="-mr-6">
-                <StatusIndicator />
-                <StatusLabel className="truncate">
-                  {GROUP_STATUS_TEXT[st]}
-                </StatusLabel>
-              </Status>
+              <span className="min-w-0 truncate">
+                <span className="font-medium">{g.name}</span>
+                <span className="text-muted-foreground font-normal">
+                  {' '}
+                  — {g.arenaLabel}
+                </span>
+              </span>
+              <div className="flex items-center">
+                <span className="text-muted-foreground text-xs">{g.id}</span>
+                <Status status={st} className="-mr-6">
+                  <StatusIndicator />
+                  <StatusLabel className="truncate">
+                    {GROUP_STATUS_TEXT[st]}
+                  </StatusLabel>
+                </Status>
+              </div>
             </span>
           ),
         };
