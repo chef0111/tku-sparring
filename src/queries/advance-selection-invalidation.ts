@@ -10,7 +10,7 @@ export function shouldInvalidateAdvanceSelection(
 
   const scope = queryKey[1];
   if (scope === 'selectionCatalog') {
-    return queryKey[3] === tournamentId;
+    return true;
   }
 
   if (scope === 'selectionMatches') {

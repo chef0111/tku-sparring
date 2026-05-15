@@ -18,22 +18,36 @@ export class ArenaMatchClaimDAL {
     });
   }
 
-  static async releaseAllForDeviceInGroup(input: {
-    groupId: string;
-    deviceId: string;
-  }) {
-    await prisma.arenaMatchClaim.deleteMany({
-      where: {
-        groupId: input.groupId,
-        deviceId: input.deviceId,
-      },
+  static async releaseAllForDeviceInGroup(
+    input: { groupId: string; deviceId: string },
+    db: Pick<typeof prisma, 'arenaMatchClaim' | 'match'> = prisma
+  ) {
+    const claims = await db.arenaMatchClaim.findMany({
+      where: { groupId: input.groupId, deviceId: input.deviceId },
+      select: { matchId: true },
     });
+    if (claims.length === 0) return;
+
+    const matchIds = [...new Set(claims.map((c) => c.matchId))];
+
+    await db.arenaMatchClaim.deleteMany({
+      where: { groupId: input.groupId, deviceId: input.deviceId },
+    });
+
+    for (const mid of matchIds) {
+      const m = await db.match.findUnique({
+        where: { id: mid },
+        select: { redWins: true, blueWins: true, status: true },
+      });
+      if (!m || m.status === 'complete') continue;
+      const idle = m.redWins === 0 && m.blueWins === 0;
+      await db.match.update({
+        where: { id: mid },
+        data: { status: idle ? 'pending' : 'active' },
+      });
+    }
   }
 
-  /**
-   * Creates or refreshes the claim for this device on the match.
-   * Fails if another non-expired holder exists.
-   */
   static async claim(
     input: {
       matchId: string;
@@ -45,11 +59,11 @@ export class ArenaMatchClaimDAL {
     db: Pick<typeof prisma, 'arenaMatchClaim' | 'match'> = prisma
   ) {
     const now = new Date();
-    await ArenaMatchClaimDAL.cleanupExpired(now);
+    await this.cleanupExpired(now);
 
     const match = await db.match.findUnique({
       where: { id: input.matchId },
-      select: { id: true, groupId: true, tournamentId: true },
+      select: { id: true, groupId: true, tournamentId: true, status: true },
     });
 
     if (!match || match.groupId !== input.groupId) {
@@ -71,7 +85,15 @@ export class ArenaMatchClaimDAL {
       throw new Error('Match is in use on another device');
     }
 
-    const exp = ArenaMatchClaimDAL.expiresAt(now);
+    await this.releaseAllForDeviceInGroup(
+      {
+        groupId: input.groupId,
+        deviceId: input.deviceId,
+      },
+      db
+    );
+
+    const exp = this.expiresAt(now);
     const data = {
       deviceId: input.deviceId,
       userId: input.userId,
@@ -80,17 +102,21 @@ export class ArenaMatchClaimDAL {
       expiresAt: exp,
     };
 
-    const row = existing
-      ? await db.arenaMatchClaim.update({
-          where: { matchId: input.matchId },
-          data,
-        })
-      : await db.arenaMatchClaim.create({
-          data: {
-            matchId: input.matchId,
-            ...data,
-          },
-        });
+    const row = await db.arenaMatchClaim.upsert({
+      where: { matchId: input.matchId },
+      create: {
+        matchId: input.matchId,
+        ...data,
+      },
+      update: data,
+    });
+
+    if (match.status !== 'complete') {
+      await db.match.update({
+        where: { id: input.matchId },
+        data: { status: 'active' },
+      });
+    }
 
     publishTournamentSelectionInvalidate(input.tournamentId);
     return row;
@@ -101,7 +127,7 @@ export class ArenaMatchClaimDAL {
     db: Pick<typeof prisma, 'arenaMatchClaim'> = prisma
   ) {
     const now = new Date();
-    await ArenaMatchClaimDAL.cleanupExpired(now);
+    await this.cleanupExpired(now);
 
     const row = await db.arenaMatchClaim.findUnique({
       where: { matchId: input.matchId },
@@ -114,14 +140,14 @@ export class ArenaMatchClaimDAL {
     return db.arenaMatchClaim.update({
       where: { matchId: input.matchId },
       data: {
-        expiresAt: ArenaMatchClaimDAL.expiresAt(now),
+        expiresAt: this.expiresAt(now),
       },
     });
   }
 
   static async release(
     input: { matchId: string; deviceId: string; userId: string },
-    db: Pick<typeof prisma, 'arenaMatchClaim'> = prisma
+    db: Pick<typeof prisma, 'arenaMatchClaim' | 'match'> = prisma
   ) {
     const row = await db.arenaMatchClaim.findUnique({
       where: { matchId: input.matchId },
@@ -132,9 +158,22 @@ export class ArenaMatchClaimDAL {
     }
 
     const tournamentId = row.tournamentId;
+    const matchId = row.matchId;
     await db.arenaMatchClaim.delete({
       where: { matchId: input.matchId },
     });
+
+    const m = await db.match.findUnique({
+      where: { id: matchId },
+      select: { redWins: true, blueWins: true, status: true },
+    });
+    if (m && m.status !== 'complete') {
+      const idle = m.redWins === 0 && m.blueWins === 0;
+      await db.match.update({
+        where: { id: matchId },
+        data: { status: idle ? 'pending' : 'active' },
+      });
+    }
 
     publishTournamentSelectionInvalidate(tournamentId);
     return { removed: true as const };

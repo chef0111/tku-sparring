@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
-import { getTournamentFields } from '../constant/form';
-import { resolveGroupComboboxStatus } from '../lib/group';
-import { resolveMatchComboboxRow } from '../lib/match';
+import { getTournamentFields } from '../components/settings/constant/form';
+import { resolveGroupComboboxStatus } from '../components/settings/lib/group';
+import { resolveMatchComboboxRow } from '../components/settings/lib/match';
 import type { QueryClient, UseQueryResult } from '@tanstack/react-query';
 import type { AdvanceFormData } from '@/contexts/settings/context';
 import type {
@@ -60,7 +60,7 @@ function tournamentsFromCatalogCaches(
   return [];
 }
 
-export function useAdvanceSettingsComboboxState(args: {
+export function useAdvanceSettings(args: {
   advance: AdvanceFormData;
   deviceId: string | undefined;
   queryClient: QueryClient;

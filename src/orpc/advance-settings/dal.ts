@@ -129,6 +129,7 @@ export type SelectionMatchRow = {
 export class AdvanceSettingsDAL {
   static async selectionCatalog(input: SelectionCatalogDTO) {
     const tournaments = await prisma.tournament.findMany({
+      where: { status: 'active' },
       select: { id: true, name: true, status: true },
       orderBy: { createdAt: 'desc' },
       take: 200,
@@ -142,8 +143,8 @@ export class AdvanceSettingsDAL {
     }
 
     const tournament = await loadTournamentForSelection(effectiveTournamentId);
-    if (!tournament) {
-      throw new Error('Tournament not found');
+    if (!tournament || tournament.status !== 'active') {
+      return { tournaments, groups: groupsOut };
     }
 
     const matchStatusRows = await prisma.match.findMany({
@@ -194,11 +195,10 @@ export class AdvanceSettingsDAL {
     }
 
     const tournament = await loadTournamentForSelection(tournamentId);
-    if (!tournament) {
-      throw new Error('Tournament not found');
-    }
-
     const matchesOut: Array<SelectionMatchRow> = [];
+    if (!tournament || tournament.status !== 'active') {
+      return { matches: matchesOut };
+    }
 
     const targetGroup = tournament.groups.find((x) => x.id === groupId);
     if (!targetGroup) {
@@ -254,7 +254,7 @@ export class AdvanceSettingsDAL {
         continue;
       }
       if (
-        m.status !== 'pending' ||
+        (m.status !== 'pending' && m.status !== 'active') ||
         !m.redTournamentAthleteId ||
         !m.blueTournamentAthleteId
       ) {

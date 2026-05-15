@@ -1,4 +1,4 @@
-import { ArrowLeftRight, Crown } from 'lucide-react';
+import { ArrowLeftRight, Crown, RotateCcw } from 'lucide-react';
 import { SlotLocks } from './slot-locks';
 import { MatchSheetStatus } from './match-sheet-status';
 import { ParticipantRow } from './participant-row';
@@ -218,7 +218,29 @@ export function MatchDetailPanel() {
                 'Save score'
               )}
             </Button>
-          ) : null}
+          ) : (
+            !!position.canResetMatch && (
+              <Button
+                type="button"
+                variant="outline"
+                className="text-destructive! border-destructive/50 hover:bg-destructive/10 w-full"
+                onClick={position.handleResetMatch}
+                disabled={position.resetMatchScore.isPending}
+              >
+                {position.resetMatchScore.isPending ? (
+                  <>
+                    <Spinner className="text-destructive" />
+                    Resetting…
+                  </>
+                ) : (
+                  <>
+                    <RotateCcw />
+                    Reset match
+                  </>
+                )}
+              </Button>
+            )
+          )}
         </SheetFooter>
       </SheetContent>
     </Sheet>

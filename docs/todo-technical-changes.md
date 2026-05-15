@@ -57,7 +57,7 @@ Reference: current schema in [prisma/schema.prisma](prisma/schema.prisma).
 - Query patterns should align with existing query hooks in [src/queries/tournaments.ts](src/queries/tournaments.ts) and [src/queries/groups.ts](src/queries/groups.ts).
 - Bracket rendering should be deterministic and derived from Match records.
 - Locks are per athlete and applied during shuffle and drag operations.
-- Match reservation / coordination is delivered via **`GET /api/tournament/stream`** (invalidate events) plus **`ArenaMatchClaim`** heartbeat on the arena client; outdated group **lease** concepts are retired.
+- Match reservation / coordination uses **tournament realtime** (Socket.io `invalidate` events) plus **`ArenaMatchClaim`** heartbeat on the arena client; outdated group **lease** concepts are retired.
 
 ### Non-functional Constraints
 

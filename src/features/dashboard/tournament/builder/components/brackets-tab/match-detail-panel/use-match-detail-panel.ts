@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { TournamentAthleteData } from '@/features/dashboard/types';
 import { useTournamentBracket } from '@/features/dashboard/tournament/builder/context/tournament-bracket/use-tournament-bracket';
 import {
+  useResetMatchScore,
   useSetLock,
   useSetWinner,
   useSwapParticipants,
@@ -27,6 +28,7 @@ export function useMatchDetailPanel() {
   const [manualReason, setManualReason] = React.useState('');
 
   const updateScore = useUpdateScore({ onSuccess: () => onOpenChange(false) });
+  const resetMatchScore = useResetMatchScore();
   const setWinner = useSetWinner({ onSuccess: () => onOpenChange(false) });
   const swapParticipants = useSwapParticipants();
   const setLock = useSetLock();
@@ -56,6 +58,14 @@ export function useMatchDetailPanel() {
     : null;
 
   const canEdit = !!match && !readOnly && match.status !== 'complete';
+  const canResetMatch =
+    !!match &&
+    !readOnly &&
+    (tournamentStatus === 'draft' || tournamentStatus === 'active') &&
+    (match.redWins > 0 ||
+      match.blueWins > 0 ||
+      match.status === 'complete' ||
+      match.winnerId != null);
   const canSwap =
     !!match &&
     !readOnly &&
@@ -111,6 +121,21 @@ export function useMatchDetailPanel() {
     [match, setLock]
   );
 
+  const handleResetMatch = React.useCallback(() => {
+    if (!match) return;
+    resetMatchScore.mutate(
+      { matchId: match.id, redWins: 0, blueWins: 0 },
+      {
+        onSuccess: () => {
+          setRedWins(0);
+          setBlueWins(0);
+          setShowManualWinner(false);
+          setManualReason('');
+        },
+      }
+    );
+  }, [match, resetMatchScore]);
+
   return {
     match,
     matchLabel,
@@ -127,6 +152,7 @@ export function useMatchDetailPanel() {
     redAthlete,
     blueAthlete,
     canEdit,
+    canResetMatch,
     canSwap,
     canToggleLocks,
     hasScoreWinner,
@@ -136,7 +162,9 @@ export function useMatchDetailPanel() {
     handleSetWinner,
     handleSwap,
     handleLockChange,
+    handleResetMatch,
     updateScore,
+    resetMatchScore,
     swapParticipants,
     setWinner,
     setLock,

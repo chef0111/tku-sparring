@@ -32,9 +32,9 @@ _Avoid_: Competitor
 A short-lived server-side reservation tying one **Match** to one **deviceId** (and user) so Advance Settings cannot finalize the same bout on two devices at once. Enforced in `ArenaMatchClaim` with TTL and heartbeats; distinct from any group-wide lock.
 _Avoid_: Group lease, checkout, “group control”
 
-**Tournament selection SSE**:
-A per-tournament **Server-Sent Events** channel that signals clients to **refetch** Advance selection and related match data (`GET /api/tournament/stream`). Payloads are coarse invalidation hints, not authoritative state.
-_Avoid_: Lease stream, websocket
+**Tournament realtime (WebSocket)**:
+A per-tournament **Socket.io** room (`tournament:{id}`) on the external **realtime service**; clients refetch Advance selection and related match data after `invalidate` events. The main app notifies that service over **HTTPS** (`POST /internal/broadcast`); payloads are coarse invalidation hints, not authoritative state. See `docs/tournament-realtime.md`.
+_Avoid_: Lease stream, SSE (removed)
 
 **Match Label**:
 A human-readable match identifier that encodes arena and sequence (e.g., Match 101).
@@ -66,5 +66,5 @@ _Avoid_: Setup wizard
 
 ## Flagged ambiguities
 
-- Historic docs referred to **Group Control Lease** and a **Takeover Queue**; **superseded** by per-match **`ArenaMatchClaim`** + tournament SSE (`docs/sse-group-control-lease.md`, `PRD.md` §MVP / arena flow).
+- Historic docs referred to **Group Control Lease** and a **Takeover Queue**; **superseded** by per-match **`ArenaMatchClaim`** + tournament realtime (`docs/sse-group-control-lease.md`, `docs/tournament-realtime.md`, `PRD.md` §MVP / arena flow).
 - UI label for the holder row: **Reserved** (this device); **In use** (other device)—see Advance Settings combobox `Status`.

@@ -34,6 +34,16 @@ export const systemKeys: Array<KeyEntry> = [
     kbd: () =>
       navigator.userAgent.toUpperCase().includes('MAC') ? '⌘ + Z' : 'Ctrl + Z',
   },
+  {
+    label: 'Reset round status',
+    kbd: () =>
+      navigator.userAgent.toUpperCase().includes('MAC') ? '⌘ + E' : 'Ctrl + E',
+  },
+  {
+    label: 'Reset match status',
+    kbd: () =>
+      navigator.userAgent.toUpperCase().includes('MAC') ? '⌘ + M' : 'Ctrl + M',
+  },
 ];
 
 export const redKeys: Array<KeyEntry> = [

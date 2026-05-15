@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { shouldInvalidateAdvanceSelection } from './advance-selection-invalidation';
 
 describe('shouldInvalidateAdvanceSelection', () => {
-  it('matches selectionCatalog key with tournament id at index 3', () => {
+  it('invalidates every selectionCatalog query on tournament invalidate', () => {
     expect(
       shouldInvalidateAdvanceSelection('t-a', [
         'advanceSettings',
@@ -20,7 +20,16 @@ describe('shouldInvalidateAdvanceSelection', () => {
         null,
         'other',
       ])
-    ).toBe(false);
+    ).toBe(true);
+
+    expect(
+      shouldInvalidateAdvanceSelection('t-a', [
+        'advanceSettings',
+        'selectionCatalog',
+        null,
+        null,
+      ])
+    ).toBe(true);
   });
 
   it('matches selectionMatches key with tournament id at index 3', () => {

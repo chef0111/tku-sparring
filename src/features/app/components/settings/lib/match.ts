@@ -6,10 +6,7 @@ export type MatchComboboxStatusVariant =
   | 'maintenance'
   | 'degraded';
 
-export function resolveMatchComboboxRow(
-  row: SelectionMatchRow,
-  selectedMatchId: string | null | undefined
-): {
+export function resolveMatchComboboxRow(row: SelectionMatchRow): {
   status: MatchComboboxStatusVariant;
   statusLabel: string;
 } {
@@ -17,10 +14,6 @@ export function resolveMatchComboboxRow(
     return { status: 'degraded', statusLabel: 'Busy' };
   }
   if (row.claimStatus === 'held_by_me') {
-    return { status: 'online', statusLabel: 'Active' };
-  }
-  const sel = selectedMatchId?.trim();
-  if (sel && row.id === sel) {
     return { status: 'online', statusLabel: 'Active' };
   }
   return { status: 'maintenance', statusLabel: 'Available' };

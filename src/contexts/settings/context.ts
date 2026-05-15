@@ -70,6 +70,8 @@ type SettingsContextType = {
   setAdvanceFormState: (state: Partial<FormState>) => void;
 
   applySettings: () => void;
+  /** True while advance-tab confirm is running async work (claim, invalidation). */
+  applySettingsPending: boolean;
 };
 
 export const SettingsContext = createContext<SettingsContextType | undefined>(

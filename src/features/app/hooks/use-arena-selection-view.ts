@@ -2,8 +2,6 @@ import { queryOptions, useQuery } from '@tanstack/react-query';
 
 import { client } from '@/orpc/client';
 
-export const ADVANCE_SELECTION_OPEN_POLL_MS = 4_000;
-
 export function arenaSelectionCatalogQueryOptions(args: {
   deviceId: string | undefined;
   tournamentId: string | null;
@@ -24,8 +22,10 @@ export function arenaSelectionCatalogQueryOptions(args: {
         deviceId: deviceId!,
         tournamentId: catalogTournamentId ?? undefined,
       }),
-    staleTime: 30_000,
+    staleTime: Number.POSITIVE_INFINITY,
     gcTime: 5 * 60 * 1000,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -52,9 +52,10 @@ export function arenaSelectionMatchesQueryOptions(args: {
         tournamentId: tid!,
         groupId: gid!,
       }),
-    /** Match claims change across devices; avoid long-lived stale rows (e.g. missing Busy). */
-    staleTime: 0,
+    staleTime: Number.POSITIVE_INFINITY,
     gcTime: 5 * 60 * 1000,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 }
 

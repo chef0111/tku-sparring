@@ -15,7 +15,6 @@ import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth-client';
 import { useDeviceId } from '@/hooks/use-device-id';
 import {
-  ADVANCE_SELECTION_OPEN_POLL_MS,
   useArenaSelectionCatalog,
   useArenaSelectionMatches,
 } from '@/features/app/hooks/use-arena-selection-view';
@@ -24,15 +23,14 @@ export const AdvanceSettings = () => {
   const { data: session, isPending: sessionPending } = authClient.useSession();
   const deviceId = useDeviceId();
   const queryClient = useQueryClient();
-  const { formData, updateAdvanceForm, setAdvanceFormState, isOpen } =
-    useSettings();
+  const { formData, updateAdvanceForm, setAdvanceFormState } = useSettings();
   const { advance } = formData;
 
   const catalogQuery = useArenaSelectionCatalog({
     deviceId,
     tournamentId: advance.tournament,
     enabled: Boolean(session?.user),
-    refetchInterval: isOpen ? ADVANCE_SELECTION_OPEN_POLL_MS : false,
+    refetchInterval: false,
   });
 
   const matchesQuery = useArenaSelectionMatches({
@@ -40,7 +38,7 @@ export const AdvanceSettings = () => {
     tournamentId: advance.tournament,
     groupId: advance.group,
     enabled: Boolean(session?.user),
-    refetchInterval: isOpen ? ADVANCE_SELECTION_OPEN_POLL_MS : false,
+    refetchInterval: false,
   });
 
   const formKey = useMemo(

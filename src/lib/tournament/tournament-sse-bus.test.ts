@@ -1,52 +1,56 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   publishMatchInvalidateEvent,
   publishTournamentSelectionInvalidate,
-  subscribeToTournamentSseEvents,
 } from './tournament-sse-bus';
 
-describe('tournament sse bus', () => {
-  it('isolates throwing listeners so publish does not fail', () => {
-    const brokenListener = vi.fn(() => {
-      throw new Error('stream closed');
-    });
-    const healthyListener = vi.fn();
-    const unsubscribeBroken = subscribeToTournamentSseEvents(
-      'tournament-1',
-      brokenListener
-    );
-    const unsubscribeHealthy = subscribeToTournamentSseEvents(
-      'tournament-1',
-      healthyListener
-    );
+describe('tournament realtime bus', () => {
+  const fetchMock = vi.fn();
 
-    expect(() =>
-      publishTournamentSelectionInvalidate('tournament-1')
-    ).not.toThrow();
-    expect(healthyListener).toHaveBeenCalledTimes(1);
-
-    publishTournamentSelectionInvalidate('tournament-1');
-
-    expect(brokenListener).toHaveBeenCalledTimes(1);
-    expect(healthyListener).toHaveBeenCalledTimes(2);
-
-    unsubscribeBroken();
-    unsubscribeHealthy();
+  beforeEach(() => {
+    vi.stubGlobal('fetch', fetchMock);
+    fetchMock.mockResolvedValue({ ok: true });
+    fetchMock.mockClear();
+    process.env.REALTIME_INTERNAL_BROADCAST_URL =
+      'http://localhost:3331/internal/broadcast';
+    process.env.REALTIME_INTERNAL_BROADCAST_SECRET = 'test-secret';
   });
 
-  it('aliases publishMatchInvalidateEvent to selection invalidate', () => {
-    const listener = vi.fn();
-    const unsubscribe = subscribeToTournamentSseEvents('t-1', listener);
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    delete process.env.REALTIME_INTERNAL_BROADCAST_URL;
+    delete process.env.REALTIME_INTERNAL_BROADCAST_SECRET;
+    vi.restoreAllMocks();
+  });
 
-    publishMatchInvalidateEvent('t-1');
-
-    expect(listener).toHaveBeenCalledTimes(1);
-    expect(listener).toHaveBeenCalledWith({
-      type: 'invalidate',
+  it('POSTs invalidate payload to internal broadcast URL', async () => {
+    publishTournamentSelectionInvalidate('t-1');
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://localhost:3331/internal/broadcast',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          Authorization: 'Bearer test-secret',
+          'Content-Type': 'application/json',
+        }),
+      })
+    );
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(String(init.body))).toEqual({
       tournamentId: 't-1',
+      event: { type: 'invalidate', tournamentId: 't-1' },
     });
+  });
 
-    unsubscribe();
+  it('aliases publishMatchInvalidateEvent to selection invalidate', async () => {
+    publishMatchInvalidateEvent('t-2');
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(String(init.body))).toEqual({
+      tournamentId: 't-2',
+      event: { type: 'invalidate', tournamentId: 't-2' },
+    });
   });
 });

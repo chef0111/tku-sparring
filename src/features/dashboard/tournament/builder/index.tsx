@@ -14,7 +14,7 @@ import type { GroupData, TournamentData } from '@/features/dashboard/types';
 import { TournamentActivitySheet } from '@/features/dashboard/tournament/tournament-activity-sheet';
 import LoadingScreen from '@/components/navigation/loading';
 import { Button } from '@/components/ui/button';
-import { useTournamentSseStream } from '@/hooks/use-tournament-sse-stream';
+import { useTournamentRealtimeStream } from '@/hooks/use-tournament-realtime-stream';
 import { useTournament } from '@/queries/tournaments';
 import { useGroups } from '@/queries/groups';
 
@@ -23,7 +23,7 @@ interface TournamentBuilderPageProps {
 }
 
 export function TournamentBuilderPage({ id }: TournamentBuilderPageProps) {
-  useTournamentSseStream(id);
+  useTournamentRealtimeStream(id);
 
   const tournamentQuery = useTournament(id);
   const groupsQuery = useGroups(id);
