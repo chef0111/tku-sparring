@@ -21,6 +21,21 @@ type LeaseUiStatus =
   | 'held_by_other'
   | 'pending_takeover';
 
+function leaseRpcMessage(e: unknown): string {
+  if (e instanceof Error) {
+    return e.message;
+  }
+  if (
+    typeof e === 'object' &&
+    e !== null &&
+    'message' in e &&
+    typeof (e as { message: unknown }).message === 'string'
+  ) {
+    return (e as { message: string }).message;
+  }
+  return '';
+}
+
 /**
  * Toggles `lease.acquire` / `lease.release` for the Advance tab’s selected group.
  */
@@ -41,18 +56,22 @@ export function AdvanceGroupLeaseToggle() {
 
   const [busy, setBusy] = React.useState(false);
 
+  /** Match `useArenaLease`: avoid acquire/release until the list has been fetched once. */
+  const snapshotReady =
+    Boolean(session?.user && tournament && deviceId) && leasesQuery.isFetched;
+
   const listLoading =
-    Boolean(session?.user && tournament && deviceId) &&
-    leasesQuery.isPending &&
-    leasesQuery.data === undefined;
+    Boolean(session?.user && tournament && deviceId) && !leasesQuery.isFetched;
 
   if (!session?.user || !tournament || !group || !deviceId) {
     return null;
   }
 
-  const canAcquire = status === 'available';
-  const canRelease = status === 'held_by_me';
-  const blocked = status === 'held_by_other' || status === 'pending_takeover';
+  const canAcquire = snapshotReady && status === 'available';
+  const canRelease = snapshotReady && status === 'held_by_me';
+  const blocked =
+    snapshotReady &&
+    (status === 'held_by_other' || status === 'pending_takeover');
 
   const disabled = busy || listLoading || blocked;
 
@@ -78,7 +97,7 @@ export function AdvanceGroupLeaseToggle() {
           try {
             await client.lease.acquire({ groupId: group, deviceId });
           } catch (e) {
-            const msg = e instanceof Error ? e.message : '';
+            const msg = leaseRpcMessage(e);
             if (!msg.includes('already controlled by this device')) {
               throw e;
             }
@@ -90,7 +109,7 @@ export function AdvanceGroupLeaseToggle() {
         toast.error(
           canRelease ? 'Could not release lease' : 'Could not acquire lease',
           {
-            description: e instanceof Error ? e.message : undefined,
+            description: leaseRpcMessage(e) || undefined,
           }
         );
       } finally {
