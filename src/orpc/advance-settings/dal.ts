@@ -3,7 +3,7 @@ import type { SelectionCatalogDTO, SelectionMatchesDTO } from './dto';
 import { savedArenaGroupIds } from '@/lib/tournament/arena-group-order';
 import {
   buildManualRankMapFromMatches,
-  buildSharedArenaMatchNumberById,
+  buildMatchNumber,
   formatArenaMatchTitle,
   resolveArenaGroupOrder,
 } from '@/lib/tournament/arena-match-label';
@@ -219,16 +219,29 @@ export class AdvanceSettingsDAL {
       orderBy: [{ round: 'asc' }, { matchIndex: 'asc' }],
     });
 
+    const athleteCountRows = await prisma.tournamentAthlete.groupBy({
+      by: ['groupId'],
+      where: { groupId: { in: groupIdsOnArena } },
+      _count: { _all: true },
+    });
+    const groupAthleteCountById = new Map<string, number>();
+    for (const row of athleteCountRows) {
+      if (row.groupId != null) {
+        groupAthleteCountById.set(row.groupId, row._count._all);
+      }
+    }
+
     const meta = groupsOnArena.map((x) => ({
       id: x.id,
       thirdPlaceMatch: x.thirdPlaceMatch,
     }));
     const matchDataList = allMatches.map(prismaMatchToMatchData);
-    const numbers = buildSharedArenaMatchNumberById({
+    const numbers = buildMatchNumber({
       arenaIndex,
       groups: meta,
       matches: matchDataList,
       groupOrder,
+      groupAthleteCountById,
       manualRankByMatchId: buildManualRankMapFromMatches(matchDataList),
     });
 

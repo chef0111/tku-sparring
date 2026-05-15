@@ -12,8 +12,8 @@ import {
   MATCH_W,
 } from '@/lib/tournament/bracket-layout';
 import {
-  formatArenaMatchHeaderLine,
   formatFeederWinnerPlaceholder,
+  formatMatchHeaderLine,
   getFeederMatch,
 } from '@/lib/tournament/arena-match-label';
 import { cn } from '@/lib/utils';
@@ -119,7 +119,11 @@ export function BracketMatchNode({
       style={{ left: pos.x, top: pos.y, width: MATCH_W, height: MATCH_H }}
     >
       <p className="text-muted-foreground pointer-events-none absolute -top-4 right-0 left-0 truncate text-center text-[10px] leading-none font-medium tabular-nums">
-        {formatArenaMatchHeaderLine(matchLabel.get(match.id))}
+        {formatMatchHeaderLine(matchLabel.get(match.id), {
+          bothSlotsOpen:
+            match.redTournamentAthleteId == null &&
+            match.blueTournamentAthleteId == null,
+        })}
       </p>
       <div
         className={cn(
