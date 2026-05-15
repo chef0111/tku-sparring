@@ -29,7 +29,11 @@ This document captures bracket generation behavior and match labeling for the to
 ## Match display numbers (arena sequence)
 
 - Display numbers are `arenaIndex * 100` + a **1-based sequence** shared across all groups on that arena (e.g. Arena 1 → 101, 102, …; Arena 2 → 201, 202, …).
-- **Round 0 advanced rows** (exactly one athlete vs **Open** / empty) are **not** assigned a display number: the map stores `null` for that match id so the sequence does not advance for that row. The bracket header shows **Advanced** instead of `Match {n}`; upper-round placeholders use **Winner {n}** when the feeder has a number, otherwise the advancer’s name when known, otherwise **Advanced** (see `formatArenaMatchHeaderLine` / `formatFeederWinnerPlaceholder` in [`src/lib/tournament/arena-match-label.ts`](../src/lib/tournament/arena-match-label.ts)).
+- **Round 0 advanced rows** (exactly one athlete vs **Open** / empty) are **not** assigned a display number: the map stores `null` for that match id so the sequence does not advance for that row. The bracket header shows **Advanced** instead of `Match {n}`.
+- **Round 0** rows with **both** slots open and **no** display number use a **blank** header (not “Advanced”); upper-round empty slots use **Winner {n}** when the feeder has a number, otherwise the advancer’s name when the feeder is complete, otherwise **Open** (see `formatMatchHeaderLine` / `formatFeederWinnerPlaceholder` in [`src/lib/tournament/arena-match-label.ts`](../src/lib/tournament/arena-match-label.ts)).
+- **Round 0 BYE vs BYE** (both standard seed positions are beyond the roster size for the bracket shell) never receive athletes; they also get `null` and **do not** advance the arena sequence, same as advanced rows.
+- The same **null** numbering applies when **every roster athlete already appears on round 0** in that group but a round-0 row is still fully empty (no further assignable slots without a swap).
+- **Upper rounds:** a match whose two round-0 feeders are not both phantoms, and where **exactly one** round-0 feeder is a **phantom** (both tournament-athlete slots still empty on that opening match), is also **not** numbered — e.g. a semifinal between a real opening match and an empty shell row (does not consume the arena sequence), including after the real side has already received an advancer.
 - **Third-Place Match** is numbered **immediately before the Final** within the same ordering rules below.
 - Example for an 8-athlete bracket in Arena 1 (single group, third-place on): Match 107 (Third-Place), Match 108 (Final).
 
@@ -52,5 +56,5 @@ Example: Groups **A** and **B** on Arena 1, same structure, group order `[A, B]`
 ## Builder UI labels
 
 - **Round 0**, empty athlete slot: show **Open** (not a “winner” placeholder).
-- **Round ≥ 1**, empty athlete slot: when the feeder has an arena display number, show **`Winner {n}`** where **`n`** is that feeder’s number from the shared arena map. When the feeder has **no** display number (round-0 advanced), show the **advancing athlete’s name** if the feeder is already complete, otherwise **Advanced**.
-- Full match titles use **`Match {n}`** when **`n`** is present; for advanced rows with **`n` null**, show **Advanced** (no numeric id).
+- **Round ≥ 1**, empty athlete slot: when the feeder has an arena display number, show **`Winner {n}`** where **`n`** is that feeder’s number from the shared arena map. When the feeder has **no** display number, show the **advancing athlete’s name** if the feeder is already complete, otherwise **Open**.
+- Full match titles use **`Match {n}`** when **`n`** is present. When **`n`** is null: **Advanced** for a real advanced (one athlete) row; **blank** when both slots are still open on that match.

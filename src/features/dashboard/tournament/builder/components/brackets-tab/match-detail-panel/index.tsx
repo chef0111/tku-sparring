@@ -6,7 +6,7 @@ import { ParticipantRow } from './participant-row';
 import { ScoreControl } from './score-control';
 import { useMatchDetailPanel } from './use-match-detail-panel';
 import type { MatchStatus } from '@/features/dashboard/types';
-import { formatArenaMatchHeaderLine } from '@/lib/tournament/arena-match-label';
+import { formatMatchHeaderLine } from '@/lib/tournament/arena-match-label';
 import {
   Sheet,
   SheetContent,
@@ -57,7 +57,11 @@ export function MatchDetailPanel() {
           <SheetHeader className="gap-2 border-b px-6 pt-6 pb-4">
             <SheetTitle>
               {position.roundLabel} —{' '}
-              {formatArenaMatchHeaderLine(matchLabel.get(match.id))}
+              {formatMatchHeaderLine(matchLabel.get(match.id), {
+                bothSlotsOpen:
+                  match.redTournamentAthleteId == null &&
+                  match.blueTournamentAthleteId == null,
+              })}
             </SheetTitle>
             <SheetDescription asChild>
               <div className="flex flex-col gap-3">

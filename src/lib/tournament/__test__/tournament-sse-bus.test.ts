@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   publishMatchInvalidateEvent,
   publishTournamentSelectionInvalidate,
-} from './tournament-sse-bus';
+} from '../tournament-sse-bus';
 
 describe('tournament realtime bus', () => {
   const fetchMock = vi.fn();

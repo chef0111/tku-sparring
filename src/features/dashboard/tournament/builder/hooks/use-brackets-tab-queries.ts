@@ -3,7 +3,7 @@ import type { GroupData, MatchData } from '@/features/dashboard/types';
 import {
   buildArenaMatchNumberById,
   buildManualRankMapFromMatches,
-  buildSharedArenaMatchNumberById,
+  buildMatchNumber,
   resolveArenaGroupOrder,
 } from '@/lib/tournament/arena-match-label';
 import {
@@ -65,13 +65,19 @@ export function useBracketsTabQueries({
         return buildArenaMatchNumberById(
           local,
           arenaIdx,
-          selectedGroup.thirdPlaceMatch
+          selectedGroup.thirdPlaceMatch,
+          selectedGroup._count.tournamentAthletes
         );
       }
       return new Map<string, number | null>();
     }
     const manual = buildManualRankMapFromMatches(arenaMatches);
-    return buildSharedArenaMatchNumberById({
+    const groupAthleteCountById = new Map(
+      groupsOnArena.map(
+        (g) => [g.id, g._count.tournamentAthletes] as [string, number]
+      )
+    );
+    return buildMatchNumber({
       arenaIndex: arenaIdx,
       groups: groupsOnArena.map((g) => ({
         id: g.id,
@@ -79,6 +85,7 @@ export function useBracketsTabQueries({
       })),
       matches: arenaMatches,
       groupOrder,
+      groupAthleteCountById,
       manualRankByMatchId: manual.size > 0 ? manual : undefined,
     });
   }, [selectedGroup, groups, tournamentMatches, matches, arenaGroupOrder]);
