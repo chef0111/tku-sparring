@@ -138,7 +138,6 @@ model Match {
   round                    Int      @default(0)
   matchIndex               Int      @default(0)
   status                   String   @default("pending")
-  bestOf                   Int      @default(3)
   redAthleteId             String?  @db.ObjectId
   blueAthleteId            String?  @db.ObjectId
   redTournamentAthleteId   String?  @db.ObjectId

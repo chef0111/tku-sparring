@@ -59,6 +59,17 @@ _Avoid_: Consolation bout
 The client-side selection flow for tournament, group, and match used before a bout starts.
 _Avoid_: Setup wizard
 
+**Arena score (server)**:
+Persisted **`redWins`** / **`blueWins`** on the **Match** row; authoritative after the operator confirms Advance Settings (**Apply**) for that match. Synced from the arena app via **`match.updateScore`** (including offline replay). A full page reload does **not** auto-restore the scoreboard from the server until Apply is used again (tournament match lists may not be ready immediately).
+_Avoid_: Treating only Zustand as source of truth for set wins after refresh
+
+**Arena combat snapshot (local)**:
+Best-effort **`localStorage`** under **`tku-arena-combat-snapshot:{matchId}`** (one blob per bout) for in-round **health**, **mana**, **fouls**, and **round/break timer fields** (`timeLeft`, break state) while Advance Settings has that match selected **and** the operator has applied it in the current session. Current schema is **v2** (v1 blobs still load for combat only; timer resets to a full round). A legacy single key **`tku-arena-combat-snapshot`** is read once per match for migration, then moved into the scoped key. Restored only when the snapshot’s **completed-round count** (`redWins + blueWins`) matches the server row; otherwise that match’s blob is removed as stale.
+_Avoid_: Relying on it for round winners or timer phase
+
+**Match format (BO3)**:
+Every **Match** is **best-of-three rounds** (first to **2** round wins). There is **no** configurable **`bestOf`** field on matches or tournaments.
+
 ## Relationships
 
 - A **Tournament** contains many **Groups**.

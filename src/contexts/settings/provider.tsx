@@ -37,6 +37,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     isValid: true,
   });
   const [applySettingsPending, setApplySettingsPending] = useState(false);
+  const [arenaAdvanceApplyNum, setarenaAdvanceApplyNum] = useState(0);
 
   const formState =
     activeTab === 'standard' ? standardFormState : advanceFormState;
@@ -213,6 +214,10 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
           resetMatch();
           resetAll();
 
+          if (advance.match) {
+            setarenaAdvanceApplyNum((n) => n + 1);
+          }
+
           toast.success('Settings applied', {
             description: 'Applied latest settings for the next matches.',
             className: 'min-w-8! mx-auto inset-x-0 justify-center',
@@ -286,6 +291,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       setAdvanceFormState,
       applySettings,
       applySettingsPending,
+      arenaAdvanceApplyNum,
     }),
     [
       isOpen,
@@ -299,6 +305,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       setAdvanceFormState,
       applySettings,
       applySettingsPending,
+      arenaAdvanceApplyNum,
     ]
   );
 

@@ -11,7 +11,6 @@ export const MatchSchema = z.object({
   round: z.number().int(),
   matchIndex: z.number().int(),
   status: MatchStatusSchema,
-  bestOf: z.number().int(),
   redAthleteId: z.string().nullable(),
   blueAthleteId: z.string().nullable(),
   redTournamentAthleteId: z.string().nullable(),
@@ -34,7 +33,6 @@ export const CreateMatchSchema = z.object({
   round: z.number().int().default(0),
   matchIndex: z.number().int().default(0),
   status: MatchStatusSchema.default('pending'),
-  bestOf: z.number().int().default(3),
   redAthleteId: z.string().nullable().optional(),
   blueAthleteId: z.string().nullable().optional(),
   redTournamentAthleteId: z.string().nullable().optional(),
@@ -134,7 +132,6 @@ export const CreateCustomMatchSchema = z.object({
   displayLabel: z.string().min(1).max(120),
   red: CustomSlotSchema,
   blue: CustomSlotSchema,
-  bestOf: z.number().int().min(1).max(5).optional(),
 });
 
 export type MatchStatusDTO = z.infer<typeof MatchStatusSchema>;

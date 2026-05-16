@@ -19,7 +19,6 @@ function createEmptyMatch(
     round,
     matchIndex,
     status: 'pending',
-    bestOf: 3,
     redTournamentAthleteId: null,
     blueTournamentAthleteId: null,
     redAthleteId: null,

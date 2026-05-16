@@ -42,7 +42,7 @@ export const Scoreboard = ({ className }: ScoreboardProps) => {
       e.preventDefault();
       if (isOpen) return;
       useTimerStore.getState().reset();
-      usePlayerStore.getState().resetRoundCombatPreserveHealth();
+      usePlayerStore.getState().resetRoundStats();
     },
     { preventDefault: true },
     [isOpen]
@@ -57,6 +57,7 @@ export const Scoreboard = ({ className }: ScoreboardProps) => {
       useMatchStore.getState().resetMatch();
       useTimerStore.getState().reset();
       usePlayerStore.getState().resetMatchCombatPreservePlayers();
+      usePlayerStore.getState().resetHealth();
     },
     [isOpen]
   );

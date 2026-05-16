@@ -43,9 +43,46 @@ export function useFinishMatch() {
   }, [closeMatchResult, resetMatch, resetPlayers, resetTimer]);
 
   const accept = React.useCallback(() => {
-    resetArenaClientAfterResult();
+    closeMatchResult();
+    resetMatch();
+
+    const advance = formData.advance;
+    const ps = usePlayerStore.getState();
+    const ts = useTimerStore.getState();
+
+    if (advance.maxHealth > 0) {
+      ps.setMaxHealth(advance.maxHealth);
+    }
+    if (advance.roundDuration > 0) {
+      ts.setRoundDuration(advance.roundDuration * 1000);
+    }
+    if (advance.breakDuration > 0) {
+      ts.setBreakDuration(advance.breakDuration * 1000);
+    }
+    if (advance.redPlayerName) {
+      ps.setPlayerName('red', advance.redPlayerName);
+    }
+    if (advance.bluePlayerName) {
+      ps.setPlayerName('blue', advance.bluePlayerName);
+    }
+    if (advance.redPlayerAvatar) {
+      ps.setPlayerAvatar('red', advance.redPlayerAvatar);
+    }
+    if (advance.bluePlayerAvatar) {
+      ps.setPlayerAvatar('blue', advance.bluePlayerAvatar);
+    }
+
+    resetTimer();
+    resetPlayers();
     invalidateAdvanceSelection();
-  }, [invalidateAdvanceSelection, resetArenaClientAfterResult]);
+  }, [
+    closeMatchResult,
+    formData.advance,
+    invalidateAdvanceSelection,
+    resetMatch,
+    resetPlayers,
+    resetTimer,
+  ]);
 
   const cancel = React.useCallback(async () => {
     if (selectedMatchId && OBJECT_ID_RE.test(selectedMatchId)) {

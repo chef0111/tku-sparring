@@ -211,6 +211,7 @@ const initializer: StateCreator<PlayerStore> = (set, get) => ({
       },
       lastRedHit: null,
       lastBlueHit: null,
+      lastHitTimes: { red: 0, blue: 0 },
     });
   },
 
