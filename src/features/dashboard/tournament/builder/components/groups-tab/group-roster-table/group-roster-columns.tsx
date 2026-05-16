@@ -1,11 +1,11 @@
 import { MoreHorizontal } from 'lucide-react';
 import { useDraggable } from '@dnd-kit/core';
-// import { OutOfRangeBadge, getViolations } from '../out-of-range-badge';
 import type { ColumnDef } from '@tanstack/react-table';
 import type {
   GroupData,
   TournamentAthleteData,
 } from '@/features/dashboard/types';
+import { AthleteAvatar } from '@/features/dashboard/athlete/components/athlete-avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,11 +18,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
-// import {
-//   Tooltip,
-//   TooltipContent,
-//   TooltipTrigger,
-// } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { getBeltLabel, getGenderLabel } from '@/config/athlete';
 
@@ -55,13 +50,16 @@ function NameCell({
       {...attributes}
       {...listeners}
       className={cn(
-        'flex cursor-grab flex-col active:cursor-grabbing',
+        'flex cursor-grab flex-row items-center gap-2 active:cursor-grabbing',
         isDragging && 'opacity-50',
         readOnly && 'cursor-default'
       )}
     >
-      <p className="text-sm font-medium">{athlete.name}</p>
-      <p className="text-muted-foreground text-xs">{athlete.affiliation}</p>
+      <AthleteAvatar name={athlete.name} image={athlete.image} />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <p className="text-sm font-medium">{athlete.name}</p>
+        <p className="text-muted-foreground text-xs">{athlete.affiliation}</p>
+      </div>
     </div>
   );
 }
@@ -160,21 +158,6 @@ export function getGroupRosterColumns({
       enableHiding: false,
       enableColumnFilter: false,
     },
-    // {
-    //   id: 'violations',
-    //   header: () => (
-    //     <Tooltip>
-    //       <TooltipTrigger asChild>
-    //         <AlertTriangle className="text-muted-foreground size-3.5" />
-    //       </TooltipTrigger>
-    //       <TooltipContent>Constraint violations</TooltipContent>
-    //     </Tooltip>
-    //   ),
-    //   cell: ({ row }) => (
-    //     <OutOfRangeBadge violations={getViolations(row.original, group)} />
-    //   ),
-    //   enableSorting: false,
-    // },
     {
       id: 'actions',
       header: '',

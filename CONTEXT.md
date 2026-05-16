@@ -28,6 +28,9 @@ _Avoid_: Match patch, score helper
 A global athlete identity record shared across tournaments.
 _Avoid_: Player, user
 
+**Profile photo (`image`)**:
+Optional public HTTPS URL of the athlete’s photo on **AthleteProfile**; **TournamentAthlete** stores a snapshot of the same URL when the athlete is added to a tournament.
+
 **TournamentAthlete**:
 A per-tournament participation record that links an AthleteProfile to a tournament and (optionally) a group.
 _Avoid_: Competitor

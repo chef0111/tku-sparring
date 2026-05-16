@@ -62,6 +62,7 @@ export function AthleteEditSheet({
       beltLevel: athlete?.beltLevel ?? 0,
       weight: athlete?.weight ?? 60,
       affiliation: athlete?.affiliation ?? '',
+      image: athlete?.image ?? '',
     } as FormValues,
     validators: {
       onSubmit: EditAthleteSchema,
@@ -105,6 +106,7 @@ export function AthleteEditSheet({
         beltLevel: value.beltLevel,
         weight: value.weight,
         affiliation: value.affiliation,
+        image: value.image.trim() === '' ? null : value.image.trim(),
       });
     },
   });
@@ -121,6 +123,7 @@ export function AthleteEditSheet({
         beltLevel: value.beltLevel,
         weight: value.weight,
         affiliation: value.affiliation,
+        image: value.image.trim() === '' ? null : value.image.trim(),
       },
       {
         onSuccess: () => {
@@ -227,6 +230,16 @@ export function AthleteEditSheet({
                   <field.Input
                     label="Affiliation"
                     placeholder="Club or gym name"
+                  />
+                )}
+              </form.AppField>
+
+              <form.AppField name="image">
+                {(field) => (
+                  <field.Input
+                    label="Photo URL"
+                    descPosition="after-label"
+                    placeholder="https://…"
                   />
                 )}
               </form.AppField>

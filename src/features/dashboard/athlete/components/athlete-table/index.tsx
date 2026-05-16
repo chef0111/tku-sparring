@@ -5,6 +5,7 @@ import { BulkAddAthletesDialog } from '../dialogs/bulk-add-athletes-dialog';
 import { BulkDeleteAthletesDialog } from '../dialogs/bulk-delete-athletes-dialog';
 import { useAthleteTableQuery } from '../../hooks/use-athlete-manager-query';
 import { AthletesActionBar } from './athletes-action-bar';
+import { exportAthletesTableToCSV } from './export-athletes-csv';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { AthleteProfileData } from '@/features/dashboard/types';
 
@@ -12,7 +13,6 @@ import type { AthleteProfilesDTO } from '@/orpc/athlete-profiles/dto';
 import { useAthleteProfiles } from '@/queries/athlete-profiles';
 import { useFeatureFlags } from '@/contexts/feature-flags';
 import { useDataTable } from '@/hooks/use-data-table';
-import { exportTableToCSV } from '@/lib/data-table/export';
 import { DEFAULT_SORTING } from '@/config/athlete';
 import { cn } from '@/lib/utils';
 
@@ -31,6 +31,10 @@ interface AthleteTableProps {
   onAdd: () => void;
   onImport: () => void;
   enableQueryFilter?: boolean;
+  onBulkEdit?: (
+    profiles: Array<AthleteProfileData>,
+    onComplete: () => void
+  ) => void;
 }
 
 export function AthleteTable({
@@ -39,6 +43,7 @@ export function AthleteTable({
   onAdd,
   onImport,
   enableQueryFilter = true,
+  onBulkEdit,
 }: AthleteTableProps) {
   const { enableAdvancedFilter, filterFlag } = useFeatureFlags();
   const query = useAthleteTableQuery();
@@ -111,19 +116,18 @@ export function AthleteTable({
     );
   }
 
-  function handleExportAll() {
-    exportTableToCSV(table, {
-      filename: 'athletes',
-      excludeColumns: ['select', 'actions'],
-      headers: {
-        athleteCode: 'Athlete ID',
-        name: 'Name',
-        gender: 'Gender',
-        beltLevel: 'Belt level',
-        weight: 'Weight',
-        affiliation: 'Affiliation',
-      },
+  function handleBulkEditClick() {
+    if (!onBulkEdit) return;
+    const profiles = table
+      .getFilteredSelectedRowModel()
+      .rows.map((row) => row.original);
+    onBulkEdit(profiles, () => {
+      table.resetRowSelection();
     });
+  }
+
+  function handleExportAll() {
+    exportAthletesTableToCSV(table, { filename: 'athletes' });
   }
 
   return (
@@ -140,6 +144,7 @@ export function AthleteTable({
                 table={table}
                 state={tableState}
                 onBulkAdd={handleBulkAddToTournament}
+                onBulkEdit={onBulkEdit ? handleBulkEditClick : undefined}
                 onDelete={handleBulkDeleteClick}
               />
             }

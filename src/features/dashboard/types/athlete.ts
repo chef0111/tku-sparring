@@ -8,6 +8,7 @@ export interface AthleteProfileData {
   beltLevel: number;
   weight: number;
   affiliation: string;
+  image: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,6 +21,7 @@ export type AthleteRow = {
   beltLevel: number;
   weight: number;
   affiliation: string;
+  image: string;
 };
 
 export type ColumnOptions = {

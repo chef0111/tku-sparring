@@ -70,20 +70,25 @@ export function TournamentStatusDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Change tournament status?</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-lg">
+            Update tournament status?
+          </DialogTitle>
+          <DialogDescription className="text-base font-light">
             Tournament: <span className="font-semibold">{tournamentName}</span>{' '}
             <br />
-            From {STATUS_LABEL[fromStatus]} to {STATUS_LABEL[toStatus]}
+            From{' '}
+            <span className="font-semibold">
+              {STATUS_LABEL[fromStatus]}
+            </span> to{' '}
+            <span className="font-semibold">{STATUS_LABEL[toStatus]}</span>
           </DialogDescription>
         </DialogHeader>
-        <div className="text-muted-foreground px-6 text-sm">
+        <div className="text-muted-foreground">
           <ul className="flex flex-col gap-1">
-            {bullets.map((line) => (
-              <li key={line} className="flex gap-2">
-                <span aria-hidden>•</span>
-                <span>{line}</span>
-              </li>
+            {bullets.map((line, index) => (
+              <span key={index} className="italic">
+                {line}
+              </span>
             ))}
           </ul>
         </div>

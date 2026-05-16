@@ -67,6 +67,13 @@ export const EditAthleteSchema = z.object({
     .min(20, 'Weight must be at least 20kg')
     .max(100, 'Weight must be less than 100kg'),
   affiliation: z.string().min(1, 'Affiliation is required'),
+  image: z.string().refine(
+    (s) => {
+      const t = s.trim();
+      return t === '' || z.string().url().safeParse(t).success;
+    },
+    { message: 'Photo URL must be empty or a valid URL' }
+  ),
 });
 
 export const GroupConstraintsSchema = z.object({

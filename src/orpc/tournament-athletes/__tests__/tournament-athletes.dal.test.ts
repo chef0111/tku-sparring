@@ -17,13 +17,14 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-const profile = (id: string) => ({
+const profile = (id: string, image: string | null = null) => ({
   id,
   name: `Athlete ${id}`,
   gender: 'M',
   beltLevel: 3,
   weight: 55,
   affiliation: 'Club A',
+  image,
 });
 
 describe('bulkCreate', () => {
@@ -54,12 +55,33 @@ describe('bulkCreate', () => {
           beltLevel: 3,
           weight: 55,
           affiliation: 'Club A',
+          image: null,
           status: 'selected',
         }),
       ]),
     });
 
     expect(result).toHaveLength(2);
+  });
+
+  it('copies profile image URL into snapshot', async () => {
+    vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue([]);
+    vi.mocked(prisma.tournamentAthlete.createMany).mockResolvedValue({
+      count: 1,
+    });
+
+    const url = 'https://example.com/a.png';
+    const profiles = [profile('p1', url)];
+    await TournamentAthleteDAL.bulkCreate('tournament-1', profiles);
+
+    expect(prisma.tournamentAthlete.createMany).toHaveBeenCalledWith({
+      data: [
+        expect.objectContaining({
+          athleteProfileId: 'p1',
+          image: url,
+        }),
+      ],
+    });
   });
 
   it('skips athletes already in the tournament', async () => {

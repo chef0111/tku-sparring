@@ -121,6 +121,8 @@ export type SelectionMatchRow = {
   status: string;
   redAthleteName: string | null;
   blueAthleteName: string | null;
+  redAthleteImage: string | null;
+  blueAthleteImage: string | null;
   /** Exclusive lock held by another device. */
   disabled: boolean;
   claimStatus: MatchClaimStatus;
@@ -254,14 +256,19 @@ export class AdvanceSettingsDAL {
         taIds.add(m.blueTournamentAthleteId);
       }
     }
-    const names =
+    const tournamentAthletes =
       taIds.size > 0
         ? await prisma.tournamentAthlete.findMany({
             where: { id: { in: [...taIds] } },
-            select: { id: true, name: true },
+            select: { id: true, name: true, image: true },
           })
         : [];
-    const nameById = new Map(names.map((t) => [t.id, t.name]));
+    const athleteByTaId = new Map(
+      tournamentAthletes.map((t) => [
+        t.id,
+        { name: t.name, image: t.image?.trim() || null },
+      ])
+    );
 
     for (const m of allMatches) {
       if (m.groupId !== groupId) {
@@ -275,17 +282,21 @@ export class AdvanceSettingsDAL {
         continue;
       }
       const n = numbers.get(m.id);
+      const redTa = m.redTournamentAthleteId
+        ? athleteByTaId.get(m.redTournamentAthleteId)
+        : undefined;
+      const blueTa = m.blueTournamentAthleteId
+        ? athleteByTaId.get(m.blueTournamentAthleteId)
+        : undefined;
       matchesOut.push({
         id: m.id,
         label: n != null ? formatArenaMatchTitle(n) : `Match ${m.id.slice(-6)}`,
         groupId: m.groupId,
         status: m.status,
-        redAthleteName: m.redTournamentAthleteId
-          ? (nameById.get(m.redTournamentAthleteId) ?? null)
-          : null,
-        blueAthleteName: m.blueTournamentAthleteId
-          ? (nameById.get(m.blueTournamentAthleteId) ?? null)
-          : null,
+        redAthleteName: redTa?.name ?? null,
+        blueAthleteName: blueTa?.name ?? null,
+        redAthleteImage: redTa?.image ?? null,
+        blueAthleteImage: blueTa?.image ?? null,
         disabled: false,
         claimStatus: 'none',
       });

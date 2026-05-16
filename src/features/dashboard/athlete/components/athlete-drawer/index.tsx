@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IconGripVertical, IconPlus } from '@tabler/icons-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
+import { PlusIcon, SaveIcon } from 'lucide-react';
 import { AthleteRowFields } from './athlete-row-fields';
 import type { AthleteRow } from '@/features/dashboard/types';
-import { useCreateAthleteProfile } from '@/queries/athlete-profiles';
 import { Button } from '@/components/ui/button';
 import {
   Drawer,
@@ -22,10 +23,18 @@ import {
   SortableOverlay,
 } from '@/components/ui/sortable';
 import { Spinner } from '@/components/ui/spinner';
+import { client } from '@/orpc/client';
+
+export type AthleteDrawerMode = 'create' | 'bulk-edit';
 
 interface AthleteDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  mode?: AthleteDrawerMode;
+  /** Prefill when `mode` is `bulk-edit` (row `id` = athlete profile id). */
+  seedRows?: Array<AthleteRow> | null;
+  /** Called after bulk-edit requests finish (before drawer closes). */
+  onBulkEditSaved?: () => void;
 }
 
 function createEmptyRow(): AthleteRow {
@@ -37,6 +46,7 @@ function createEmptyRow(): AthleteRow {
     beltLevel: 0,
     weight: 60,
     affiliation: '',
+    image: '',
   };
 }
 
@@ -44,11 +54,31 @@ function onIsolateSortableFromDrawerGesture(e: React.SyntheticEvent) {
   e.stopPropagation();
 }
 
-export function AthleteDrawer({ open, onOpenChange }: AthleteDrawerProps) {
+function seedKey(rows: Array<AthleteRow> | null | undefined) {
+  return rows?.length ? rows.map((r) => r.id).join('\0') : '';
+}
+
+export function AthleteDrawer({
+  open,
+  onOpenChange,
+  mode = 'create',
+  seedRows = null,
+  onBulkEditSaved,
+}: AthleteDrawerProps) {
+  const queryClient = useQueryClient();
   const [rows, setRows] = useState<Array<AthleteRow>>(() => [createEmptyRow()]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const createMutation = useCreateAthleteProfile();
+  const seedRowsKey = seedKey(seedRows);
+
+  useEffect(() => {
+    if (!open) return;
+    if (mode === 'bulk-edit' && seedRows && seedRows.length > 0) {
+      setRows(seedRows.map((r) => ({ ...r })));
+    } else {
+      setRows([createEmptyRow()]);
+    }
+  }, [open, mode, seedRowsKey]);
 
   function updateRow(
     index: number,
@@ -96,39 +126,80 @@ export function AthleteDrawer({ open, onOpenChange }: AthleteDrawerProps) {
     }
 
     setIsSubmitting(true);
-    let successCount = 0;
-    let failCount = 0;
 
-    for (const row of rows) {
-      try {
-        await createMutation.mutateAsync({
-          athleteCode: row.athleteCode.trim(),
-          name: row.name,
-          gender: row.gender,
-          beltLevel: row.beltLevel,
-          weight: row.weight,
-          affiliation: row.affiliation,
-          confirmDuplicate: false,
-        });
-        successCount++;
-      } catch {
-        failCount++;
+    try {
+      if (mode === 'bulk-edit') {
+        const results = await Promise.allSettled(
+          rows.map((row) => {
+            const trimmedImage = row.image.trim();
+            return client.athleteProfile.update({
+              id: row.id,
+              athleteCode: row.athleteCode.trim(),
+              name: row.name,
+              gender: row.gender,
+              beltLevel: row.beltLevel,
+              weight: row.weight,
+              affiliation: row.affiliation,
+              image: trimmedImage === '' ? null : trimmedImage,
+            });
+          })
+        );
+        const successCount = results.filter(
+          (r) => r.status === 'fulfilled'
+        ).length;
+        const failCount = results.length - successCount;
+        await queryClient.invalidateQueries({ queryKey: ['athleteProfile'] });
+        onBulkEditSaved?.();
+        handleOpenChange(false);
+        if (failCount === 0) {
+          toast.success(
+            `${successCount} ${successCount === 1 ? 'Athlete' : 'Athletes'} updated`
+          );
+        } else {
+          toast.warning(
+            `Updated ${successCount} athletes, ${failCount} failed`
+          );
+        }
+      } else {
+        const results = await Promise.allSettled(
+          rows.map((row) => {
+            const trimmedImage = row.image.trim();
+            return client.athleteProfile.create({
+              athleteCode: row.athleteCode.trim(),
+              name: row.name,
+              gender: row.gender,
+              beltLevel: row.beltLevel,
+              weight: row.weight,
+              affiliation: row.affiliation,
+              ...(trimmedImage ? { image: trimmedImage } : {}),
+              confirmDuplicate: false,
+            });
+          })
+        );
+        const successCount = results.filter(
+          (r) => r.status === 'fulfilled'
+        ).length;
+        const failCount = results.length - successCount;
+        await queryClient.invalidateQueries({ queryKey: ['athleteProfile'] });
+        handleOpenChange(false);
+        if (failCount === 0) {
+          toast.success(
+            `${successCount} ${successCount === 1 ? 'Athlete' : 'Athletes'} created successfully`
+          );
+        } else {
+          toast.warning(
+            `${successCount} ${successCount === 1 ? 'Athlete' : 'Athletes'} created, ${failCount} failed`
+          );
+        }
       }
-    }
-
-    setIsSubmitting(false);
-    handleOpenChange(false);
-
-    if (failCount === 0) {
-      toast.success(
-        `${successCount} ${successCount === 1 ? 'Athlete' : 'Athletes'} created successfully`
-      );
-    } else {
-      toast.warning(
-        `${successCount} ${successCount === 1 ? 'Athlete' : 'Athletes'} created, ${failCount} failed`
-      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Request failed');
+    } finally {
+      setIsSubmitting(false);
     }
   }
+
+  const isBulkEdit = mode === 'bulk-edit';
 
   return (
     <Drawer
@@ -139,9 +210,13 @@ export function AthleteDrawer({ open, onOpenChange }: AthleteDrawerProps) {
     >
       <DrawerContent className="mx-auto max-h-[65vh] max-w-5xl border">
         <DrawerHeader>
-          <DrawerTitle>Add Athletes</DrawerTitle>
+          <DrawerTitle>
+            {isBulkEdit ? 'Edit Athletes' : 'Add Athletes'}
+          </DrawerTitle>
           <DrawerDescription>
-            Fill in each row and click Create to add multiple athletes at once.
+            {isBulkEdit
+              ? 'Edit selected rows and save. Changes are sent in parallel.'
+              : 'Fill in each row and click Create to add multiple athletes at once.'}
           </DrawerDescription>
         </DrawerHeader>
 
@@ -157,10 +232,10 @@ export function AthleteDrawer({ open, onOpenChange }: AthleteDrawerProps) {
                 <SortableItem
                   key={row.id}
                   value={row.id}
-                  className="flex items-center gap-2 rounded-xl border p-2"
+                  className="flex min-w-0 items-center gap-2 rounded-xl border p-2"
                 >
                   <SortableItemHandle
-                    className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-md px-1 py-2"
+                    className="text-muted-foreground hover:text-foreground hover:bg-muted shrink-0 rounded-md px-1 py-2"
                     onPointerDownCapture={onIsolateSortableFromDrawerGesture}
                     onTouchStartCapture={onIsolateSortableFromDrawerGesture}
                   >
@@ -186,7 +261,7 @@ export function AthleteDrawer({ open, onOpenChange }: AthleteDrawerProps) {
                 if (!row) return null;
 
                 return (
-                  <div className="pointer-events-none flex items-center gap-2 rounded-xl border p-2">
+                  <div className="pointer-events-none flex min-w-0 items-center gap-2 rounded-xl border p-2">
                     <button
                       type="button"
                       className="bg-muted cursor-grabbing rounded-md px-1 py-2"
@@ -210,18 +285,34 @@ export function AthleteDrawer({ open, onOpenChange }: AthleteDrawerProps) {
         </div>
 
         <DrawerFooter className="flex-row justify-between">
-          <Button variant="outline" onClick={addRow} disabled={isSubmitting}>
-            <IconPlus />
-            Add Row
-          </Button>
+          {!isBulkEdit ? (
+            <Button variant="outline" onClick={addRow} disabled={isSubmitting}>
+              <IconPlus />
+              Add Row
+            </Button>
+          ) : (
+            <div />
+          )}
           <Button onClick={onSubmit} disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <Spinner className="text-primary-foreground" />
-                <span>Creating…</span>
+                <span>{isBulkEdit ? 'Saving…' : 'Creating…'}</span>
+              </>
+            ) : isBulkEdit ? (
+              <>
+                <SaveIcon />
+                {`Save ${rows.length} ${
+                  rows.length === 1 ? 'Athlete' : 'Athletes'
+                }`}
               </>
             ) : (
-              `Create ${rows.length} ${rows.length === 1 ? 'Athlete' : 'Athletes'}`
+              <>
+                <PlusIcon />
+                {`Create ${rows.length} ${
+                  rows.length === 1 ? 'Athlete' : 'Athletes'
+                }`}
+              </>
             )}
           </Button>
         </DrawerFooter>
