@@ -27,6 +27,7 @@ export interface TournamentAthleteData {
   beltLevel: number;
   weight: number;
   affiliation: string;
+  image: string | null;
   athleteProfile: { id: string; athleteCode: string | null };
 }
 

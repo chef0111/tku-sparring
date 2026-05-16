@@ -107,6 +107,7 @@ export class TournamentAthleteDAL {
       beltLevel: number;
       weight: number;
       affiliation: string;
+      image: string | null;
     }>
   ) {
     const existing = await prisma.tournamentAthlete.findMany({
@@ -132,6 +133,7 @@ export class TournamentAthleteDAL {
         beltLevel: p.beltLevel,
         weight: p.weight,
         affiliation: p.affiliation,
+        image: p.image ?? null,
         status: 'selected',
       })),
     });

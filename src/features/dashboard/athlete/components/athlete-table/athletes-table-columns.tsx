@@ -1,3 +1,4 @@
+import { AthleteAvatar } from '../athlete-avatar';
 import AthletesActionMenu from './athletes-action-menu';
 import type {
   AthleteProfileData,
@@ -78,7 +79,10 @@ export function getAthletesTableColumns(
         />
       ),
       cell: ({ row }) => (
-        <span className="font-medium">{row.original.name}</span>
+        <div className="flex flex-row items-center gap-2">
+          <AthleteAvatar name={row.original.name} image={row.original.image} />
+          <span className="font-medium">{row.original.name}</span>
+        </div>
       ),
       enableSorting: true,
       enableColumnFilter: true,

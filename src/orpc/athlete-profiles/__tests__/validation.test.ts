@@ -106,6 +106,34 @@ describe('CreateAthleteProfileSchema', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('accepts optional https image URL', () => {
+    const result = CreateAthleteProfileSchema.safeParse({
+      ...valid,
+      image: 'https://example.com/p.png',
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.image).toBe('https://example.com/p.png');
+    }
+  });
+
+  it('omits image when not provided', () => {
+    const result = CreateAthleteProfileSchema.parse(valid);
+    expect(result.image).toBeUndefined();
+  });
+
+  it('maps empty image string to undefined', () => {
+    const result = CreateAthleteProfileSchema.parse({ ...valid, image: '' });
+    expect(result.image).toBeUndefined();
+  });
+
+  it('rejects invalid image URL', () => {
+    expect(
+      CreateAthleteProfileSchema.safeParse({ ...valid, image: 'not-a-url' })
+        .success
+    ).toBe(false);
+  });
 });
 
 describe('UpdateAthleteProfileSchema', () => {
@@ -125,6 +153,51 @@ describe('UpdateAthleteProfileSchema', () => {
       beltLevel: 11,
     });
     expect(result.success).toBe(false);
+  });
+
+  it('omits image when not provided on update', () => {
+    const result = UpdateAthleteProfileSchema.parse({
+      id: 'abc123',
+      athleteCode: 'TKD-001',
+    });
+    expect(result.image).toBeUndefined();
+  });
+
+  it('maps empty image to null on update', () => {
+    const result = UpdateAthleteProfileSchema.parse({
+      id: 'abc123',
+      athleteCode: 'TKD-001',
+      image: '',
+    });
+    expect(result.image).toBeNull();
+  });
+
+  it('maps null image on update', () => {
+    const result = UpdateAthleteProfileSchema.parse({
+      id: 'abc123',
+      athleteCode: 'TKD-001',
+      image: null,
+    });
+    expect(result.image).toBeNull();
+  });
+
+  it('accepts https image on update', () => {
+    const result = UpdateAthleteProfileSchema.parse({
+      id: 'abc123',
+      athleteCode: 'TKD-001',
+      image: 'https://example.com/a.png',
+    });
+    expect(result.image).toBe('https://example.com/a.png');
+  });
+
+  it('rejects invalid image URL on update', () => {
+    expect(
+      UpdateAthleteProfileSchema.safeParse({
+        id: 'abc123',
+        athleteCode: 'TKD-001',
+        image: 'not-a-url',
+      }).success
+    ).toBe(false);
   });
 });
 

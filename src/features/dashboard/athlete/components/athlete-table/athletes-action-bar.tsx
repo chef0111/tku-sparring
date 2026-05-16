@@ -1,9 +1,11 @@
 import {
   IconDownload,
+  IconPencil,
   IconTrash,
   IconUserPlus,
   IconX,
 } from '@tabler/icons-react';
+import { exportAthletesTableToCSV } from './export-athletes-csv';
 import type { Table } from '@tanstack/react-table';
 import type { AthleteProfileData } from '@/features/dashboard/types';
 import type { DataTableControlledState } from '@/hooks/use-data-table';
@@ -15,12 +17,12 @@ import {
   ActionBarSelection,
   ActionBarSeparator,
 } from '@/components/ui/action-bar';
-import { exportTableToCSV } from '@/lib/data-table/export';
 
 interface AthletesActionBarProps {
   table: Table<AthleteProfileData>;
   state: DataTableControlledState;
   onBulkAdd: () => void;
+  onBulkEdit?: () => void;
   onDelete: () => void;
 }
 
@@ -28,6 +30,7 @@ export function AthletesActionBar({
   table,
   state,
   onBulkAdd,
+  onBulkEdit,
   onDelete,
 }: AthletesActionBarProps) {
   const rows = table.getFilteredSelectedRowModel().rows;
@@ -38,18 +41,9 @@ export function AthletesActionBar({
   }
 
   function onExport() {
-    exportTableToCSV(table, {
+    exportAthletesTableToCSV(table, {
       filename: 'athletes',
-      excludeColumns: ['select', 'actions'],
       onlySelected: true,
-      headers: {
-        athleteCode: 'Athlete Code',
-        name: 'Name',
-        gender: 'Gender',
-        beltLevel: 'Belt level',
-        weight: 'Weight',
-        affiliation: 'Affiliation',
-      },
     });
   }
 
@@ -65,6 +59,12 @@ export function AthletesActionBar({
       </ActionBarSelection>
       <ActionBarSeparator />
       <ActionBarGroup>
+        {onBulkEdit ? (
+          <ActionBarItem onClick={onBulkEdit}>
+            <IconPencil />
+            Edit
+          </ActionBarItem>
+        ) : null}
         <ActionBarItem onClick={onBulkAdd}>
           <IconUserPlus />
           Add to Tournament

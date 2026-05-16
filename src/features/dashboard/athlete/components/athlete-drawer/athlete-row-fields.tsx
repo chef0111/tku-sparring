@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { BELT_LEVELS, GENDER_OPTIONS } from '@/config/athlete';
+import { cn } from '@/lib/utils';
 
 interface AthleteRowFieldsProps {
   row: AthleteRow;
@@ -33,10 +34,19 @@ export function AthleteRowFields({
   onUpdate,
   onRemove,
 }: AthleteRowFieldsProps) {
+  const showRemoveColumn = rowCount > 1;
+
   return (
-    <>
+    <div
+      className={cn(
+        'grid min-w-0 flex-1 items-center gap-2',
+        showRemoveColumn
+          ? 'grid-cols-[7.5rem_10rem_6.25rem_8rem_5.25rem_minmax(0,1fr)_minmax(0,1fr)_auto]'
+          : 'grid-cols-[7.5rem_10rem_6.25rem_8rem_5.25rem_minmax(0,1fr)_minmax(0,1fr)]'
+      )}
+    >
       <Input
-        className="max-w-42 min-w-36"
+        className="w-full min-w-0"
         placeholder="Athlete ID"
         value={row.athleteCode}
         disabled={readOnly}
@@ -44,7 +54,7 @@ export function AthleteRowFields({
       />
 
       <Input
-        className="max-w-64 min-w-36 flex-1"
+        className="w-full min-w-0"
         placeholder="Athlete full name"
         value={row.name}
         disabled={readOnly}
@@ -56,7 +66,7 @@ export function AthleteRowFields({
         disabled={readOnly}
         onValueChange={(v) => onUpdate(index, 'gender', v as 'M' | 'F')}
       >
-        <SelectTrigger className="w-24">
+        <SelectTrigger className="w-full min-w-0">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -73,7 +83,7 @@ export function AthleteRowFields({
         disabled={readOnly}
         onValueChange={(v) => onUpdate(index, 'beltLevel', Number(v))}
       >
-        <SelectTrigger className="w-28">
+        <SelectTrigger className="w-full min-w-0">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -86,7 +96,7 @@ export function AthleteRowFields({
       </Select>
 
       <NumberInput
-        className="w-20"
+        className="w-full min-w-0"
         placeholder="kg"
         min={20}
         max={150}
@@ -100,14 +110,23 @@ export function AthleteRowFields({
       />
 
       <Input
-        className="max-w-48 min-w-36"
+        className="w-full min-w-0"
         placeholder="Affiliation"
         value={row.affiliation}
         disabled={readOnly}
         onChange={(e) => onUpdate(index, 'affiliation', e.target.value)}
       />
 
-      {rowCount > 1 &&
+      <Input
+        className="w-full min-w-0"
+        placeholder="Photo URL"
+        title={row.image}
+        value={row.image}
+        disabled={readOnly}
+        onChange={(e) => onUpdate(index, 'image', e.target.value)}
+      />
+
+      {showRemoveColumn &&
         (readOnly ? (
           <div className="size-8 shrink-0" aria-hidden />
         ) : (
@@ -115,11 +134,12 @@ export function AthleteRowFields({
             variant="ghost"
             size="icon-sm"
             type="button"
+            className="shrink-0"
             onClick={() => onRemove(index)}
           >
             <IconX />
           </Button>
         ))}
-    </>
+    </div>
   );
 }

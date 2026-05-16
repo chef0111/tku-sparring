@@ -25,6 +25,7 @@ import { useTournamentReadOnly } from '@/hooks/use-tournament-read-only';
 import { useSetTournamentStatus } from '@/queries/tournaments';
 import { TournamentStatusPill } from '@/features/dashboard/tournament/list/components/tournament-status-pill';
 import { TournamentActivitySheet } from '@/features/dashboard/tournament/tournament-activity-sheet';
+import { Spinner } from '@/components/ui/spinner';
 
 type ConfirmStatus = 'active' | 'completed';
 
@@ -216,9 +217,14 @@ export function TournamentViewer({
               }}
               disabled={setStatusMutation.isPending}
             >
-              {setStatusMutation.isPending
-                ? 'Saving...'
-                : (transitionAction?.label ?? 'Confirm')}
+              {setStatusMutation.isPending ? (
+                <>
+                  <Spinner className="text-primary-foreground" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                (transitionAction?.label ?? 'Confirm')
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

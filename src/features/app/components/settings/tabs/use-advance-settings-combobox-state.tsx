@@ -98,9 +98,19 @@ export function useAdvanceSettingsComboboxState(args: {
   ]);
 
   useEffect(() => {
-    const matchId = advance.match;
+    const matchId = advance.match?.trim();
+    if (!matchId) {
+      if (advance.redPlayerAvatar != null || advance.bluePlayerAvatar != null) {
+        updateAdvanceForm({
+          redPlayerAvatar: null,
+          bluePlayerAvatar: null,
+        });
+      }
+      return;
+    }
+
     const rows = matchesQuery.data?.matches;
-    if (!matchId || !rows) {
+    if (!rows) {
       return;
     }
     const row = rows.find((m) => m.id === matchId);
@@ -109,9 +119,13 @@ export function useAdvanceSettingsComboboxState(args: {
     }
     const red = row.redAthleteName ?? 'RED';
     const blue = row.blueAthleteName ?? 'BLUE';
+    const redImg = row.redAthleteImage ?? null;
+    const blueImg = row.blueAthleteImage ?? null;
     if (
       advance.redPlayerName === red &&
       advance.bluePlayerName === blue &&
+      advance.redPlayerAvatar === redImg &&
+      advance.bluePlayerAvatar === blueImg &&
       form.getFieldValue('redPlayerName') === red &&
       form.getFieldValue('bluePlayerName') === blue
     ) {
@@ -122,10 +136,14 @@ export function useAdvanceSettingsComboboxState(args: {
     updateAdvanceForm({
       redPlayerName: red,
       bluePlayerName: blue,
+      redPlayerAvatar: redImg,
+      bluePlayerAvatar: blueImg,
     });
   }, [
+    advance.bluePlayerAvatar,
     advance.bluePlayerName,
     advance.match,
+    advance.redPlayerAvatar,
     advance.redPlayerName,
     form,
     matchesQuery.data?.matches,

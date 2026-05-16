@@ -128,7 +128,7 @@ export function BracketSlot({
           )}
           <span
             className={cn(
-              'min-w-0 text-xs',
+              'min-w-0 text-xs select-none!',
               athlete ? 'text-foreground' : 'text-muted-foreground italic',
               isWinner && 'font-semibold text-emerald-600'
             )}
@@ -140,7 +140,7 @@ export function BracketSlot({
 
       <div
         className={cn(
-          'flex shrink-0 items-center pr-2 text-xs font-semibold tabular-nums',
+          'flex shrink-0 items-center pr-2 text-xs font-semibold tabular-nums select-none!',
           isWinner ? 'font-semibold text-emerald-600' : 'text-muted-foreground'
         )}
       >

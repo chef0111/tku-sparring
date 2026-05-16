@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { UserPlus } from 'lucide-react';
-import type { CreateAthleteProfileDTO } from '@/orpc/athlete-profiles/dto';
 import { parseImportFile } from '@/lib/data-table/import';
 import { client } from '@/orpc/client';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -25,6 +24,7 @@ interface AthleteRowValues {
   beltLevel: number | string;
   weight: number | string;
   affiliation: string;
+  image?: string;
 }
 
 interface AthleteImportDialogProps {
@@ -42,10 +42,6 @@ export function AthleteImportDialog({
   const [error, setError] = React.useState<string | null>(null);
   const [isImporting, setIsImporting] = React.useState(false);
   const queryClient = useQueryClient();
-  const createMutation = useMutation({
-    mutationFn: (data: CreateAthleteProfileDTO) =>
-      client.athleteProfile.create(data),
-  });
 
   function resetState() {
     setPreview(null);
@@ -74,24 +70,30 @@ export function AthleteImportDialog({
   async function handleImport() {
     if (!preview) return;
     setIsImporting(true);
-    let successCount = 0;
-    let failCount = 0;
-    for (const row of preview) {
-      try {
-        await createMutation.mutateAsync({
+    const results = await Promise.allSettled(
+      preview.map((row) => {
+        const trimmedImage =
+          typeof row.image === 'string' ? row.image.trim() : '';
+        return client.athleteProfile.create({
           athleteCode: row.athleteCode.trim(),
           name: row.name,
           gender: row.gender?.trim().toUpperCase() === 'F' ? 'F' : 'M',
           beltLevel: Number(row.beltLevel),
           weight: Number(row.weight),
           affiliation: row.affiliation,
+          ...(trimmedImage ? { image: trimmedImage } : {}),
           confirmDuplicate: true,
         });
-        successCount++;
-      } catch {
-        failCount++;
-      }
-    }
+      })
+    );
+    const successCount = results.filter((r) => r.status === 'fulfilled').length;
+    const failCount = results.length - successCount;
+
+    await queryClient.invalidateQueries({ queryKey: ['athleteProfile'] });
+    setIsImporting(false);
+    onOpenChange(false);
+    resetState();
+
     if (failCount > 0) {
       toast.warning(
         `Imported ${successCount} athletes, ${failCount} failed (duplicates or invalid data)`
@@ -99,9 +101,6 @@ export function AthleteImportDialog({
     } else {
       toast.success(`Imported ${successCount} athletes`);
     }
-    queryClient.invalidateQueries({ queryKey: ['athleteProfile'] });
-    onOpenChange(false);
-    resetState();
   }
 
   return (

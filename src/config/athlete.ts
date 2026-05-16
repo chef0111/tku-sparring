@@ -38,8 +38,11 @@ export const TABLE_HEADER_MAP: Record<string, string> = {
   'Belt level': 'beltLevel',
   Weight: 'weight',
   Affiliation: 'affiliation',
+  Image: 'image',
+  'Photo URL': 'image',
 };
 
 export const DEFAULT_SORTING: AthleteProfilesDTO['sorting'] = [
   { id: 'beltLevel', desc: true },
+  { id: 'name', desc: false },
 ];

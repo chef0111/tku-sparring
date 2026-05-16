@@ -3,6 +3,22 @@ import { dataTableConfig } from '@/config/data-table';
 import { filterItemSchema } from '@/lib/data-table/parsers';
 import { flagConfig } from '@/config/flag';
 
+const createProfileImageSchema = z
+  .union([z.url('Photo URL must be a valid URL'), z.literal('')])
+  .optional()
+  .transform((v) => (v === undefined || v === '' ? undefined : v));
+
+const updateProfileImageSchema = z
+  .union([
+    z.string().url('Photo URL must be a valid URL'),
+    z.literal(''),
+    z.null(),
+  ])
+  .optional()
+  .transform((v) =>
+    v === undefined ? undefined : v === '' || v === null ? null : v
+  );
+
 export const CreateAthleteProfileSchema = z.object({
   athleteCode: z.string().min(1, 'Athlete ID is required'),
   name: z.string().min(1, 'Name is required'),
@@ -13,6 +29,7 @@ export const CreateAthleteProfileSchema = z.object({
     .min(20, 'Weight must be at least 20 kg')
     .max(150, 'Weight must be at most 150 kg'),
   affiliation: z.string().min(1, 'Affiliation is required'),
+  image: createProfileImageSchema,
   confirmDuplicate: z.boolean().optional().default(false),
 });
 
@@ -24,6 +41,7 @@ export const UpdateAthleteProfileSchema = z.object({
   beltLevel: z.number().int().min(0).max(10).optional(),
   weight: z.number().min(20).max(150).optional(),
   affiliation: z.string().min(1).optional(),
+  image: updateProfileImageSchema,
 });
 
 export const AthleteProfilesSchema = z.object({
@@ -38,7 +56,6 @@ export const AthleteProfilesSchema = z.object({
     .max(2)
     .optional(),
   affiliation: z.string().optional(),
-  /** Discrete belt levels (OR). From faceted multi-select URL `beltLevel=a,b`. */
   beltLevels: z
     .array(z.number().int().min(0).max(10))
     .min(1)

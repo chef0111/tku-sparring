@@ -196,9 +196,9 @@ export const AdvanceSettings = () => {
                 <PlayerAvatar
                   name={player.playerName}
                   image={
-                    (advance[
-                      player.nameAvatar as keyof typeof advance
-                    ] as string) || ''
+                    (advance[player.nameAvatar as keyof typeof advance] as
+                      | string
+                      | null) ?? ''
                   }
                   className={player.className}
                   fallback={

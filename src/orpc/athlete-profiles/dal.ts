@@ -119,6 +119,7 @@ export class AthleteProfileDAL {
       ({ nameSortKey: _nameSortKey, ...row }) => ({
         ...row,
         athleteCode: row.athleteCode ?? '',
+        image: row.image ?? null,
       })
     );
 
@@ -171,14 +172,25 @@ export class AthleteProfileDAL {
   }
 
   static async update(id: string, data: Omit<UpdateAthleteProfileDTO, 'id'>) {
-    return prisma.athleteProfile.update({
-      where: { id },
-      data: {
-        ...data,
-        ...(data.name !== undefined
-          ? { nameSortKey: getNameSortKey(data.name) }
-          : {}),
-      },
+    return prisma.$transaction(async (tx) => {
+      const profile = await tx.athleteProfile.update({
+        where: { id },
+        data: {
+          ...data,
+          ...(data.name !== undefined
+            ? { nameSortKey: getNameSortKey(data.name) }
+            : {}),
+        },
+      });
+
+      if (data.image !== undefined) {
+        await tx.tournamentAthlete.updateMany({
+          where: { athleteProfileId: id },
+          data: { image: data.image },
+        });
+      }
+
+      return profile;
     });
   }
 

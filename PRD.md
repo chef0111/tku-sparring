@@ -98,6 +98,7 @@ Data / Inputs:
 - `beltLevel` (fixed array, values 0-10)
 - `weight` (kg, 20-150 bounds)
 - `affiliation`
+- `image` (optional HTTPS URL to a profile photo)
 
 UAC:
 

@@ -43,6 +43,7 @@ function useInvalidateAthleteProfiles() {
   const queryClient = useQueryClient();
   return () => {
     queryClient.invalidateQueries({ queryKey: ['athleteProfile'] });
+    queryClient.invalidateQueries({ queryKey: ['tournamentAthlete'] });
   };
 }
 

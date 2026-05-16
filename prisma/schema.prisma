@@ -170,6 +170,7 @@ model AthleteProfile {
   beltLevel   Int
   weight      Float
   affiliation String
+  image       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -196,6 +197,7 @@ model TournamentAthlete {
   beltLevel   Int
   weight      Float
   affiliation String
+  image       String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

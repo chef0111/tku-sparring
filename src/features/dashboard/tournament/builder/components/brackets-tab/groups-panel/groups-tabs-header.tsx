@@ -59,7 +59,7 @@ export function GroupsTabsHeader({
                   register(g.id, el);
                 }}
                 value={g.id}
-                className="shrink-0"
+                className="shrink-0 select-none!"
               >
                 {g.name}
               </TabsTrigger>
