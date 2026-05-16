@@ -62,6 +62,8 @@ export function summarizeTournamentActivity(
       return `Match status set to ${String(p.toStatus ?? '')}${p.clearedScores === true ? ' (scores cleared)' : ''}`;
     case 'match.swap_participants':
       return 'Match participants swapped';
+    case 'match.create_custom':
+      return `Custom match created (${String(p.displayLabel ?? '')})`;
     case 'group.athlete_assigned':
       return `Assigned ${String(p.name ?? 'athlete')} to a group`;
     case 'group.athlete_unassigned':

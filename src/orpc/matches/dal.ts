@@ -9,10 +9,13 @@ import {
   setRound0SlotLock,
   swapRound0Slots,
 } from './round0-slot-editor';
+import { assertCustomMatchDisplayLabelAvailable } from './custom-match-label';
 import type {
   AdminSetMatchStatusDTO,
   AssignSlotDTO,
+  CreateCustomMatchDTO,
   CreateMatchDTO,
+  CustomSlotDTO,
   GenerateBracketDTO,
   SetLockDTO,
   SetWinnerDTO,
@@ -35,6 +38,8 @@ import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { publishMatchInvalidateEvent } from '@/lib/tournament/tournament-sse-bus';
 import { prisma } from '@/lib/db';
 
+const MATCH_CUSTOM_ROUND = 900;
+
 function clearMatchProgressionData() {
   return {
     redTournamentAthleteId: null,
@@ -50,34 +55,54 @@ function clearMatchProgressionData() {
 }
 
 export class MatchDAL {
+  private static coalesceMatchRead<
+    T extends {
+      kind?: string | null;
+      displayLabel?: string | null;
+    },
+  >(m: T): T & { kind: 'bracket' | 'custom'; displayLabel: string | null } {
+    return {
+      ...m,
+      kind: m.kind === 'custom' ? 'custom' : 'bracket',
+      displayLabel: m.displayLabel ?? null,
+    };
+  }
+
   static async findByGroupId(groupId: string) {
-    return prisma.match.findMany({
+    const rows = await prisma.match.findMany({
       where: { groupId },
       orderBy: [{ round: 'asc' }, { matchIndex: 'asc' }],
     });
+    return rows.map((m) => MatchDAL.coalesceMatchRead(m));
   }
 
   static async findByTournamentId(tournamentId: string) {
-    return prisma.match.findMany({
+    const rows = await prisma.match.findMany({
       where: { tournamentId },
       orderBy: [{ round: 'asc' }, { matchIndex: 'asc' }],
     });
+    return rows.map((m) => MatchDAL.coalesceMatchRead(m));
   }
 
   static async findById(id: string) {
-    return prisma.match.findUnique({ where: { id } });
+    const m = await prisma.match.findUnique({ where: { id } });
+    if (!m) return null;
+    return MatchDAL.coalesceMatchRead(m);
   }
 
   static async create(data: CreateMatchDTO) {
-    return prisma.match.create({ data });
+    const m = await prisma.match.create({ data });
+    return MatchDAL.coalesceMatchRead(m);
   }
 
   static async update(id: string, data: Omit<UpdateMatchDTO, 'id'>) {
-    return prisma.match.update({ where: { id }, data });
+    const m = await prisma.match.update({ where: { id }, data });
+    return MatchDAL.coalesceMatchRead(m);
   }
 
   static async deleteMatch(id: string) {
-    return prisma.match.delete({ where: { id } });
+    const m = await prisma.match.delete({ where: { id } });
+    return MatchDAL.coalesceMatchRead(m);
   }
 
   /** Uniform random permutation (Math.random). */
@@ -105,7 +130,7 @@ export class MatchDAL {
     }
 
     const existing = await prisma.match.count({
-      where: { groupId: input.groupId },
+      where: { groupId: input.groupId, kind: 'bracket' },
     });
     if (existing > 0) {
       throw new Error(
@@ -162,7 +187,7 @@ export class MatchDAL {
     }
 
     await prisma.match.updateMany({
-      where: { groupId },
+      where: { groupId, kind: 'bracket' },
       data: {
         redTournamentAthleteId: null,
         blueTournamentAthleteId: null,
@@ -201,7 +226,7 @@ export class MatchDAL {
     }
 
     const allMatches = await prisma.match.findMany({
-      where: { groupId },
+      where: { groupId, kind: 'bracket' },
       orderBy: [{ round: 'asc' }, { matchIndex: 'asc' }],
     });
     if (allMatches.length === 0) {
@@ -303,7 +328,9 @@ export class MatchDAL {
       throw new Error('Regeneration only allowed in Draft status');
     }
 
-    await prisma.match.deleteMany({ where: { groupId } });
+    await prisma.match.deleteMany({
+      where: { groupId, kind: 'bracket' },
+    });
 
     await recordTournamentActivity({
       tournamentId: group.tournamentId,
@@ -377,7 +404,7 @@ export class MatchDAL {
 
     publishMatchInvalidateEvent(match.tournamentId);
 
-    return updated;
+    return MatchDAL.coalesceMatchRead(updated);
   }
 
   static async setWinner(input: SetWinnerDTO, adminId: string) {
@@ -417,7 +444,7 @@ export class MatchDAL {
 
     publishMatchInvalidateEvent(match.tournamentId);
 
-    return updated;
+    return MatchDAL.coalesceMatchRead(updated);
   }
 
   static async swapParticipants(input: SwapParticipantsDTO, adminId: string) {
@@ -471,7 +498,7 @@ export class MatchDAL {
         tx
       );
 
-      return updated;
+      return MatchDAL.coalesceMatchRead(updated);
     });
   }
 
@@ -515,6 +542,163 @@ export class MatchDAL {
 
     publishMatchInvalidateEvent(match.tournamentId);
 
-    return updated;
+    return MatchDAL.coalesceMatchRead(updated);
+  }
+
+  private static async resolveCustomSlot(
+    groupId: string,
+    _tournamentId: string,
+    slot: CustomSlotDTO
+  ): Promise<{
+    tournamentAthleteId: string;
+    athleteProfileId: string | null;
+  }> {
+    if (slot.mode === 'direct') {
+      const ta = await prisma.tournamentAthlete.findFirst({
+        where: { id: slot.tournamentAthleteId, groupId },
+      });
+      if (!ta) throw new Error('Tournament athlete not found in this group');
+      return {
+        tournamentAthleteId: ta.id,
+        athleteProfileId: ta.athleteProfileId,
+      };
+    }
+
+    const feeder = await prisma.match.findFirst({
+      where: { id: slot.feederMatchId, groupId },
+    });
+    if (!feeder) throw new Error('Feeder match not found in this group');
+    if (feeder.kind === 'custom') {
+      throw new Error(
+        'Bracket matches only — custom matches cannot be feeders'
+      );
+    }
+    if (feeder.status !== 'complete') {
+      throw new Error('Feeder match must be complete');
+    }
+    if (!feeder.winnerTournamentAthleteId) {
+      throw new Error('Feeder match has no winner');
+    }
+
+    if (slot.mode === 'winner') {
+      if (
+        feeder.redTournamentAthleteId == null ||
+        feeder.blueTournamentAthleteId == null
+      ) {
+        throw new Error(
+          'Winner slot requires both athletes present in the feeder match'
+        );
+      }
+      const ta = await prisma.tournamentAthlete.findUnique({
+        where: { id: feeder.winnerTournamentAthleteId },
+        select: { athleteProfileId: true },
+      });
+      if (!ta) throw new Error('Winner tournament athlete missing');
+      return {
+        tournamentAthleteId: feeder.winnerTournamentAthleteId,
+        athleteProfileId: ta.athleteProfileId,
+      };
+    }
+
+    if (
+      feeder.redTournamentAthleteId == null ||
+      feeder.blueTournamentAthleteId == null
+    ) {
+      throw new Error('Loser slot requires both athletes in the feeder match');
+    }
+    const w = feeder.winnerTournamentAthleteId;
+    let loserTa: string | null = null;
+    if (w === feeder.redTournamentAthleteId) {
+      loserTa = feeder.blueTournamentAthleteId;
+    } else if (w === feeder.blueTournamentAthleteId) {
+      loserTa = feeder.redTournamentAthleteId;
+    } else {
+      throw new Error('Winner does not match a feeder corner');
+    }
+    if (!loserTa) throw new Error('Could not resolve loser');
+
+    const ta = await prisma.tournamentAthlete.findUnique({
+      where: { id: loserTa },
+      select: { athleteProfileId: true },
+    });
+    if (!ta) throw new Error('Loser tournament athlete missing');
+
+    return {
+      tournamentAthleteId: loserTa,
+      athleteProfileId: ta.athleteProfileId,
+    };
+  }
+
+  static async createCustom(input: CreateCustomMatchDTO, adminId: string) {
+    const group = await prisma.group.findUnique({
+      where: { id: input.groupId },
+      include: { tournament: { select: { id: true, status: true } } },
+    });
+    if (!group) throw new Error('Group not found');
+    if (group.tournament.status === 'completed') {
+      throw new Error('Cannot add matches to a completed tournament');
+    }
+
+    const displayLabel = input.displayLabel.trim();
+    await assertCustomMatchDisplayLabelAvailable({
+      tournamentId: group.tournamentId,
+      groupId: input.groupId,
+      displayLabel,
+    });
+
+    const red = await MatchDAL.resolveCustomSlot(
+      input.groupId,
+      group.tournamentId,
+      input.red
+    );
+    const blue = await MatchDAL.resolveCustomSlot(
+      input.groupId,
+      group.tournamentId,
+      input.blue
+    );
+
+    if (red.tournamentAthleteId === blue.tournamentAthleteId) {
+      throw new Error('Red and blue cannot be the same athlete');
+    }
+
+    const idxAgg = await prisma.match.aggregate({
+      where: { groupId: input.groupId, round: MATCH_CUSTOM_ROUND },
+      _max: { matchIndex: true },
+    });
+    const nextMatchIndex = (idxAgg._max.matchIndex ?? -1) + 1;
+
+    const row = await prisma.match.create({
+      data: {
+        kind: 'custom',
+        displayLabel,
+        groupId: input.groupId,
+        tournamentId: group.tournamentId,
+        round: MATCH_CUSTOM_ROUND,
+        matchIndex: nextMatchIndex,
+        status: 'pending',
+        bestOf: input.bestOf ?? 3,
+        redTournamentAthleteId: red.tournamentAthleteId,
+        blueTournamentAthleteId: blue.tournamentAthleteId,
+        redAthleteId: red.athleteProfileId,
+        blueAthleteId: blue.athleteProfileId,
+        redWins: 0,
+        blueWins: 0,
+        redLocked: false,
+        blueLocked: false,
+      },
+    });
+
+    await recordTournamentActivity({
+      tournamentId: group.tournamentId,
+      adminId,
+      eventType: 'match.create_custom',
+      entityType: 'match',
+      entityId: row.id,
+      payload: { groupId: input.groupId, displayLabel },
+    });
+
+    publishMatchInvalidateEvent(group.tournamentId);
+
+    return MatchDAL.coalesceMatchRead(row);
   }
 }

@@ -15,6 +15,7 @@ function createEmptyMatch(
   matchIndex: number
 ): CreateMatchDTO {
   return {
+    kind: 'bracket',
     round,
     matchIndex,
     status: 'pending',

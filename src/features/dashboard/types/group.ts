@@ -31,8 +31,12 @@ export interface TournamentAthleteData {
   athleteProfile: { id: string; athleteCode: string | null };
 }
 
+export type MatchKind = 'bracket' | 'custom';
+
 export interface MatchData {
   id: string;
+  kind: MatchKind;
+  displayLabel: string | null;
   round: number;
   matchIndex: number;
   status: MatchStatus;

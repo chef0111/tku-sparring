@@ -20,6 +20,10 @@ _Avoid_: Court, mat
 A single contest between two athletes within a group bracket.
 _Avoid_: Game, bout
 
+**Custom match**:
+A **Match** in a **Group** with `kind = custom`: same scoring, claims, and Advance Settings listing rules as a bracket match, but it **does not** feed winners into the single-elimination tree. Uses an admin-chosen **display label** unique within the tournament (and must not collide with arena `Match {n}` labels on that group’s arena). Stored outside the bracket canvas layout (round band reserved in data).
+_Avoid_: Friendly, scrimmage (too vague)
+
 **Match transition**:
 A rules-only change from one **Match** state to another, including score edits, admin status changes, winner overrides, and whether bracket advancement must be applied or cleared.
 _Avoid_: Match patch, score helper
@@ -58,7 +62,7 @@ _Avoid_: Setup wizard
 ## Relationships
 
 - A **Tournament** contains many **Groups**.
-- A **Group** contains many **Matches**.
+- A **Group** contains many **Matches** (bracket shell rows and optional **Custom matches**).
 - A **TournamentAthlete** belongs to exactly one **Tournament** and one **AthleteProfile**.
 - At most one active **Arena match claim** row exists per **Match** (non-expired); it references `matchId`, `groupId`, `tournamentId`, `deviceId`, `userId`.
 - There is **no** group-level control lease or takeover queue in the current product model.

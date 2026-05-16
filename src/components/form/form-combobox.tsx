@@ -21,7 +21,6 @@ import {
 } from '@/components/ui/popover';
 
 export interface ComboboxData {
-  /** Closed trigger text when `label` is a React node (falls back to string `label`). */
   triggerLabel?: string;
   label?: React.ReactNode;
   value?: string;

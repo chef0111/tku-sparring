@@ -6,6 +6,8 @@ import type { MatchData } from '@/features/dashboard/types';
 function baseMatch(over: Partial<MatchData>): MatchData {
   return {
     id: over.id ?? 'm1',
+    kind: over.kind ?? 'bracket',
+    displayLabel: over.displayLabel ?? null,
     round: over.round ?? 0,
     matchIndex: over.matchIndex ?? 0,
     status: over.status ?? 'pending',
@@ -110,5 +112,49 @@ describe('buildBracketActionQueue', () => {
     const q = buildBracketActionQueue(matches);
     expect(q).toHaveLength(1);
     expect(q[0]!.reasons).toEqual(['No opponent']);
+  });
+
+  it('lists custom matches first and tags them when actionable', () => {
+    const matches = [
+      baseMatch({
+        id: 'bracket',
+        kind: 'bracket',
+        round: 0,
+        matchIndex: 0,
+        redTournamentAthleteId: 'r',
+        blueTournamentAthleteId: null,
+      }),
+      baseMatch({
+        id: 'custom',
+        kind: 'custom',
+        round: 900,
+        matchIndex: 0,
+        displayLabel: 'Bronze',
+        redTournamentAthleteId: 'r2',
+        blueTournamentAthleteId: 'b2',
+        winnerTournamentAthleteId: null,
+        status: 'pending',
+      }),
+    ];
+    const q = buildBracketActionQueue(matches);
+    expect(q.map((x) => x.match.id)).toEqual(['custom', 'bracket']);
+    expect(q[0]!.reasons[0]).toBe('Custom match');
+    expect(q[0]!.reasons).toContain('No winner recorded');
+  });
+
+  it('excludes finished custom matches', () => {
+    expect(
+      buildBracketActionQueue([
+        baseMatch({
+          id: 'c',
+          kind: 'custom',
+          round: 900,
+          redTournamentAthleteId: 'r',
+          blueTournamentAthleteId: 'b',
+          winnerTournamentAthleteId: 'w',
+          status: 'complete',
+        }),
+      ])
+    ).toHaveLength(0);
   });
 });

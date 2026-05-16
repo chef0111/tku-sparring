@@ -29,10 +29,12 @@ export function BracketActionQueue() {
 
   const matchList = matches as Array<MatchData>;
 
-  const maxRound = React.useMemo(
-    () => Math.max(...matchList.map((m) => m.round)),
-    [matchList]
-  );
+  const maxRound = React.useMemo(() => {
+    const bracketRounds = matchList
+      .filter((m) => m.kind !== 'custom')
+      .map((m) => m.round);
+    return bracketRounds.length === 0 ? 0 : Math.max(...bracketRounds);
+  }, [matchList]);
   const queue = React.useMemo(
     () => buildBracketActionQueue(matchList),
     [matchList]
@@ -149,7 +151,11 @@ function QueueRow({
       <Card
         role="button"
         tabIndex={0}
-        aria-label={`${roundLabel} — Match ${match.matchIndex + 1}`}
+        aria-label={
+          match.kind === 'custom'
+            ? `Custom — ${match.displayLabel?.trim() || 'match'}`
+            : `${roundLabel} — Match ${match.matchIndex + 1}`
+        }
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -172,11 +178,13 @@ function QueueRow({
         >
           <CardHeader className="gap-1 p-0">
             <CardTitle className="truncate text-sm font-semibold">
-              {formatMatchHeaderLine(matchLabel.get(match.id), {
-                bothSlotsOpen:
-                  match.redTournamentAthleteId == null &&
-                  match.blueTournamentAthleteId == null,
-              })}
+              {match.kind === 'custom'
+                ? match.displayLabel?.trim() || 'Custom match'
+                : formatMatchHeaderLine(matchLabel.get(match.id), {
+                    bothSlotsOpen:
+                      match.redTournamentAthleteId == null &&
+                      match.blueTournamentAthleteId == null,
+                  })}
             </CardTitle>
           </CardHeader>
           <p className="text-muted-foreground relative truncate text-xs">

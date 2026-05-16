@@ -108,8 +108,12 @@ export function useBracketsTabQueries({
   const isPoolLoading = matchesQuery.isPending || athletesQuery.isPending;
   const athleteCount = selectedGroup?._count.tournamentAthletes ?? 0;
   const toolbarDisabled = matches.length === 0;
-  const maxBracketRound =
-    matches.length > 0 ? Math.max(...matches.map((m) => m.round)) : 0;
+  const maxBracketRound = React.useMemo(() => {
+    const bracketOnly = matches.filter((m) => m.kind !== 'custom');
+    return bracketOnly.length > 0
+      ? Math.max(...bracketOnly.map((m) => m.round))
+      : 0;
+  }, [matches]);
 
   const isDraft = tournamentStatus === 'draft';
   const showArenaOrderEntry = React.useMemo(

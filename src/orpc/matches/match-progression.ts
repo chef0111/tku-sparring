@@ -10,6 +10,7 @@ export async function advanceWinner(
 ) {
   const match = await prisma.match.findUnique({ where: { id: matchId } });
   if (!match) return;
+  if (match.kind === 'custom') return;
 
   const successor = getSuccessorSlot({
     round: match.round,
@@ -48,7 +49,10 @@ export async function clearWinnerAdvancement(match: {
   round: number;
   matchIndex: number;
   winnerTournamentAthleteId: string | null;
+  kind?: string;
 }) {
+  if (match.kind === 'custom') return;
+
   const wta = match.winnerTournamentAthleteId;
   if (!wta) return;
 

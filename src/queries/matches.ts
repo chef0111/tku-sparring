@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import type {
   AdminSetMatchStatusDTO,
   AssignSlotDTO,
+  CreateCustomMatchDTO,
   GenerateBracketDTO,
   SetLockDTO,
   SetWinnerDTO,
@@ -96,6 +97,21 @@ export function useResetBracket(options?: { onSuccess?: () => void }) {
       invalidate();
       options?.onSuccess?.();
     },
+  });
+}
+
+export function useCreateCustomMatch(options?: { onSuccess?: () => void }) {
+  const invalidate = useInvalidateMatches();
+
+  return useMutation({
+    mutationFn: (data: CreateCustomMatchDTO) => client.match.createCustom(data),
+    onSuccess: () => {
+      invalidate();
+      toast.success('Custom match created');
+      options?.onSuccess?.();
+    },
+    onError: (err) =>
+      toast.error(err instanceof Error ? err.message : 'Request failed'),
   });
 }
 

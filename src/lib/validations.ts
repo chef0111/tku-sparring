@@ -102,3 +102,72 @@ export const MatchScoreSchema = z.object({
   redWins: z.number().int().min(0).max(2),
   blueWins: z.number().int().min(0).max(2),
 });
+
+export const CustomMatchAthleteSchema = z.enum(['direct', 'winner', 'loser']);
+
+export type CustomMatchAthlete = z.infer<typeof CustomMatchAthleteSchema>;
+
+export function customMatchCornersUseSameSource(data: {
+  redAthlete: CustomMatchAthlete;
+  blueAthlete: CustomMatchAthlete;
+  redSelectionId: string;
+  blueSelectionId: string;
+}): boolean {
+  const r = data.redSelectionId.trim();
+  const b = data.blueSelectionId.trim();
+  if (!r || r !== b) return false;
+  if (data.redAthlete === 'direct' && data.blueAthlete === 'direct')
+    return true;
+  if (data.redAthlete === 'direct' || data.blueAthlete === 'direct')
+    return false;
+  return data.redAthlete === data.blueAthlete;
+}
+
+export const CreateCustomMatchFormSchema = z
+  .object({
+    displayLabel: z
+      .string()
+      .trim()
+      .min(1, { message: 'Match label is required.' })
+      .max(120, { message: 'Match label cannot exceed 120 characters.' }),
+    redAthlete: CustomMatchAthleteSchema,
+    redSelectionId: z.string(),
+    blueAthlete: CustomMatchAthleteSchema,
+    blueSelectionId: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.redSelectionId.trim()) {
+      ctx.addIssue({
+        code: 'custom',
+        message:
+          data.redAthlete === 'direct'
+            ? 'Select a red athlete.'
+            : 'Select a feeder match for red.',
+        path: ['redSelectionId'],
+      });
+    }
+    if (!data.blueSelectionId.trim()) {
+      ctx.addIssue({
+        code: 'custom',
+        message:
+          data.blueAthlete === 'direct'
+            ? 'Select a blue athlete.'
+            : 'Select a feeder match for blue.',
+        path: ['blueSelectionId'],
+      });
+    }
+    if (customMatchCornersUseSameSource(data)) {
+      ctx.addIssue({
+        code: 'custom',
+        message:
+          data.redAthlete === 'direct' && data.blueAthlete === 'direct'
+            ? 'Red and blue must be different athletes.'
+            : 'Red and blue cannot use the same match source.',
+        path: ['blueSelectionId'],
+      });
+    }
+  });
+
+export type CreateCustomMatchFormValues = z.infer<
+  typeof CreateCustomMatchFormSchema
+>;

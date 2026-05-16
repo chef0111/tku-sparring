@@ -14,6 +14,7 @@ type FormSelectSharedProps = FormControlProps & {
   children: ReactNode;
   placeholder?: string;
   className?: string;
+  disabled?: boolean;
 };
 
 export function FormSelect({
@@ -21,6 +22,7 @@ export function FormSelect({
   descPosition,
   placeholder,
   className,
+  disabled,
   ...props
 }: FormSelectSharedProps) {
   const field = useFieldContext<string>();
@@ -29,6 +31,7 @@ export function FormSelect({
   return (
     <FormBase {...props} descPosition={descPosition}>
       <Select
+        disabled={disabled}
         onValueChange={(e) => field.handleChange(e ?? '')}
         value={field.state.value}
       >
@@ -37,6 +40,7 @@ export function FormSelect({
           id={field.name}
           onBlur={field.handleBlur}
           className={className}
+          disabled={disabled}
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>

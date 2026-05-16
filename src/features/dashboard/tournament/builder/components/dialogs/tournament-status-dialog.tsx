@@ -68,7 +68,7 @@ export function TournamentStatusDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="gap-4">
         <DialogHeader>
           <DialogTitle className="text-lg">
             Update tournament status?
@@ -83,7 +83,7 @@ export function TournamentStatusDialog({
             <span className="font-semibold">{STATUS_LABEL[toStatus]}</span>
           </DialogDescription>
         </DialogHeader>
-        <div className="text-muted-foreground">
+        <div className="text-muted-foreground mb-2">
           <ul className="flex flex-col gap-1">
             {bullets.map((line, index) => (
               <span key={index} className="italic">

@@ -15,8 +15,14 @@ vi.mock('@/lib/db', () => ({
       findFirst: vi.fn(),
       update: vi.fn(),
       updateMany: vi.fn(),
+      deleteMany: vi.fn(),
+      aggregate: vi.fn(),
     },
-    tournamentAthlete: { findMany: vi.fn(), findUnique: vi.fn() },
+    tournamentAthlete: {
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      findFirst: vi.fn(),
+    },
     $transaction: vi.fn(),
   },
 }));
@@ -27,6 +33,10 @@ vi.mock('@/orpc/activity/dal', () => ({
 
 vi.mock('@/lib/tournament/tournament-sse-bus', () => ({
   publishMatchInvalidateEvent: vi.fn(),
+}));
+
+vi.mock('@/orpc/matches/custom-match-label', () => ({
+  assertCustomMatchDisplayLabelAvailable: vi.fn().mockResolvedValue(undefined),
 }));
 
 const draftGroup = {
@@ -71,6 +81,10 @@ describe('generateBracket', () => {
     vi.mocked(prisma.match.findMany).mockResolvedValue([]);
 
     await MatchDAL.generateBracket({ groupId: 'group-1' }, 'admin-1');
+
+    expect(prisma.match.count).toHaveBeenCalledWith({
+      where: { groupId: 'group-1', kind: 'bracket' },
+    });
 
     const creates = vi
       .mocked(prisma.match.create)
@@ -166,7 +180,7 @@ describe('resetBracket', () => {
     await MatchDAL.resetBracket('group-1', 'admin-1');
 
     expect(prisma.match.updateMany).toHaveBeenCalledWith({
-      where: { groupId: 'group-1' },
+      where: { groupId: 'group-1', kind: 'bracket' },
       data: expect.objectContaining({
         redTournamentAthleteId: null,
         blueTournamentAthleteId: null,
@@ -534,5 +548,91 @@ describe('MatchDAL.adminSetMatchStatus', () => {
       where: { id: 'm1' },
       data: { status: 'complete' },
     });
+  });
+});
+
+describe('regenerateBracket', () => {
+  it('deletes only bracket matches for the group', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue(draftGroup as never);
+    vi.mocked(prisma.match.deleteMany).mockResolvedValue({ count: 3 } as never);
+    vi.mocked(prisma.match.count).mockResolvedValue(0);
+    vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue([
+      { id: 'ta1', athleteProfileId: 'ap1', beltLevel: 3, weight: 60 },
+      { id: 'ta2', athleteProfileId: 'ap2', beltLevel: 3, weight: 62 },
+    ] as never);
+    vi.mocked(prisma.match.create).mockImplementation((args) => {
+      const data = args.data as { round: number; matchIndex: number };
+      return Promise.resolve({
+        id: `m-${data.round}-${data.matchIndex}`,
+        ...data,
+      }) as never;
+    });
+    vi.mocked(prisma.match.findMany).mockResolvedValue([]);
+
+    await MatchDAL.regenerateBracket('group-1', 'admin-1');
+
+    expect(prisma.match.deleteMany).toHaveBeenCalledWith({
+      where: { groupId: 'group-1', kind: 'bracket' },
+    });
+  });
+});
+
+describe('createCustom', () => {
+  it('creates custom match with direct athletes and notifies realtime', async () => {
+    const { publishMatchInvalidateEvent } =
+      await import('@/lib/tournament/tournament-sse-bus');
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      id: 'group-1',
+      tournamentId: 't-1',
+      tournament: { id: 't-1', status: 'active' },
+    } as never);
+
+    vi.mocked(prisma.tournamentAthlete.findFirst)
+      .mockResolvedValueOnce({
+        id: 'ta-red',
+        athleteProfileId: 'ap-r',
+        groupId: 'group-1',
+      } as never)
+      .mockResolvedValueOnce({
+        id: 'ta-blue',
+        athleteProfileId: 'ap-b',
+        groupId: 'group-1',
+      } as never);
+
+    vi.mocked(prisma.match.aggregate).mockResolvedValue({
+      _max: { matchIndex: null },
+    } as never);
+    vi.mocked(prisma.match.create).mockResolvedValue({
+      id: 'custom-1',
+      kind: 'custom',
+      displayLabel: 'Exhibition',
+      groupId: 'group-1',
+      tournamentId: 't-1',
+      round: 900,
+      matchIndex: 0,
+    } as never);
+
+    const row = await MatchDAL.createCustom(
+      {
+        groupId: 'group-1',
+        displayLabel: 'Exhibition',
+        red: { mode: 'direct', tournamentAthleteId: 'ta-red' },
+        blue: { mode: 'direct', tournamentAthleteId: 'ta-blue' },
+      },
+      'admin-1'
+    );
+
+    expect(row.kind).toBe('custom');
+    expect(prisma.match.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          kind: 'custom',
+          displayLabel: 'Exhibition',
+          redTournamentAthleteId: 'ta-red',
+          blueTournamentAthleteId: 'ta-blue',
+        }),
+      })
+    );
+    expect(publishMatchInvalidateEvent).toHaveBeenCalledWith('t-1');
   });
 });

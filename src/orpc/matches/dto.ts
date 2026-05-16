@@ -2,8 +2,12 @@ import { z } from 'zod';
 
 export const MatchStatusSchema = z.enum(['pending', 'active', 'complete']);
 
+export const MatchKindSchema = z.enum(['bracket', 'custom']);
+
 export const MatchSchema = z.object({
   id: z.string(),
+  kind: MatchKindSchema,
+  displayLabel: z.string().nullable(),
   round: z.number().int(),
   matchIndex: z.number().int(),
   status: MatchStatusSchema,
@@ -25,6 +29,8 @@ export const MatchSchema = z.object({
 });
 
 export const CreateMatchSchema = z.object({
+  kind: MatchKindSchema.default('bracket'),
+  displayLabel: z.string().nullable().optional(),
   round: z.number().int().default(0),
   matchIndex: z.number().int().default(0),
   status: MatchStatusSchema.default('pending'),
@@ -41,6 +47,8 @@ export const CreateMatchSchema = z.object({
 
 export const UpdateMatchSchema = z.object({
   id: z.string(),
+  kind: MatchKindSchema.optional(),
+  displayLabel: z.string().nullable().optional(),
   status: MatchStatusSchema.optional(),
   redWins: z.number().int().optional(),
   blueWins: z.number().int().optional(),
@@ -112,6 +120,23 @@ export const SwapSlotsSchema = z.object({
   sideB: z.enum(['red', 'blue']),
 });
 
+export const CustomSlotSchema = z.discriminatedUnion('mode', [
+  z.object({
+    mode: z.literal('direct'),
+    tournamentAthleteId: z.string(),
+  }),
+  z.object({ mode: z.literal('winner'), feederMatchId: z.string() }),
+  z.object({ mode: z.literal('loser'), feederMatchId: z.string() }),
+]);
+
+export const CreateCustomMatchSchema = z.object({
+  groupId: z.string(),
+  displayLabel: z.string().min(1).max(120),
+  red: CustomSlotSchema,
+  blue: CustomSlotSchema,
+  bestOf: z.number().int().min(1).max(5).optional(),
+});
+
 export type MatchStatusDTO = z.infer<typeof MatchStatusSchema>;
 export type MatchDTO = z.infer<typeof MatchSchema>;
 export type CreateMatchDTO = z.infer<typeof CreateMatchSchema>;
@@ -127,3 +152,5 @@ export type ResetBracketDTO = z.infer<typeof ResetBracketSchema>;
 export type AdminSetMatchStatusDTO = z.infer<typeof AdminSetMatchStatusSchema>;
 export type AssignSlotDTO = z.infer<typeof AssignSlotSchema>;
 export type SwapSlotsDTO = z.infer<typeof SwapSlotsSchema>;
+export type CustomSlotDTO = z.infer<typeof CustomSlotSchema>;
+export type CreateCustomMatchDTO = z.infer<typeof CreateCustomMatchSchema>;
