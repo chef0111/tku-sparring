@@ -40,7 +40,6 @@ export interface MatchData {
   round: number;
   matchIndex: number;
   status: MatchStatus;
-  bestOf: number;
   redAthleteId: string | null;
   blueAthleteId: string | null;
   redTournamentAthleteId: string | null;

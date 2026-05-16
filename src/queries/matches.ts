@@ -38,6 +38,26 @@ export function useTournamentMatches(tournamentId: string) {
   });
 }
 
+export function useMatchGet(
+  matchId: string | null,
+  options?: { enabled?: boolean }
+) {
+  const enabledOpt = options?.enabled ?? true;
+  const idOk = Boolean(matchId && /^[a-f\d]{24}$/i.test(matchId));
+  return useQuery({
+    queryKey: ['match', 'get', matchId] as const,
+    queryFn: ({ queryKey }) => {
+      const id = queryKey[2];
+      if (typeof id !== 'string' || !/^[\da-f]{24}$/i.test(id)) {
+        throw new Error('match.get: invalid id in queryKey');
+      }
+      return client.match.get({ id });
+    },
+    enabled: enabledOpt && idOk,
+    staleTime: 20_000,
+  });
+}
+
 function useInvalidateMatches() {
   const queryClient = useQueryClient();
   return () => {

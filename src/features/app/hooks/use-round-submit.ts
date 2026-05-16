@@ -10,19 +10,41 @@ export function useRoundSubmit() {
   const { formData } = useSettings();
   const advanceMatch = formData.advance.match;
 
-  const { redWon, blueWon } = useMatchStore(
-    useShallow((s) => ({ redWon: s.redWon, blueWon: s.blueWon }))
+  const { redWon, blueWon, hydrationGeneration } = useMatchStore(
+    useShallow((s) => ({
+      redWon: s.redWon,
+      blueWon: s.blueWon,
+      hydrationGeneration: s.hydrationGeneration,
+    }))
   );
 
   const prevRed = React.useRef(redWon);
   const prevBlue = React.useRef(blueWon);
   const hydrated = React.useRef(false);
+  const prevAdvanceMatch = React.useRef<string | null>(advanceMatch);
+  const prevHydrationGen = React.useRef(hydrationGeneration);
 
   React.useEffect(() => {
     if (!advanceMatch) {
       prevRed.current = redWon;
       prevBlue.current = blueWon;
       hydrated.current = false;
+      prevAdvanceMatch.current = null;
+      return;
+    }
+
+    if (advanceMatch !== prevAdvanceMatch.current) {
+      prevAdvanceMatch.current = advanceMatch;
+      prevRed.current = redWon;
+      prevBlue.current = blueWon;
+      hydrated.current = false;
+    }
+
+    if (hydrationGeneration !== prevHydrationGen.current) {
+      prevHydrationGen.current = hydrationGeneration;
+      prevRed.current = redWon;
+      prevBlue.current = blueWon;
+      hydrated.current = true;
       return;
     }
 
@@ -49,5 +71,5 @@ export function useRoundSubmit() {
 
     prevRed.current = redWon;
     prevBlue.current = blueWon;
-  }, [advanceMatch, blueWon, mutateAsync, redWon]);
+  }, [advanceMatch, blueWon, hydrationGeneration, mutateAsync, redWon]);
 }

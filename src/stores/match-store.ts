@@ -1,5 +1,10 @@
 import { create } from 'zustand';
 import type { PlayerData } from './player-store';
+import {
+  BO3_MAX_ROUNDS,
+  BO3_WINS_NEEDED,
+  deriveArenaCurrentRound,
+} from '@/lib/tournament/bo3';
 
 interface MatchState {
   matchId: string;
@@ -11,6 +16,8 @@ interface MatchState {
   blueWon: number;
   matchWinner: Player | null;
   isMatchOver: boolean;
+  /** Incremented when server-driven score hydration runs (arena reload sync). */
+  hydrationGeneration: number;
 }
 
 interface MatchActions {
@@ -23,6 +30,10 @@ interface MatchActions {
   setMatchOver: (winner: Player) => void;
   closeMatchResult: () => void;
   setMaxRounds: (rounds: number) => void;
+  hydrateFromServerScores: (input: {
+    redWins: number;
+    blueWins: number;
+  }) => void;
 }
 
 type MatchStore = MatchState & MatchActions;
@@ -31,12 +42,13 @@ export const useMatchStore = create<MatchStore>()((set, get) => ({
   matchId: 'Match 001',
   matchLabel: 'MATCH 001',
   currentRound: 1,
-  maxRounds: 3,
+  maxRounds: BO3_MAX_ROUNDS,
   roundWinners: [],
   redWon: 0,
   blueWon: 0,
   matchWinner: null,
   isMatchOver: false,
+  hydrationGeneration: 0,
 
   setMatchDisplay: ({ id, label }) => {
     set({ matchId: id, matchLabel: label });
@@ -99,6 +111,7 @@ export const useMatchStore = create<MatchStore>()((set, get) => ({
   resetMatch: () => {
     set({
       currentRound: 1,
+      maxRounds: BO3_MAX_ROUNDS,
       roundWinners: [],
       redWon: 0,
       blueWon: 0,
@@ -127,5 +140,25 @@ export const useMatchStore = create<MatchStore>()((set, get) => ({
 
   setMaxRounds: (rounds) => {
     set({ maxRounds: rounds });
+  },
+
+  hydrateFromServerScores: ({ redWins, blueWins }) => {
+    const isOver = redWins >= BO3_WINS_NEEDED || blueWins >= BO3_WINS_NEEDED;
+    const matchWinner: Player | null = isOver
+      ? redWins >= BO3_WINS_NEEDED
+        ? 'red'
+        : 'blue'
+      : null;
+    const placeholders: Array<Player | null> = [null, null, null];
+    set((state) => ({
+      maxRounds: BO3_MAX_ROUNDS,
+      redWon: redWins,
+      blueWon: blueWins,
+      currentRound: deriveArenaCurrentRound(redWins, blueWins),
+      roundWinners: placeholders,
+      isMatchOver: isOver,
+      matchWinner,
+      hydrationGeneration: state.hydrationGeneration + 1,
+    }));
   },
 }));

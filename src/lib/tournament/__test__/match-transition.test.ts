@@ -8,7 +8,6 @@ import {
 
 const baseMatch = {
   status: 'pending',
-  bestOf: 3,
   redWins: 0,
   blueWins: 0,
   redAthleteId: 'ap-red',

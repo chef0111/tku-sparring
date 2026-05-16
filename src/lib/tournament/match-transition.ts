@@ -1,5 +1,6 @@
 import type { MatchStatusDTO } from '@/orpc/matches/dto';
 import { MatchStatusSchema } from '@/orpc/matches/dto';
+import { BO3_WINS_NEEDED } from '@/lib/tournament/bo3';
 
 export type MatchTransitionData = {
   redWins?: number;
@@ -11,7 +12,6 @@ export type MatchTransitionData = {
 
 export type ScoreTransitionMatch = {
   status: string;
-  bestOf: number;
   redWins: number;
   blueWins: number;
   redAthleteId: string | null;
@@ -55,7 +55,7 @@ export function getScoreTransition(input: {
   clearAdvancement: boolean;
   advanceWinnerTournamentAthleteId: string | null;
 } {
-  const winsNeeded = Math.ceil(input.match.bestOf / 2);
+  const winsNeeded = BO3_WINS_NEEDED;
   const hadCompleted =
     input.match.status === 'complete' ||
     input.match.redWins >= winsNeeded ||

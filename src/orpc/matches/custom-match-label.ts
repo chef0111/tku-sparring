@@ -15,7 +15,6 @@ function prismaRowToMatchData(m: {
   round: number;
   matchIndex: number;
   status: string;
-  bestOf: number;
   redAthleteId: string | null;
   blueAthleteId: string | null;
   redTournamentAthleteId: string | null;
@@ -37,7 +36,6 @@ function prismaRowToMatchData(m: {
     round: m.round,
     matchIndex: m.matchIndex,
     status: m.status as MatchData['status'],
-    bestOf: m.bestOf,
     redAthleteId: m.redAthleteId,
     blueAthleteId: m.blueAthleteId,
     redTournamentAthleteId: m.redTournamentAthleteId,

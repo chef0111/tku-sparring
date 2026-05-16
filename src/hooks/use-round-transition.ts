@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
+import { BO3_WINS_NEEDED } from '@/lib/tournament/bo3';
 import { useTimerStore } from '@/stores/timer-store';
 import { useMatchStore } from '@/stores/match-store';
 
@@ -25,7 +26,7 @@ export const useRoundTransition = () => {
   const prevIsBreakTime = useRef(isBreakTime);
 
   useEffect(() => {
-    const isMatchOver = redWon >= 2 || blueWon >= 2;
+    const isMatchOver = redWon >= BO3_WINS_NEEDED || blueWon >= BO3_WINS_NEEDED;
 
     if (
       prevIsBreakTime.current &&
