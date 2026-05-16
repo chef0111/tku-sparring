@@ -87,7 +87,7 @@ export function BracketToolbar() {
                   ? 'Generate a bracket first'
                   : tournamentStatus === 'completed'
                     ? 'Tournament completed'
-                    : 'Add exhibition match'}
+                    : 'Custom match'}
           </TooltipContent>
         </Tooltip>
 
