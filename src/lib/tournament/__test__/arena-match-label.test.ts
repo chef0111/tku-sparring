@@ -19,6 +19,8 @@ function m(
 ): MatchData {
   return {
     id,
+    kind: 'bracket',
+    displayLabel: null,
     round,
     matchIndex,
     status: 'pending',
@@ -57,6 +59,12 @@ describe('sortMatchesInRound', () => {
 });
 
 describe('excludedFromArenaSequence', () => {
+  it('is true for custom matches', () => {
+    expect(excludedFromArenaSequence(m('x', 0, 0, { kind: 'custom' }))).toBe(
+      true
+    );
+  });
+
   it('is true for round 0 with exactly one tournament athlete', () => {
     expect(
       excludedFromArenaSequence(

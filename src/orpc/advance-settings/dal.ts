@@ -40,6 +40,8 @@ export function deriveGroupStatusForSelectionView(
 
 function prismaMatchToMatchData(m: {
   id: string;
+  kind: string;
+  displayLabel: string | null;
   round: number;
   matchIndex: number;
   status: string;
@@ -60,6 +62,8 @@ function prismaMatchToMatchData(m: {
 }): MatchData {
   return {
     id: m.id,
+    kind: m.kind === 'custom' ? 'custom' : 'bracket',
+    displayLabel: m.displayLabel ?? null,
     round: m.round,
     matchIndex: m.matchIndex,
     status: m.status as MatchStatus,
@@ -288,9 +292,16 @@ export class AdvanceSettingsDAL {
       const blueTa = m.blueTournamentAthleteId
         ? athleteByTaId.get(m.blueTournamentAthleteId)
         : undefined;
+      const customLabel = m.displayLabel?.trim();
+      const label =
+        m.kind === 'custom' && customLabel
+          ? customLabel
+          : n != null
+            ? formatArenaMatchTitle(n)
+            : `Match ${m.id.slice(-6)}`;
       matchesOut.push({
         id: m.id,
-        label: n != null ? formatArenaMatchTitle(n) : `Match ${m.id.slice(-6)}`,
+        label,
         groupId: m.groupId,
         status: m.status,
         redAthleteName: redTa?.name ?? null,

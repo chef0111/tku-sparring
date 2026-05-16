@@ -10,6 +10,7 @@ export const TOURNAMENT_ACTIVITY_EVENT_TYPES = [
   'match.winner_override',
   'match.status_admin',
   'match.swap_participants',
+  'match.create_custom',
   'group.athlete_assigned',
   'group.athlete_unassigned',
   'group.auto_assign',

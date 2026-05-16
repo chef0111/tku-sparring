@@ -133,6 +133,8 @@ model ArenaMatchClaim {
 
 model Match {
   id                       String   @id @default(auto()) @map("_id") @db.ObjectId
+  kind                     String   @default("bracket")
+  displayLabel             String?
   round                    Int      @default(0)
   matchIndex               Int      @default(0)
   status                   String   @default("pending")
@@ -158,6 +160,7 @@ model Match {
 
   @@index([groupId])
   @@index([tournamentId])
+  @@index([tournamentId, displayLabel])
   @@map("match")
 }
 

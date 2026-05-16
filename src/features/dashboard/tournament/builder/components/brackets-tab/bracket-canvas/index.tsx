@@ -64,7 +64,8 @@ export function BracketCanvas() {
   } = useTournamentBracket();
 
   const thirdPlaceMatch = selectedGroup?.thirdPlaceMatch ?? false;
-  const matchList = matches as Array<MatchData>;
+  const matchListFull = matches as Array<MatchData>;
+  const matchList = matchListFull.filter((m) => m.kind !== 'custom');
 
   const athleteMap = React.useMemo(() => {
     const map = new Map<string, TournamentAthleteData>();

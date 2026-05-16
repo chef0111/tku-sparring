@@ -25,6 +25,7 @@ import {
 import {
   adminSetMatchStatusEndpoint,
   assignSlotEndpoint,
+  createCustomMatch,
   createMatch,
   generateBracketEndpoint,
   getMatch,
@@ -95,6 +96,7 @@ export default {
     list: listMatches,
     get: getMatch,
     create: createMatch,
+    createCustom: createCustomMatch,
     update: updateMatch,
     adminSetMatchStatus: adminSetMatchStatusEndpoint,
     delete: removeMatch,

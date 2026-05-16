@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
   AdminSetMatchStatusSchema,
   AssignSlotSchema,
+  CreateCustomMatchSchema,
   CreateMatchSchema,
   GenerateBracketSchema,
   RegenerateBracketSchema,
@@ -51,6 +52,12 @@ export const createMatch = authedProcedure
   .handler(async ({ input }) => {
     const match = await MatchDAL.create(input);
     return match;
+  });
+
+export const createCustomMatch = authedProcedure
+  .input(CreateCustomMatchSchema)
+  .handler(async ({ input, context }) => {
+    return MatchDAL.createCustom(input, context.user.id);
   });
 
 export const updateMatch = authedProcedure

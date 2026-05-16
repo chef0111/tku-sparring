@@ -12,6 +12,8 @@ export function excludedFromArenaSequence(
   groupBracketMeta?: ReadonlyMap<string, ArenaRound0BracketMeta>,
   allMatches?: ReadonlyArray<MatchData>
 ): boolean {
+  if (match.kind === 'custom') return true;
+
   if (match.round === 0) {
     const hasRed = match.redTournamentAthleteId != null;
     const hasBlue = match.blueTournamentAthleteId != null;

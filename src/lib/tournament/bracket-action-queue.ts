@@ -14,9 +14,12 @@ export function buildBracketActionQueue(
 ): Array<BracketActionQueueItem> {
   if (matches.length === 0) return [];
 
-  const sorted = [...matches].sort(
-    (a, b) => a.round - b.round || a.matchIndex - b.matchIndex
-  );
+  const sorted = [...matches].sort((a, b) => {
+    const ac = a.kind === 'custom' ? 0 : 1;
+    const bc = b.kind === 'custom' ? 0 : 1;
+    if (ac !== bc) return ac - bc;
+    return a.round - b.round || a.matchIndex - b.matchIndex;
+  });
   const out: Array<BracketActionQueueItem> = [];
 
   for (const m of sorted) {
@@ -34,6 +37,9 @@ export function buildBracketActionQueue(
     }
 
     if (reasons.length === 0) continue;
+    if (m.kind === 'custom') {
+      reasons.unshift('Custom match');
+    }
     out.push({ match: m, reasons });
   }
 
