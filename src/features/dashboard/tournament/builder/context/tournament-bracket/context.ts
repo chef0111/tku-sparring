@@ -20,7 +20,7 @@ export type TournamentBracketContextValue = BracketsTabQueriesSnapshot &
     arenaOrderSheetOpen: boolean;
     setArenaOrderSheetOpen: Dispatch<SetStateAction<boolean>>;
     handleSlotClick: (match: MatchData) => void;
-    matchForDetailPanel: MatchData | null;
+    matchDetail: MatchData | null;
     /** Pool drop target enabled (group has matches). */
     slotReturnEnabled: boolean;
     /** Hint under pool / empty states when athletes can be dragged back from bracket. */

@@ -57,7 +57,7 @@ function BracketShell({
     data.athletes
   );
 
-  const matchForDetailPanel = React.useMemo(() => {
+  const matchDetail = React.useMemo(() => {
     if (!selectedMatch) return null;
     return (
       (data.matches as Array<MatchData>).find(
@@ -98,7 +98,7 @@ function BracketShell({
       arenaOrderSheetOpen,
       setArenaOrderSheetOpen,
       handleSlotClick,
-      matchForDetailPanel,
+      matchDetail,
       slotReturnEnabled,
       showArrangedHint,
     };
@@ -118,7 +118,7 @@ function BracketShell({
     panelOpen,
     arenaOrderSheetOpen,
     handleSlotClick,
-    matchForDetailPanel,
+    matchDetail,
     slotReturnEnabled,
     showArrangedHint,
   ]);

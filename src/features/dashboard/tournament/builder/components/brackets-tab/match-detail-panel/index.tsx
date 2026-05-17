@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { MatchStatusDialog } from '../../dialogs/match-status-dialog';
 import { useMatchDetailPanel } from '../../../hooks/use-match-detail-panel';
-import { DeleteCustomMatchDialog } from './delete-custom-match-dialog';
+import { DeleteCustomMatchDialog } from '../../dialogs/delete-custom-match-dialog';
 import { SlotLocks } from './slot-locks';
 import { MatchSheetStatus } from './match-sheet-status';
 import { ParticipantRow } from './participant-row';

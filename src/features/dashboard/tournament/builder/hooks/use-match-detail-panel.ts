@@ -28,7 +28,7 @@ function isMatchStatusDowngrade(from: MatchStatus, to: MatchStatus) {
 export function useMatchDetailPanel() {
   const {
     matchLabel,
-    matchForDetailPanel: match,
+    matchDetail: match,
     panelOpen: open,
     setPanelOpen: onOpenChange,
     setSelectedMatch,
@@ -45,6 +45,8 @@ export function useMatchDetailPanel() {
   const [pendingMatchStatus, setPendingMatchStatus] =
     React.useState<MatchStatus | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+
+  const lastDetailMatchIdRef = React.useRef<string | null>(null);
 
   const updateScore = useUpdateScore({ onSuccess: () => onOpenChange(false) });
   const resetMatchScore = useResetMatchScore();
@@ -63,14 +65,22 @@ export function useMatchDetailPanel() {
   });
 
   React.useEffect(() => {
-    if (match) {
-      setRedWins(match.redWins);
-      setBlueWins(match.blueWins);
-      setShowManualWinner(false);
-      setManualReason('');
-      setPendingMatchStatus(null);
-      setDeleteDialogOpen(false);
+    if (!match) {
+      lastDetailMatchIdRef.current = null;
+      return;
     }
+
+    if (lastDetailMatchIdRef.current === match.id) {
+      return;
+    }
+
+    lastDetailMatchIdRef.current = match.id;
+    setRedWins(match.redWins);
+    setBlueWins(match.blueWins);
+    setShowManualWinner(false);
+    setManualReason('');
+    setPendingMatchStatus(null);
+    setDeleteDialogOpen(false);
   }, [match]);
 
   const athleteMap = React.useMemo(() => {
