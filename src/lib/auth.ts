@@ -1,6 +1,6 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
-import { username } from 'better-auth/plugins';
+import { openAPI, username } from 'better-auth/plugins';
 import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { tanstackStartCookies } from 'better-auth/tanstack-start';
 import { prisma } from './db';
@@ -56,6 +56,7 @@ export const auth = betterAuth({
         displayUsername: 'post-normalization',
       },
     }),
+    ...(process.env.NODE_ENV === 'development' ? [openAPI()] : []),
     tanstackStartCookies(),
   ],
   experimental: { joins: true },
