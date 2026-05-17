@@ -91,7 +91,7 @@ export function BracketSlot({
         'relative z-2 flex touch-none items-stretch rounded-md border border-transparent bg-transparent active:cursor-grabbing',
         athlete ? 'cursor-grab' : 'cursor-pointer',
         locked && 'border-amber-500/60',
-        isOver && canDrop && 'ring-primary/40 ring-2',
+        isOver && canDrop && 'ring-primary/30 ring-1',
         isDragging && 'opacity-60'
       )}
       {...(canDrag ? listeners : {})}

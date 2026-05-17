@@ -9,7 +9,7 @@ function QueueRowSkeleton({ isLast }: { isLast: boolean }) {
       aria-hidden
     >
       <div
-        className="flex w-3 shrink-0 translate-y-6 flex-col items-center"
+        className="flex w-2 shrink-0 translate-y-6 flex-col items-center"
         aria-hidden
       >
         <Skeleton className="size-1.5 shrink-0 rounded-full" />
@@ -46,13 +46,13 @@ export function GroupsPanelSkeleton({
 }) {
   return (
     <div className="flex flex-col gap-3" aria-busy="true">
-      <header className="flex flex-col gap-2 px-0.5">
+      <header className="flex flex-col gap-1.5 px-0.5">
         <div className="flex items-center gap-2">
           <Skeleton className="size-1.5 shrink-0 rounded-full" />
           <Skeleton className="h-4 w-40" />
-          <Skeleton className="ml-auto size-5 rounded-md" />
         </div>
-        <Skeleton className="h-3 w-full max-w-64" />
+        <Skeleton className="h-3 w-full max-w-72" />
+        <Skeleton className="h-3 w-2/3 max-w-48" />
       </header>
 
       <ul className="flex flex-col gap-0" role="presentation">

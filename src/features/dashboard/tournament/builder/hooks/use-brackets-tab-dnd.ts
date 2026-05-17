@@ -6,7 +6,7 @@ import type { TournamentAthleteData } from '@/features/dashboard/types';
 import { useAssignSlot, useSwapSlots } from '@/queries/matches';
 
 type DragLabel =
-  | { kind: 'panel'; name: string }
+  | { kind: 'panel'; name: string; beltLevel: number; weight: number }
   | { kind: 'slot'; name: string }
   | null;
 
@@ -41,6 +41,8 @@ export function useBracketsTabDnd(athletes: Array<TournamentAthleteData>) {
         setDragLabel({
           kind: 'panel',
           name: a?.name ?? 'Athlete',
+          beltLevel: a?.beltLevel ?? 0,
+          weight: a?.weight ?? 0,
         });
         return;
       }

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { DndContext, DragOverlay } from '@dnd-kit/core';
+import { GripVertical, LockOpen } from 'lucide-react';
 import { useBuilderManagerQuery } from '../../hooks/use-builder-manager-query';
 import { useBracketsTabDnd } from '../../hooks/use-brackets-tab-dnd';
 import { useBracketsTabQueries } from '../../hooks/use-brackets-tab-queries';
@@ -13,6 +14,7 @@ import { LoadingBracketState } from '../../components/brackets-tab/skeletons';
 import { TournamentBracketContext } from './context';
 import type { GroupData, MatchData } from '@/features/dashboard/types';
 import type { TournamentBracketContextValue } from './context';
+import { getBeltLabel } from '@/config/athlete';
 
 export interface TournamentBracketProviderProps {
   tournamentId: string;
@@ -130,7 +132,7 @@ function BracketShell({
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
       >
-        <div className="flex h-full min-h-0 w-full">
+        <div className="canvas-background flex h-full min-h-0 w-full">
           <div className="relative min-h-0 min-w-0 flex-1">
             {data.matchesQuery.isPending ? (
               <LoadingBracketState />
@@ -151,11 +153,29 @@ function BracketShell({
         </div>
 
         <DragOverlay dropAnimation={null}>
-          {dragLabel ? (
-            <div className="bg-popover text-popover-foreground max-w-55 truncate rounded-md border px-3 py-2 text-sm shadow-md">
-              {dragLabel.name}
+          {dragLabel && (
+            <div className="bg-card flex cursor-grab items-center gap-2 rounded-md border px-2 py-2 text-sm active:cursor-grabbing data-dragging:cursor-grabbing">
+              <button
+                type="button"
+                data-slot="panel-athlete-drag"
+                className="text-muted-foreground flex size-6 shrink-0 cursor-grab items-center justify-center rounded-sm text-xs"
+              >
+                {dragLabel.kind === 'panel' ? (
+                  <GripVertical className="size-3.5" />
+                ) : (
+                  <LockOpen className="size-3.5" />
+                )}
+              </button>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium">{dragLabel.name}</p>
+                {dragLabel.kind === 'panel' && (
+                  <p className="text-muted-foreground truncate text-xs">
+                    {getBeltLabel(dragLabel.beltLevel)} · {dragLabel.weight} kg
+                  </p>
+                )}
+              </div>
             </div>
-          ) : null}
+          )}
         </DragOverlay>
 
         <MatchDetailPanel />

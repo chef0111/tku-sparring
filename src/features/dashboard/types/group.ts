@@ -51,6 +51,7 @@ export interface MatchData {
   winnerTournamentAthleteId: string | null;
   redLocked: boolean;
   blueLocked: boolean;
+  updatedAt: Date;
   groupId: string;
   tournamentId: string;
   arenaSequenceRank?: number | null;

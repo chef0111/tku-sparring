@@ -2,6 +2,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { GripVertical } from 'lucide-react';
 import type { TournamentAthleteData } from '@/features/dashboard/types';
 import { cn } from '@/lib/utils';
+import { getBeltLabel } from '@/config/athlete';
 
 interface PanelAthleteRowProps {
   athlete: TournamentAthleteData;
@@ -46,7 +47,7 @@ export function PanelAthleteRow({
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium">{athlete.name}</p>
         <p className="text-muted-foreground truncate text-xs">
-          Belt {athlete.beltLevel} · {athlete.weight} kg
+          {getBeltLabel(athlete.beltLevel)} · {athlete.weight} kg
         </p>
       </div>
     </div>

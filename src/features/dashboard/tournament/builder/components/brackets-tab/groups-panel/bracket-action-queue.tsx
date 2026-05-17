@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { formatDistanceToNow } from 'date-fns';
 import { MatchSheetStatus } from '../match-detail-panel/match-sheet-status';
 import { useTournamentBracket } from '../../../context/tournament-bracket/use-tournament-bracket';
 import type { MatchData } from '@/features/dashboard/types';
@@ -85,11 +86,10 @@ export function BracketActionQueue() {
         </Empty>
       ) : (
         <ul className="flex flex-col gap-0" role="list">
-          {queue.map(({ match, reasons }, index) => (
+          {queue.map(({ match }, index) => (
             <QueueRow
               key={match.id}
               match={match}
-              reasons={reasons}
               order={index + 1}
               isLast={index === queue.length - 1}
               maxRound={maxRound}
@@ -114,7 +114,6 @@ export function BracketActionQueue() {
 
 interface QueueRowProps {
   match: MatchData;
-  reasons: Array<string>;
   maxRound: number;
   order: number;
   isLast: boolean;
@@ -124,7 +123,6 @@ interface QueueRowProps {
 
 function QueueRow({
   match,
-  reasons,
   maxRound,
   order,
   isLast,
@@ -197,7 +195,10 @@ function QueueRow({
             </CardTitle>
           </CardHeader>
           <p className="text-muted-foreground relative truncate text-xs">
-            {reasons.join(' · ')}
+            Updated{' '}
+            {formatDistanceToNow(new Date(match.updatedAt), {
+              addSuffix: true,
+            })}
           </p>
         </CardContent>
         <CardFooter className="relative flex w-full cursor-default items-center justify-between px-2 py-1">
