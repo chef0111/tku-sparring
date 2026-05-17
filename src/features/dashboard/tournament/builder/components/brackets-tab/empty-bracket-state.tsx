@@ -10,6 +10,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
+import { Spinner } from '@/components/ui/spinner';
 
 interface EmptyBracketStateProps {
   groupId: string | null;
@@ -68,8 +69,17 @@ export function EmptyBracketState({
             });
           }}
         >
-          <Dices data-icon="inline-start" />
-          Generate Bracket
+          {generate.isPending ? (
+            <>
+              <Spinner className="text-primary-foreground" />
+              Generating…
+            </>
+          ) : (
+            <>
+              <Dices data-icon="inline-start" />
+              Generate Bracket
+            </>
+          )}
         </Button>
       </EmptyContent>
     </Empty>

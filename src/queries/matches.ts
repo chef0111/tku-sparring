@@ -252,6 +252,20 @@ export function useResetMatchScore(options?: { onSuccess?: () => void }) {
   });
 }
 
+export function useDeleteMatch(options?: { onSuccess?: () => void }) {
+  const invalidate = useInvalidateMatches();
+
+  return useMutation({
+    mutationFn: (data: { id: string }) => client.match.delete(data),
+    onSuccess: () => {
+      invalidate();
+      toast.success('Custom match deleted');
+      options?.onSuccess?.();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+}
+
 export function useSetWinner(options?: { onSuccess?: () => void }) {
   const invalidate = useInvalidateMatches();
 

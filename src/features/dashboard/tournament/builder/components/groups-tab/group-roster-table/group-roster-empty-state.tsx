@@ -2,6 +2,7 @@ import { ArrowRight, UserPlus } from 'lucide-react';
 import type { GroupData } from '@/features/dashboard/types';
 import { Button } from '@/components/ui/button';
 import { useAutoAssignGroup } from '@/queries/groups';
+import { Spinner } from '@/components/ui/spinner';
 
 interface GroupRosterEmptyStateProps {
   variant: 'no-group-selected' | 'no-athletes';
@@ -47,7 +48,14 @@ export function GroupRosterEmptyState({
         onClick={() => autoAssign.mutate({ groupId: group.id, tournamentId })}
         disabled={autoAssign.isPending}
       >
-        Auto-assign
+        {autoAssign.isPending ? (
+          <>
+            <Spinner className="text-primary-foreground" />
+            Assigning…
+          </>
+        ) : (
+          'Auto-assign'
+        )}
       </Button>
       <p className="text-xs">Drag from the pool or click + on a pool row.</p>
     </div>

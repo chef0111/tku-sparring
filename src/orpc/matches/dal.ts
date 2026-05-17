@@ -10,6 +10,7 @@ import {
   swapRound0Slots,
 } from './round0-slot-editor';
 import { assertCustomMatchDisplayLabelAvailable } from './custom-match-label';
+import { throwMatchBadRequest } from './match-domain-error';
 import type {
   AdminSetMatchStatusDTO,
   AssignSlotDTO,
@@ -557,7 +558,8 @@ export class MatchDAL {
       const ta = await prisma.tournamentAthlete.findFirst({
         where: { id: slot.tournamentAthleteId, groupId },
       });
-      if (!ta) throw new Error('Tournament athlete not found in this group');
+      if (!ta)
+        throwMatchBadRequest('Tournament athlete not found in this group');
       return {
         tournamentAthleteId: ta.id,
         athleteProfileId: ta.athleteProfileId,
@@ -567,17 +569,17 @@ export class MatchDAL {
     const feeder = await prisma.match.findFirst({
       where: { id: slot.feederMatchId, groupId },
     });
-    if (!feeder) throw new Error('Feeder match not found in this group');
+    if (!feeder) throwMatchBadRequest('Feeder match not found in this group');
     if (feeder.kind === 'custom') {
-      throw new Error(
+      throwMatchBadRequest(
         'Bracket matches only — custom matches cannot be feeders'
       );
     }
     if (feeder.status !== 'complete') {
-      throw new Error('Feeder match must be complete');
+      throwMatchBadRequest('Feeder match must be complete');
     }
     if (!feeder.winnerTournamentAthleteId) {
-      throw new Error('Feeder match has no winner');
+      throwMatchBadRequest('Feeder match has no winner');
     }
 
     if (slot.mode === 'winner') {
@@ -585,7 +587,7 @@ export class MatchDAL {
         feeder.redTournamentAthleteId == null ||
         feeder.blueTournamentAthleteId == null
       ) {
-        throw new Error(
+        throwMatchBadRequest(
           'Winner slot requires both athletes present in the feeder match'
         );
       }
@@ -593,7 +595,7 @@ export class MatchDAL {
         where: { id: feeder.winnerTournamentAthleteId },
         select: { athleteProfileId: true },
       });
-      if (!ta) throw new Error('Winner tournament athlete missing');
+      if (!ta) throwMatchBadRequest('Winner tournament athlete missing');
       return {
         tournamentAthleteId: feeder.winnerTournamentAthleteId,
         athleteProfileId: ta.athleteProfileId,
@@ -604,7 +606,9 @@ export class MatchDAL {
       feeder.redTournamentAthleteId == null ||
       feeder.blueTournamentAthleteId == null
     ) {
-      throw new Error('Loser slot requires both athletes in the feeder match');
+      throwMatchBadRequest(
+        'Loser slot requires both athletes in the feeder match'
+      );
     }
     const w = feeder.winnerTournamentAthleteId;
     let loserTa: string | null = null;
@@ -613,15 +617,15 @@ export class MatchDAL {
     } else if (w === feeder.blueTournamentAthleteId) {
       loserTa = feeder.redTournamentAthleteId;
     } else {
-      throw new Error('Winner does not match a feeder corner');
+      throwMatchBadRequest('Winner does not match a feeder corner');
     }
-    if (!loserTa) throw new Error('Could not resolve loser');
+    if (!loserTa) throwMatchBadRequest('Could not resolve loser');
 
     const ta = await prisma.tournamentAthlete.findUnique({
       where: { id: loserTa },
       select: { athleteProfileId: true },
     });
-    if (!ta) throw new Error('Loser tournament athlete missing');
+    if (!ta) throwMatchBadRequest('Loser tournament athlete missing');
 
     return {
       tournamentAthleteId: loserTa,
@@ -634,9 +638,9 @@ export class MatchDAL {
       where: { id: input.groupId },
       include: { tournament: { select: { id: true, status: true } } },
     });
-    if (!group) throw new Error('Group not found');
+    if (!group) throwMatchBadRequest('Group not found');
     if (group.tournament.status === 'completed') {
-      throw new Error('Cannot add matches to a completed tournament');
+      throwMatchBadRequest('Cannot add matches to a completed tournament');
     }
 
     const displayLabel = input.displayLabel.trim();
@@ -658,7 +662,7 @@ export class MatchDAL {
     );
 
     if (red.tournamentAthleteId === blue.tournamentAthleteId) {
-      throw new Error('Red and blue cannot be the same athlete');
+      throwMatchBadRequest('Red and blue cannot be the same athlete');
     }
 
     const idxAgg = await prisma.match.aggregate({

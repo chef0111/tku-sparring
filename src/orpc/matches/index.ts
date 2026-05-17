@@ -16,6 +16,7 @@ import {
   UpdateScoreSchema,
 } from './dto';
 import { MatchDAL } from './dal';
+import { throwMatchBadRequest } from './match-domain-error';
 import { authedProcedure } from '@/orpc/middleware';
 
 export const listMatches = authedProcedure
@@ -77,8 +78,12 @@ export const adminSetMatchStatusEndpoint = authedProcedure
 export const removeMatch = authedProcedure
   .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {
-    const match = await MatchDAL.deleteMatch(input.id);
-    return match;
+    const existing = await MatchDAL.findById(input.id);
+    if (!existing) throwMatchBadRequest('Match not found');
+    if (existing.kind !== 'custom') {
+      throwMatchBadRequest('Only custom matches can be deleted');
+    }
+    return MatchDAL.deleteMatch(input.id);
   });
 
 export const generateBracketEndpoint = authedProcedure

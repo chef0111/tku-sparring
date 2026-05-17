@@ -51,8 +51,20 @@ export function excludedFromArenaSequence(
 
   if (!allMatches || allMatches.length === 0) return false;
 
-  const fr = getFeederMatch(allMatches, match.round, match.matchIndex, 'red');
-  const fb = getFeederMatch(allMatches, match.round, match.matchIndex, 'blue');
+  const fr = getFeederMatch(
+    allMatches,
+    match.groupId,
+    match.round,
+    match.matchIndex,
+    'red'
+  );
+  const fb = getFeederMatch(
+    allMatches,
+    match.groupId,
+    match.round,
+    match.matchIndex,
+    'blue'
+  );
   if (!fr || !fb) return false;
 
   const phantomRound0Feeder = (f: MatchData) =>
@@ -296,6 +308,7 @@ export function formatFeederWinnerLabel(displayNumber: number): string {
 
 export function getFeederMatch(
   matches: ReadonlyArray<MatchData>,
+  groupId: string,
   round: number,
   matchIndex: number,
   side: 'red' | 'blue'
@@ -303,6 +316,9 @@ export function getFeederMatch(
   if (round <= 0) return undefined;
   const childIndex = side === 'red' ? matchIndex * 2 : matchIndex * 2 + 1;
   return matches.find(
-    (m) => m.round === round - 1 && m.matchIndex === childIndex
+    (m) =>
+      m.groupId === groupId &&
+      m.round === round - 1 &&
+      m.matchIndex === childIndex
   );
 }

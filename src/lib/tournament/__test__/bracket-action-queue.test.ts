@@ -50,14 +50,14 @@ describe('buildBracketActionQueue', () => {
         round: 1,
         matchIndex: 0,
         redTournamentAthleteId: 'r',
-        blueTournamentAthleteId: null,
+        blueTournamentAthleteId: 'b',
       }),
       baseMatch({
         id: 'earlier',
         round: 0,
-        matchIndex: 1,
+        matchIndex: 0,
         redTournamentAthleteId: 'r2',
-        blueTournamentAthleteId: null,
+        blueTournamentAthleteId: 'b2',
       }),
     ];
     const q = buildBracketActionQueue(matches);
@@ -67,7 +67,7 @@ describe('buildBracketActionQueue', () => {
     ]);
   });
 
-  it('includes open corners and no-winner when both filled', () => {
+  it('lists bracket rows with status subtitle', () => {
     const matches = [
       baseMatch({
         id: 'm',
@@ -81,10 +81,10 @@ describe('buildBracketActionQueue', () => {
     ];
     const q = buildBracketActionQueue(matches);
     expect(q).toHaveLength(1);
-    expect(q[0]!.reasons).toContain('No winner recorded');
+    expect(q[0]!.reasons).toEqual(['Pending']);
   });
 
-  it('excludes complete matches with a winner', () => {
+  it('lists completed bracket matches', () => {
     const matches = [
       baseMatch({
         id: 'm',
@@ -96,10 +96,12 @@ describe('buildBracketActionQueue', () => {
         status: 'complete',
       }),
     ];
-    expect(buildBracketActionQueue(matches)).toHaveLength(0);
+    const q = buildBracketActionQueue(matches);
+    expect(q).toHaveLength(1);
+    expect(q[0]!.reasons).toEqual(['Complete']);
   });
 
-  it('includes one-sided empty for later rounds', () => {
+  it('includes one-sided empty for later rounds when not phantom-fed', () => {
     const matches = [
       baseMatch({
         id: 'sf',
@@ -111,10 +113,100 @@ describe('buildBracketActionQueue', () => {
     ];
     const q = buildBracketActionQueue(matches);
     expect(q).toHaveLength(1);
-    expect(q[0]!.reasons).toEqual(['No opponent']);
+    expect(q[0]!.reasons).toEqual(['Pending']);
   });
 
-  it('lists custom matches first and tags them when actionable', () => {
+  it('omits round-0 structural BYE rows (Advanced)', () => {
+    const matches = [
+      baseMatch({
+        id: 'bye',
+        round: 0,
+        matchIndex: 0,
+        redTournamentAthleteId: 'ta1',
+        blueTournamentAthleteId: null,
+      }),
+      baseMatch({
+        id: 'open',
+        round: 0,
+        matchIndex: 1,
+        redTournamentAthleteId: 'ta2',
+        blueTournamentAthleteId: null,
+      }),
+    ];
+    const q = buildBracketActionQueue(matches, { groupAthleteCount: 3 });
+    expect(q.map((x) => x.match.id)).toEqual([]);
+  });
+
+  it('omits completed structural BYE rows', () => {
+    const matches = [
+      baseMatch({
+        id: 'bye-done',
+        round: 0,
+        matchIndex: 0,
+        redTournamentAthleteId: 'ta1',
+        blueTournamentAthleteId: null,
+        winnerTournamentAthleteId: 'ta1',
+        status: 'complete',
+      }),
+      baseMatch({
+        id: 'open',
+        round: 0,
+        matchIndex: 1,
+        redTournamentAthleteId: 'ta2',
+        blueTournamentAthleteId: null,
+      }),
+    ];
+    const q = buildBracketActionQueue(matches, { groupAthleteCount: 3 });
+    expect(q.map((x) => x.match.id)).toEqual([]);
+  });
+
+  it('omits completed phantom-fed upper row (Advanced)', () => {
+    const matches = [
+      baseMatch({
+        id: 'r0-0',
+        round: 0,
+        matchIndex: 0,
+        redTournamentAthleteId: 'a',
+        blueTournamentAthleteId: 'b',
+      }),
+      baseMatch({ id: 'r0-1', round: 0, matchIndex: 1 }),
+      baseMatch({
+        id: 'sf',
+        round: 1,
+        matchIndex: 0,
+        redTournamentAthleteId: 'w',
+        blueTournamentAthleteId: null,
+        winnerTournamentAthleteId: 'w',
+        status: 'complete',
+      }),
+    ];
+    const q = buildBracketActionQueue(matches);
+    expect(q.some((x) => x.match.id === 'sf')).toBe(false);
+  });
+
+  it('omits upper-round slots fed by one phantom round-0 row', () => {
+    const matches = [
+      baseMatch({
+        id: 'r0-0',
+        round: 0,
+        matchIndex: 0,
+        redTournamentAthleteId: 'a',
+        blueTournamentAthleteId: 'b',
+      }),
+      baseMatch({ id: 'r0-1', round: 0, matchIndex: 1 }),
+      baseMatch({
+        id: 'sf',
+        round: 1,
+        matchIndex: 0,
+        redTournamentAthleteId: 'w',
+        blueTournamentAthleteId: null,
+      }),
+    ];
+    const q = buildBracketActionQueue(matches);
+    expect(q.map((x) => x.match.id)).not.toContain('sf');
+  });
+
+  it('lists custom matches first with Custom match + status', () => {
     const matches = [
       baseMatch({
         id: 'bracket',
@@ -122,7 +214,7 @@ describe('buildBracketActionQueue', () => {
         round: 0,
         matchIndex: 0,
         redTournamentAthleteId: 'r',
-        blueTournamentAthleteId: null,
+        blueTournamentAthleteId: 'b1',
       }),
       baseMatch({
         id: 'custom',
@@ -138,23 +230,23 @@ describe('buildBracketActionQueue', () => {
     ];
     const q = buildBracketActionQueue(matches);
     expect(q.map((x) => x.match.id)).toEqual(['custom', 'bracket']);
-    expect(q[0]!.reasons[0]).toBe('Custom match');
-    expect(q[0]!.reasons).toContain('No winner recorded');
+    expect(q[0]!.reasons).toEqual(['Custom match', 'Pending']);
+    expect(q[1]!.reasons).toEqual(['Pending']);
   });
 
-  it('excludes finished custom matches', () => {
-    expect(
-      buildBracketActionQueue([
-        baseMatch({
-          id: 'c',
-          kind: 'custom',
-          round: 900,
-          redTournamentAthleteId: 'r',
-          blueTournamentAthleteId: 'b',
-          winnerTournamentAthleteId: 'w',
-          status: 'complete',
-        }),
-      ])
-    ).toHaveLength(0);
+  it('includes finished custom matches', () => {
+    const q = buildBracketActionQueue([
+      baseMatch({
+        id: 'c',
+        kind: 'custom',
+        round: 900,
+        redTournamentAthleteId: 'r',
+        blueTournamentAthleteId: 'b',
+        winnerTournamentAthleteId: 'w',
+        status: 'complete',
+      }),
+    ]);
+    expect(q).toHaveLength(1);
+    expect(q[0]!.reasons).toEqual(['Custom match', 'Complete']);
   });
 });

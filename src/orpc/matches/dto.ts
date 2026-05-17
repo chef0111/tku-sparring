@@ -131,7 +131,7 @@ export const CustomSlotSchema = z.discriminatedUnion('mode', [
 
 export const CreateCustomMatchSchema = z.object({
   groupId: z.string(),
-  displayLabel: z.string().min(1).max(120),
+  displayLabel: z.string().trim().min(1).max(120),
   red: CustomSlotSchema,
   blue: CustomSlotSchema,
   bestOf: z.number().int().min(1).max(5).optional(),
