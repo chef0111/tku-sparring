@@ -13,11 +13,8 @@ export const MatchInfo = ({ matchLabel, className }: MatchInfoProps) => {
         className
       )}
     >
-      <h2
-        className="match-info max-w-full px-2 text-center text-6xl leading-tight tracking-tight uppercase max-xl:text-5xl"
-        title={matchLabel}
-      >
-        <span className="line-clamp-2 text-balance">{matchLabel}</span>
+      <h2 className="match-info max-w-full px-2 text-center text-6xl leading-[1.125] tracking-tight uppercase max-xl:text-5xl">
+        {matchLabel}
       </h2>
     </div>
   );

@@ -5,9 +5,8 @@ import { Controls } from './controls';
 import type { TemporalState } from 'zundo';
 import type { StoreApi } from 'zustand';
 import type { PlayerStore } from '@/stores/player-store';
+import { useMatchReset } from '@/features/app/hooks/use-match-reset';
 import { usePlayerStore } from '@/stores/player-store';
-import { useMatchStore } from '@/stores/match-store';
-import { useTimerStore } from '@/stores/timer-store';
 import { useSettings } from '@/contexts/settings';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +16,7 @@ interface ScoreboardProps {
 
 export const Scoreboard = ({ className }: ScoreboardProps) => {
   const { isOpen } = useSettings();
+  const { resetRound, resetMatch } = useMatchReset();
 
   useHotkeys(
     'mod+z',
@@ -41,11 +41,10 @@ export const Scoreboard = ({ className }: ScoreboardProps) => {
     (e) => {
       e.preventDefault();
       if (isOpen) return;
-      useTimerStore.getState().reset();
-      usePlayerStore.getState().resetRoundCombatPreserveHealth();
+      resetRound();
     },
     { preventDefault: true },
-    [isOpen]
+    [isOpen, resetRound]
   );
 
   useHotkeys(
@@ -53,12 +52,10 @@ export const Scoreboard = ({ className }: ScoreboardProps) => {
     (e) => {
       e.preventDefault();
       if (isOpen) return;
-      useMatchStore.getState().closeMatchResult();
-      useMatchStore.getState().resetMatch();
-      useTimerStore.getState().reset();
-      usePlayerStore.getState().resetMatchCombatPreservePlayers();
+      resetMatch();
     },
-    [isOpen]
+    { preventDefault: true },
+    [isOpen, resetMatch]
   );
 
   return (
@@ -80,8 +77,3 @@ export const Scoreboard = ({ className }: ScoreboardProps) => {
     </section>
   );
 };
-
-// Re-export sub-components for flexibility
-export { Timer } from './timer';
-export { ScoreBox } from './score-box';
-export { Controls } from './controls';

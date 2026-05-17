@@ -50,8 +50,7 @@ interface PlayerActions {
   resetScores: () => void;
   resetHealth: () => void;
   resetRoundStats: () => void;
-  resetRoundCombatPreserveHealth: () => void;
-  resetMatchCombatPreservePlayers: () => void;
+  resetMatchStats: () => void;
   resetAll: () => void;
 
   saveRoundScores: (roundIndex: number) => void;
@@ -214,34 +213,7 @@ const initializer: StateCreator<PlayerStore> = (set, get) => ({
     });
   },
 
-  resetRoundCombatPreserveHealth: () => {
-    const state = get();
-    set({
-      red: {
-        ...state.red,
-        score: 0,
-        hits: 0,
-        fouls: 0,
-        mana: state.maxMana,
-        technique: 0,
-        headHits: 0,
-      },
-      blue: {
-        ...state.blue,
-        score: 0,
-        hits: 0,
-        fouls: 0,
-        mana: state.maxMana,
-        technique: 0,
-        headHits: 0,
-      },
-      lastRedHit: null,
-      lastBlueHit: null,
-      lastHitTimes: { red: 0, blue: 0 },
-    });
-  },
-
-  resetMatchCombatPreservePlayers: () => {
+  resetMatchStats: () => {
     const state = get();
     set({
       red: {
