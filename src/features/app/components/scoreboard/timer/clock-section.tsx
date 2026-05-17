@@ -1,5 +1,9 @@
+import { HistoryIcon, TimerReset } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatTime } from '@/lib/format';
+import { Button } from '@/components/ui/button';
+import { ButtonGroup } from '@/components/ui/button-group';
+import { useMatchReset } from '@/features/app/hooks/use-match-reset';
 
 interface ClockSectionProps {
   time: number;
@@ -20,13 +24,35 @@ export const ClockSection = ({
   onClick,
   className,
 }: ClockSectionProps) => {
+  const { resetRound, resetMatch } = useMatchReset();
+
   return (
     <div
       className={cn(
-        'relative flex w-full flex-col items-center justify-center',
+        'relative -mt-8 flex w-full flex-col items-center justify-center',
         className
       )}
     >
+      <ButtonGroup className="mb-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="rounded-l-sm! select-none!"
+          onClick={resetRound}
+        >
+          <TimerReset />
+          Reset round
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="rounded-r-sm! select-none!"
+          onClick={resetMatch}
+        >
+          <HistoryIcon />
+          Reset match
+        </Button>
+      </ButtonGroup>
       <TimeBox
         time={time}
         showMilliseconds={showMilliseconds}

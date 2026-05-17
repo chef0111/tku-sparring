@@ -6,6 +6,7 @@ import type {
 import { useTournamentBracket } from '@/features/dashboard/tournament/builder/context/tournament-bracket/use-tournament-bracket';
 import {
   useAdminSetMatchStatus,
+  useDeleteMatch,
   useResetMatchScore,
   useSetLock,
   useSetWinner,
@@ -27,9 +28,10 @@ function isMatchStatusDowngrade(from: MatchStatus, to: MatchStatus) {
 export function useMatchDetailPanel() {
   const {
     matchLabel,
-    matchForDetailPanel: match,
+    matchDetail: match,
     panelOpen: open,
     setPanelOpen: onOpenChange,
+    setSelectedMatch,
     athletes,
     readOnly,
     tournamentStatus,
@@ -42,9 +44,19 @@ export function useMatchDetailPanel() {
   const [manualReason, setManualReason] = React.useState('');
   const [pendingMatchStatus, setPendingMatchStatus] =
     React.useState<MatchStatus | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+
+  const lastDetailMatchIdRef = React.useRef<string | null>(null);
 
   const updateScore = useUpdateScore({ onSuccess: () => onOpenChange(false) });
   const resetMatchScore = useResetMatchScore();
+  const deleteMatch = useDeleteMatch({
+    onSuccess: () => {
+      setDeleteDialogOpen(false);
+      onOpenChange(false);
+      setSelectedMatch(null);
+    },
+  });
   const setWinner = useSetWinner({ onSuccess: () => onOpenChange(false) });
   const swapParticipants = useSwapParticipants();
   const setLock = useSetLock();
@@ -53,13 +65,22 @@ export function useMatchDetailPanel() {
   });
 
   React.useEffect(() => {
-    if (match) {
-      setRedWins(match.redWins);
-      setBlueWins(match.blueWins);
-      setShowManualWinner(false);
-      setManualReason('');
-      setPendingMatchStatus(null);
+    if (!match) {
+      lastDetailMatchIdRef.current = null;
+      return;
     }
+
+    if (lastDetailMatchIdRef.current === match.id) {
+      return;
+    }
+
+    lastDetailMatchIdRef.current = match.id;
+    setRedWins(match.redWins);
+    setBlueWins(match.blueWins);
+    setShowManualWinner(false);
+    setManualReason('');
+    setPendingMatchStatus(null);
+    setDeleteDialogOpen(false);
   }, [match]);
 
   const athleteMap = React.useMemo(() => {
@@ -97,6 +118,12 @@ export function useMatchDetailPanel() {
 
   const canChangeMatchStatus =
     !!match &&
+    !readOnly &&
+    (tournamentStatus === 'draft' || tournamentStatus === 'active');
+
+  const canDeleteCustomMatch =
+    !!match &&
+    match.kind === 'custom' &&
     !readOnly &&
     (tournamentStatus === 'draft' || tournamentStatus === 'active');
 
@@ -209,6 +236,11 @@ export function useMatchDetailPanel() {
     });
   }, [adminSetMatchStatus, match, pendingMatchStatus]);
 
+  const confirmDeleteCustomMatch = React.useCallback(() => {
+    if (!match || match.kind !== 'custom') return;
+    deleteMatch.mutate({ id: match.id });
+  }, [match, deleteMatch]);
+
   return {
     match,
     matchLabel,
@@ -229,6 +261,10 @@ export function useMatchDetailPanel() {
     canSwap,
     canToggleLocks,
     canChangeMatchStatus,
+    canDeleteCustomMatch,
+    deleteDialogOpen,
+    setDeleteDialogOpen,
+    confirmDeleteCustomMatch,
     pendingMatchStatus,
     setPendingMatchStatus,
     handleMatchStatusSelect,
@@ -249,5 +285,6 @@ export function useMatchDetailPanel() {
     setWinner,
     setLock,
     adminSetMatchStatus,
+    deleteMatch,
   };
 }

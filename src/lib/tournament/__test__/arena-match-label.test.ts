@@ -481,7 +481,17 @@ describe('formatFeederWinnerLabel', () => {
 describe('getFeederMatch', () => {
   it('resolves red and blue feeders like bracket connectors', () => {
     const matches = [m('c0', 0, 0), m('c1', 0, 1), m('p', 1, 0)];
-    expect(getFeederMatch(matches, 1, 0, 'red')?.id).toBe('c0');
-    expect(getFeederMatch(matches, 1, 0, 'blue')?.id).toBe('c1');
+    expect(getFeederMatch(matches, 'g', 1, 0, 'red')?.id).toBe('c0');
+    expect(getFeederMatch(matches, 'g', 1, 0, 'blue')?.id).toBe('c1');
+  });
+
+  it('does not pick a feeder from another group with the same round and matchIndex', () => {
+    const matches = [
+      m('g1-r0', 0, 0, { groupId: 'g1' }),
+      m('g2-r0', 0, 0, { groupId: 'g2' }),
+      m('g1-r1', 1, 0, { groupId: 'g1' }),
+    ];
+    expect(getFeederMatch(matches, 'g1', 1, 0, 'red')?.id).toBe('g1-r0');
+    expect(getFeederMatch(matches, 'g1', 1, 0, 'blue')).toBeUndefined();
   });
 });

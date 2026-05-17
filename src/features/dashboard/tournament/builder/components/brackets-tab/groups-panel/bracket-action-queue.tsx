@@ -24,8 +24,13 @@ import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 
 export function BracketActionQueue() {
-  const { matches, handleSlotClick, showArrangedHint, matchLabel } =
-    useTournamentBracket();
+  const {
+    matches,
+    handleSlotClick,
+    showArrangedHint,
+    matchLabel,
+    athleteCount,
+  } = useTournamentBracket();
 
   const matchList = matches as Array<MatchData>;
 
@@ -36,8 +41,11 @@ export function BracketActionQueue() {
     return bracketRounds.length === 0 ? 0 : Math.max(...bracketRounds);
   }, [matchList]);
   const queue = React.useMemo(
-    () => buildBracketActionQueue(matchList),
-    [matchList]
+    () =>
+      buildBracketActionQueue(matchList, {
+        groupAthleteCount: athleteCount,
+      }),
+    [matchList, athleteCount]
   );
 
   return (
@@ -49,7 +57,7 @@ export function BracketActionQueue() {
             aria-hidden
           />
           <Label className="text-muted-foreground text-sm font-semibold uppercase">
-            Available matches
+            Matches
           </Label>
           {queue.length > 0 ? (
             <Badge
@@ -61,7 +69,8 @@ export function BracketActionQueue() {
           ) : null}
         </div>
         <p className="text-muted-foreground text-xs leading-snug">
-          Open a match to edit scores, slots, or locks.
+          Every match in this group except Advanced auto-slots. Open one to edit
+          scores, slots, or locks.
         </p>
       </header>
 
@@ -70,7 +79,7 @@ export function BracketActionQueue() {
           <EmptyHeader>
             <EmptyTitle>Nothing queued</EmptyTitle>
             <EmptyDescription>
-              No empty slots or missing outcomes right now.
+              No matches to list (empty shell slots only, or no bracket yet).
             </EmptyDescription>
           </EmptyHeader>
         </Empty>

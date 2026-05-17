@@ -21,7 +21,7 @@ A single contest between two athletes within a group bracket.
 _Avoid_: Game, bout
 
 **Custom match**:
-A **Match** in a **Group** with `kind = custom`: same scoring, claims, and Advance Settings listing rules as a bracket match, but it **does not** feed winners into the single-elimination tree. Uses an admin-chosen **display label** unique within the tournament (and must not collide with arena `Match {n}` labels on that group’s arena). Stored outside the bracket canvas layout (round band reserved in data).
+A **Match** in a **Group** with `kind = custom`: same scoring, claims, and Advance Settings listing rules as a bracket match, but it **does not** feed winners into the single-elimination tree. Uses an admin-chosen **display label** unique within the tournament (and must not collide with arena `Match {n}` labels on that group’s arena). Stored outside the bracket canvas layout (round band reserved in data). **Regenerate bracket** for that **Group** deletes every **Match** row (bracket shell and **custom** rows) and recreates an empty bracket shell.
 _Avoid_: Friendly, scrimmage (too vague)
 
 **Match transition**:

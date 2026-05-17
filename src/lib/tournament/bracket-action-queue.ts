@@ -1,16 +1,60 @@
 import type { MatchData } from '@/features/dashboard/types';
+import type { ArenaRound0BracketMeta } from '@/lib/tournament/arena-match-label';
+import { excludedFromArenaSequence } from '@/lib/tournament/arena-match-label';
 
 export interface BracketActionQueueItem {
   match: MatchData;
   reasons: Array<string>;
 }
 
-/**
- * Matches that need admin attention: open slots or filled matches without a recorded winner.
- * Skips rows where both athletes are empty (unused shell nodes).
- */
+export interface BuildBracketActionQueueOptions {
+  groupAthleteCount?: number;
+}
+
+const STATUS_LABEL: Record<MatchData['status'], string> = {
+  pending: 'Pending',
+  active: 'Active',
+  complete: 'Complete',
+};
+
+function queueReasonLines(m: MatchData): Array<string> {
+  const status = STATUS_LABEL[m.status] ?? m.status;
+  if (m.kind === 'custom') {
+    return ['Custom match', status];
+  }
+  return [status];
+}
+
+/** Same meta shape as {@link buildMatchNumber} uses per group (single-group queue). */
+function buildSingleGroupBracketMeta(
+  matches: ReadonlyArray<MatchData>,
+  athleteCount: number
+): ReadonlyMap<string, ArenaRound0BracketMeta> | undefined {
+  const gid = matches[0]?.groupId;
+  if (!gid || athleteCount < 1) return undefined;
+  const round0 = matches.filter(
+    (x) => x.groupId === gid && x.kind !== 'custom' && x.round === 0
+  );
+  const ta = new Set<string>();
+  for (const x of round0) {
+    if (x.redTournamentAthleteId) ta.add(x.redTournamentAthleteId);
+    if (x.blueTournamentAthleteId) ta.add(x.blueTournamentAthleteId);
+  }
+  return new Map([
+    [
+      gid,
+      {
+        athleteCount,
+        round0MatchCount: round0.length,
+        distinctRound0TournamentAthleteCount: ta.size,
+      },
+    ],
+  ]);
+}
+
 export function buildBracketActionQueue(
-  matches: Array<MatchData>
+  matches: Array<MatchData>,
+  options?: BuildBracketActionQueueOptions
 ): Array<BracketActionQueueItem> {
   if (matches.length === 0) return [];
 
@@ -22,25 +66,24 @@ export function buildBracketActionQueue(
   });
   const out: Array<BracketActionQueueItem> = [];
 
+  const groupMeta =
+    options?.groupAthleteCount != null && options.groupAthleteCount >= 1
+      ? buildSingleGroupBracketMeta(sorted, options.groupAthleteCount)
+      : undefined;
+
   for (const m of sorted) {
     const emptyRed = m.redTournamentAthleteId == null;
     const emptyBlue = m.blueTournamentAthleteId == null;
     if (emptyRed && emptyBlue) continue;
 
-    const reasons: Array<string> = [];
-    if (emptyRed) reasons.push('No opponent');
-    if (emptyBlue) reasons.push('No opponent');
-
-    const bothFilled = !emptyRed && !emptyBlue;
-    if (bothFilled && m.winnerTournamentAthleteId == null) {
-      reasons.push('No winner recorded');
+    if (
+      m.kind !== 'custom' &&
+      excludedFromArenaSequence(m, groupMeta, sorted)
+    ) {
+      continue;
     }
 
-    if (reasons.length === 0) continue;
-    if (m.kind === 'custom') {
-      reasons.unshift('Custom match');
-    }
-    out.push({ match: m, reasons });
+    out.push({ match: m, reasons: queueReasonLines(m) });
   }
 
   return out;

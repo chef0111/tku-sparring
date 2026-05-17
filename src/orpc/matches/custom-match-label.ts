@@ -1,3 +1,4 @@
+import { throwMatchBadRequest } from './match-domain-error';
 import type { MatchData } from '@/features/dashboard/types';
 import {
   buildManualRankMapFromMatches,
@@ -70,7 +71,7 @@ export async function assertCustomMatchDisplayLabelAvailable(input: {
 }): Promise<void> {
   const trimmed = input.displayLabel.trim();
   if (!trimmed) {
-    throw new Error('Match label is required');
+    throwMatchBadRequest('Match label is required');
   }
   const key = normalizeMatchLabelKey(trimmed);
 
@@ -88,10 +89,10 @@ export async function assertCustomMatchDisplayLabelAvailable(input: {
       },
     },
   });
-  if (!tournament) throw new Error('Tournament not found');
+  if (!tournament) throwMatchBadRequest('Tournament not found');
 
   const targetGroup = tournament.groups.find((g) => g.id === input.groupId);
-  if (!targetGroup) throw new Error('Group not found on tournament');
+  if (!targetGroup) throwMatchBadRequest('Group not found on tournament');
 
   const arenaIndex = targetGroup.arenaIndex;
   const groupsOnArena = tournament.groups.filter(
@@ -112,7 +113,9 @@ export async function assertCustomMatchDisplayLabelAvailable(input: {
   for (const c of customs) {
     const d = c.displayLabel?.trim();
     if (d && normalizeMatchLabelKey(d) === key) {
-      throw new Error('That label is already used by another custom match');
+      throwMatchBadRequest(
+        'That label is already used by another custom match'
+      );
     }
   }
 
@@ -157,7 +160,7 @@ export async function assertCustomMatchDisplayLabelAvailable(input: {
   }
 
   if (assignedTitles.has(key)) {
-    throw new Error('That label matches an existing arena match number');
+    throwMatchBadRequest('That label matches an existing arena match number');
   }
 
   const matchKey = /^match\s+(.+)$/i.exec(trimmed);
@@ -167,7 +170,7 @@ export async function assertCustomMatchDisplayLabelAvailable(input: {
       if (m.kind === 'custom') continue;
       const suffix = m.id.slice(-6).toLowerCase();
       if (tail === suffix) {
-        throw new Error(
+        throwMatchBadRequest(
           'That label collides with an auto-generated match label'
         );
       }

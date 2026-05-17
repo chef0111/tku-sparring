@@ -82,8 +82,10 @@ export function useRegenerateBracket(options?: { onSuccess?: () => void }) {
   return useMutation({
     mutationFn: (data: { groupId: string }) => client.bracket.regenerate(data),
     onSuccess: () => {
-      invalidate();
       options?.onSuccess?.();
+    },
+    onSettled: () => {
+      void invalidate();
     },
   });
 }
@@ -94,8 +96,10 @@ export function useResetBracket(options?: { onSuccess?: () => void }) {
   return useMutation({
     mutationFn: (data: { groupId: string }) => client.bracket.reset(data),
     onSuccess: () => {
-      invalidate();
       options?.onSuccess?.();
+    },
+    onSettled: () => {
+      void invalidate();
     },
   });
 }
@@ -246,6 +250,20 @@ export function useResetMatchScore(options?: { onSuccess?: () => void }) {
     onSuccess: () => {
       invalidate();
       toast.success('Match reset');
+      options?.onSuccess?.();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+}
+
+export function useDeleteMatch(options?: { onSuccess?: () => void }) {
+  const invalidate = useInvalidateMatches();
+
+  return useMutation({
+    mutationFn: (data: { id: string }) => client.match.delete(data),
+    onSuccess: () => {
+      invalidate();
+      toast.success('Custom match deleted');
       options?.onSuccess?.();
     },
     onError: (err) => toast.error(err.message),

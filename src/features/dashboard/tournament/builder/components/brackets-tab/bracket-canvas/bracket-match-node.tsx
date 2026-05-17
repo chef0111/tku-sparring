@@ -52,6 +52,7 @@ export function BracketMatchNode({
     if (match.round === 0) return 'Open';
     const feeder = getFeederMatch(
       matches,
+      match.groupId,
       match.round,
       match.matchIndex,
       'red'
@@ -72,6 +73,7 @@ export function BracketMatchNode({
     if (match.round === 0) return 'Open';
     const feeder = getFeederMatch(
       matches,
+      match.groupId,
       match.round,
       match.matchIndex,
       'blue'

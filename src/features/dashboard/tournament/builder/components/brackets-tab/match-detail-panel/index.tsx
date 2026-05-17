@@ -1,10 +1,17 @@
-import { ArrowLeftRight, Crown, RotateCcw } from 'lucide-react';
+import {
+  ArrowLeftRight,
+  Crown,
+  RotateCcw,
+  SaveIcon,
+  Trash2,
+} from 'lucide-react';
 import { MatchStatusDialog } from '../../dialogs/match-status-dialog';
+import { useMatchDetailPanel } from '../../../hooks/use-match-detail-panel';
+import { DeleteCustomMatchDialog } from '../../dialogs/delete-custom-match-dialog';
 import { SlotLocks } from './slot-locks';
 import { MatchSheetStatus } from './match-sheet-status';
 import { ParticipantRow } from './participant-row';
 import { ScoreControl } from './score-control';
-import { useMatchDetailPanel } from './use-match-detail-panel';
 import type { MatchStatus } from '@/features/dashboard/types';
 import { formatMatchHeaderLine } from '@/lib/tournament/arena-match-label';
 import {
@@ -55,13 +62,14 @@ export function MatchDetailPanel() {
           className="flex w-full flex-col gap-0 p-0 sm:max-w-md"
         >
           <SheetHeader className="gap-2 border-b px-6 pt-6 pb-4">
-            <SheetTitle>
-              {position.roundLabel} —{' '}
-              {formatMatchHeaderLine(matchLabel.get(match.id), {
-                bothSlotsOpen:
-                  match.redTournamentAthleteId == null &&
-                  match.blueTournamentAthleteId == null,
-              })}
+            <SheetTitle className="text-lg">
+              {match.kind === 'custom'
+                ? match.displayLabel?.trim() || 'Custom match'
+                : formatMatchHeaderLine(matchLabel.get(match.id), {
+                    bothSlotsOpen:
+                      match.redTournamentAthleteId == null &&
+                      match.blueTournamentAthleteId == null,
+                  })}
             </SheetTitle>
             <SheetDescription asChild>
               <div className="flex flex-col gap-3">
@@ -249,7 +257,7 @@ export function MatchDetailPanel() {
             ) : null}
           </div>
 
-          <SheetFooter className="mt-auto border-t px-6 py-4">
+          <SheetFooter className="mt-auto flex flex-col gap-2 border-t px-6 py-4">
             {position.canEdit ? (
               <Button
                 className="w-full"
@@ -260,11 +268,14 @@ export function MatchDetailPanel() {
               >
                 {position.updateScore.isPending ? (
                   <>
-                    <Spinner data-icon="inline-start" />
+                    <Spinner className="text-primary-foreground" />
                     Saving…
                   </>
                 ) : (
-                  'Save score'
+                  <>
+                    <SaveIcon data-icon="inline-start" />
+                    Save score
+                  </>
                 )}
               </Button>
             ) : (
@@ -290,6 +301,18 @@ export function MatchDetailPanel() {
                 </Button>
               )
             )}
+            {position.canDeleteCustomMatch ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="text-destructive! border-destructive/50 hover:bg-destructive/10 w-full"
+                onClick={() => position.setDeleteDialogOpen(true)}
+                disabled={position.deleteMatch.isPending}
+              >
+                <Trash2 data-icon="inline-start" />
+                Delete match
+              </Button>
+            ) : null}
           </SheetFooter>
         </SheetContent>
       </Sheet>
@@ -306,6 +329,13 @@ export function MatchDetailPanel() {
         }
         isPending={position.adminSetMatchStatus.isPending}
         onConfirm={position.confirmPendingMatchStatus}
+      />
+
+      <DeleteCustomMatchDialog
+        open={position.deleteDialogOpen}
+        onOpenChange={position.setDeleteDialogOpen}
+        isPending={position.deleteMatch.isPending}
+        onConfirm={position.confirmDeleteCustomMatch}
       />
     </>
   );
