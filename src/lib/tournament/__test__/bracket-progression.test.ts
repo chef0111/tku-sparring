@@ -1,6 +1,37 @@
 import { describe, expect, it } from 'vitest';
 
-import { getSuccessorSlot, isRound0ByeMatch } from '../bracket-progression';
+import {
+  bracketHasResettableMatchActivity,
+  getSuccessorSlot,
+  isAutoRound0ByeCompleteMatch,
+  isRound0ByeMatch,
+} from '../bracket-progression';
+import type { MatchData } from '@/features/dashboard/types';
+
+function baseBracket(over: Partial<MatchData> = {}): MatchData {
+  return {
+    id: 'm1',
+    kind: 'bracket',
+    displayLabel: null,
+    round: 0,
+    matchIndex: 0,
+    status: 'pending',
+    bestOf: 1,
+    redAthleteId: null,
+    blueAthleteId: null,
+    redTournamentAthleteId: null,
+    blueTournamentAthleteId: null,
+    redWins: 0,
+    blueWins: 0,
+    winnerId: null,
+    winnerTournamentAthleteId: null,
+    redLocked: false,
+    blueLocked: false,
+    groupId: 'g1',
+    tournamentId: 't1',
+    ...over,
+  };
+}
 
 describe('getSuccessorSlot', () => {
   it('maps even match indexes to the red side of the next match', () => {
@@ -50,5 +81,83 @@ describe('isRound0ByeMatch', () => {
         blueTournamentAthleteId: null,
       })
     ).toBe(false);
+  });
+});
+
+describe('isAutoRound0ByeCompleteMatch', () => {
+  it('detects server bye auto-complete rows', () => {
+    expect(
+      isAutoRound0ByeCompleteMatch(
+        baseBracket({
+          redTournamentAthleteId: 'ta1',
+          blueTournamentAthleteId: null,
+          status: 'complete',
+          redWins: 0,
+          blueWins: 0,
+        })
+      )
+    ).toBe(true);
+  });
+
+  it('is false for a fought complete match with wins', () => {
+    expect(
+      isAutoRound0ByeCompleteMatch(
+        baseBracket({
+          redTournamentAthleteId: 'ta1',
+          blueTournamentAthleteId: 'ta2',
+          status: 'complete',
+          redWins: 2,
+          blueWins: 0,
+        })
+      )
+    ).toBe(false);
+  });
+});
+
+describe('bracketHasResettableMatchActivity', () => {
+  it('is false when only auto bye completes exist', () => {
+    expect(
+      bracketHasResettableMatchActivity([
+        baseBracket({
+          redTournamentAthleteId: 'ta1',
+          blueTournamentAthleteId: null,
+          status: 'complete',
+          redWins: 0,
+          blueWins: 0,
+        }),
+        baseBracket({
+          id: 'm2',
+          matchIndex: 1,
+          redTournamentAthleteId: 'ta2',
+          blueTournamentAthleteId: 'ta3',
+          status: 'pending',
+        }),
+      ])
+    ).toBe(false);
+  });
+
+  it('is true for any custom match', () => {
+    expect(
+      bracketHasResettableMatchActivity([
+        baseBracket(),
+        baseBracket({
+          id: 'c1',
+          kind: 'custom',
+          round: 900,
+          matchIndex: 0,
+        }),
+      ])
+    ).toBe(true);
+  });
+
+  it('is true for active or scored bracket rows', () => {
+    expect(
+      bracketHasResettableMatchActivity([baseBracket({ status: 'active' })])
+    ).toBe(true);
+    expect(
+      bracketHasResettableMatchActivity([
+        baseBracket({ redWins: 1, blueWins: 0 }),
+      ])
+    ).toBe(true);
   });
 });

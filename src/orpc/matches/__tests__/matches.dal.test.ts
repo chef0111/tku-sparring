@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MatchDAL } from '../dal';
+import { buildRound0BaselineV1 } from '../round0-baseline';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
   prisma: {
-    group: { findUnique: vi.fn() },
+    group: { findUnique: vi.fn(), update: vi.fn() },
     match: {
       count: vi.fn(),
       create: vi.fn(),
@@ -48,6 +49,7 @@ const draftGroup = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(prisma.group.update).mockResolvedValue({} as never);
   vi.mocked(prisma.$transaction).mockImplementation(async (arg: unknown) => {
     if (typeof arg === 'function') {
       return arg(prisma as never);
@@ -172,26 +174,67 @@ describe('generateBracket', () => {
 });
 
 describe('resetBracket', () => {
-  it('nulls participants and clears locks via updateMany', async () => {
-    vi.mocked(prisma.group.findUnique).mockResolvedValue(draftGroup as never);
-    vi.mocked(prisma.match.updateMany).mockResolvedValue({ count: 3 } as never);
-    vi.mocked(prisma.match.findMany).mockResolvedValue([]);
+  it('throws when there is no saved shuffle layout', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      ...draftGroup,
+      round0Baseline: null,
+    } as never);
+
+    await expect(MatchDAL.resetBracket('group-1', 'admin-1')).rejects.toThrow(
+      /Shuffle once/i
+    );
+    expect(prisma.match.findMany).not.toHaveBeenCalled();
+  });
+
+  it('restores round 0 from baseline and logs bracket.reset', async () => {
+    const r0m0 = {
+      id: 'm0',
+      round: 0,
+      matchIndex: 0,
+      redLocked: false,
+      blueLocked: false,
+      redTournamentAthleteId: 'ta-a',
+      blueTournamentAthleteId: 'ta-b',
+      redAthleteId: 'p1',
+      blueAthleteId: 'p2',
+      redWins: 0,
+      blueWins: 0,
+      winnerId: null,
+      winnerTournamentAthleteId: null,
+      status: 'pending',
+    };
+    const baseline = buildRound0BaselineV1([r0m0]);
+
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      ...draftGroup,
+      round0Baseline: baseline,
+    } as never);
+
+    vi.mocked(prisma.match.findMany).mockImplementation(((args) => {
+      const w = args?.where as { round?: number; kind?: string } | undefined;
+      if (w?.kind === 'bracket' && w.round === undefined) {
+        return Promise.resolve([r0m0] as never);
+      }
+      if (w?.round === 0) {
+        return Promise.resolve([r0m0] as never);
+      }
+      return Promise.resolve([] as never);
+    }) as typeof prisma.match.findMany);
+
+    vi.mocked(prisma.match.updateMany).mockResolvedValue({ count: 0 } as never);
+    vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue([
+      { id: 'ta-a', athleteProfileId: 'p1', beltLevel: 4, weight: 65 },
+      { id: 'ta-b', athleteProfileId: 'p2', beltLevel: 4, weight: 66 },
+    ] as never);
+    vi.mocked(prisma.match.update).mockResolvedValue({} as never);
+    vi.mocked(prisma.match.findUnique).mockResolvedValue(null);
 
     await MatchDAL.resetBracket('group-1', 'admin-1');
 
-    expect(prisma.match.updateMany).toHaveBeenCalledWith({
-      where: { groupId: 'group-1', kind: 'bracket' },
-      data: expect.objectContaining({
-        redTournamentAthleteId: null,
-        blueTournamentAthleteId: null,
-        redLocked: false,
-        blueLocked: false,
-        status: 'pending',
-      }),
-    });
     expect(recordTournamentActivity).toHaveBeenCalledWith(
       expect.objectContaining({ eventType: 'bracket.reset' })
     );
+    expect(prisma.match.update).toHaveBeenCalled();
   });
 });
 
@@ -325,14 +368,39 @@ describe('shuffleBracket', () => {
       status: 'pending',
     };
 
-    let findManyCalls = 0;
+    let bracketR0Pass = 0;
     vi.mocked(prisma.match.findMany).mockImplementation(((args) => {
-      findManyCalls++;
-      const w = args?.where as { round?: number } | undefined;
-      if (findManyCalls === 1) {
+      const w = args?.where as
+        | {
+            round?: number;
+            kind?: string;
+            groupId?: string;
+          }
+        | undefined;
+      if (w?.kind === 'bracket' && w.round === undefined) {
         return Promise.resolve([r0m0, r0m1] as never);
       }
-      if (w?.round === 0) {
+      if (w?.kind === 'bracket' && w.round === 0) {
+        bracketR0Pass++;
+        if (bracketR0Pass === 1) {
+          return Promise.resolve([r0m0, r0m1] as never);
+        }
+        return Promise.resolve([
+          {
+            ...r0m0,
+            blueTournamentAthleteId: 'ta-fill',
+            blueAthleteId: 'ap-fill',
+          },
+          {
+            ...r0m1,
+            redTournamentAthleteId: 'ta-a',
+            blueTournamentAthleteId: 'ta-b',
+            redAthleteId: 'p2',
+            blueAthleteId: 'p3',
+          },
+        ] as never);
+      }
+      if (w?.round === 0 && !w?.kind) {
         return Promise.resolve([
           {
             ...r0m0,
@@ -350,6 +418,8 @@ describe('shuffleBracket', () => {
       }
       return Promise.resolve([] as never);
     }) as typeof prisma.match.findMany);
+
+    vi.mocked(prisma.match.updateMany).mockResolvedValue({ count: 0 } as never);
 
     vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue([
       { id: 'ta-locked', athleteProfileId: 'p1', beltLevel: 5, weight: 70 },
@@ -423,11 +493,15 @@ describe('shuffleBracket', () => {
       status: 'pending',
     };
 
-    vi.mocked(prisma.match.findMany).mockResolvedValue([
-      ...r0,
-      ...r1,
-      r2,
-    ] as never);
+    vi.mocked(prisma.match.findMany).mockImplementation((args) => {
+      const w = args?.where as { round?: number } | undefined;
+      if (w?.round === 0) {
+        return Promise.resolve(r0 as never);
+      }
+      return Promise.resolve([...r0, ...r1, r2] as never);
+    });
+
+    vi.mocked(prisma.match.updateMany).mockResolvedValue({ count: 0 } as never);
 
     vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue(
       ['ta1', 'ta2', 'ta3', 'ta4', 'ta5'].map((id, ix) => ({
@@ -447,12 +521,13 @@ describe('shuffleBracket', () => {
     const r0Updates = updates.filter((u) =>
       String(u.where.id).startsWith('r0-')
     );
-    expect(r0Updates).toHaveLength(4);
+    const placementR0 = r0Updates.slice(-4);
+    expect(placementR0).toHaveLength(4);
 
     let bothFilled = 0;
     let oneFilled = 0;
     let bothEmpty = 0;
-    for (const u of r0Updates) {
+    for (const u of placementR0) {
       const d = u.data as {
         redTournamentAthleteId: string | null;
         blueTournamentAthleteId: string | null;
@@ -552,10 +627,10 @@ describe('MatchDAL.adminSetMatchStatus', () => {
 });
 
 describe('regenerateBracket', () => {
-  it('deletes only bracket matches for the group', async () => {
+  it('clears all group matches, deletes every match row, then recreates the shell in a transaction', async () => {
     vi.mocked(prisma.group.findUnique).mockResolvedValue(draftGroup as never);
-    vi.mocked(prisma.match.deleteMany).mockResolvedValue({ count: 3 } as never);
-    vi.mocked(prisma.match.count).mockResolvedValue(0);
+    vi.mocked(prisma.match.updateMany).mockResolvedValue({ count: 4 } as never);
+    vi.mocked(prisma.match.deleteMany).mockResolvedValue({ count: 4 } as never);
     vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue([
       { id: 'ta1', athleteProfileId: 'ap1', beltLevel: 3, weight: 60 },
       { id: 'ta2', athleteProfileId: 'ap2', beltLevel: 3, weight: 62 },
@@ -571,9 +646,27 @@ describe('regenerateBracket', () => {
 
     await MatchDAL.regenerateBracket('group-1', 'admin-1');
 
-    expect(prisma.match.deleteMany).toHaveBeenCalledWith({
-      where: { groupId: 'group-1', kind: 'bracket' },
+    expect(prisma.match.updateMany).toHaveBeenCalledWith({
+      where: { groupId: 'group-1' },
+      data: expect.objectContaining({
+        redTournamentAthleteId: null,
+        blueTournamentAthleteId: null,
+        redLocked: false,
+        blueLocked: false,
+        status: 'pending',
+      }),
     });
+    expect(prisma.match.deleteMany).toHaveBeenCalledWith({
+      where: { groupId: 'group-1' },
+    });
+    expect(prisma.match.create).toHaveBeenCalled();
+    expect(prisma.group.update).toHaveBeenCalledWith({
+      where: { id: 'group-1' },
+      data: { round0Baseline: null },
+    });
+    expect(recordTournamentActivity).toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: 'bracket.regenerate' })
+    );
   });
 });
 

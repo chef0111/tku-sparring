@@ -102,6 +102,7 @@ model Group {
   weightMax       Float?
   thirdPlaceMatch Boolean  @default(false)
   arenaIndex      Int      @default(1)
+  round0Baseline    Json?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

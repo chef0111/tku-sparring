@@ -15,6 +15,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Card } from '@/components/ui/card';
+import { bracketHasResettableMatchActivity } from '@/lib/tournament/bracket-progression';
 
 export function BracketToolbar() {
   const {
@@ -45,6 +46,16 @@ export function BracketToolbar() {
         ? 'Generate a bracket first'
         : undefined;
 
+  const resetHasWork =
+    groupId != null && bracketHasResettableMatchActivity(matches);
+  const resetDisabledForCleanBracket =
+    blocked || reset.isPending || !resetHasWork;
+  const resetTooltip =
+    reason ??
+    (!resetHasWork
+      ? 'Record a bout or add a custom match to enable reset'
+      : 'Reset bracket');
+
   function wrap<T>(
     promise: Promise<T>,
     messages: {
@@ -60,15 +71,15 @@ export function BracketToolbar() {
   }
 
   return (
-    <>
-      <Card className="bg-popover absolute top-1/3 left-3 z-10 flex -translate-y-1/3 flex-col gap-1 rounded-md border p-1 shadow-md">
+    <div className="fixed top-1/3 left-3 z-10 -translate-y-1/4 space-y-2">
+      <Card className="bg-popover flex flex-col gap-1 rounded-md border p-1 shadow-md">
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="inline-flex">
               <Button
                 type="button"
                 variant="ghost"
-                size="icon-lg"
+                size="icon"
                 disabled={customBlocked}
                 aria-label="Create custom match"
                 className="rounded-sm"
@@ -90,14 +101,15 @@ export function BracketToolbar() {
                     : 'Custom match'}
           </TooltipContent>
         </Tooltip>
-
+      </Card>
+      <Card className="bg-popover flex flex-col gap-1 rounded-md border p-1 shadow-md">
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="inline-flex">
               <Button
                 type="button"
                 variant="ghost"
-                size="icon-lg"
+                size="icon"
                 disabled={blocked || shuffle.isPending}
                 aria-label="Shuffle bracket"
                 className="rounded-sm"
@@ -131,7 +143,7 @@ export function BracketToolbar() {
                   if (!groupId) return;
                   void wrap(regenerate.mutateAsync({ groupId }), {
                     loading: 'Regenerating bracket…',
-                    success: 'Bracket shell recreated',
+                    success: 'Bracket regenerated',
                   });
                 }}
               >
@@ -151,13 +163,13 @@ export function BracketToolbar() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                disabled={blocked || reset.isPending}
+                disabled={resetDisabledForCleanBracket}
                 aria-label="Reset bracket"
                 onClick={() => {
                   if (!groupId) return;
                   void wrap(reset.mutateAsync({ groupId }), {
                     loading: 'Resetting bracket…',
-                    success: 'Bracket cleared',
+                    success: 'Bracket reset',
                   });
                 }}
               >
@@ -165,12 +177,10 @@ export function BracketToolbar() {
               </Button>
             </span>
           </TooltipTrigger>
-          <TooltipContent side="right">
-            {reason ?? 'Reset bracket'}
-          </TooltipContent>
+          <TooltipContent side="right">{resetTooltip}</TooltipContent>
         </Tooltip>
       </Card>
       <CreateCustomMatchDialog open={customOpen} onOpenChange={setCustomOpen} />
-    </>
+    </div>
   );
 }

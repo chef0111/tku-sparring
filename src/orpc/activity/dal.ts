@@ -49,7 +49,7 @@ export function summarizeTournamentActivity(
     case 'bracket.generate':
       return `Bracket generated (${String(p.mode ?? 'full')})`;
     case 'bracket.reset':
-      return 'Bracket reset (participants cleared)';
+      return 'Bracket reset (fresh shuffle)';
     case 'bracket.shuffle':
       return 'Bracket shuffled';
     case 'bracket.regenerate':

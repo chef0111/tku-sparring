@@ -82,8 +82,10 @@ export function useRegenerateBracket(options?: { onSuccess?: () => void }) {
   return useMutation({
     mutationFn: (data: { groupId: string }) => client.bracket.regenerate(data),
     onSuccess: () => {
-      invalidate();
       options?.onSuccess?.();
+    },
+    onSettled: () => {
+      void invalidate();
     },
   });
 }
@@ -94,8 +96,10 @@ export function useResetBracket(options?: { onSuccess?: () => void }) {
   return useMutation({
     mutationFn: (data: { groupId: string }) => client.bracket.reset(data),
     onSuccess: () => {
-      invalidate();
       options?.onSuccess?.();
+    },
+    onSettled: () => {
+      void invalidate();
     },
   });
 }
