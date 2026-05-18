@@ -1,4 +1,5 @@
 import { formatDistanceToNow } from 'date-fns';
+import { Link } from '@tanstack/react-router';
 import { TournamentStatusPill } from '../tournament-status-pill';
 import { TournamentsActionMenu } from './tournaments-action-menu';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -24,12 +25,19 @@ export function getTournamentsTableColumns(
         />
       ),
       cell: ({ row }) => (
-        <div className="flex min-w-0 flex-col">
-          <span className="truncate font-medium">{row.original.name}</span>
+        <Link
+          to="/dashboard/tournaments/$id"
+          params={{ id: row.original.id }}
+          aria-label={`Open ${row.original.name}`}
+          className="group/link flex min-w-0 flex-col"
+        >
+          <span className="truncate font-medium underline-offset-2 group-hover/link:underline">
+            {row.original.name}
+          </span>
           <span className="text-muted-foreground truncate font-mono text-xs">
             {row.original.id.slice(-12)}
           </span>
-        </div>
+        </Link>
       ),
       enableSorting: true,
       enableHiding: false,

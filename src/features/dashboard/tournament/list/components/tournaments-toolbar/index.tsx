@@ -10,7 +10,6 @@ import {
 import { ViewModeToggle, useTournamentsViewMode } from './view-mode-toggle';
 import type { TournamentStatus } from '@/features/dashboard/types';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -20,6 +19,11 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useDebouncedCallback } from '@/hooks/use-debounced-callback';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/components/ui/input-group';
 
 const QUERY_DEBOUNCE_MS = 300;
 
@@ -105,16 +109,18 @@ export function TournamentsToolbar({
       aria-orientation="horizontal"
       className={cn('flex w-full flex-wrap items-center gap-2 py-2', className)}
     >
-      <div className="relative min-w-48 flex-1">
-        <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-        <Input
+      <InputGroup className="h-9 min-w-48 flex-1">
+        <InputGroupAddon className="bg-background h-full rounded-l-md border-r pr-2">
+          <Search className="text-primary" />
+        </InputGroupAddon>
+        <InputGroupInput
           placeholder="Search tournaments..."
           value={localQuery}
           onChange={onQueryChange}
-          className="h-9 pl-9"
           aria-label="Search tournaments"
+          className="h-full"
         />
-      </div>
+      </InputGroup>
 
       <Select value={statusSelectValue} onValueChange={onStatusChange}>
         <SelectTrigger className="h-9 w-36" aria-label="Filter by status">
