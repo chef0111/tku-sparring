@@ -20,12 +20,12 @@ export function BuilderShell({
       {readOnly && (
         <Alert
           variant="warning"
-          className="fixed top-16 left-1/2 z-20 w-fit -translate-x-1/2 border-amber-500/20 bg-amber-500/10 backdrop-blur-xs"
+          className="fixed top-16 left-1/2 z-20 w-fit -translate-x-1/2 border-amber-500/20 bg-amber-500/10 backdrop-blur-sm"
         >
           <AlertTitle className="text-center">Read-only workspace</AlertTitle>
           <AlertDescription className="text-center">
-            This tournament is completed. Builder mutations are disabled so
-            results stay locked.
+            This tournament is completed. Features are disabled so results stay
+            locked.
           </AlertDescription>
         </Alert>
       )}

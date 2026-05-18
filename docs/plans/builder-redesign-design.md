@@ -119,8 +119,8 @@ export function BuilderShell({ header, children, footer, readOnly }: Props) {
         <Alert className="mx-4 mt-3">
           <AlertTitle>Read-only workspace</AlertTitle>
           <AlertDescription>
-            This tournament is completed. Builder mutations are disabled so
-            results stay locked.
+            This tournament is completed. Features are disabled so results stay
+            locked.
           </AlertDescription>
         </Alert>
       )}
@@ -254,6 +254,7 @@ Visual:
 `index.tsx`:
 
 - Header strip above table:
+
   ```
   Group A · Belt 7–9 · 50–60kg · M     [● Online · You]  [Take over]  [⚙ Settings]
   4 athletes · 0 violations · Arena 2
@@ -264,6 +265,7 @@ Visual:
   - `Take over` button visible when `leaseInfo?.leaseStatus === 'held_by_other'`.
   - `Settings` opens `GroupSettingsSheet`.
   - Second line: counts.
+
 - Uses `useDataTable` w/ controlled state from local `useState` for `pagination` and `sorting` (kept ephemeral — not in URL; resets on group switch).
 - Calls `useTournamentAthletes({ tournamentId, groupId: group.id, page, perPage, sorting })`.
 - Renders `DataTable` + `DataTableToolbar` + `DataTableSortList`. No row selection. No view options.

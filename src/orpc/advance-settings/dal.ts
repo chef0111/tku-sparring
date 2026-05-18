@@ -56,6 +56,7 @@ function prismaMatchToMatchData(m: {
   winnerTournamentAthleteId: string | null;
   redLocked: boolean;
   blueLocked: boolean;
+  updatedAt: Date;
   groupId: string;
   tournamentId: string;
   arenaSequenceRank?: number | null;
@@ -78,6 +79,7 @@ function prismaMatchToMatchData(m: {
     winnerTournamentAthleteId: m.winnerTournamentAthleteId,
     redLocked: m.redLocked,
     blueLocked: m.blueLocked,
+    updatedAt: m.updatedAt,
     groupId: m.groupId,
     tournamentId: m.tournamentId,
     arenaSequenceRank: m.arenaSequenceRank ?? null,

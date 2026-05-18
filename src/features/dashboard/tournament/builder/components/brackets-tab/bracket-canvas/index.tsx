@@ -95,7 +95,7 @@ export function BracketCanvas() {
   return (
     <div
       ref={containerRef}
-      className="canvas-background relative size-full min-h-0 overflow-hidden pl-6"
+      className="relative size-full min-h-0 overflow-hidden pl-6"
       {...handlers}
     >
       <div

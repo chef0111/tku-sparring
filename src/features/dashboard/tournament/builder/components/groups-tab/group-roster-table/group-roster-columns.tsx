@@ -89,6 +89,7 @@ export function getGroupRosterColumns({
           readOnly={readOnly}
         />
       ),
+      maxSize: 120,
       enableSorting: true,
       enableHiding: false,
       enableColumnFilter: false,
@@ -137,6 +138,7 @@ export function getGroupRosterColumns({
           {getBeltLabel(row.original.beltLevel)}
         </span>
       ),
+      maxSize: 120,
       enableSorting: true,
       enableHiding: false,
       enableColumnFilter: false,
@@ -154,6 +156,7 @@ export function getGroupRosterColumns({
       cell: ({ row }) => (
         <span className="text-sm tabular-nums">{row.original.weight}kg</span>
       ),
+      maxSize: 100,
       enableSorting: true,
       enableHiding: false,
       enableColumnFilter: false,

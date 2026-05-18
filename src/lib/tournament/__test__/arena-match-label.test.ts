@@ -35,6 +35,7 @@ function m(
     winnerTournamentAthleteId: null,
     redLocked: false,
     blueLocked: false,
+    updatedAt: new Date(0),
     groupId: 'g',
     tournamentId: 't',
     ...over,

@@ -68,7 +68,7 @@ function ComboboxInput({
   return (
     <InputGroup
       className={cn(
-        'border-border! w-auto focus-within:shadow-none focus-within:ring-0! focus-within:ring-offset-0! has-[[data-slot=input-group-control]:focus-visible]:ring-0! has-[[data-slot=input-group-control]:focus-visible]:ring-offset-0!',
+        'border-border! w-auto rounded-sm! focus-within:shadow-none focus-within:ring-0! focus-within:ring-offset-0! has-[[data-slot=input-group-control]:focus-visible]:ring-0! has-[[data-slot=input-group-control]:focus-visible]:ring-offset-0!',
         className
       )}
     >

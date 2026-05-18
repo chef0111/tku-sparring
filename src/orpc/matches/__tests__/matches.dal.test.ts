@@ -493,13 +493,15 @@ describe('shuffleBracket', () => {
       status: 'pending',
     };
 
-    vi.mocked(prisma.match.findMany).mockImplementation((args) => {
+    vi.mocked(prisma.match.findMany).mockImplementation(((
+      args: Parameters<typeof prisma.match.findMany>[0]
+    ) => {
       const w = args?.where as { round?: number } | undefined;
       if (w?.round === 0) {
-        return Promise.resolve(r0 as never);
+        return Promise.resolve(r0);
       }
-      return Promise.resolve([...r0, ...r1, r2] as never);
-    });
+      return Promise.resolve([...r0, ...r1, r2]);
+    }) as never);
 
     vi.mocked(prisma.match.updateMany).mockResolvedValue({ count: 0 } as never);
 

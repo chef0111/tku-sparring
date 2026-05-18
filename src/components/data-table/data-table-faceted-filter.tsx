@@ -45,14 +45,6 @@ export function DataTableFacetedFilter<TData, TValue>({
     Array.isArray(columnFilterValue) ? columnFilterValue : []
   );
 
-  const onReset = React.useCallback(
-    (event?: React.MouseEvent) => {
-      event?.stopPropagation();
-      column?.setFilterValue(undefined);
-    },
-    [column]
-  );
-
   const searchTitle = title ?? 'option';
 
   const comboboxValue = multiple
@@ -74,6 +66,18 @@ export function DataTableFacetedFilter<TData, TValue>({
       }
     },
     [column, multiple]
+  );
+
+  const onReset = React.useCallback(
+    (event?: React.MouseEvent) => {
+      event?.stopPropagation();
+      if (!column) return;
+      // Route clears through the same path as choosing "no value" so Base UI combobox
+      // selection state and nuqs-driven column filters stay aligned (trigger X only used
+      // setFilterValue before, which could leave URL updates losing the race).
+      onValueChange(multiple ? [] : null);
+    },
+    [column, multiple, onValueChange]
   );
 
   return (
@@ -159,7 +163,11 @@ export function DataTableFacetedFilter<TData, TValue>({
                 className="[&>span.pointer-events-none.absolute]:hidden"
                 value={option}
               >
-                <Checkbox checked={isSelected} />
+                <Checkbox
+                  checked={isSelected}
+                  className="data-checked:text-primary-foreground!"
+                  style={{ color: 'var(--primary-foreground) !important' }}
+                />
                 {option.icon && <option.icon />}
                 <span className="min-w-0 flex-1 whitespace-nowrap">
                   {option.label}
@@ -174,14 +182,13 @@ export function DataTableFacetedFilter<TData, TValue>({
           }}
         </ComboboxList>
         {selectedValues.size > 0 && (
-          <>
+          <div className="mx-1 mb-1">
             <ComboboxSeparator />
-            <button
+            <ComboboxItem
               className={cn(
                 buttonVariants({ variant: 'ghost', size: 'sm' }),
-                'mx-1 mb-1 w-full justify-between font-normal'
+                'justify-between px-1.5 font-normal'
               )}
-              type="button"
               onClick={() => {
                 onReset();
                 setOpen(false);
@@ -189,8 +196,8 @@ export function DataTableFacetedFilter<TData, TValue>({
             >
               <span>Clear filters</span>
               <XIcon className="size-4 shrink-0" />
-            </button>
-          </>
+            </ComboboxItem>
+          </div>
         )}
       </ComboboxContent>
     </Combobox>
