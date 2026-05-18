@@ -130,12 +130,11 @@ export function useSetArenaGroupOrder() {
       await queryClient.cancelQueries({ queryKey: key });
       const previous = queryClient.getQueryData(key);
       queryClient.setQueryData(key, (old) => {
-        if (!old || typeof old !== 'object') return old;
-        const o = old as Record<string, unknown>;
+        if (!old) return old;
         return {
-          ...o,
+          ...old,
           arenaGroupOrder: patchArenaGroupOrderJson(
-            o.arenaGroupOrder,
+            old.arenaGroupOrder,
             variables.arenaIndex,
             variables.groupIds
           ),
@@ -208,17 +207,16 @@ export function useMoveGroupBetweenArenas() {
       });
 
       queryClient.setQueryData(tKey, (old) => {
-        if (!old || typeof old !== 'object') return old;
-        const o = old as Record<string, unknown>;
+        if (!old) return old;
         return {
-          ...o,
+          ...old,
           arenaGroupOrder: nextJson,
         };
       });
 
       queryClient.setQueryData(gKey, (old) => {
         if (!Array.isArray(old)) return old;
-        return old.map((g: { id: string; arenaIndex: number }) =>
+        return old.map((g) =>
           g.id === variables.groupId
             ? { ...g, arenaIndex: variables.toArena }
             : g
@@ -268,12 +266,11 @@ export function useEnsureArenaSlot() {
       await queryClient.cancelQueries({ queryKey: tKey });
       const previous = queryClient.getQueryData(tKey);
       queryClient.setQueryData(tKey, (old) => {
-        if (!old || typeof old !== 'object') return old;
-        const o = old as Record<string, unknown>;
+        if (!old) return old;
         return {
-          ...o,
+          ...old,
           arenaGroupOrder: patchArenaGroupOrderJson(
-            o.arenaGroupOrder,
+            old.arenaGroupOrder,
             variables.arenaIndex,
             []
           ),
@@ -339,17 +336,16 @@ export function useRetireArena() {
       });
 
       queryClient.setQueryData(tKey, (old) => {
-        if (!old || typeof old !== 'object') return old;
-        const o = old as Record<string, unknown>;
+        if (!old) return old;
         return {
-          ...o,
+          ...old,
           arenaGroupOrder: nextJson,
         };
       });
 
       queryClient.setQueryData(gKey, (old) => {
         if (!Array.isArray(old)) return old;
-        return old.map((g: { id: string; arenaIndex: number }) =>
+        return old.map((g) =>
           g.arenaIndex === variables.fromArena
             ? { ...g, arenaIndex: variables.toArena }
             : g

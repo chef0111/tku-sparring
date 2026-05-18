@@ -25,6 +25,7 @@ const existingProfile = {
   weight: 65,
   affiliation: 'TKD Club',
   athleteCode: null,
+  image: null,
   createdAt: new Date(),
   updatedAt: new Date(),
 };

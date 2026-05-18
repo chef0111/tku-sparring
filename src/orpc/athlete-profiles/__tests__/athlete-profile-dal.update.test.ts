@@ -26,7 +26,7 @@ describe('AthleteProfileDAL.update', () => {
         athleteProfile: { update: profileUpdate },
         tournamentAthlete: { updateMany: tournamentUpdateMany },
       };
-      return (fn as (t: typeof tx) => Promise<unknown>)(tx as never);
+      return (fn as unknown as (t: typeof tx) => Promise<unknown>)(tx);
     });
 
     await AthleteProfileDAL.update('prof1', {
@@ -57,12 +57,13 @@ describe('AthleteProfileDAL.update', () => {
         athleteProfile: { update: profileUpdate },
         tournamentAthlete: { updateMany: tournamentUpdateMany },
       };
-      return (fn as (t: typeof tx) => Promise<unknown>)(tx as never);
+      return (fn as unknown as (t: typeof tx) => Promise<unknown>)(tx);
     });
 
     await AthleteProfileDAL.update('prof1', {
       athleteCode: '001',
       name: 'New Name',
+      image: undefined,
     });
 
     expect(tournamentUpdateMany).not.toHaveBeenCalled();

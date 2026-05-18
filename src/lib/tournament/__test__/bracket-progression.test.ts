@@ -27,6 +27,7 @@ function baseBracket(over: Partial<MatchData> = {}): MatchData {
     winnerTournamentAthleteId: null,
     redLocked: false,
     blueLocked: false,
+    updatedAt: new Date(0),
     groupId: 'g1',
     tournamentId: 't1',
     ...over,

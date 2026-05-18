@@ -69,6 +69,7 @@ export default function AthletesActionMenu({
           updateMutation.mutateAsync({
             id: row.original.id,
             athleteCode: row.original.athleteCode,
+            image: row.original.image,
             ...updates,
           }),
           {

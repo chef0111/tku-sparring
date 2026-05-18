@@ -22,6 +22,7 @@ function baseMatch(over: Partial<MatchData>): MatchData {
     winnerTournamentAthleteId: over.winnerTournamentAthleteId ?? null,
     redLocked: over.redLocked ?? false,
     blueLocked: over.blueLocked ?? false,
+    updatedAt: over.updatedAt ?? new Date(0),
     groupId: over.groupId ?? 'g1',
     tournamentId: over.tournamentId ?? 't1',
   };

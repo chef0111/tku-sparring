@@ -52,11 +52,8 @@ describe('getAdminStatusTransition', () => {
     expect(
       getAdminStatusTransition({
         match: {
-          ...baseMatch,
           status: 'complete',
-          redWins: 2,
           winnerTournamentAthleteId: 'ta-red',
-          winnerId: 'ap-red',
         },
         status: 'active',
       })
@@ -77,11 +74,7 @@ describe('getAdminStatusTransition', () => {
     expect(
       getAdminStatusTransition({
         match: {
-          ...baseMatch,
           status: 'pending',
-          redWins: 0,
-          blueWins: 0,
-          winnerId: null,
           winnerTournamentAthleteId: null,
         },
         status: 'complete',

@@ -12,7 +12,9 @@ import {
 vi.mock('@/orpc/client', () => ({
   client: {
     match: {
-      updateScore: vi.fn().mockResolvedValue(undefined),
+      updateScore: vi
+        .fn()
+        .mockResolvedValue({ id: 'm1', updatedAt: new Date() } as never),
       setWinner: vi.fn().mockResolvedValue(undefined),
     },
     device: {
@@ -51,12 +53,12 @@ describe('arena offline queue', () => {
     await replayArenaMutationQueue();
 
     expect(client.match.updateScore).toHaveBeenCalledTimes(2);
-    expect(client.match.updateScore.mock.calls[0]![0]).toEqual({
+    expect(vi.mocked(client.match.updateScore).mock.calls[0]![0]).toEqual({
       matchId: 'm1',
       redWins: 1,
       blueWins: 0,
     });
-    expect(client.match.updateScore.mock.calls[1]![0]).toEqual({
+    expect(vi.mocked(client.match.updateScore).mock.calls[1]![0]).toEqual({
       matchId: 'm1',
       redWins: 1,
       blueWins: 1,
@@ -68,7 +70,7 @@ describe('arena offline queue', () => {
     const { client } = await import('@/orpc/client');
     vi.mocked(client.match.updateScore)
       .mockRejectedValueOnce(new Error('network'))
-      .mockResolvedValue(undefined);
+      .mockResolvedValue({ id: 'm1', updatedAt: new Date() } as never);
 
     await enqueue({
       kind: 'match.updateScore',
