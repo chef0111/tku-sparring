@@ -229,13 +229,18 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
 
   const [filterValues, setFilterValues] = useQueryStates(filterParsers);
 
-  const debouncedSetFilterValues = useDebouncedCallback(
-    (values: typeof filterValues) => {
-      void setPage(1);
-      void setFilterValues(values);
-    },
-    debounceMs
-  );
+  /** Merged keys applied in one debounced flush so a null (clear) is not dropped when another filter update reschedules the debouncer before it runs. */
+  const pendingFilterUrlRef = React.useRef<
+    Record<string, string | Array<string> | null>
+  >({});
+
+  const debouncedFilterUrl = useDebouncedCallback(() => {
+    const merged = pendingFilterUrlRef.current;
+    if (Object.keys(merged).length === 0) return;
+    pendingFilterUrlRef.current = {};
+    void setPage(1);
+    void setFilterValues(merged);
+  }, debounceMs);
 
   const initialColumnFilters: ColumnFiltersState = React.useMemo(() => {
     if (enableAdvancedFilter) return [];
@@ -277,9 +282,11 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
         >((acc, filter) => {
           if (filterableColumns.find((column) => column.id === filter.id)) {
             const filterKey = filterKeyByColumnId[filter.id] ?? filter.id;
-            const value = filter.value as string | Array<string>;
+            const value = filter.value as string | Array<string> | undefined;
             acc[filterKey] =
-              value === '' || (Array.isArray(value) && value.length === 0)
+              value === undefined ||
+              value === '' ||
+              (Array.isArray(value) && value.length === 0)
                 ? null
                 : value;
           }
@@ -294,12 +301,16 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
           }
         }
 
-        debouncedSetFilterValues(filterUpdates);
+        pendingFilterUrlRef.current = {
+          ...pendingFilterUrlRef.current,
+          ...filterUpdates,
+        };
+        debouncedFilterUrl();
         return next;
       });
     },
     [
-      debouncedSetFilterValues,
+      debouncedFilterUrl,
       filterableColumns,
       filterKeyByColumnId,
       enableAdvancedFilter,
