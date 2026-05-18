@@ -19,7 +19,7 @@ export const useRoundTransition = () => {
     }))
   );
 
-  const resetRoundStats = useTimerStore((s) => s.resetRoundStats);
+  const primeRound = useTimerStore((s) => s.primeRound);
   const nextRound = useMatchStore((s) => s.nextRound);
 
   const prevIsBreakTime = useRef(isBreakTime);
@@ -33,7 +33,7 @@ export const useRoundTransition = () => {
       breakTimeLeft === 0 &&
       !isMatchOver
     ) {
-      resetRoundStats(roundDuration);
+      primeRound(roundDuration);
       nextRound();
     }
     prevIsBreakTime.current = isBreakTime;
@@ -43,7 +43,7 @@ export const useRoundTransition = () => {
     roundDuration,
     redWon,
     blueWon,
-    resetRoundStats,
+    primeRound,
     nextRound,
   ]);
 };

@@ -19,7 +19,6 @@ interface MatchActions {
   recordRoundWinner: (winner: Player) => void;
   declareWinner: (red: PlayerData, blue: PlayerData) => Player | 'tie';
   resetMatch: () => void;
-  resetRound: () => void;
   setMatchOver: (winner: Player) => void;
   closeMatchResult: () => void;
   setMaxRounds: (rounds: number) => void;
@@ -105,10 +104,6 @@ export const useMatchStore = create<MatchStore>()((set, get) => ({
       matchWinner: null,
       isMatchOver: false,
     });
-  },
-
-  resetRound: () => {
-    // Round state is managed through currentRound, nothing else to reset here
   },
 
   setMatchOver: (winner) => {

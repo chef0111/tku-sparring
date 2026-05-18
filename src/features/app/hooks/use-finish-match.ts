@@ -5,19 +5,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useArenaMutation } from '@/features/app/hooks/use-arena-mutation';
 import { useSettings } from '@/contexts/settings';
 import { useMatchStore } from '@/stores/match-store';
-import { usePlayerStore } from '@/stores/player-store';
-import { useTimerStore } from '@/stores/timer-store';
+import { afterFinish } from '@/stores/arena-scoring-actions';
 
 const OBJECT_ID_RE = /^[a-f\d]{24}$/i;
 
 export function useFinishMatch() {
   const queryClient = useQueryClient();
   const { mutateAsync } = useArenaMutation();
-
-  const closeMatchResult = useMatchStore((s) => s.closeMatchResult);
-  const resetMatch = useMatchStore((s) => s.resetMatch);
-  const resetTimer = useTimerStore((s) => s.reset);
-  const resetPlayers = usePlayerStore((s) => s.resetAll);
 
   const { matchId } = useMatchStore(
     useShallow((s) => ({
@@ -36,11 +30,8 @@ export function useFinishMatch() {
   }, [queryClient]);
 
   const resetArenaClientAfterResult = React.useCallback(() => {
-    closeMatchResult();
-    resetMatch();
-    resetTimer();
-    resetPlayers();
-  }, [closeMatchResult, resetMatch, resetPlayers, resetTimer]);
+    afterFinish();
+  }, []);
 
   const accept = React.useCallback(() => {
     resetArenaClientAfterResult();

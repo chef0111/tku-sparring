@@ -14,6 +14,7 @@ import type {
 import { usePlayerStore } from '@/stores/player-store';
 import { useTimerStore } from '@/stores/timer-store';
 import { useMatchStore } from '@/stores/match-store';
+import { prepArena } from '@/stores/arena-scoring-actions';
 import { useDeviceId } from '@/hooks/use-device-id';
 import { arenaSelectionMatchesQueryOptions } from '@/features/app/hooks/use-arena-selection-view';
 import { client } from '@/orpc/client';
@@ -42,18 +43,15 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     activeTab === 'standard' ? standardFormState : advanceFormState;
 
   const setMaxHealth = usePlayerStore((s) => s.setMaxHealth);
-  const resetAll = usePlayerStore((s) => s.resetAll);
   const setPlayerName = usePlayerStore((s) => s.setPlayerName);
   const setPlayerAvatar = usePlayerStore((s) => s.setPlayerAvatar);
 
-  const { setRoundDuration, setBreakDuration, resetRoundStats } = useTimerStore(
+  const { setRoundDuration, setBreakDuration } = useTimerStore(
     useShallow((s) => ({
       setRoundDuration: s.setRoundDuration,
       setBreakDuration: s.setBreakDuration,
-      resetRoundStats: s.resetRoundStats,
     }))
   );
-  const resetMatch = useMatchStore((s) => s.resetMatch);
 
   const toggleSettings = useCallback(() => setIsOpen(true), []);
 
@@ -106,10 +104,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         setPlayerAvatar('blue', standard.bluePlayerAvatar);
       }
 
-      resetRoundStats(standard.roundDuration * 1000);
-
-      resetMatch();
-      resetAll();
+      prepArena(standard.roundDuration * 1000);
 
       toast.success('Settings applied', {
         description: 'Applied latest settings for the next matches.',
@@ -145,8 +140,6 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
           if (advance.bluePlayerAvatar) {
             setPlayerAvatar('blue', advance.bluePlayerAvatar);
           }
-
-          resetRoundStats(advance.roundDuration * 1000);
 
           if (
             advance.match &&
@@ -210,8 +203,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
             }
           }
 
-          resetMatch();
-          resetAll();
+          prepArena(advance.roundDuration * 1000);
 
           toast.success('Settings applied', {
             description: 'Applied latest settings for the next matches.',
@@ -235,9 +227,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     setBreakDuration,
     setPlayerName,
     setPlayerAvatar,
-    resetMatch,
-    resetAll,
-    resetRoundStats,
+    prepArena,
   ]);
 
   useHotkeys(
