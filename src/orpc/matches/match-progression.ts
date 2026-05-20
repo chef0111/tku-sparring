@@ -26,6 +26,7 @@ export async function advanceWinner(
 
   const nextMatch = await db.match.findFirst({
     where: {
+      kind: 'bracket',
       groupId: match.groupId,
       round: successor.round,
       matchIndex: successor.matchIndex,
@@ -70,6 +71,7 @@ export async function clearWinnerAdvancement(
 
   const nextMatch = await db.match.findFirst({
     where: {
+      kind: 'bracket',
       groupId: match.groupId,
       round: successor.round,
       matchIndex: successor.matchIndex,

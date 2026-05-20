@@ -47,8 +47,20 @@ export function BracketMatchNode({
     [athleteMap]
   );
 
+  const redAssignedName = React.useMemo(() => {
+    if (redAthlete) return redAthlete.name;
+    if (!match.redTournamentAthleteId) return null;
+    return resolveTaName(match.redTournamentAthleteId) ?? null;
+  }, [match.redTournamentAthleteId, redAthlete, resolveTaName]);
+
+  const blueAssignedName = React.useMemo(() => {
+    if (blueAthlete) return blueAthlete.name;
+    if (!match.blueTournamentAthleteId) return null;
+    return resolveTaName(match.blueTournamentAthleteId) ?? null;
+  }, [match.blueTournamentAthleteId, blueAthlete, resolveTaName]);
+
   const redEmptyLabel = React.useMemo(() => {
-    if (redAthlete) return '';
+    if (redAssignedName) return '';
     if (match.round === 0) return 'Open';
     const feeder = getFeederMatch(
       matches,
@@ -64,12 +76,12 @@ export function BracketMatchNode({
     match.matchIndex,
     match.round,
     matches,
-    redAthlete,
+    redAssignedName,
     resolveTaName,
   ]);
 
   const blueEmptyLabel = React.useMemo(() => {
-    if (blueAthlete) return '';
+    if (blueAssignedName) return '';
     if (match.round === 0) return 'Open';
     const feeder = getFeederMatch(
       matches,
@@ -85,7 +97,7 @@ export function BracketMatchNode({
     match.matchIndex,
     match.round,
     matches,
-    blueAthlete,
+    blueAssignedName,
     resolveTaName,
   ]);
 
@@ -154,6 +166,7 @@ export function BracketMatchNode({
         match={match}
         side="red"
         athlete={redAthlete}
+        assignedName={redAssignedName}
         emptyLabel={redEmptyLabel}
         locked={match.redLocked}
         wins={match.redWins}
@@ -166,6 +179,7 @@ export function BracketMatchNode({
         match={match}
         side="blue"
         athlete={blueAthlete}
+        assignedName={blueAssignedName}
         emptyLabel={blueEmptyLabel}
         locked={match.blueLocked}
         wins={match.blueWins}

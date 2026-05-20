@@ -672,6 +672,143 @@ describe('regenerateBracket', () => {
   });
 });
 
+describe('updateScore', () => {
+  it('advances winner to the next-round slot when match completes 2-0', async () => {
+    const completedMatch = {
+      id: 'm-r0-0',
+      kind: 'bracket',
+      groupId: 'group-1',
+      tournamentId: 't-1',
+      round: 0,
+      matchIndex: 0,
+      status: 'pending',
+      bestOf: 3,
+      redWins: 0,
+      blueWins: 0,
+      redTournamentAthleteId: 'ta-red',
+      blueTournamentAthleteId: 'ta-blue',
+      redAthleteId: 'ap-red',
+      blueAthleteId: 'ap-blue',
+      winnerId: null,
+      winnerTournamentAthleteId: null,
+    };
+
+    vi.mocked(prisma.match.findUnique)
+      .mockResolvedValueOnce(completedMatch as never)
+      .mockResolvedValueOnce({
+        ...completedMatch,
+        status: 'complete',
+        redWins: 2,
+        blueWins: 0,
+        winnerId: 'ap-red',
+        winnerTournamentAthleteId: 'ta-red',
+      } as never);
+
+    vi.mocked(prisma.match.update)
+      .mockResolvedValueOnce({
+        ...completedMatch,
+        status: 'complete',
+        redWins: 2,
+        blueWins: 0,
+        winnerId: 'ap-red',
+        winnerTournamentAthleteId: 'ta-red',
+      } as never)
+      .mockResolvedValueOnce({ id: 'm-r1-0' } as never);
+
+    vi.mocked(prisma.match.findFirst).mockResolvedValue({
+      id: 'm-r1-0',
+      redTournamentAthleteId: null,
+      blueTournamentAthleteId: null,
+    } as never);
+
+    vi.mocked(prisma.tournamentAthlete.findUnique).mockResolvedValue({
+      id: 'ta-red',
+      athleteProfileId: 'ap-red',
+    } as never);
+
+    await MatchDAL.updateScore(
+      { matchId: 'm-r0-0', redWins: 2, blueWins: 0 },
+      'admin-1'
+    );
+
+    expect(prisma.match.update).toHaveBeenCalledTimes(2);
+    expect(prisma.match.update).toHaveBeenNthCalledWith(2, {
+      where: { id: 'm-r1-0' },
+      data: {
+        redTournamentAthleteId: 'ta-red',
+        redAthleteId: 'ap-red',
+      },
+    });
+  });
+});
+
+describe('adminSetMatchStatus', () => {
+  it('derives winner from existing scores and advances when marking complete', async () => {
+    const match = {
+      id: 'm-r0-0',
+      kind: 'bracket',
+      groupId: 'group-1',
+      tournamentId: 't-1',
+      round: 0,
+      matchIndex: 0,
+      status: 'active',
+      bestOf: 3,
+      redWins: 2,
+      blueWins: 0,
+      redTournamentAthleteId: 'ta-red',
+      blueTournamentAthleteId: 'ta-blue',
+      redAthleteId: 'ap-red',
+      blueAthleteId: 'ap-blue',
+      winnerId: null,
+      winnerTournamentAthleteId: null,
+    };
+
+    vi.mocked(prisma.match.findUnique)
+      .mockResolvedValueOnce(match as never)
+      .mockResolvedValueOnce({
+        ...match,
+        status: 'complete',
+        winnerId: 'ap-red',
+        winnerTournamentAthleteId: 'ta-red',
+      } as never);
+
+    vi.mocked(prisma.match.update)
+      .mockResolvedValueOnce({ ...match, status: 'complete' } as never)
+      .mockResolvedValueOnce({
+        ...match,
+        status: 'complete',
+        winnerId: 'ap-red',
+        winnerTournamentAthleteId: 'ta-red',
+      } as never)
+      .mockResolvedValueOnce({ id: 'm-r1-0' } as never);
+
+    vi.mocked(prisma.match.findFirst).mockResolvedValue({
+      id: 'm-r1-0',
+      redTournamentAthleteId: null,
+      blueTournamentAthleteId: null,
+    } as never);
+
+    vi.mocked(prisma.tournamentAthlete.findUnique).mockResolvedValue({
+      id: 'ta-red',
+      athleteProfileId: 'ap-red',
+    } as never);
+
+    await MatchDAL.adminSetMatchStatus(
+      { matchId: 'm-r0-0', status: 'complete' },
+      'admin-1'
+    );
+
+    expect(prisma.match.update).toHaveBeenCalledTimes(3);
+    expect(prisma.match.update).toHaveBeenNthCalledWith(3, {
+      where: { id: 'm-r1-0' },
+      data: {
+        redTournamentAthleteId: 'ta-red',
+        redAthleteId: 'ap-red',
+      },
+    });
+  });
+});
+
 describe('createCustom', () => {
   it('creates custom match with direct athletes and notifies realtime', async () => {
     const { publishMatchInvalidateEvent } =

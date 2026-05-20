@@ -706,10 +706,39 @@ export class MatchDAL {
       await clearWinnerAdvancement(match);
     }
 
-    const updated = await prisma.match.update({
+    let updated = await prisma.match.update({
       where: { id: input.matchId },
       data: transition.data,
     });
+
+    if (next === 'complete' && !transition.clearedScores) {
+      const scoreTransition = getScoreTransition({
+        match: { ...match, ...updated },
+        redWins: updated.redWins,
+        blueWins: updated.blueWins,
+      });
+
+      if (scoreTransition.data.status === 'complete') {
+        updated = await prisma.match.update({
+          where: { id: input.matchId },
+          data: {
+            redWins: scoreTransition.data.redWins,
+            blueWins: scoreTransition.data.blueWins,
+            winnerId: scoreTransition.data.winnerId ?? null,
+            winnerTournamentAthleteId:
+              scoreTransition.data.winnerTournamentAthleteId ?? null,
+            status: 'complete',
+          },
+        });
+
+        if (scoreTransition.advanceWinnerTournamentAthleteId) {
+          await advanceWinner(
+            input.matchId,
+            scoreTransition.advanceWinnerTournamentAthleteId
+          );
+        }
+      }
+    }
 
     await recordTournamentActivity({
       tournamentId: match.tournamentId,
