@@ -223,9 +223,17 @@ export function useMatchDetailPanel() {
         setPendingMatchStatus(next);
         return;
       }
+      if (
+        next === 'complete' &&
+        (redWins >= 2 || blueWins >= 2) &&
+        (redWins !== match.redWins || blueWins !== match.blueWins)
+      ) {
+        updateScore.mutate({ matchId: match.id, redWins, blueWins });
+        return;
+      }
       adminSetMatchStatus.mutate({ matchId: match.id, status: next });
     },
-    [adminSetMatchStatus, match]
+    [adminSetMatchStatus, match, redWins, blueWins, updateScore]
   );
 
   const confirmPendingMatchStatus = React.useCallback(() => {

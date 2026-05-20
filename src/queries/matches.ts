@@ -20,6 +20,7 @@ import {
   applyOptimisticSetLock,
   applyOptimisticSwap,
   applyOptimisticSwapParticipants,
+  applyOptimisticUpdateScore,
   findMatchListQueryKey,
 } from '@/lib/queries/matches';
 
@@ -214,16 +215,37 @@ export function useSetLock(options?: { onSuccess?: () => void }) {
 }
 
 export function useUpdateScore(options?: { onSuccess?: () => void }) {
+  const queryClient = useQueryClient();
   const invalidate = useInvalidateMatches();
 
   return useMutation({
     mutationFn: (data: UpdateScoreDTO) => client.match.updateScore(data),
-    onSuccess: () => {
-      invalidate();
-      toast.success('Score updated');
-      options?.onSuccess?.();
+    onMutate: async (input): Promise<BracketDnDMutationContext | undefined> => {
+      const queryKey = findMatchListQueryKey(queryClient, input.matchId);
+      if (!queryKey) return undefined;
+
+      await queryClient.cancelQueries({ queryKey });
+      const previousMatches =
+        queryClient.getQueryData<Array<MatchData>>(queryKey);
+      queryClient.setQueryData<Array<MatchData>>(queryKey, (old) => {
+        if (!old) return old;
+        return applyOptimisticUpdateScore(old, input);
+      });
+      return { queryKey, previousMatches };
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err, _input, context) => {
+      if (context?.queryKey && context.previousMatches !== undefined) {
+        queryClient.setQueryData(context.queryKey, context.previousMatches);
+      }
+      toast.error(err.message);
+    },
+    onSettled: (_data, error) => {
+      void invalidate();
+      if (!error) {
+        toast.success('Score updated');
+        options?.onSuccess?.();
+      }
+    },
   });
 }
 

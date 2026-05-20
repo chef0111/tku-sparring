@@ -4,8 +4,11 @@ import type {
   SetLockDTO,
   SwapParticipantsDTO,
   SwapSlotsDTO,
+  UpdateScoreDTO,
 } from '@/orpc/matches/dto';
 import type { MatchData } from '@/features/dashboard/types';
+import { getSuccessorSlot } from '@/lib/tournament/bracket-progression';
+import { getScoreTransition } from '@/lib/tournament/match-transition';
 
 export type MatchListQueryKey = readonly ['match', 'list', string];
 
@@ -170,6 +173,55 @@ export function applyOptimisticSwapParticipants(
         : input.blueTournamentAthleteId
           ? findProfileId(matches, input.blueTournamentAthleteId)
           : null;
+
+  return out;
+}
+
+export function applyOptimisticUpdateScore(
+  matches: Array<MatchData>,
+  input: UpdateScoreDTO
+): Array<MatchData> {
+  const out = matches.map((m) => ({ ...m }));
+  const m = out.find((x) => x.id === input.matchId);
+  if (!m) return out;
+
+  const transition = getScoreTransition({
+    match: m,
+    redWins: input.redWins,
+    blueWins: input.blueWins,
+  });
+
+  Object.assign(m, transition.data);
+
+  if (
+    transition.data.status !== 'complete' ||
+    !transition.advanceWinnerTournamentAthleteId
+  ) {
+    return out;
+  }
+
+  const successor = getSuccessorSlot({
+    round: m.round,
+    matchIndex: m.matchIndex,
+  });
+  const next = out.find(
+    (x) =>
+      x.kind === 'bracket' &&
+      x.groupId === m.groupId &&
+      x.round === successor.round &&
+      x.matchIndex === successor.matchIndex
+  );
+  if (!next) return out;
+
+  const wta = transition.advanceWinnerTournamentAthleteId;
+  const profileId = findProfileId(matches, wta);
+  if (successor.side === 'red') {
+    next.redTournamentAthleteId = wta;
+    next.redAthleteId = profileId;
+  } else {
+    next.blueTournamentAthleteId = wta;
+    next.blueAthleteId = profileId;
+  }
 
   return out;
 }

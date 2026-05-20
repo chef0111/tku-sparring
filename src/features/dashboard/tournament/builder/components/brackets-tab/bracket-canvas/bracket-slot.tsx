@@ -14,6 +14,7 @@ export interface BracketSlotProps {
   side: 'red' | 'blue';
   athlete: TournamentAthleteData | null | undefined;
   emptyLabel: string;
+  assignedName?: string | null;
   locked: boolean;
   wins: number;
   isWinner: boolean;
@@ -27,6 +28,7 @@ export function BracketSlot({
   side,
   athlete,
   emptyLabel,
+  assignedName,
   locked,
   wins,
   isWinner,
@@ -35,6 +37,7 @@ export function BracketSlot({
   readOnly,
 }: BracketSlotProps) {
   const id = `slot-${match.id}-${side}`;
+  const slotLabel = athlete?.name ?? assignedName ?? emptyLabel;
   const canDrag = !locked && !!athlete && match.round === 0 && !readOnly;
   const canDrop = match.round === 0 && !locked;
 
@@ -89,7 +92,7 @@ export function BracketSlot({
       }}
       className={cn(
         'relative z-2 flex touch-none items-stretch rounded-md border border-transparent bg-transparent active:cursor-grabbing',
-        athlete ? 'cursor-grab' : 'cursor-pointer',
+        athlete || assignedName ? 'cursor-grab' : 'cursor-pointer',
         locked && 'border-amber-500/60',
         isOver && canDrop && 'ring-primary/30 ring-1',
         isDragging && 'opacity-60'
@@ -129,11 +132,13 @@ export function BracketSlot({
           <span
             className={cn(
               'min-w-0 text-xs select-none!',
-              athlete ? 'text-foreground' : 'text-muted-foreground italic',
+              athlete || assignedName
+                ? 'text-foreground'
+                : 'text-muted-foreground italic',
               isWinner && 'font-semibold text-emerald-600'
             )}
           >
-            {athlete ? athlete.name : emptyLabel}
+            {slotLabel}
           </span>
         </div>
       </div>
