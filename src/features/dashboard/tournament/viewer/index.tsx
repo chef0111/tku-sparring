@@ -1,14 +1,11 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
-import {
-  CheckCircle2,
-  Edit,
-  History,
-  Layers,
-  LayoutGrid,
-  Trophy,
-  Users,
-} from 'lucide-react';
+import { CheckCircle2, Edit, History } from 'lucide-react';
+import { ActivityPanel } from './components/activity-panel';
+import { GroupsProgressTable } from './components/groups-progress-table';
+import { SetupChecklist } from './components/setup-checklist';
+import { TournamentKpiRow } from './components/tournament-kpi-row';
+import { useTournamentCommandCenter } from './hooks/use-tournament-command-center';
 import type {
   GroupData,
   MatchData,
@@ -43,7 +40,7 @@ interface TournamentViewerProps {
 export function TournamentViewer({
   tournament,
   groups,
-  matches: _matches,
+  matches,
   tournamentId,
 }: TournamentViewerProps) {
   const isReadOnly = useTournamentReadOnly(tournamentId);
@@ -52,6 +49,12 @@ export function TournamentViewer({
     React.useState<ConfirmStatus | null>(null);
   const setStatusMutation = useSetTournamentStatus({
     onSuccess: () => setConfirmStatus(null),
+  });
+
+  const commandCenter = useTournamentCommandCenter({
+    tournament,
+    groups,
+    matches,
   });
 
   const transitionAction =
@@ -94,7 +97,7 @@ export function TournamentViewer({
             type="button"
             onClick={() => setActivityOpen(true)}
           >
-            <History className="mr-1 size-4" />
+            <History className="mr-1 size-4" data-icon="inline-start" />
             Activity
           </Button>
           <Button variant="outline" size="sm" asChild>
@@ -102,7 +105,7 @@ export function TournamentViewer({
               to="/dashboard/tournaments/$id/builder"
               params={{ id: tournamentId }}
             >
-              <Edit className="mr-1 size-4" />
+              <Edit className="mr-1 size-4" data-icon="inline-start" />
               {isReadOnly ? 'Open Builder' : 'Edit Tournament'}
             </Link>
           </Button>
@@ -118,7 +121,7 @@ export function TournamentViewer({
       </SiteHeader>
 
       <div className="flex-1 overflow-auto p-6">
-        <div className="mx-auto max-w-7xl space-y-6">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4">
           {tournament.status === 'active' &&
           tournament.lifecycle.canComplete ? (
             <Alert>
@@ -131,49 +134,32 @@ export function TournamentViewer({
             </Alert>
           ) : null}
 
-          {/* Stats */}
-          <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard
-              icon={Layers}
-              label="Groups"
-              value={tournament._count.groups}
+          {tournament.status === 'draft' &&
+          commandCenter.setupSteps.length > 0 ? (
+            <SetupChecklist
+              steps={commandCenter.setupSteps}
+              tournamentId={tournamentId}
             />
-            <StatCard
-              icon={Users}
-              label="Athletes"
-              value={tournament._count.tournamentAthletes}
-            />
-            <StatCard
-              icon={Trophy}
-              label="Matches"
-              value={tournament._count.matches}
-            />
-          </div>
+          ) : null}
 
-          {/* Athletes per group */}
-          <div className="space-y-4">
-            {groups.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
-                <LayoutGrid className="text-muted-foreground mb-4 size-10" />
-                <p className="text-muted-foreground text-sm">
-                  No groups yet. Switch to builder mode to add groups.
-                </p>
-                <Button variant="outline" size="sm" className="mt-4" asChild>
-                  <Link
-                    to="/dashboard/tournaments/$id/builder"
-                    params={{ id: tournamentId }}
-                  >
-                    Open Builder
-                  </Link>
-                </Button>
-              </div>
-            ) : (
-              <div className="flex h-32 items-center justify-center rounded-lg border border-dashed">
-                <p className="text-muted-foreground text-sm">
-                  Select a group to view athletes.
-                </p>
-              </div>
-            )}
+          <TournamentKpiRow
+            tournament={tournament}
+            matchTotals={commandCenter.matchTotals}
+          />
+
+          <div className="grid gap-4 lg:grid-cols-5">
+            <div className="flex flex-col gap-4 lg:col-span-3">
+              <GroupsProgressTable
+                rows={commandCenter.groupProgress}
+                tournamentId={tournamentId}
+              />
+            </div>
+            <div className="lg:col-span-2">
+              <ActivityPanel
+                tournamentId={tournamentId}
+                onViewAll={() => setActivityOpen(true)}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -235,26 +221,6 @@ export function TournamentViewer({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: number;
-}) {
-  return (
-    <div className="rounded-lg border p-4">
-      <div className="flex items-center gap-2">
-        <Icon className="text-muted-foreground size-4" />
-        <span className="text-muted-foreground text-sm">{label}</span>
-      </div>
-      <p className="mt-2 text-2xl font-bold">{value}</p>
     </div>
   );
 }
