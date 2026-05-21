@@ -1,0 +1,42 @@
+---
+description: Use Bun as the primary package manager for all install, run, and CLI tasks
+alwaysApply: true
+---
+
+# Bun Package Manager
+
+This project uses **Bun**. Lockfile: `bun.lock`.
+
+## Commands
+
+| Instead of         | Use                |
+| ------------------ | ------------------ |
+| `npm install`      | `bun install`      |
+| `npm add <pkg>`    | `bun add <pkg>`    |
+| `npm add -d <pkg>` | `bun add -d <pkg>` |
+| `npm remove <pkg>` | `bun remove <pkg>` |
+| `npm run <script>` | `bun run <script>` |
+| `npx <cmd>`        | `bunx <cmd>`       |
+
+## Agent behavior
+
+- Run package and script commands with `bun` / `bunx`, not `npm`, `pnpm`, or `yarn`.
+- Prefer `bun run test`, `bun run dev`, `bun run lint` over `npm test`, etc.
+- When adding dependencies, update `package.json` via `bun add` so `bun.lock` stays in sync.
+- Do not create or commit `package-lock.json`, `pnpm-lock.yaml`, or `yarn.lock`.
+
+## Examples
+
+```bash
+# Install deps
+bun install
+
+# Add a dependency
+bun add zod
+
+# Run a script
+bun run test
+
+# One-off CLI (replaces npx)
+bunx shadcn@latest add button
+```
