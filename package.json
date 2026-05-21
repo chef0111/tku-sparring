@@ -16,10 +16,10 @@
     "url": "git+https://github.com/chef0111/tku-sparring.git"
   },
   "scripts": {
-    "dev": "portless tku-sparring vite dev --port 3000",
+    "dev": "portless tss vite dev --port 3000",
     "build": "vite build",
-    "preview": "portless tku-sparring vite preview",
-    "start": "vite build && portless tku-sparring vite preview",
+    "preview": "portless tss vite preview",
+    "start": "vite build && portless tss vite preview",
     "test": "vitest run",
     "lint": "eslint",
     "format": "prettier",
