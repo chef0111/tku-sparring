@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { formatDistanceToNow } from 'date-fns';
 import { ListFilter, ScrollText, X } from 'lucide-react';
+import { ActivityEventRow } from './viewer/components/activity-event-row';
 import type { TournamentActivityEventType } from '@/orpc/activity/event-types';
 import type { ActivityEventFilterOption } from '@/orpc/activity/filter-options';
 import { getNormalizedEvents } from '@/orpc/activity/filter-options';
@@ -24,11 +24,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { useTournamentActivityInfinite } from '@/queries/activity';
 import { cn } from '@/lib/utils';
 
@@ -209,40 +204,9 @@ export function TournamentActivitySheet({
             <p className="text-muted-foreground text-sm">No activity yet.</p>
           ) : (
             <ul className="flex flex-col gap-3">
-              {rows.map((row) => {
-                const createdAt =
-                  row.createdAt instanceof Date
-                    ? row.createdAt
-                    : new Date(row.createdAt);
-                return (
-                  <li
-                    key={row.id}
-                    className="border-border rounded-md border px-3 py-2"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm leading-snug">{row.summary}</p>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <time
-                            className="text-muted-foreground shrink-0 text-xs whitespace-nowrap"
-                            dateTime={createdAt.toISOString()}
-                          >
-                            {formatDistanceToNow(createdAt, {
-                              addSuffix: true,
-                            })}
-                          </time>
-                        </TooltipTrigger>
-                        <TooltipContent side="left">
-                          {createdAt.toLocaleString()}
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                    <p className="text-muted-foreground mt-1 text-xs">
-                      {row.adminName}
-                    </p>
-                  </li>
-                );
-              })}
+              {rows.map((row) => (
+                <ActivityEventRow key={row.id} row={row} />
+              ))}
             </ul>
           )}
         </div>
