@@ -1,77 +1,132 @@
-import { Layers, LayoutGrid, Trophy, Users } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
+import { ArrowUpRight, Layers, LayoutGrid, Trophy, Users } from 'lucide-react';
+import { HubMetricCard, HubMetricFooter } from './hub-panel';
 import type { DashboardStats } from '../lib/compute-dashboard-stats';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Status, StatusIndicator, StatusLabel } from '@/components/ui/status';
 
 interface KpiStripProps {
   stats: DashboardStats['kpis'];
 }
 
-const tiles = [
-  {
-    key: 'tournaments',
-    label: 'Tournaments',
-    icon: LayoutGrid,
-    getValue: (stats: DashboardStats['kpis']) => stats.totalTournaments,
-    getSecondary: (stats: DashboardStats['kpis']) =>
-      `${stats.byStatus.draft} draft · ${stats.byStatus.active} active · ${stats.byStatus.completed} done`,
-  },
-  {
-    key: 'athletes',
-    label: 'Athletes',
-    icon: Users,
-    getValue: (stats: DashboardStats['kpis']) => stats.totalAthletes,
-  },
-  {
-    key: 'groups',
-    label: 'Groups',
-    icon: Layers,
-    getValue: (stats: DashboardStats['kpis']) => stats.totalGroups,
-  },
-  {
-    key: 'matches',
-    label: 'Matches',
-    icon: Trophy,
-    getValue: (stats: DashboardStats['kpis']) => stats.totalMatches,
-  },
-] as const;
+function formatAvgPerTournament(total: number, tournaments: number) {
+  if (tournaments === 0) return '0';
+  const avg = total / tournaments;
+  return Number.isInteger(avg) ? String(avg) : avg.toFixed(1);
+}
+
+function StatusMixFooter({ stats }: { stats: DashboardStats['kpis'] }) {
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <Status status="degraded">
+        <StatusIndicator />
+        <StatusLabel>{stats.byStatus.draft} draft</StatusLabel>
+      </Status>
+      <Status status="online">
+        <StatusIndicator />
+        <StatusLabel>{stats.byStatus.active} active</StatusLabel>
+      </Status>
+      <Status status="maintenance">
+        <StatusIndicator />
+        <StatusLabel>{stats.byStatus.completed} done</StatusLabel>
+      </Status>
+    </div>
+  );
+}
 
 export function KpiStrip({ stats }: KpiStripProps) {
+  const avgAthletes = formatAvgPerTournament(
+    stats.totalAthletes,
+    stats.totalTournaments
+  );
+  const avgGroups = formatAvgPerTournament(
+    stats.totalGroups,
+    stats.totalTournaments
+  );
+  const avgMatches = formatAvgPerTournament(
+    stats.totalMatches,
+    stats.totalTournaments
+  );
+
+  const tiles = [
+    {
+      key: 'tournaments',
+      label: 'Tournaments',
+      icon: LayoutGrid,
+      value: stats.totalTournaments,
+      footer: <StatusMixFooter stats={stats} />,
+      action: (
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="text-muted-foreground size-7"
+          asChild
+        >
+          <Link to="/dashboard/tournaments" aria-label="View all tournaments">
+            <ArrowUpRight aria-hidden="true" />
+          </Link>
+        </Button>
+      ),
+    },
+    {
+      key: 'athletes',
+      label: 'Athletes',
+      icon: Users,
+      value: stats.totalAthletes,
+      footer: (
+        <HubMetricFooter
+          status="online"
+          value={`${avgAthletes} avg`}
+          label="registers per tournament"
+        />
+      ),
+    },
+    {
+      key: 'groups',
+      label: 'Groups',
+      icon: Layers,
+      value: stats.totalGroups,
+      footer: (
+        <HubMetricFooter
+          status="maintenance"
+          value={`${avgGroups} avg`}
+          label="division buckets in play"
+        />
+      ),
+    },
+    {
+      key: 'matches',
+      label: 'Matches',
+      icon: Trophy,
+      value: stats.totalMatches,
+      footer: (
+        <HubMetricFooter
+          status="degraded"
+          value={`${avgMatches} avg`}
+          label="across all tournaments"
+        />
+      ),
+    },
+  ] as const;
+
   return (
     <section className="flex flex-col gap-3">
       <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-        Overview
+        Today
       </h2>
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {tiles.map((tile, index) => {
-          const Icon = tile.icon;
-          return (
-            <Card
-              key={tile.key}
-              className="animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-500 motion-reduce:animate-none"
-              style={{ animationDelay: `${index * 75}ms` }}
-            >
-              <CardHeader className="flex flex-row items-center gap-2 pb-2">
-                <Icon
-                  className="text-muted-foreground size-4"
-                  aria-hidden="true"
-                />
-                <CardTitle className="text-muted-foreground text-sm font-medium">
-                  {tile.label}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-1">
-                <p className="text-2xl font-semibold tabular-nums">
-                  {tile.getValue(stats)}
-                </p>
-                {'getSecondary' in tile && tile.getSecondary ? (
-                  <p className="text-muted-foreground text-xs">
-                    {tile.getSecondary(stats)}
-                  </p>
-                ) : null}
-              </CardContent>
-            </Card>
-          );
-        })}
+      <div className="grid gap-4 overflow-visible sm:grid-cols-2 xl:grid-cols-4">
+        {tiles.map((tile, index) => (
+          <HubMetricCard
+            key={tile.key}
+            label={tile.label}
+            icon={tile.icon}
+            value={tile.value}
+            footer={tile.footer}
+            action={'action' in tile ? tile.action : undefined}
+            className="animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-500 motion-reduce:animate-none"
+            style={{ animationDelay: `${index * 75}ms` }}
+          />
+        ))}
       </div>
     </section>
   );

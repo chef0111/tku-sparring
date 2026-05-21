@@ -33,7 +33,7 @@ export function TournamentsActionMenu({
   }, []);
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild onClick={stopRowClick}>
         <Button
           variant="ghost"

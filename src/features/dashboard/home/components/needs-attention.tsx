@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router';
+import { HubSection, HubSectionBody } from './hub-panel';
 import type { AttentionItem } from '../lib/compute-dashboard-stats';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -11,13 +12,13 @@ export function NeedsAttention({ items }: NeedsAttentionProps) {
   if (items.length === 0) return null;
 
   return (
-    <section className="bg-card flex flex-col gap-3 rounded-lg border p-4">
-      <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-        Needs attention
-      </h2>
-      <div className="flex flex-col gap-3">
+    <HubSection title="Needs attention">
+      <HubSectionBody className="flex flex-col gap-3">
         {items.map((item) => (
-          <Alert key={`${item.tournamentId}-${item.kind}`}>
+          <Alert
+            key={`${item.tournamentId}-${item.kind}`}
+            className="border-border/60 bg-muted/20"
+          >
             <AlertTitle>{item.tournamentName}</AlertTitle>
             <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <span>{item.message}</span>
@@ -32,7 +33,7 @@ export function NeedsAttention({ items }: NeedsAttentionProps) {
             </AlertDescription>
           </Alert>
         ))}
-      </div>
-    </section>
+      </HubSectionBody>
+    </HubSection>
   );
 }

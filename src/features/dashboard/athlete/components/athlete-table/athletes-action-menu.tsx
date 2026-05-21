@@ -102,7 +102,7 @@ export default function AthletesActionMenu({
   );
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="absolute inset-2 size-8">
           <MoreHorizontal className="size-4" />

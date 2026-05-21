@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { HubSection, HubSectionBody } from './hub-panel';
 import type { TournamentListItem } from '@/features/dashboard/types';
 import type { DataTableRowAction } from '@/types/data-table';
 import { getTournamentsTableColumns } from '@/features/dashboard/tournament/list/components/tournaments-table/tournaments-table-columns';
@@ -34,16 +35,16 @@ export function RecentTournamentsSection({
   });
 
   return (
-    <section className="bg-card flex flex-col gap-3 rounded-lg border p-4">
-      <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-        Recent tournaments
-      </h2>
-      <DataTable
-        table={table}
-        state={tableState}
-        selectedRows={false}
-        pagination={false}
-      />
-    </section>
+    <HubSection title="Recent tournaments">
+      <HubSectionBody className="p-0 pt-0">
+        <DataTable
+          table={table}
+          state={tableState}
+          selectedRows={false}
+          pagination={false}
+          className="gap-0"
+        />
+      </HubSectionBody>
+    </HubSection>
   );
 }
