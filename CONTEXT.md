@@ -59,6 +59,14 @@ _Avoid_: Consolation bout
 The client-side selection flow for tournament, group, and match used before a bout starts.
 _Avoid_: Setup wizard
 
+**Operations hub**:
+`/dashboard` — cross-tournament KPIs, status pipeline, needs-attention, recent table.
+_Avoid_: Home dashboard, admin home
+
+**Command center**:
+`/dashboard/tournaments/$id` — per-tournament monitoring, setup checklist (draft), lifecycle actions; editing stays on **Builder**.
+_Avoid_: Tournament detail, viewer
+
 ## Naming conventions (code)
 
 Prefer **short imperative** names for APIs and modules, but keep **semantics** aligned with the domain terms above — a reader should still see what concept is acted on (e.g. a **Match**, a **round**), not only that something runs.
