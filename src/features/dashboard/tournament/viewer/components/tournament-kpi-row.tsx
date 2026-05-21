@@ -46,11 +46,14 @@ export function TournamentKpiRow({
           return (
             <Card
               key={tile.key}
-              className="animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-500"
+              className="animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-500 motion-reduce:animate-none"
               style={{ animationDelay: `${index * 75}ms` }}
             >
               <CardHeader className="flex flex-row items-center gap-2 pb-2">
-                <Icon className="text-muted-foreground size-4" />
+                <Icon
+                  className="text-muted-foreground size-4"
+                  aria-hidden="true"
+                />
                 <CardTitle className="text-muted-foreground text-sm font-medium">
                   {tile.label}
                 </CardTitle>
@@ -64,7 +67,7 @@ export function TournamentKpiRow({
           );
         })}
         <Card
-          className="animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-500"
+          className="animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-500 motion-reduce:animate-none"
           style={{ animationDelay: `${tiles.length * 75}ms` }}
         >
           <CardHeader className="pb-2">

@@ -47,7 +47,7 @@ export function StatusPipeline({ pipeline }: StatusPipelineProps) {
                 <Empty className="border-none p-6">
                   <EmptyHeader>
                     <EmptyMedia variant="icon">
-                      <LayoutGrid />
+                      <LayoutGrid aria-hidden="true" />
                     </EmptyMedia>
                     <EmptyTitle>
                       No {label.toLowerCase()} tournaments
@@ -64,7 +64,7 @@ export function StatusPipeline({ pipeline }: StatusPipelineProps) {
                       <Link
                         to="/dashboard/tournaments/$id"
                         params={{ id: tournament.id }}
-                        className="hover:bg-muted/50 flex flex-col gap-0.5 rounded-md px-2 py-2 transition-colors"
+                        className="hover:bg-muted/50 flex min-w-0 flex-col gap-0.5 rounded-md px-2 py-2 transition-colors"
                       >
                         <span className="truncate text-sm font-medium">
                           {tournament.name}

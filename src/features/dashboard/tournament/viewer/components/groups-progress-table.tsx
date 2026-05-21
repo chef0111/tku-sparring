@@ -38,7 +38,7 @@ export function GroupsProgressTable({
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <LayoutGrid />
+              <LayoutGrid aria-hidden="true" />
             </EmptyMedia>
             <EmptyTitle>No groups yet</EmptyTitle>
             <EmptyDescription>

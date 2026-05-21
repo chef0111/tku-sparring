@@ -121,11 +121,12 @@ export function TournamentViewer({
       </SiteHeader>
 
       <div className="flex-1 overflow-auto p-6">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4">
+        <main className="mx-auto flex max-w-7xl flex-col gap-4">
+          <h1 className="sr-only">{tournament.name} command center</h1>
           {tournament.status === 'active' &&
           tournament.lifecycle.canComplete ? (
             <Alert>
-              <CheckCircle2 className="size-4" />
+              <CheckCircle2 className="size-4" aria-hidden="true" />
               <AlertTitle>Ready to complete</AlertTitle>
               <AlertDescription>
                 All groups have winner results. You can complete this tournament
@@ -161,7 +162,7 @@ export function TournamentViewer({
               />
             </div>
           </div>
-        </div>
+        </main>
       </div>
 
       <TournamentActivitySheet
@@ -212,7 +213,7 @@ export function TournamentViewer({
               {setStatusMutation.isPending ? (
                 <>
                   <Spinner className="text-primary-foreground" />
-                  <span>Saving...</span>
+                  <span>Saving…</span>
                 </>
               ) : (
                 (transitionAction?.label ?? 'Confirm')

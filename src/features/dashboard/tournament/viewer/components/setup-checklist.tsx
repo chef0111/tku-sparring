@@ -31,6 +31,7 @@ export function SetupChecklist({ steps, tournamentId }: SetupChecklistProps) {
                     ? 'text-primary size-4'
                     : 'text-muted-foreground size-4'
                 }
+                aria-hidden="true"
               />
               <span
                 className={
