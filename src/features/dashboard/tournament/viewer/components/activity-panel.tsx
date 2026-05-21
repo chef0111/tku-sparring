@@ -25,7 +25,9 @@ export function ActivityPanel({ tournamentId, onViewAll }: ActivityPanelProps) {
   return (
     <Card className="flex h-full flex-col">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base">Recent activity</CardTitle>
+        <CardTitle className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+          Recent activity
+        </CardTitle>
         <Button variant="ghost" size="sm" onClick={onViewAll}>
           View all
         </Button>

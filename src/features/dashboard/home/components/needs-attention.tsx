@@ -11,7 +11,7 @@ export function NeedsAttention({ items }: NeedsAttentionProps) {
   if (items.length === 0) return null;
 
   return (
-    <section className="flex flex-col gap-3">
+    <section className="bg-card flex flex-col gap-3 rounded-lg border p-4">
       <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
         Needs attention
       </h2>

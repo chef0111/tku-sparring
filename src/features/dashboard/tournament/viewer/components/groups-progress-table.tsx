@@ -80,7 +80,10 @@ export function GroupsProgressTable({
         </TableHeader>
         <TableBody>
           {rows.map((row) => (
-            <TableRow key={row.groupId} className="hover:bg-muted/50">
+            <TableRow
+              key={row.groupId}
+              className="hover:bg-muted/50 transition-colors"
+            >
               <TableCell className="font-medium">{row.groupName}</TableCell>
               <TableCell className="tabular-nums">{row.arenaIndex}</TableCell>
               <TableCell className="text-right tabular-nums">

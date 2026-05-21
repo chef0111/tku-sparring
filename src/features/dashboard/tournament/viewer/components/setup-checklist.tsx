@@ -13,7 +13,7 @@ export function SetupChecklist({ steps, tournamentId }: SetupChecklistProps) {
   const firstIncompleteIndex = steps.findIndex((step) => !step.complete);
 
   return (
-    <Card>
+    <Card className="bg-card rounded-lg border">
       <CardContent className="flex flex-wrap items-center gap-4 pt-6">
         {steps.map((step, index) => {
           const Icon = step.complete ? CheckCircle2 : Circle;

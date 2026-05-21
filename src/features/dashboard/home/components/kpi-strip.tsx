@@ -37,34 +37,39 @@ const tiles = [
 
 export function KpiStrip({ stats }: KpiStripProps) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      {tiles.map((tile, index) => {
-        const Icon = tile.icon;
-        return (
-          <Card
-            key={tile.key}
-            className="animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-500"
-            style={{ animationDelay: `${index * 75}ms` }}
-          >
-            <CardHeader className="flex flex-row items-center gap-2 pb-2">
-              <Icon className="text-muted-foreground size-4" />
-              <CardTitle className="text-muted-foreground text-sm font-medium">
-                {tile.label}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-1">
-              <p className="text-2xl font-semibold tabular-nums">
-                {tile.getValue(stats)}
-              </p>
-              {'getSecondary' in tile && tile.getSecondary ? (
-                <p className="text-muted-foreground text-xs">
-                  {tile.getSecondary(stats)}
+    <section className="flex flex-col gap-3">
+      <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+        Overview
+      </h2>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {tiles.map((tile, index) => {
+          const Icon = tile.icon;
+          return (
+            <Card
+              key={tile.key}
+              className="animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-500"
+              style={{ animationDelay: `${index * 75}ms` }}
+            >
+              <CardHeader className="flex flex-row items-center gap-2 pb-2">
+                <Icon className="text-muted-foreground size-4" />
+                <CardTitle className="text-muted-foreground text-sm font-medium">
+                  {tile.label}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-1">
+                <p className="text-2xl font-semibold tabular-nums">
+                  {tile.getValue(stats)}
                 </p>
-              ) : null}
-            </CardContent>
-          </Card>
-        );
-      })}
-    </div>
+                {'getSecondary' in tile && tile.getSecondary ? (
+                  <p className="text-muted-foreground text-xs">
+                    {tile.getSecondary(stats)}
+                  </p>
+                ) : null}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </section>
   );
 }
