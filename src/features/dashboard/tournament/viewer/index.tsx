@@ -9,7 +9,11 @@ import {
   Trophy,
   Users,
 } from 'lucide-react';
-import type { GroupData, TournamentData } from '@/features/dashboard/types';
+import type {
+  GroupData,
+  MatchData,
+  TournamentData,
+} from '@/features/dashboard/types';
 import { SiteHeader } from '@/features/dashboard/site-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -32,12 +36,14 @@ type ConfirmStatus = 'active' | 'completed';
 interface TournamentViewerProps {
   tournament: TournamentData;
   groups: Array<GroupData>;
+  matches: Array<MatchData>;
   tournamentId: string;
 }
 
 export function TournamentViewer({
   tournament,
   groups,
+  matches: _matches,
   tournamentId,
 }: TournamentViewerProps) {
   const isReadOnly = useTournamentReadOnly(tournamentId);

@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type {
   AdminSetMatchStatusDTO,
@@ -32,11 +37,15 @@ export function useMatches(groupId: string | null) {
   });
 }
 
-export function useTournamentMatches(tournamentId: string) {
-  return useQuery({
+export function tournamentMatchesQueryOptions(tournamentId: string) {
+  return queryOptions({
     queryKey: ['match', 'list', 'tournament', tournamentId] as const,
     queryFn: () => client.match.list({ tournamentId }),
   });
+}
+
+export function useTournamentMatches(tournamentId: string) {
+  return useQuery(tournamentMatchesQueryOptions(tournamentId));
 }
 
 function useInvalidateMatches() {
