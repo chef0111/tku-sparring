@@ -47,7 +47,7 @@ const PlayerAvatar = ({
           src={image ?? ''}
           alt={name}
           className={cn(
-            'relative rounded-sm object-contain transition-all duration-150 group-hover:scale-105',
+            'relative rounded-sm object-contain transition-all duration-150 select-none! group-hover:scale-105',
             isCriticalHit && 'animate-avatar-critical',
             imageClassName
           )}

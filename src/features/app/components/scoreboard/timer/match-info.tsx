@@ -13,7 +13,7 @@ export const MatchInfo = ({ matchLabel, className }: MatchInfoProps) => {
         className
       )}
     >
-      <h2 className="match-info max-w-full px-2 text-center text-6xl leading-[1.125] tracking-tight uppercase max-xl:text-5xl">
+      <h2 className="match-info max-w-full px-2 text-center text-6xl leading-[1.125] tracking-tight uppercase select-none! max-xl:text-5xl">
         {matchLabel}
       </h2>
     </div>
@@ -33,10 +33,10 @@ export const RoundInfo = ({ currentRound, className }: RoundInfoProps) => {
         className
       )}
     >
-      <h2 className="match-info text-5xl leading-[120%] max-xl:text-4xl">
+      <h2 className="match-info text-5xl leading-[120%] select-none! max-xl:text-4xl">
         ROUND
       </h2>
-      <h2 className="match-info text-7xl leading-none max-xl:text-6xl">
+      <h2 className="match-info text-7xl leading-none select-none! max-xl:text-6xl">
         {currentRound}
       </h2>
     </div>

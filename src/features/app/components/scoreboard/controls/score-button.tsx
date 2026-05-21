@@ -146,12 +146,12 @@ export const ScoreButton = ({
       <img
         src={iconPath}
         alt={`${player} ${hitType}`}
-        className="flex size-20 items-center justify-center rounded-full object-cover select-none max-xl:size-16"
+        className="flex size-20 items-center justify-center rounded-full object-cover select-none! max-xl:size-16"
       />
       {keyLabel && (
         <span
           className={cn(
-            'font-pixel absolute -bottom-7.5 flex size-4 -translate-y-8 items-center justify-center rounded-full text-center text-[18px] leading-none text-[#a6a6a6] select-none max-xl:size-3 max-xl:text-sm',
+            'font-pixel absolute -bottom-7.5 flex size-4 -translate-y-8 items-center justify-center rounded-full text-center text-[18px] leading-none text-[#a6a6a6] select-none! max-xl:size-3 max-xl:text-sm',
             player === 'red'
               ? 'text-muted-foreground bg-[#ff0000]'
               : 'text-muted-foreground bg-[#0070c0]'
