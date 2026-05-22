@@ -18,8 +18,8 @@ import type {
 import { TOURNAMENT_STATUSES } from '@/features/dashboard/types';
 import {
   TOURNAMENT_STATUS_LABEL,
-  isBackwardTournamentStatusTransition,
-  tournamentStatusChangeRequiresForce,
+  forceSetTournamentStatus,
+  isBackwardStatusTransition,
   tournamentStatusRiskNotes,
 } from '@/features/dashboard/tournament/lib/tournament-status';
 import { Button } from '@/components/ui/button';
@@ -65,13 +65,13 @@ export function TournamentsActionMenu({
       const from = tournament.status;
       if (status === from) return;
 
-      if (isBackwardTournamentStatusTransition(from, status)) {
+      if (isBackwardStatusTransition(from, status)) {
         toast.warning(`Reverting to ${TOURNAMENT_STATUS_LABEL[status]}`, {
           description: tournamentStatusRiskNotes(from, status).join(' '),
         });
       }
 
-      const force = tournamentStatusChangeRequiresForce(from, status);
+      const force = forceSetTournamentStatus(from, status);
 
       startUpdateTransition(() => {
         toast.promise(

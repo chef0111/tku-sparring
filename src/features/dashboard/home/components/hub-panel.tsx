@@ -180,7 +180,7 @@ export function HubSection({
         </div>
         {action}
       </div>
-      <div className="overflow-hidden">{children}</div>
+      <div className="overflow-hidden p-1">{children}</div>
     </section>
   );
 }
