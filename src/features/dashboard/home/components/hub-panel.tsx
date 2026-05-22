@@ -98,9 +98,7 @@ export function HubSection({
     <section className={cn('flex flex-col gap-3', className)}>
       <div className="flex items-end justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-1">
-          <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-            {title}
-          </h2>
+          <h2 className="font-medium">{title}</h2>
           {description ? (
             <p className="text-muted-foreground text-sm">{description}</p>
           ) : null}

@@ -50,6 +50,7 @@ export function DashboardHome() {
               <StatusPipeline pipeline={stats.pipeline} />
               <RecentTournamentsSection
                 tournaments={stats.recentTournaments}
+                pending={isPending}
                 onRowAction={setRowAction}
               />
             </>

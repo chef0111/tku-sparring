@@ -52,7 +52,7 @@ export function KpiStrip({ stats }: KpiStripProps) {
     {
       key: 'tournaments',
       label: 'Tournaments',
-      icon: LayoutGrid,
+      icon: Trophy,
       value: stats.totalTournaments,
       footer: <StatusMixFooter stats={stats} />,
       action: (
@@ -97,7 +97,7 @@ export function KpiStrip({ stats }: KpiStripProps) {
     {
       key: 'matches',
       label: 'Matches',
-      icon: Trophy,
+      icon: LayoutGrid,
       value: stats.totalMatches,
       footer: (
         <HubMetricFooter
@@ -111,11 +111,8 @@ export function KpiStrip({ stats }: KpiStripProps) {
 
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-        Today
-      </h2>
       <div className="grid gap-4 overflow-visible sm:grid-cols-2 xl:grid-cols-4">
-        {tiles.map((tile, index) => (
+        {tiles.map((tile) => (
           <HubMetricCard
             key={tile.key}
             label={tile.label}
@@ -123,8 +120,6 @@ export function KpiStrip({ stats }: KpiStripProps) {
             value={tile.value}
             footer={tile.footer}
             action={'action' in tile ? tile.action : undefined}
-            className="animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-500 motion-reduce:animate-none"
-            style={{ animationDelay: `${index * 75}ms` }}
           />
         ))}
       </div>

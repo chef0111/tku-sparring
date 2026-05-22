@@ -10,6 +10,13 @@ import type {
 } from '@/features/dashboard/types';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 
+function resolveRowData(
+  row: { original: TournamentListItem },
+  options: TournamentRowActionOptions
+): TournamentListItem {
+  return options.resolveTournament?.(row.original.id) ?? row.original;
+}
+
 export function getTournamentsTableColumns(
   options: TournamentRowActionOptions
 ): Array<ColumnDef<TournamentListItem>> {
@@ -55,7 +62,9 @@ export function getTournamentsTableColumns(
           label="Status"
         />
       ),
-      cell: ({ row }) => <TournamentStatusPill status={row.original.status} />,
+      cell: ({ row }) => (
+        <TournamentStatusPill status={resolveRowData(row, options).status} />
+      ),
       maxSize: 140,
       enableHiding: false,
       enableSorting: false,
@@ -139,7 +148,13 @@ export function getTournamentsTableColumns(
     },
     {
       id: 'actions',
-      cell: ({ row }) => <TournamentsActionMenu options={options} row={row} />,
+      cell: ({ row }) => (
+        <TournamentsActionMenu
+          options={options}
+          row={row}
+          tournament={resolveRowData(row, options)}
+        />
+      ),
       maxSize: 32,
       minSize: 32,
       enableSorting: false,

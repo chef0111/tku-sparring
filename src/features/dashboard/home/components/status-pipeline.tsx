@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { ArrowRight, ArrowUpRight, LayoutGrid } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Trophy } from 'lucide-react';
 import { HubSection, HubSectionBody, HubSectionHeader } from './hub-panel';
 import type { DashboardStats } from '../lib/compute-dashboard-stats';
 import type { TournamentStatus } from '@/features/dashboard/types';
@@ -54,12 +54,12 @@ export function StatusPipeline({ pipeline }: StatusPipelineProps) {
                   </Status>
                 }
               />
-              <HubSectionBody className="flex min-h-45 flex-1 flex-col gap-2">
+              <HubSectionBody className="bg-background flex min-h-45 flex-1 flex-col gap-2 p-3">
                 {items.length === 0 ? (
                   <Empty className="flex-1 border-none p-4">
                     <EmptyHeader>
                       <EmptyMedia variant="icon">
-                        <LayoutGrid aria-hidden="true" />
+                        <Trophy aria-hidden="true" />
                       </EmptyMedia>
                       <EmptyTitle>
                         No {label.toLowerCase()} tournaments

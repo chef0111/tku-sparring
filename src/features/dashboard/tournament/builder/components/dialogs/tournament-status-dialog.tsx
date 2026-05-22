@@ -1,4 +1,8 @@
 import type { TournamentStatus } from '@/features/dashboard/types';
+import {
+  TOURNAMENT_STATUS_LABEL,
+  tournamentStatusRiskNotes,
+} from '@/features/dashboard/tournament/lib/tournament-status';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -9,39 +13,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
-
-const STATUS_LABEL: Record<TournamentStatus, string> = {
-  draft: 'Draft',
-  active: 'Active',
-  completed: 'Completed',
-};
-
-function riskNotes(
-  from: TournamentStatus,
-  to: TournamentStatus
-): Array<string> {
-  const notes: Array<string> = [];
-  if (from === 'completed' && to !== 'completed') {
-    notes.push('Moving away from Completed re-enables editing in the builder.');
-  }
-  if (to === 'completed') {
-    notes.push('Completed marks the tournament workspace read-only.');
-  }
-  if (to === 'draft' && from !== 'draft') {
-    notes.push(
-      'Moving to Draft restores draft-only bracket operations where applicable.'
-    );
-  }
-  if (to === 'active' && from === 'draft') {
-    notes.push(
-      'Active allows live scoring and arena selection for active tournaments.'
-    );
-  }
-  if (notes.length === 0) {
-    notes.push('This is an administrative status override.');
-  }
-  return notes;
-}
 
 interface TournamentStatusDialogProps {
   open: boolean;
@@ -64,7 +35,7 @@ export function TournamentStatusDialog({
 }: TournamentStatusDialogProps) {
   if (!toStatus) return null;
 
-  const bullets = riskNotes(fromStatus, toStatus);
+  const bullets = tournamentStatusRiskNotes(fromStatus, toStatus);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -78,9 +49,12 @@ export function TournamentStatusDialog({
             <br />
             From{' '}
             <span className="font-semibold">
-              {STATUS_LABEL[fromStatus]}
-            </span> to{' '}
-            <span className="font-semibold">{STATUS_LABEL[toStatus]}</span>
+              {TOURNAMENT_STATUS_LABEL[fromStatus]}
+            </span>{' '}
+            to{' '}
+            <span className="font-semibold">
+              {TOURNAMENT_STATUS_LABEL[toStatus]}
+            </span>
           </DialogDescription>
         </DialogHeader>
         <div className="text-muted-foreground mb-2">
