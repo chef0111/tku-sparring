@@ -58,7 +58,7 @@ npx prisma db push
 bun run dev
 ```
 
-The application should now be available at `https://tku-sparring.localhost`
+The application should now be available at `https://tss.localhost`
 
 ### 7. Build for production
 

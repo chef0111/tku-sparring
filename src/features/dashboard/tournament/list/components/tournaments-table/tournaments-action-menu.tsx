@@ -1,39 +1,99 @@
 import * as React from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { ExternalLink, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import {
+  CircleDot,
+  ExternalLink,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
+import { toast } from 'sonner';
 import type { Row } from '@tanstack/react-table';
 
 import type {
   TournamentListItem,
   TournamentRowActionOptions,
+  TournamentStatus,
 } from '@/features/dashboard/types';
+import { TOURNAMENT_STATUSES } from '@/features/dashboard/types';
+import {
+  TOURNAMENT_STATUS_LABEL,
+  forceSetTournamentStatus,
+  isBackwardStatusTransition,
+  tournamentStatusRiskNotes,
+} from '@/features/dashboard/tournament/lib/tournament-status';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useSetTournamentStatus } from '@/queries/tournaments';
 
 interface TournamentsActionMenuProps {
   options: TournamentRowActionOptions;
   row: Row<TournamentListItem>;
+  tournament: TournamentListItem;
 }
 
 export function TournamentsActionMenu({
   options,
   row,
+  tournament,
 }: TournamentsActionMenuProps) {
   const navigate = useNavigate();
+  const [isUpdatePending, startUpdateTransition] = React.useTransition();
+  const setStatusMutation = useSetTournamentStatus({ suppressToast: true });
+
+  const isUpdating = isUpdatePending || setStatusMutation.isPending;
 
   const stopRowClick = React.useCallback((event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
   }, []);
 
+  const onStatusChange = React.useCallback(
+    (status: TournamentStatus) => {
+      const from = tournament.status;
+      if (status === from) return;
+
+      if (isBackwardStatusTransition(from, status)) {
+        toast.warning(`Reverting to ${TOURNAMENT_STATUS_LABEL[status]}`, {
+          description: tournamentStatusRiskNotes(from, status).join(' '),
+        });
+      }
+
+      const force = forceSetTournamentStatus(from, status);
+
+      startUpdateTransition(() => {
+        toast.promise(
+          setStatusMutation.mutateAsync({
+            id: tournament.id,
+            status,
+            force,
+          }),
+          {
+            loading: 'Updating status…',
+            success: `Status set to ${TOURNAMENT_STATUS_LABEL[status]}`,
+            error: (err) =>
+              err instanceof Error ? err.message : 'Status update failed',
+          }
+        );
+      });
+    },
+    [tournament.id, tournament.status, setStatusMutation, startUpdateTransition]
+  );
+
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild onClick={stopRowClick}>
         <Button
           variant="ghost"
@@ -62,6 +122,38 @@ export function TournamentsActionMenu({
           <Pencil className="mr-2 size-4" />
           Rename
         </DropdownMenuItem>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger disabled={isUpdating}>
+            <CircleDot className="mr-2 size-4" />
+            Status
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuLabel className="text-center">
+              Choose status
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuRadioGroup
+              value={tournament.status}
+              onValueChange={(value) => {
+                if (!TOURNAMENT_STATUSES.includes(value as TournamentStatus)) {
+                  return;
+                }
+                onStatusChange(value as TournamentStatus);
+              }}
+            >
+              {TOURNAMENT_STATUSES.map((status) => (
+                <DropdownMenuRadioItem
+                  key={status}
+                  value={status}
+                  disabled={isUpdating}
+                  className="min-w-32"
+                >
+                  {TOURNAMENT_STATUS_LABEL[status]}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"

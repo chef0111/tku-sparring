@@ -4,8 +4,8 @@ import { Download, Upload } from 'lucide-react';
 import { BulkAddAthletesDialog } from '../dialogs/bulk-add-athletes-dialog';
 import { BulkDeleteAthletesDialog } from '../dialogs/bulk-delete-athletes-dialog';
 import { useAthleteTableQuery } from '../../hooks/use-athlete-manager-query';
+import { exportAthletesTableToCSV } from '../../lib/export-athletes-csv';
 import { AthletesActionBar } from './athletes-action-bar';
-import { exportAthletesTableToCSV } from './export-athletes-csv';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { AthleteProfileData } from '@/features/dashboard/types';
 

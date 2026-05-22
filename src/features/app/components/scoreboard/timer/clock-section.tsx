@@ -29,11 +29,11 @@ export const ClockSection = ({
   return (
     <div
       className={cn(
-        'relative -mt-8 flex w-full flex-col items-center justify-center',
+        'group/timer relative -mt-8 flex w-full flex-col items-center justify-center',
         className
       )}
     >
-      <ButtonGroup className="mb-1">
+      <ButtonGroup className="mb-1 opacity-0 transition group-hover/timer:opacity-100">
         <Button
           variant="ghost"
           size="sm"
@@ -98,7 +98,7 @@ export const TimeBox = ({
     >
       <h1
         className={cn(
-          'm-0 text-center text-8xl leading-none font-bold text-white select-none max-xl:text-7xl',
+          'm-0 text-center text-8xl leading-none font-bold text-white select-none! max-xl:text-7xl',
           shouldBlink && 'animate-timer-blink',
           isPaused && !isBreakTime && 'text-yellow-500'
         )}
@@ -129,7 +129,7 @@ export const TimeoutIndicator = ({
         className
       )}
     >
-      <h2 className="text-background m-0 text-center text-6xl leading-none font-bold whitespace-nowrap select-none max-2xl:text-5xl max-xl:text-[44px]">
+      <h2 className="text-background m-0 text-center text-6xl leading-none font-bold whitespace-nowrap select-none! max-2xl:text-5xl max-xl:text-[44px]">
         Time out
       </h2>
     </div>

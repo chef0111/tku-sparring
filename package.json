@@ -16,10 +16,10 @@
     "url": "git+https://github.com/chef0111/tku-sparring.git"
   },
   "scripts": {
-    "dev": "portless tku-sparring vite dev --port 3000",
+    "dev": "portless tss vite dev --port 3000",
     "build": "vite build",
-    "preview": "portless tku-sparring vite preview",
-    "start": "vite build && portless tku-sparring vite preview",
+    "preview": "portless tss vite preview",
+    "start": "vite build && portless tss vite preview",
     "test": "vitest run",
     "lint": "eslint",
     "format": "prettier",
@@ -76,7 +76,7 @@
     "fake-indexeddb": "^6.2.5",
     "jose": "^6.2.3",
     "lucide-react": "^1.14.0",
-    "motion": "^12.25.0",
+    "motion": "^12.40.0",
     "nanoid": "^5.1.9",
     "next-themes": "^0.4.6",
     "nitro": "^3.0.260429-beta",
@@ -86,12 +86,14 @@
     "react-day-picker": "9",
     "react-dom": "^19.2.6",
     "react-hotkeys-hook": "^5.3.2",
+    "recharts": "^3.8.1",
     "rough-notation": "^0.5.1",
     "socket.io-client": "^4.8.3",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.3.0",
     "three": "^0.184.0",
+    "tunnel-rat": "^0.1.2",
     "vaul": "^1.1.2",
     "vite-tsconfig-paths": "^6.1.1",
     "xlsx": "^0.18.5",
@@ -136,7 +138,7 @@
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [
-      "eslint",
+      "eslint --fix",
       "prettier --write"
     ],
     "**/*.{html,json,css,scss,md,mdx}": [

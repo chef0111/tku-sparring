@@ -30,19 +30,19 @@ export const systemKeys: Array<KeyEntry> = [
     kbd: 'Space',
   },
   {
-    label: 'Undo player actions',
-    kbd: () =>
-      navigator.userAgent.toUpperCase().includes('MAC') ? '⌘ + Z' : 'Ctrl + Z',
-  },
-  {
-    label: 'Reset round status',
+    label: 'Reset round',
     kbd: () =>
       navigator.userAgent.toUpperCase().includes('MAC') ? '⌘ + R' : 'Ctrl + R',
   },
   {
-    label: 'Reset match status',
+    label: 'Reset match',
     kbd: () =>
       navigator.userAgent.toUpperCase().includes('MAC') ? '⌘ + M' : 'Ctrl + M',
+  },
+  {
+    label: 'Undo player actions',
+    kbd: () =>
+      navigator.userAgent.toUpperCase().includes('MAC') ? '⌘ + Z' : 'Ctrl + Z',
   },
 ];
 

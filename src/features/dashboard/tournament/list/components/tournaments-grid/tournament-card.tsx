@@ -36,7 +36,11 @@ export function TournamentCard({
     <Card className="group bg-popover/70 relative gap-0 rounded-lg border-none p-0 ring-0">
       {onRowAction ? (
         <div className="absolute top-1 right-1 z-20 p-0">
-          <TournamentsActionMenu options={{ onRowAction }} row={row} />
+          <TournamentsActionMenu
+            options={{ onRowAction }}
+            row={row}
+            tournament={tournament}
+          />
         </div>
       ) : null}
       <Link

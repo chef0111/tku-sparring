@@ -17,6 +17,7 @@ export const TOURNAMENT_STATUSES: ReadonlyArray<TournamentStatus> = [
 
 export interface TournamentRowActionOptions {
   onRowAction: (action: DataTableRowAction<TournamentListItem>) => void;
+  resolveTournament?: (id: string) => TournamentListItem | undefined;
 }
 
 export interface TournamentData {
@@ -43,5 +44,11 @@ export interface TournamentListItem {
   name: string;
   status: TournamentStatus;
   createdAt: Date;
-  _count: { groups: number; matches: number; tournamentAthletes: number };
+  _count: {
+    groups: number;
+    matches: number;
+    tournamentAthletes: number;
+    /** Builder queue count — excludes Advanced/BYE/empty slots. */
+    actionableMatches: number;
+  };
 }

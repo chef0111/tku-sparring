@@ -10,7 +10,6 @@ function csvCell(value: unknown): string {
   return String(value);
 }
 
-/** CSV export for athletes: UI can use a single name column while export keeps Image separate. */
 export function exportAthletesTableToCSV(
   table: Table<AthleteProfileData>,
   opts: { filename?: string; onlySelected?: boolean } = {}

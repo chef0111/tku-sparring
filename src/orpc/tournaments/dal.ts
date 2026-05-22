@@ -12,11 +12,17 @@ import type {
   TournamentStatusDTO,
   UpdateTournamentDTO,
 } from './dto';
+import type {
+  MatchData,
+  MatchKind,
+  MatchStatus,
+} from '@/features/dashboard/types';
 import {
   mergeArenaGroupOrderAfterCrossArenaMove,
   mergeArenaGroupOrderAfterRetireArena,
   patchArenaGroupOrderJson,
 } from '@/lib/tournament/arena-group-order';
+import { countActionableMatchesByTournamentId } from '@/lib/tournament/bracket-action-queue';
 import { prisma } from '@/lib/db';
 import { getNameSortKey } from '@/lib/sort/name-sort-key';
 import { publishTournamentSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
@@ -85,6 +91,54 @@ export class TournamentDAL {
       default:
         return { createdAt: direction };
     }
+  }
+
+  private static toMatchData(
+    match: Prisma.MatchGetPayload<Record<string, never>>
+  ): MatchData {
+    return {
+      ...match,
+      kind: (match.kind === 'custom' ? 'custom' : 'bracket') as MatchKind,
+      displayLabel: match.displayLabel ?? null,
+      status: match.status as MatchStatus,
+    };
+  }
+
+  private static async attachActionableMatchCounts<
+    T extends {
+      id: string;
+      _count: { groups: number; matches: number; tournamentAthletes: number };
+    },
+  >(items: Array<T>) {
+    if (items.length === 0) return items;
+
+    const tournamentIds = items.map((item) => item.id);
+    const [groups, matches] = await Promise.all([
+      prisma.group.findMany({
+        where: { tournamentId: { in: tournamentIds } },
+        select: {
+          id: true,
+          tournamentId: true,
+          _count: { select: { tournamentAthletes: true } },
+        },
+      }),
+      prisma.match.findMany({
+        where: { tournamentId: { in: tournamentIds } },
+      }),
+    ]);
+
+    const actionableByTournamentId = countActionableMatchesByTournamentId(
+      groups,
+      matches.map((match) => TournamentDAL.toMatchData(match))
+    );
+
+    return items.map((item) => ({
+      ...item,
+      _count: {
+        ...item._count,
+        actionableMatches: actionableByTournamentId.get(item.id) ?? 0,
+      },
+    }));
   }
 
   private static async buildTournamentLifecycle(
@@ -196,7 +250,10 @@ export class TournamentDAL {
       prisma.tournament.count({ where }),
     ]);
 
-    return { items, total };
+    const enrichedItems =
+      await TournamentDAL.attachActionableMatchCounts(items);
+
+    return { items: enrichedItems, total };
   }
 
   static async findById(id: string) {
