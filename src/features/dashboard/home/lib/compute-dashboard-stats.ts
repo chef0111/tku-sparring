@@ -20,6 +20,18 @@ export interface DashboardStats {
     totalGroups: number;
     totalMatches: number;
   };
+  chartData: {
+    statusMix: Array<{
+      status: TournamentStatus;
+      count: number;
+      label: string;
+    }>;
+    topByAthletes: Array<{
+      name: string;
+      athletes: number;
+      matches: number;
+    }>;
+  };
   attentionItems: Array<AttentionItem>;
   pipeline: Record<TournamentStatus, Array<TournamentListItem>>;
   recentTournaments: Array<TournamentListItem>;
@@ -27,6 +39,13 @@ export interface DashboardStats {
 
 const PIPELINE_CAP = 5;
 const RECENT_CAP = 10;
+const TOP_TOURNAMENTS_CAP = 8;
+
+const STATUS_LABELS: Record<TournamentStatus, string> = {
+  draft: 'Draft',
+  active: 'Active',
+  completed: 'Completed',
+};
 
 function sortByCreatedAtDesc(a: TournamentListItem, b: TournamentListItem) {
   return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -99,6 +118,27 @@ export function computeDashboardStats(
       .slice(0, PIPELINE_CAP),
   };
 
+  const statusMix = (['draft', 'active', 'completed'] as const).map(
+    (status) => ({
+      status,
+      count: byStatus[status],
+      label: STATUS_LABELS[status],
+    })
+  );
+
+  const topByAthletes = [...tournaments]
+    .sort(
+      (a, b) =>
+        b._count.tournamentAthletes - a._count.tournamentAthletes ||
+        b._count.matches - a._count.matches
+    )
+    .slice(0, TOP_TOURNAMENTS_CAP)
+    .map((t) => ({
+      name: t.name,
+      athletes: t._count.tournamentAthletes,
+      matches: t._count.matches,
+    }));
+
   return {
     kpis: {
       totalTournaments: tournaments.length,
@@ -106,6 +146,10 @@ export function computeDashboardStats(
       totalAthletes,
       totalGroups,
       totalMatches,
+    },
+    chartData: {
+      statusMix,
+      topByAthletes,
     },
     attentionItems: deriveAttentionItems(tournaments),
     pipeline,

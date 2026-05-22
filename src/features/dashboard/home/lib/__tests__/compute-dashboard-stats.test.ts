@@ -38,6 +38,42 @@ describe('computeDashboardStats', () => {
     expect(result.kpis.totalMatches).toBe(15);
   });
 
+  it('builds chart payloads for status mix and top tournaments', () => {
+    const items = [
+      makeTournament({
+        id: '1',
+        name: 'Alpha Open',
+        status: 'draft',
+        _count: { groups: 2, matches: 10, tournamentAthletes: 20 },
+      }),
+      makeTournament({
+        id: '2',
+        name: 'Beta Cup',
+        status: 'active',
+        _count: { groups: 1, matches: 5, tournamentAthletes: 30 },
+      }),
+      makeTournament({
+        id: '3',
+        name: 'Gamma Classic',
+        status: 'completed',
+        _count: { groups: 1, matches: 8, tournamentAthletes: 12 },
+      }),
+    ];
+
+    const result = computeDashboardStats(items);
+
+    expect(result.chartData.statusMix).toEqual([
+      { status: 'draft', count: 1, label: 'Draft' },
+      { status: 'active', count: 1, label: 'Active' },
+      { status: 'completed', count: 1, label: 'Completed' },
+    ]);
+    expect(result.chartData.topByAthletes[0]).toEqual({
+      name: 'Beta Cup',
+      athletes: 30,
+      matches: 5,
+    });
+  });
+
   it('derives needs-attention items for incomplete draft tournaments', () => {
     const items = [
       makeTournament({ id: 'a', status: 'draft', name: 'Empty' }),
