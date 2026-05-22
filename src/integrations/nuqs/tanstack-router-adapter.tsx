@@ -18,14 +18,23 @@ import {
   renderQueryString,
 } from 'nuqs/adapters/custom';
 
-function searchValueToParamPairs(
+/** Search keys serialized as a single JSON array string by nuqs object-array parsers. */
+export const JSON_ARRAY_SEARCH_KEYS = new Set(['sort', 'filters']);
+
+export function searchValueToParamPairs(
   key: string,
   value: unknown
 ): Array<[string, string]> {
   if (value === undefined || value === null) return [];
 
   if (Array.isArray(value)) {
-    if (value.length === 0) return [];
+    if (value.length === 0) {
+      // Preserve explicit empty sort/filters so nuqs can distinguish [] from "param absent".
+      if (JSON_ARRAY_SEARCH_KEYS.has(key)) {
+        return [[key, '[]']];
+      }
+      return [];
+    }
     // Keys like `sort` / `filters`: nuqs serializes the whole array as one JSON string.
     // Emit a single param so `.get(key)` matches `createParser` + `JSON.parse` expectations.
     if (value.some((item) => item !== null && typeof item === 'object')) {

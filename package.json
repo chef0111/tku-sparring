@@ -92,6 +92,7 @@
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.3.0",
     "three": "^0.184.0",
+    "tunnel-rat": "^0.1.2",
     "vaul": "^1.1.2",
     "vite-tsconfig-paths": "^6.1.1",
     "xlsx": "^0.18.5",
@@ -136,7 +137,7 @@
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [
-      "eslint",
+      "eslint --fix",
       "prettier --write"
     ],
     "**/*.{html,json,css,scss,md,mdx}": [
