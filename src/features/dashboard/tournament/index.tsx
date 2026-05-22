@@ -2,9 +2,10 @@ import { Link } from '@tanstack/react-router';
 import { ArrowLeft, Trophy } from 'lucide-react';
 import { TournamentViewer } from './viewer';
 import { TournamentViewerLoading } from './viewer/loading';
-import type { GroupData, TournamentData } from '../types';
+import type { GroupData, MatchData, TournamentData } from '../types';
 import { Button } from '@/components/ui/button';
 import { useTournamentRealtimeStream } from '@/hooks/use-tournament-realtime-stream';
+import { useTournamentMatches } from '@/queries/matches';
 import { useTournament } from '@/queries/tournaments';
 import { useGroups } from '@/queries/groups';
 
@@ -17,6 +18,7 @@ export function TournamentPage({ id }: TournamentPageProps) {
 
   const tournamentQuery = useTournament(id);
   const groupsQuery = useGroups(id);
+  const matchesQuery = useTournamentMatches(id);
 
   if (tournamentQuery.isPending) {
     return <TournamentViewerLoading />;
@@ -44,6 +46,7 @@ export function TournamentPage({ id }: TournamentPageProps) {
     <TournamentViewer
       tournament={tournament}
       groups={groups as Array<GroupData>}
+      matches={(matchesQuery.data ?? []) as Array<MatchData>}
       tournamentId={id}
     />
   );

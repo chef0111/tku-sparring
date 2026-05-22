@@ -359,7 +359,7 @@ function Kbd({
           isPressed && 'translate-y-0 shadow-transparent'
         )}
       >
-        <span className="align-center block text-center text-xs">
+        <span className="align-center block text-center text-xs select-none!">
           {displayText || children}
         </span>
       </span>

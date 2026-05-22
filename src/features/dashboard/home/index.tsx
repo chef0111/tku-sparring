@@ -1,74 +1,76 @@
 import { useState } from 'react';
-import { Link } from '@tanstack/react-router';
-import { ArrowRight, Plus } from 'lucide-react';
-import { TournamentCard } from '../tournament/list/components/tournaments-grid/tournament-card';
-import { TournamentCardSkeleton } from '../tournament/list/components/tournaments-grid/tournament-card-skeleton';
-import { TournamentsEmptyState } from '../tournament/list/components/tournaments-empty-state';
+import { Plus } from 'lucide-react';
 import { SiteHeader } from '../site-header';
+import { DashboardHomeSkeleton } from './components/dashboard-home-skeleton';
+import { KpiStrip } from './components/kpi-strip';
+import { NeedsAttention } from './components/needs-attention';
+import { RecentTournamentsSection } from './components/recent-tournaments-section';
+import { StatusPipeline } from './components/status-pipeline';
+import { useDashboardStats } from './hooks/use-dashboard-stats';
 import type { TournamentListItem } from '@/features/dashboard/types';
+import type { DataTableRowAction } from '@/types/data-table';
 import { Button } from '@/components/ui/button';
 import { CreateTournamentDialog } from '@/features/dashboard/tournament/create-tournament-dialog';
-import { useTournaments } from '@/queries/tournaments';
+import { RenameTournamentDialog } from '@/features/dashboard/tournament/list/components/dialogs/rename-tournament-dialog';
+import { DeleteTournamentDialog } from '@/features/dashboard/tournament/list/components/dialogs/delete-tournament-dialog';
 
 export function DashboardHome() {
-  const { data, isPending } = useTournaments();
-  const [open, setOpen] = useState(false);
-
-  const tournaments = (data ?? []) as Array<TournamentListItem>;
+  const { isPending, stats } = useDashboardStats();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [rowAction, setRowAction] =
+    useState<DataTableRowAction<TournamentListItem> | null>(null);
 
   return (
     <div className="flex h-full flex-col">
       <SiteHeader title="Dashboard" />
 
-      <div className="flex-1 overflow-auto py-6">
-        <div className="mx-auto max-w-6xl space-y-8">
+      <div className="relative flex-1 overflow-auto py-6">
+        <main className="relative mx-auto flex max-w-7xl flex-col gap-6 px-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold tracking-tight">
-                Welcome back
-              </h2>
+              <h1 className="text-2xl font-bold tracking-tight text-balance">
+                Operations hub
+              </h1>
               <p className="text-muted-foreground">
-                Manage your Taekwondo tournaments from here
+                Cross-tournament monitoring and setup status
               </p>
             </div>
-            <Button onClick={() => setOpen(true)}>
-              <Plus className="size-4" />
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="size-4" data-icon="inline-start" />
               Create Tournament
             </Button>
-            <CreateTournamentDialog open={open} onOpenChange={setOpen} />
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Recent Tournaments</h3>
-              {tournaments.length > 0 && (
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/dashboard/tournaments">
-                    View all
-                    <ArrowRight className="ml-1 size-4" />
-                  </Link>
-                </Button>
-              )}
-            </div>
-
-            {isPending ? (
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <TournamentCardSkeleton key={i} />
-                ))}
-              </div>
-            ) : tournaments.length === 0 ? (
-              <TournamentsEmptyState variant="no-data" />
-            ) : (
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {tournaments.slice(0, 6).map((tournament) => (
-                  <TournamentCard key={tournament.id} tournament={tournament} />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+          {isPending ? (
+            <DashboardHomeSkeleton />
+          ) : (
+            <>
+              <KpiStrip stats={stats.kpis} />
+              <NeedsAttention items={stats.attentionItems} />
+              <StatusPipeline pipeline={stats.pipeline} />
+              <RecentTournamentsSection
+                tournaments={stats.recentTournaments}
+                pending={isPending}
+                onRowAction={setRowAction}
+              />
+            </>
+          )}
+        </main>
       </div>
+
+      <CreateTournamentDialog open={createOpen} onOpenChange={setCreateOpen} />
+      <RenameTournamentDialog
+        tournament={
+          rowAction?.variant === 'update' ? rowAction.row.original : null
+        }
+        onOpenChange={() => setRowAction(null)}
+      />
+      <DeleteTournamentDialog
+        tournament={
+          rowAction?.variant === 'delete' ? rowAction.row.original : null
+        }
+        onClose={() => setRowAction(null)}
+      />
     </div>
   );
 }

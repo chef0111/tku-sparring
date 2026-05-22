@@ -17,6 +17,7 @@ export const TOURNAMENT_STATUSES: ReadonlyArray<TournamentStatus> = [
 
 export interface TournamentRowActionOptions {
   onRowAction: (action: DataTableRowAction<TournamentListItem>) => void;
+  resolveTournament?: (id: string) => TournamentListItem | undefined;
 }
 
 export interface TournamentData {

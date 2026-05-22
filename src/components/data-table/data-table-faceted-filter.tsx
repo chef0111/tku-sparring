@@ -184,19 +184,19 @@ export function DataTableFacetedFilter<TData, TValue>({
         {selectedValues.size > 0 && (
           <div className="mx-1 mb-1">
             <ComboboxSeparator />
-            <ComboboxItem
+            <div
               className={cn(
                 buttonVariants({ variant: 'ghost', size: 'sm' }),
-                'justify-between px-1.5 font-normal'
+                'w-full scale-100! justify-between px-1.5 font-normal'
               )}
               onClick={() => {
                 onReset();
                 setOpen(false);
               }}
             >
-              <span>Clear filters</span>
+              <span className="pointer-events-none">Clear filters</span>
               <XIcon className="size-4 shrink-0" />
-            </ComboboxItem>
+            </div>
           </div>
         )}
       </ComboboxContent>

@@ -343,14 +343,17 @@ export function useRetireArena() {
         };
       });
 
-      queryClient.setQueryData(gKey, (old) => {
-        if (!Array.isArray(old)) return old;
-        return old.map((g) =>
-          g.arenaIndex === variables.fromArena
-            ? { ...g, arenaIndex: variables.toArena }
-            : g
-        );
-      });
+      queryClient.setQueryData<Array<{ id: string; arenaIndex: number }>>(
+        gKey,
+        (old) => {
+          if (!Array.isArray(old)) return old;
+          return old.map((g) =>
+            g.arenaIndex === variables.fromArena
+              ? { ...g, arenaIndex: variables.toArena }
+              : g
+          );
+        }
+      );
 
       return {
         previousTournament,
@@ -382,7 +385,10 @@ export function useRetireArena() {
   });
 }
 
-export function useSetTournamentStatus(options?: { onSuccess?: () => void }) {
+export function useSetTournamentStatus(options?: {
+  onSuccess?: () => void;
+  suppressToast?: boolean;
+}) {
   const invalidate = useInvalidateTournaments();
   const queryClient = useQueryClient();
 
@@ -400,18 +406,24 @@ export function useSetTournamentStatus(options?: { onSuccess?: () => void }) {
       void queryClient.invalidateQueries({
         queryKey: ['match', 'list', 'tournament', tournament.id],
       });
-      if (variables.force) {
-        toast.success(`Tournament status set to ${tournament.status}`);
-      } else {
-        toast.success(
-          tournament.status === 'active'
-            ? 'Tournament activated'
-            : 'Tournament completed'
-        );
+      if (!options?.suppressToast) {
+        if (variables.force) {
+          toast.success(`Tournament status set to ${tournament.status}`);
+        } else {
+          toast.success(
+            tournament.status === 'active'
+              ? 'Tournament activated'
+              : 'Tournament completed'
+          );
+        }
       }
       options?.onSuccess?.();
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => {
+      if (!options?.suppressToast) {
+        toast.error(err.message);
+      }
+    },
   });
 }
 
