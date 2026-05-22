@@ -1,4 +1,4 @@
-import { HubSection, HubSectionBody } from './hub-panel';
+import { HubSection, HubSectionContent } from './hub-panel';
 import type { TournamentListItem } from '@/features/dashboard/types';
 import type { DataTableRowAction } from '@/types/data-table';
 import { useRecentTournamentsTable } from '@/features/dashboard/home/hooks/use-recent-tournaments-table';
@@ -23,7 +23,7 @@ export function RecentTournamentsSection({
 
   return (
     <HubSection title="Recent tournaments">
-      <HubSectionBody className="p-0 pt-0">
+      <HubSectionContent padded={false}>
         {pending ? (
           <DataTableSkeleton
             columnCount={6}
@@ -40,7 +40,7 @@ export function RecentTournamentsSection({
             className="gap-0"
           />
         )}
-      </HubSectionBody>
+      </HubSectionContent>
     </HubSection>
   );
 }

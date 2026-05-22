@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { ArrowRight, ArrowUpRight, Trophy } from 'lucide-react';
-import { HubSection, HubSectionBody, HubSectionHeader } from './hub-panel';
+import { HubSection, HubSectionContent, HubSectionHeader } from './hub-panel';
 import type { DashboardStats } from '../lib/compute-dashboard-stats';
 import type { TournamentStatus } from '@/features/dashboard/types';
 import type { StatusProps } from '@/components/ui/status';
@@ -54,7 +54,7 @@ export function StatusPipeline({ pipeline }: StatusPipelineProps) {
                   </Status>
                 }
               />
-              <HubSectionBody className="bg-background flex min-h-45 flex-1 flex-col gap-2 p-3">
+              <HubSectionContent className="bg-background flex min-h-45 flex-1 flex-col gap-2 p-3">
                 {items.length === 0 ? (
                   <Empty className="flex-1 border-none p-4">
                     <EmptyHeader>
@@ -101,7 +101,7 @@ export function StatusPipeline({ pipeline }: StatusPipelineProps) {
                     View all <ArrowRight />
                   </Link>
                 </Button>
-              </HubSectionBody>
+              </HubSectionContent>
             </div>
           );
         })}

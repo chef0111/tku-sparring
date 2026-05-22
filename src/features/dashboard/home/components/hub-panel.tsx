@@ -72,7 +72,7 @@ export function HubMetricCard({
           {value}
         </p>
         {footer ? (
-          <div className="relative z-1 mt-3 min-w-0">{footer}</div>
+          <div className="relative z-1 mt-4 min-w-0">{footer}</div>
         ) : null}
       </CardContent>
     </Card>
@@ -112,17 +112,17 @@ export function HubSection({
   );
 }
 
-interface HubSectionBodyProps {
+interface HubSectionContentProps {
   children: React.ReactNode;
   className?: string;
   padded?: boolean;
 }
 
-export function HubSectionBody({
+export function HubSectionContent({
   children,
   className,
   padded = true,
-}: HubSectionBodyProps) {
+}: HubSectionContentProps) {
   return <div className={cn(padded && 'p-4', className)}>{children}</div>;
 }
 

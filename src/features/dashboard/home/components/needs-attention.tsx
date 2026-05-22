@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { HubSection, HubSectionBody } from './hub-panel';
+import { HubSection, HubSectionContent } from './hub-panel';
 import type { AttentionItem } from '../lib/compute-dashboard-stats';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ export function NeedsAttention({ items }: NeedsAttentionProps) {
 
   return (
     <HubSection title="Needs attention">
-      <HubSectionBody className="flex flex-col gap-3">
+      <HubSectionContent className="flex flex-col gap-3">
         {items.map((item) => (
           <Alert
             key={`${item.tournamentId}-${item.kind}`}
@@ -33,7 +33,7 @@ export function NeedsAttention({ items }: NeedsAttentionProps) {
             </AlertDescription>
           </Alert>
         ))}
-      </HubSectionBody>
+      </HubSectionContent>
     </HubSection>
   );
 }
