@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Link } from '@tanstack/react-router';
 import { CheckCircle2, Edit, History } from 'lucide-react';
 import { ActivityPanel } from './components/activity-panel';
-import { GroupsProgressTable } from './components/groups-progress-table';
+import { GroupsOverview } from './components/groups-overview';
 import { SetupChecklist } from './components/setup-checklist';
 import { TournamentKpiRow } from './components/tournament-kpi-row';
 import { useTournamentCommandCenter } from './hooks/use-tournament-command-center';
@@ -53,7 +53,6 @@ export function TournamentViewer({
 
   const commandCenter = useTournamentCommandCenter({
     tournament,
-    groups,
     matches,
   });
 
@@ -97,7 +96,7 @@ export function TournamentViewer({
             type="button"
             onClick={() => setActivityOpen(true)}
           >
-            <History className="mr-1 size-4" data-icon="inline-start" />
+            <History data-icon="inline-start" />
             Activity
           </Button>
           <Button variant="outline" size="sm" asChild>
@@ -105,7 +104,7 @@ export function TournamentViewer({
               to="/dashboard/tournaments/$id/builder"
               params={{ id: tournamentId }}
             >
-              <Edit className="mr-1 size-4" data-icon="inline-start" />
+              <Edit data-icon="inline-start" />
               {isReadOnly ? 'Open Builder' : 'Edit Tournament'}
             </Link>
           </Button>
@@ -121,16 +120,16 @@ export function TournamentViewer({
       </SiteHeader>
 
       <div className="flex-1 overflow-auto p-6">
-        <main className="mx-auto flex max-w-7xl flex-col gap-4">
+        <main className="mx-auto flex max-w-7xl flex-col gap-6">
           <h1 className="sr-only">{tournament.name} command center</h1>
           {tournament.status === 'active' &&
           tournament.lifecycle.canComplete ? (
             <Alert>
-              <CheckCircle2 className="size-4" aria-hidden="true" />
+              <CheckCircle2 aria-hidden="true" />
               <AlertTitle>Ready to complete</AlertTitle>
               <AlertDescription>
-                All groups have winner results. You can complete this tournament
-                when you are ready to lock the workspace.
+                Every match has a recorded winner. You can complete this
+                tournament when you are ready to lock the workspace.
               </AlertDescription>
             </Alert>
           ) : null}
@@ -143,17 +142,11 @@ export function TournamentViewer({
             />
           ) : null}
 
-          <TournamentKpiRow
-            tournament={tournament}
-            matchTotals={commandCenter.matchTotals}
-          />
+          <TournamentKpiRow tournament={tournament} groups={groups} />
 
-          <div className="grid gap-4 lg:grid-cols-5">
+          <div className="grid gap-6 lg:grid-cols-5">
             <div className="flex flex-col gap-4 lg:col-span-3">
-              <GroupsProgressTable
-                rows={commandCenter.groupProgress}
-                tournamentId={tournamentId}
-              />
+              <GroupsOverview groups={groups} tournamentId={tournamentId} />
             </div>
             <div className="lg:col-span-2">
               <ActivityPanel

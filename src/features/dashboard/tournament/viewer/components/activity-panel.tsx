@@ -1,8 +1,12 @@
 import * as React from 'react';
+import { History } from 'lucide-react';
 import { ActivityEventRow } from './activity-event-row';
+import {
+  HubSection,
+  HubSectionContent,
+} from '@/features/dashboard/home/components/hub-panel';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTournamentActivityInfinite } from '@/queries/activity';
 
@@ -23,16 +27,17 @@ export function ActivityPanel({ tournamentId, onViewAll }: ActivityPanelProps) {
   );
 
   return (
-    <Card className="flex h-full flex-col">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-          Recent activity
-        </CardTitle>
+    <HubSection
+      title="Recent activity"
+      description="Latest tournament events"
+      action={
         <Button variant="ghost" size="sm" onClick={onViewAll}>
+          <History data-icon="inline-start" />
           View all
         </Button>
-      </CardHeader>
-      <CardContent className="flex flex-1 flex-col">
+      }
+    >
+      <HubSectionContent>
         {query.isLoading ? (
           <div className="flex flex-col gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -54,7 +59,7 @@ export function ActivityPanel({ tournamentId, onViewAll }: ActivityPanelProps) {
             ))}
           </ul>
         )}
-      </CardContent>
-    </Card>
+      </HubSectionContent>
+    </HubSection>
   );
 }
