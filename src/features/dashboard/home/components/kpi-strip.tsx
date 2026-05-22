@@ -111,7 +111,7 @@ export function KpiStrip({ stats }: KpiStripProps) {
 
   return (
     <section className="flex flex-col gap-3">
-      <div className="grid gap-4 overflow-visible sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid items-stretch gap-4 overflow-visible sm:grid-cols-2 xl:grid-cols-4">
         {tiles.map((tile) => (
           <HubMetricCard
             key={tile.key}

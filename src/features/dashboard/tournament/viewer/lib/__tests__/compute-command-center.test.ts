@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { computeCommandCenter } from '../compute-command-center';
-import type {
-  GroupData,
-  MatchData,
-  TournamentData,
-} from '@/features/dashboard/types';
+import type { MatchData, TournamentData } from '@/features/dashboard/types';
 
 const tournament = {
   id: 't1',
@@ -17,45 +13,9 @@ const tournament = {
   _count: { groups: 1, matches: 4, tournamentAthletes: 8 },
 } satisfies TournamentData;
 
-const groups: Array<GroupData> = [
-  {
-    id: 'g1',
-    name: 'Group A',
-    gender: 'M',
-    beltMin: 0,
-    beltMax: 10,
-    weightMin: 20,
-    weightMax: 100,
-    thirdPlaceMatch: false,
-    arenaIndex: 1,
-    _count: { tournamentAthletes: 8, matches: 4 },
-  },
-];
-
 describe('computeCommandCenter', () => {
-  it('aggregates match status counts per group', () => {
-    const result = computeCommandCenter({
-      tournament,
-      groups,
-      matches: [
-        { id: 'm1', groupId: 'g1', status: 'complete', kind: 'bracket' },
-        { id: 'm2', groupId: 'g1', status: 'pending', kind: 'bracket' },
-        { id: 'm3', groupId: 'g1', status: 'active', kind: 'bracket' },
-        { id: 'm4', groupId: 'g1', status: 'complete', kind: 'bracket' },
-      ] as Array<MatchData>,
-    });
-
-    expect(result.groupProgress[0]).toMatchObject({
-      groupId: 'g1',
-      pending: 1,
-      active: 1,
-      complete: 2,
-      total: 4,
-    });
-  });
-
   it('derives setup steps for draft tournament', () => {
-    const result = computeCommandCenter({ tournament, groups, matches: [] });
+    const result = computeCommandCenter({ tournament, matches: [] });
 
     expect(result.setupSteps).toEqual([
       expect.objectContaining({ id: 'athletes', complete: true }),
@@ -64,28 +24,24 @@ describe('computeCommandCenter', () => {
     ]);
   });
 
-  it('computes match totals', () => {
+  it('marks brackets complete when a bracket match exists', () => {
     const result = computeCommandCenter({
       tournament,
-      groups,
       matches: [
-        { id: 'm1', groupId: 'g1', status: 'complete', kind: 'bracket' },
-        { id: 'm2', groupId: 'g1', status: 'pending', kind: 'bracket' },
+        { id: 'm1', groupId: 'g1', status: 'pending', kind: 'bracket' },
       ] as Array<MatchData>,
     });
 
-    expect(result.matchTotals).toEqual({
-      complete: 1,
-      active: 0,
-      pending: 1,
-      total: 2,
-    });
+    expect(result.setupSteps).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'brackets', complete: true }),
+      ])
+    );
   });
 
   it('treats custom-only matches as brackets not generated', () => {
     const result = computeCommandCenter({
       tournament,
-      groups,
       matches: [
         { id: 'c1', groupId: 'g1', status: 'pending', kind: 'custom' },
       ] as Array<MatchData>,
@@ -96,6 +52,14 @@ describe('computeCommandCenter', () => {
         expect.objectContaining({ id: 'brackets', complete: false }),
       ])
     );
-    expect(result.matchTotals.total).toBe(1);
+  });
+
+  it('returns no setup steps for non-draft tournaments', () => {
+    const result = computeCommandCenter({
+      tournament: { ...tournament, status: 'active' },
+      matches: [],
+    });
+
+    expect(result.setupSteps).toEqual([]);
   });
 });

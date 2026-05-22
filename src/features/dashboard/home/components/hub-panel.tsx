@@ -5,6 +5,40 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Status, StatusIndicator, StatusLabel } from '@/components/ui/status';
 import { cn } from '@/lib/utils';
 
+const hubPanelShellClassName =
+  'group bg-card border-border/80 relative gap-0 overflow-visible border border-b-0 p-0 ring-0';
+
+const hubPanelInnerClassName =
+  "bg-background border-border ring-border relative z-10 -mx-0.75 mt-auto flex w-[calc(100%+0.375rem)] max-w-none flex-col overflow-hidden rounded-xl shadow-sm ring before:pointer-events-none before:absolute before:inset-0 before:rounded-lg before:bg-[radial-gradient(ellipse_90%_70%_at_0%_0%,rgb(255_255_255/0.12),transparent_58%)] before:content-['']";
+
+interface HubPanelHeaderProps {
+  label: React.ReactNode;
+  icon: LucideIcon;
+  description?: string;
+}
+
+function HubPanelHeader({
+  label,
+  icon: Icon,
+  description,
+}: HubPanelHeaderProps) {
+  return (
+    <CardHeader className="relative z-0 flex w-full min-w-0 items-center gap-2 px-3 py-2">
+      <div className="border-muted-foreground/15 bg-muted ring-border ring-offset-background [&_svg]:text-muted-foreground flex size-5 shrink-0 items-center justify-center rounded-sm border ring-1 ring-offset-1 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-3">
+        <Icon className="text-muted-foreground" aria-hidden="true" />
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="min-w-0 truncate text-sm font-medium">{label}</span>
+        {description ? (
+          <span className="text-muted-foreground truncate text-xs">
+            {description}
+          </span>
+        ) : null}
+      </div>
+    </CardHeader>
+  );
+}
+
 interface HubMetricFooterProps {
   status: StatusProps['status'];
   value: string;
@@ -30,8 +64,9 @@ export function HubMetricFooter({
 }
 
 interface HubMetricCardProps {
-  label: string;
+  label: React.ReactNode;
   icon: LucideIcon;
+  description?: string;
   value: React.ReactNode;
   footer?: React.ReactNode;
   action?: React.ReactNode;
@@ -41,7 +76,8 @@ interface HubMetricCardProps {
 
 export function HubMetricCard({
   label,
-  icon: Icon,
+  icon,
+  description,
   value,
   footer,
   action,
@@ -50,30 +86,69 @@ export function HubMetricCard({
 }: HubMetricCardProps) {
   return (
     <Card
-      className={cn(
-        'group bg-card border-border/80 relative gap-0 overflow-visible border border-b-0 p-0 ring-0',
-        className
-      )}
+      className={cn(hubPanelShellClassName, 'flex h-full flex-col', className)}
       style={style}
     >
       {action ? (
         <div className="absolute top-1 right-2 z-20 p-0">{action}</div>
       ) : null}
-      <CardHeader className="relative z-0 flex w-full min-w-0 items-center gap-2 px-3 py-2">
-        <div className="border-muted-foreground/15 bg-muted ring-border ring-offset-background [&_svg]:text-muted-foreground flex size-5 shrink-0 items-center justify-center rounded-sm border ring-1 ring-offset-1 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-3">
-          <Icon className="text-muted-foreground" aria-hidden="true" />
-        </div>
-        <span className="min-w-0 flex-1 truncate text-sm font-medium">
-          {label}
-        </span>
-      </CardHeader>
-      <CardContent className="bg-background border-border ring-border relative z-10 -mx-0.75 mt-auto flex w-[calc(100%+0.375rem)] max-w-none flex-col justify-between gap-2 overflow-hidden rounded-xl p-4 shadow-sm ring before:pointer-events-none before:absolute before:inset-0 before:rounded-lg before:bg-[radial-gradient(ellipse_90%_70%_at_0%_0%,rgb(255_255_255/0.12),transparent_58%)] before:content-['']">
+      <HubPanelHeader label={label} icon={icon} description={description} />
+      <CardContent
+        className={cn(
+          hubPanelInnerClassName,
+          'flex flex-1 flex-col justify-between gap-2 p-4'
+        )}
+      >
         <p className="relative z-1 text-3xl font-semibold tracking-tight tabular-nums">
           {value}
         </p>
-        {footer ? (
-          <div className="relative z-1 mt-3 min-w-0">{footer}</div>
-        ) : null}
+        <div className="relative z-1 mt-4 flex min-h-6 min-w-0 items-end">
+          {footer}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface HubChartPanelProps {
+  label: string;
+  icon: LucideIcon;
+  description?: string;
+  action?: React.ReactNode;
+  footer?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function HubChartPanel({
+  label,
+  icon,
+  description,
+  action,
+  footer,
+  children,
+  className,
+}: HubChartPanelProps) {
+  return (
+    <Card className={cn(hubPanelShellClassName, className)}>
+      {action ? (
+        <div className="absolute top-1 right-2 z-20 p-0">{action}</div>
+      ) : null}
+      <HubPanelHeader label={label} icon={icon} description={description} />
+      <CardContent
+        className={cn(
+          hubPanelInnerClassName,
+          'min-h-60 flex-1 justify-center gap-3 p-4'
+        )}
+      >
+        <div className="relative z-1 flex h-full min-h-0 w-full flex-1 flex-col">
+          {children}
+        </div>
+        {footer && (
+          <div className="border-border/50 relative z-1 min-w-0 border-t pt-3">
+            {footer}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -105,24 +180,22 @@ export function HubSection({
         </div>
         {action}
       </div>
-      <div className="bg-card ring-foreground/6 overflow-hidden rounded-xl ring-1">
-        {children}
-      </div>
+      <div className="overflow-hidden p-1">{children}</div>
     </section>
   );
 }
 
-interface HubSectionBodyProps {
+interface HubSectionContentProps {
   children: React.ReactNode;
   className?: string;
   padded?: boolean;
 }
 
-export function HubSectionBody({
+export function HubSectionContent({
   children,
   className,
   padded = true,
-}: HubSectionBodyProps) {
+}: HubSectionContentProps) {
   return <div className={cn(padded && 'p-4', className)}>{children}</div>;
 }
 

@@ -45,14 +45,14 @@ export function tournamentStatusRiskNotes(
   return notes;
 }
 
-export function isBackwardTournamentStatusTransition(
+export function isBackwardStatusTransition(
   from: TournamentStatus,
   to: TournamentStatus
 ): boolean {
   return STATUS_RANK[to] < STATUS_RANK[from];
 }
 
-export function tournamentStatusChangeRequiresForce(
+export function forceSetTournamentStatus(
   from: TournamentStatus,
   to: TournamentStatus
 ): boolean {

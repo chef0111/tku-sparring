@@ -44,5 +44,11 @@ export interface TournamentListItem {
   name: string;
   status: TournamentStatus;
   createdAt: Date;
-  _count: { groups: number; matches: number; tournamentAthletes: number };
+  _count: {
+    groups: number;
+    matches: number;
+    tournamentAthletes: number;
+    /** Builder queue count — excludes Advanced/BYE/empty slots. */
+    actionableMatches: number;
+  };
 }

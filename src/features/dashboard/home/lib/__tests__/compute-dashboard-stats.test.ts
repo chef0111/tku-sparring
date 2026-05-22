@@ -9,7 +9,12 @@ function makeTournament(
   return {
     name: 'Test',
     createdAt: new Date('2026-01-01'),
-    _count: { groups: 0, matches: 0, tournamentAthletes: 0 },
+    _count: {
+      groups: 0,
+      matches: 0,
+      tournamentAthletes: 0,
+      actionableMatches: 0,
+    },
     ...overrides,
   };
 }
@@ -20,12 +25,22 @@ describe('computeDashboardStats', () => {
       makeTournament({
         id: '1',
         status: 'draft',
-        _count: { groups: 2, matches: 10, tournamentAthletes: 20 },
+        _count: {
+          groups: 2,
+          matches: 10,
+          tournamentAthletes: 20,
+          actionableMatches: 6,
+        },
       }),
       makeTournament({
         id: '2',
         status: 'active',
-        _count: { groups: 1, matches: 5, tournamentAthletes: 8 },
+        _count: {
+          groups: 1,
+          matches: 5,
+          tournamentAthletes: 8,
+          actionableMatches: 4,
+        },
       }),
     ];
 
@@ -35,28 +50,58 @@ describe('computeDashboardStats', () => {
     expect(result.kpis.byStatus).toEqual({ draft: 1, active: 1, completed: 0 });
     expect(result.kpis.totalAthletes).toBe(28);
     expect(result.kpis.totalGroups).toBe(3);
-    expect(result.kpis.totalMatches).toBe(15);
+    expect(result.kpis.totalMatches).toBe(10);
   });
 
-  it('derives needs-attention items for incomplete draft tournaments', () => {
+  it('builds chart payloads for status mix and top tournaments', () => {
     const items = [
-      makeTournament({ id: 'a', status: 'draft', name: 'Empty' }),
       makeTournament({
-        id: 'b',
+        id: '1',
+        name: 'Alpha Open',
         status: 'draft',
-        name: 'No brackets',
-        _count: { groups: 2, matches: 0, tournamentAthletes: 5 },
+        _count: {
+          groups: 2,
+          matches: 10,
+          tournamentAthletes: 20,
+          actionableMatches: 6,
+        },
+      }),
+      makeTournament({
+        id: '2',
+        name: 'Beta Cup',
+        status: 'active',
+        _count: {
+          groups: 1,
+          matches: 5,
+          tournamentAthletes: 30,
+          actionableMatches: 4,
+        },
+      }),
+      makeTournament({
+        id: '3',
+        name: 'Gamma Classic',
+        status: 'completed',
+        _count: {
+          groups: 1,
+          matches: 8,
+          tournamentAthletes: 12,
+          actionableMatches: 3,
+        },
       }),
     ];
 
     const result = computeDashboardStats(items);
 
-    expect(result.attentionItems).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ tournamentId: 'a', kind: 'no_athletes' }),
-        expect.objectContaining({ tournamentId: 'b', kind: 'no_brackets' }),
-      ])
-    );
+    expect(result.chartData.statusMix).toEqual([
+      { status: 'draft', count: 1, label: 'Draft' },
+      { status: 'active', count: 1, label: 'Active' },
+      { status: 'completed', count: 1, label: 'Completed' },
+    ]);
+    expect(result.chartData.topByAthletes[0]).toEqual({
+      name: 'Beta Cup',
+      athletes: 30,
+      matches: 4,
+    });
   });
 
   it('groups pipeline by status sorted by createdAt desc', () => {

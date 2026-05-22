@@ -1,11 +1,13 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
-import { CheckCircle2, Edit, History } from 'lucide-react';
+import { CheckCircle2, Edit, History, ZapIcon } from 'lucide-react';
 import { ActivityPanel } from './components/activity-panel';
-import { GroupsProgressTable } from './components/groups-progress-table';
+import { GroupsOverview } from './components/groups-overview';
 import { SetupChecklist } from './components/setup-checklist';
 import { TournamentKpiRow } from './components/tournament-kpi-row';
+import { TournamentStatusDialog } from './components/tournament-status-dialog';
 import { useTournamentCommandCenter } from './hooks/use-tournament-command-center';
+import type { TournamentStatus } from './components/tournament-status-dialog';
 import type {
   GroupData,
   MatchData,
@@ -14,21 +16,9 @@ import type {
 import { SiteHeader } from '@/features/dashboard/site-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { useTournamentReadOnly } from '@/hooks/use-tournament-read-only';
-import { useSetTournamentStatus } from '@/queries/tournaments';
 import { TournamentStatusPill } from '@/features/dashboard/tournament/list/components/tournament-status-pill';
 import { TournamentActivitySheet } from '@/features/dashboard/tournament/tournament-activity-sheet';
-import { Spinner } from '@/components/ui/spinner';
-
-type ConfirmStatus = 'active' | 'completed';
 
 interface TournamentViewerProps {
   tournament: TournamentData;
@@ -46,14 +36,10 @@ export function TournamentViewer({
   const isReadOnly = useTournamentReadOnly(tournamentId);
   const [activityOpen, setActivityOpen] = React.useState(false);
   const [confirmStatus, setConfirmStatus] =
-    React.useState<ConfirmStatus | null>(null);
-  const setStatusMutation = useSetTournamentStatus({
-    onSuccess: () => setConfirmStatus(null),
-  });
+    React.useState<TournamentStatus | null>(null);
 
   const commandCenter = useTournamentCommandCenter({
     tournament,
-    groups,
     matches,
   });
 
@@ -97,7 +83,7 @@ export function TournamentViewer({
             type="button"
             onClick={() => setActivityOpen(true)}
           >
-            <History className="mr-1 size-4" data-icon="inline-start" />
+            <History data-icon="inline-start" />
             Activity
           </Button>
           <Button variant="outline" size="sm" asChild>
@@ -105,53 +91,56 @@ export function TournamentViewer({
               to="/dashboard/tournaments/$id/builder"
               params={{ id: tournamentId }}
             >
-              <Edit className="mr-1 size-4" data-icon="inline-start" />
+              <Edit data-icon="inline-start" />
               {isReadOnly ? 'Open Builder' : 'Edit Tournament'}
             </Link>
           </Button>
-          {transitionAction ? (
+          {transitionAction && (
             <Button
               size="sm"
               onClick={() => setConfirmStatus(transitionAction.status)}
             >
+              <ZapIcon aria-hidden="true" />
               {transitionAction.label}
             </Button>
-          ) : null}
+          )}
         </div>
       </SiteHeader>
 
       <div className="flex-1 overflow-auto p-6">
-        <main className="mx-auto flex max-w-7xl flex-col gap-4">
+        <main className="mx-auto flex max-w-7xl flex-col gap-6">
           <h1 className="sr-only">{tournament.name} command center</h1>
           {tournament.status === 'active' &&
-          tournament.lifecycle.canComplete ? (
-            <Alert>
-              <CheckCircle2 className="size-4" aria-hidden="true" />
-              <AlertTitle>Ready to complete</AlertTitle>
-              <AlertDescription>
-                All groups have winner results. You can complete this tournament
-                when you are ready to lock the workspace.
-              </AlertDescription>
-            </Alert>
-          ) : null}
+            tournament.lifecycle.canComplete && (
+              <Alert>
+                <CheckCircle2 aria-hidden="true" />
+                <AlertTitle>Ready to complete</AlertTitle>
+                <AlertDescription>
+                  Every match has a recorded winner. You can complete this
+                  tournament when you are ready to lock the workspace.
+                </AlertDescription>
+              </Alert>
+            )}
 
           {tournament.status === 'draft' &&
-          commandCenter.setupSteps.length > 0 ? (
-            <SetupChecklist
-              steps={commandCenter.setupSteps}
-              tournamentId={tournamentId}
-            />
-          ) : null}
+            commandCenter.setupSteps.length > 0 && (
+              <SetupChecklist
+                steps={commandCenter.setupSteps}
+                tournamentId={tournamentId}
+              />
+            )}
 
           <TournamentKpiRow
             tournament={tournament}
-            matchTotals={commandCenter.matchTotals}
+            groups={groups}
+            matches={matches}
           />
 
-          <div className="grid gap-4 lg:grid-cols-5">
+          <div className="grid gap-6 lg:grid-cols-5">
             <div className="flex flex-col gap-4 lg:col-span-3">
-              <GroupsProgressTable
-                rows={commandCenter.groupProgress}
+              <GroupsOverview
+                groups={groups}
+                matches={matches}
                 tournamentId={tournamentId}
               />
             </div>
@@ -171,57 +160,12 @@ export function TournamentViewer({
         onOpenChange={setActivityOpen}
       />
 
-      <Dialog
-        open={confirmStatus !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setConfirmStatus(null);
-          }
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {transitionAction?.title ?? 'Update status'}
-            </DialogTitle>
-            <DialogDescription>
-              {transitionAction?.description ??
-                'Confirm the next tournament lifecycle transition.'}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setConfirmStatus(null)}
-              disabled={setStatusMutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                if (!confirmStatus) {
-                  return;
-                }
-
-                setStatusMutation.mutate({
-                  id: tournamentId,
-                  status: confirmStatus,
-                });
-              }}
-              disabled={setStatusMutation.isPending}
-            >
-              {setStatusMutation.isPending ? (
-                <>
-                  <Spinner className="text-primary-foreground" />
-                  <span>Saving…</span>
-                </>
-              ) : (
-                (transitionAction?.label ?? 'Confirm')
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <TournamentStatusDialog
+        tournamentId={tournamentId}
+        confirmStatus={confirmStatus}
+        onConfirmStatusChange={setConfirmStatus}
+        transitionAction={transitionAction}
+      />
     </div>
   );
 }
