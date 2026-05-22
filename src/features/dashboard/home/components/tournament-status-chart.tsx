@@ -71,14 +71,14 @@ export function TournamentStatusChart({
           data={statusMix}
           dataKey="count"
           nameKey="status"
-          className="min-h-[220px] w-full"
+          className="min-h-55 w-full"
         >
           <Pie innerRadius="55%" cornerRadius={4} paddingAngle={2} />
-          <Tooltip variant="line" />
+          <Tooltip variant="default" />
           <Legend variant="circle" />
         </EvilPieChart>
       ) : (
-        <Empty className="min-h-[200px] border-none">
+        <Empty className="min-h-50 border-none">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <PieChart aria-hidden="true" />

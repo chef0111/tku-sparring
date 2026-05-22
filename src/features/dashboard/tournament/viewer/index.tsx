@@ -142,11 +142,19 @@ export function TournamentViewer({
             />
           ) : null}
 
-          <TournamentKpiRow tournament={tournament} groups={groups} />
+          <TournamentKpiRow
+            tournament={tournament}
+            groups={groups}
+            matches={matches}
+          />
 
           <div className="grid gap-6 lg:grid-cols-5">
             <div className="flex flex-col gap-4 lg:col-span-3">
-              <GroupsOverview groups={groups} tournamentId={tournamentId} />
+              <GroupsOverview
+                groups={groups}
+                matches={matches}
+                tournamentId={tournamentId}
+              />
             </div>
             <div className="lg:col-span-2">
               <ActivityPanel

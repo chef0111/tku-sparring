@@ -88,3 +88,111 @@ export function buildBracketActionQueue(
 
   return out;
 }
+
+/** Same count as the builder Matches panel ({@link buildBracketActionQueue}). */
+export function countActionableMatches(
+  matches: ReadonlyArray<MatchData>,
+  options?: BuildBracketActionQueueOptions
+): number {
+  return buildBracketActionQueue([...matches], options).length;
+}
+
+export interface ActionableMatchGroupInput {
+  id: string;
+  _count: { tournamentAthletes: number };
+}
+
+function indexMatchesByGroupId(matches: ReadonlyArray<MatchData>) {
+  const matchesByGroupId = new Map<string, Array<MatchData>>();
+
+  for (const match of matches) {
+    const groupMatches = matchesByGroupId.get(match.groupId);
+    if (groupMatches) {
+      groupMatches.push(match);
+    } else {
+      matchesByGroupId.set(match.groupId, [match]);
+    }
+  }
+
+  return matchesByGroupId;
+}
+
+export function countActionableMatchesByGroupId(
+  groups: ReadonlyArray<ActionableMatchGroupInput>,
+  matches: ReadonlyArray<MatchData>
+) {
+  const matchesByGroupId = indexMatchesByGroupId(matches);
+
+  return new Map(
+    groups.map((group) => [
+      group.id,
+      countActionableMatches(matchesByGroupId.get(group.id) ?? [], {
+        groupAthleteCount: group._count.tournamentAthletes,
+      }),
+    ])
+  );
+}
+
+export function countActionableMatchesForGroups(
+  groups: ReadonlyArray<ActionableMatchGroupInput>,
+  matches: ReadonlyArray<MatchData>
+): number {
+  const matchesByGroupId = indexMatchesByGroupId(matches);
+  let total = 0;
+
+  for (const group of groups) {
+    total += countActionableMatches(matchesByGroupId.get(group.id) ?? [], {
+      groupAthleteCount: group._count.tournamentAthletes,
+    });
+  }
+
+  return total;
+}
+
+export interface ActionableMatchTournamentGroupInput extends ActionableMatchGroupInput {
+  tournamentId: string;
+}
+
+export function countActionableMatchesByTournamentId(
+  groups: ReadonlyArray<ActionableMatchTournamentGroupInput>,
+  matches: ReadonlyArray<MatchData>
+) {
+  const groupsByTournamentId = new Map<
+    string,
+    Array<ActionableMatchGroupInput>
+  >();
+  const matchesByTournamentId = new Map<string, Array<MatchData>>();
+
+  for (const group of groups) {
+    const tournamentGroups = groupsByTournamentId.get(group.tournamentId);
+    if (tournamentGroups) {
+      tournamentGroups.push(group);
+    } else {
+      groupsByTournamentId.set(group.tournamentId, [group]);
+    }
+  }
+
+  for (const match of matches) {
+    const tournamentMatches = matchesByTournamentId.get(match.tournamentId);
+    if (tournamentMatches) {
+      tournamentMatches.push(match);
+    } else {
+      matchesByTournamentId.set(match.tournamentId, [match]);
+    }
+  }
+
+  const tournamentIds = new Set([
+    ...groupsByTournamentId.keys(),
+    ...matchesByTournamentId.keys(),
+  ]);
+
+  return new Map(
+    [...tournamentIds].map((tournamentId) => [
+      tournamentId,
+      countActionableMatchesForGroups(
+        groupsByTournamentId.get(tournamentId) ?? [],
+        matchesByTournamentId.get(tournamentId) ?? []
+      ),
+    ])
+  );
+}

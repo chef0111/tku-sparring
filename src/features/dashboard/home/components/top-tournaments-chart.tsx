@@ -1,5 +1,3 @@
-'use client';
-
 import { BarChart3 } from 'lucide-react';
 import type { ChartConfig } from '@/components/evilcharts/ui/chart';
 import type { DashboardStats } from '@/features/dashboard/home/lib/compute-dashboard-stats';
@@ -58,7 +56,7 @@ export function TopTournamentsChart({
           data={topByAthletes}
           xDataKey="name"
           layout="horizontal"
-          className="min-h-[220px] w-full"
+          className="min-h-55 w-full"
           chartProps={{ margin: { left: 8, right: 8, top: 8, bottom: 0 } }}
         >
           <Grid horizontal={false} vertical />
@@ -76,10 +74,10 @@ export function TopTournamentsChart({
             }
           />
           <Bar dataKey="athletes" radius={4} />
-          <Tooltip variant="line" />
+          <Tooltip variant="default" />
         </EvilBarChart>
       ) : (
-        <Empty className="min-h-[200px] border-none">
+        <Empty className="min-h-50 border-none">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <BarChart3 aria-hidden="true" />

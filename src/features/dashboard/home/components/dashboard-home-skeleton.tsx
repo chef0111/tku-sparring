@@ -11,7 +11,7 @@ export function DashboardHomeSkeleton() {
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
         {Array.from({ length: 2 }).map((_, i) => (
-          <Skeleton key={i} className="min-h-[280px] rounded-xl" />
+          <Skeleton key={i} className="min-h-70 rounded-xl" />
         ))}
       </div>
       <div className="grid gap-3 lg:grid-cols-3">
@@ -19,7 +19,6 @@ export function DashboardHomeSkeleton() {
           <Skeleton key={i} className="h-52 rounded-xl" />
         ))}
       </div>
-      <Skeleton className="h-64 rounded-xl" />
       <DataTableSkeleton columnCount={6} withViewOptions={false} rowCount={5} />
     </div>
   );

@@ -10,6 +10,7 @@
     "strings": "on"
   },
   "tailwindCSS.classFunctions": ["cva", "cn"],
+  "tailwindCSS.lint.suggestCanonicalClasses": "ignore",
   "files.associations": {
     "*.css": "tailwindcss"
   },

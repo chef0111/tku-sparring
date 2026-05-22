@@ -30,6 +30,7 @@ export function ActivityPanel({ tournamentId, onViewAll }: ActivityPanelProps) {
     <HubSection
       title="Recent activity"
       description="Latest tournament events"
+      className="bg-popover ring-border/10 rounded-xl p-4 ring-1"
       action={
         <Button variant="ghost" size="sm" onClick={onViewAll}>
           <History data-icon="inline-start" />
@@ -37,7 +38,7 @@ export function ActivityPanel({ tournamentId, onViewAll }: ActivityPanelProps) {
         </Button>
       }
     >
-      <HubSectionContent>
+      <HubSectionContent padded={false}>
         {query.isLoading ? (
           <div className="flex flex-col gap-3">
             {Array.from({ length: 4 }).map((_, i) => (

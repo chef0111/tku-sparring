@@ -12,7 +12,7 @@ const hubPanelInnerClassName =
   "bg-background border-border ring-border relative z-10 -mx-0.75 mt-auto flex w-[calc(100%+0.375rem)] max-w-none flex-col overflow-hidden rounded-xl shadow-sm ring before:pointer-events-none before:absolute before:inset-0 before:rounded-lg before:bg-[radial-gradient(ellipse_90%_70%_at_0%_0%,rgb(255_255_255/0.12),transparent_58%)] before:content-['']";
 
 interface HubPanelHeaderProps {
-  label: string;
+  label: React.ReactNode;
   icon: LucideIcon;
   description?: string;
 }
@@ -64,8 +64,9 @@ export function HubMetricFooter({
 }
 
 interface HubMetricCardProps {
-  label: string;
+  label: React.ReactNode;
   icon: LucideIcon;
+  description?: string;
   value: React.ReactNode;
   footer?: React.ReactNode;
   action?: React.ReactNode;
@@ -76,6 +77,7 @@ interface HubMetricCardProps {
 export function HubMetricCard({
   label,
   icon,
+  description,
   value,
   footer,
   action,
@@ -83,20 +85,26 @@ export function HubMetricCard({
   style,
 }: HubMetricCardProps) {
   return (
-    <Card className={cn(hubPanelShellClassName, className)} style={style}>
+    <Card
+      className={cn(hubPanelShellClassName, 'flex h-full flex-col', className)}
+      style={style}
+    >
       {action ? (
         <div className="absolute top-1 right-2 z-20 p-0">{action}</div>
       ) : null}
-      <HubPanelHeader label={label} icon={icon} />
+      <HubPanelHeader label={label} icon={icon} description={description} />
       <CardContent
-        className={cn(hubPanelInnerClassName, 'justify-between gap-2 p-4')}
+        className={cn(
+          hubPanelInnerClassName,
+          'flex flex-1 flex-col justify-between gap-2 p-4'
+        )}
       >
         <p className="relative z-1 text-3xl font-semibold tracking-tight tabular-nums">
           {value}
         </p>
-        {footer ? (
-          <div className="relative z-1 mt-4 min-w-0">{footer}</div>
-        ) : null}
+        <div className="relative z-1 mt-4 flex min-h-6 min-w-0 items-end">
+          {footer}
+        </div>
       </CardContent>
     </Card>
   );
@@ -130,17 +138,17 @@ export function HubChartPanel({
       <CardContent
         className={cn(
           hubPanelInnerClassName,
-          'min-h-[240px] flex-1 justify-center gap-3 p-4'
+          'min-h-60 flex-1 justify-center gap-3 p-4'
         )}
       >
-        <div className="relative z-1 flex min-h-0 w-full flex-1 flex-col">
+        <div className="relative z-1 flex h-full min-h-0 w-full flex-1 flex-col">
           {children}
         </div>
-        {footer ? (
+        {footer && (
           <div className="border-border/50 relative z-1 min-w-0 border-t pt-3">
             {footer}
           </div>
-        ) : null}
+        )}
       </CardContent>
     </Card>
   );
@@ -172,9 +180,7 @@ export function HubSection({
         </div>
         {action}
       </div>
-      <div className="bg-card ring-foreground/6 overflow-hidden rounded-xl ring-1">
-        {children}
-      </div>
+      <div className="overflow-hidden">{children}</div>
     </section>
   );
 }

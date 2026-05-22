@@ -4,7 +4,6 @@ import { SiteHeader } from '../site-header';
 import { DashboardHomeSkeleton } from './components/dashboard-home-skeleton';
 import { HubChartsSection } from './components/hub-charts-section';
 import { KpiStrip } from './components/kpi-strip';
-import { NeedsAttention } from './components/needs-attention';
 import { RecentTournamentsSection } from './components/recent-tournaments-section';
 import { StatusPipeline } from './components/status-pipeline';
 import { useDashboardStats } from './hooks/use-dashboard-stats';
@@ -48,7 +47,6 @@ export function DashboardHome() {
             <>
               <KpiStrip stats={stats.kpis} />
               <HubChartsSection chartData={stats.chartData} />
-              <NeedsAttention items={stats.attentionItems} />
               <StatusPipeline pipeline={stats.pipeline} />
               <RecentTournamentsSection
                 tournaments={stats.recentTournaments}
