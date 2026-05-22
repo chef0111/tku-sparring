@@ -29,11 +29,11 @@ export const ClockSection = ({
   return (
     <div
       className={cn(
-        'relative -mt-8 flex w-full flex-col items-center justify-center',
+        'group/timer relative -mt-8 flex w-full flex-col items-center justify-center',
         className
       )}
     >
-      <ButtonGroup className="mb-1">
+      <ButtonGroup className="mb-1 opacity-0 transition group-hover/timer:opacity-100">
         <Button
           variant="ghost"
           size="sm"
