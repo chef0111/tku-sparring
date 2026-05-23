@@ -95,7 +95,7 @@ export function GroupsOverview({
                   />
                 }
                 action={
-                  <span className="text-muted-foreground px-1 text-xs font-medium">
+                  <span className="text-muted-foreground my-auto px-1 text-xs font-medium">
                     Arena {group.arenaIndex}
                   </span>
                 }

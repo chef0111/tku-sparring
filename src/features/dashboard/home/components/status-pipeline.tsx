@@ -155,7 +155,7 @@ function PipelineColumn({
         <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <Status
             status={pipelineStatusVariant[status]}
-            className="gap-1.5 bg-transparent p-0"
+            className="gap-1.5 bg-transparent p-0 pl-1"
           >
             <StatusIndicator />
             <StatusLabel className="text-foreground text-sm font-medium">

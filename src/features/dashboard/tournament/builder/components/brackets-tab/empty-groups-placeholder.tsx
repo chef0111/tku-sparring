@@ -1,15 +1,24 @@
 import { Trophy } from 'lucide-react';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
 
 export function EmptyGroupsPlaceholder() {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-3">
-      <div className="canvas-background flex size-16 items-center justify-center rounded-full">
-        <Trophy className="text-muted-foreground size-8" />
-      </div>
-      <h3 className="text-lg font-semibold">No groups yet</h3>
-      <p className="text-muted-foreground max-w-xs text-center text-sm">
-        Create groups and assign athletes before generating brackets.
-      </p>
-    </div>
+    <Empty className="canvas-background flex h-full flex-col items-center justify-center pb-20">
+      <EmptyHeader>
+        <EmptyMedia variant="icon" className="size-14">
+          <Trophy className="text-muted-foreground size-8" />
+        </EmptyMedia>
+        <EmptyTitle className="text-lg font-semibold">No groups yet</EmptyTitle>
+        <EmptyDescription>
+          Create groups and assign athletes before generating brackets.
+        </EmptyDescription>
+      </EmptyHeader>
+    </Empty>
   );
 }
