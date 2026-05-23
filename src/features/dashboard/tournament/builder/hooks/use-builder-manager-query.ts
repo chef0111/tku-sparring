@@ -1,7 +1,13 @@
-import { parseAsInteger, parseAsStringEnum, useQueryState } from 'nuqs';
+import {
+  parseAsBoolean,
+  parseAsInteger,
+  parseAsStringEnum,
+  useQueryState,
+} from 'nuqs';
 
 const POOL_GENDER = parseAsStringEnum(['M', 'F']);
 const TAB = parseAsStringEnum(['groups', 'brackets']).withDefault('groups');
+const ADD_ATHLETES = parseAsBoolean;
 
 export function useBuilderManagerQuery() {
   const [tab, setTab] = useQueryState('tab', TAB);
@@ -12,6 +18,10 @@ export function useBuilderManagerQuery() {
   const [poolBeltMax] = useQueryState('poolBeltMax', parseAsInteger);
   const [poolWeightMin] = useQueryState('poolWeightMin', parseAsInteger);
   const [poolWeightMax] = useQueryState('poolWeightMax', parseAsInteger);
+  const [addAthletes, setAddAthletes] = useQueryState(
+    'addAthletes',
+    ADD_ATHLETES
+  );
 
   return {
     tab,
@@ -24,5 +34,7 @@ export function useBuilderManagerQuery() {
     poolBeltMax,
     poolWeightMin,
     poolWeightMax,
+    addAthletes,
+    setAddAthletes,
   };
 }

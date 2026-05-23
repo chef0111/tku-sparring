@@ -3,6 +3,7 @@ import { DndContext } from '@dnd-kit/core';
 import { toast } from 'sonner';
 import { useBuilderManagerQuery } from '../../hooks/use-builder-manager-query';
 import { AddGroupDialog } from '../dialogs/add-group-dialog';
+import { AddAthletesSheet } from '../dialogs/add-athletes-sheet';
 import { GroupSettingsSheet } from '../dialogs/group-settings-sheet';
 import { AthletePool } from './athlete-pool';
 import { GroupRosterTable } from './group-roster-table';
@@ -13,16 +14,24 @@ import { useAssignAthlete } from '@/queries/groups';
 
 interface GroupsTabProps {
   tournamentId: string;
+  tournamentName: string;
   groups: Array<GroupData>;
   readOnly: boolean;
 }
 
-export function GroupsTab({ tournamentId, groups, readOnly }: GroupsTabProps) {
-  const { selectedGroupId, setSelectedGroup } = useBuilderManagerQuery();
+export function GroupsTab({
+  tournamentId,
+  tournamentName,
+  groups,
+  readOnly,
+}: GroupsTabProps) {
+  const { selectedGroupId, setSelectedGroup, addAthletes, setAddAthletes } =
+    useBuilderManagerQuery();
 
   const assignAthlete = useAssignAthlete({ suppressErrorToast: true });
 
   const [showAddGroup, setShowAddGroup] = React.useState(false);
+  const [addAthletesOpen, setAddAthletesOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [settingsGroup, setSettingsGroup] = React.useState<GroupData | null>(
     null
@@ -37,9 +46,17 @@ export function GroupsTab({ tournamentId, groups, readOnly }: GroupsTabProps) {
   React.useEffect(() => {
     if (readOnly) {
       setShowAddGroup(false);
+      setAddAthletesOpen(false);
       setSettingsOpen(false);
     }
   }, [readOnly]);
+
+  React.useEffect(() => {
+    if (addAthletes && !readOnly) {
+      setAddAthletesOpen(true);
+      void setAddAthletes(null);
+    }
+  }, [addAthletes, readOnly, setAddAthletes]);
 
   const selectedGroup = groups.find((g) => g.id === selectedGroupId) ?? null;
 
@@ -78,6 +95,7 @@ export function GroupsTab({ tournamentId, groups, readOnly }: GroupsTabProps) {
           tournamentId={tournamentId}
           selectedGroupId={selectedGroupId}
           readOnly={readOnly}
+          onOpenAddAthletes={() => setAddAthletesOpen(true)}
         />
         <GroupRosterTable
           group={selectedGroup}
@@ -96,6 +114,13 @@ export function GroupsTab({ tournamentId, groups, readOnly }: GroupsTabProps) {
         />
       </div>
 
+      <AddAthletesSheet
+        open={addAthletesOpen}
+        onOpenChange={setAddAthletesOpen}
+        tournamentId={tournamentId}
+        tournamentName={tournamentName}
+        readOnly={readOnly}
+      />
       <AddGroupDialog
         open={showAddGroup}
         onOpenChange={setShowAddGroup}

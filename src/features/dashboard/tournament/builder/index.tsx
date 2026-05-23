@@ -110,6 +110,7 @@ function TournamentBuilderActive({
         {b.tab === 'groups' ? (
           <GroupsTab
             tournamentId={tournamentId}
+            tournamentName={tournament.name}
             groups={groups}
             readOnly={b.isReadOnly}
           />
