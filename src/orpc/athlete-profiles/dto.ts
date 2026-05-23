@@ -85,6 +85,7 @@ export const AthleteProfilesSchema = z.object({
     .optional(),
   filters: z.array(filterItemSchema).optional().default([]),
   joinOperator: z.enum(dataTableConfig.joinOperators).optional().default('and'),
+  excludeTournamentId: z.string().optional(),
 });
 
 export const CheckDuplicateSchema = z.object({
