@@ -167,7 +167,7 @@ function SetupStepRow({
         {!step.complete ? (
           <div className="flex justify-end">
             <Button
-              variant={isCurrent ? 'default' : 'outline'}
+              variant={isCurrent ? 'primary' : 'outline'}
               size="sm"
               className="h-8 cursor-pointer"
               asChild
@@ -232,13 +232,13 @@ export function SetupChecklist({ steps, tournamentId }: SetupChecklistProps) {
           ))}
         </ol>
 
-        {allComplete ? (
+        {allComplete && (
           <HubMetricFooter
             status="online"
             value="Ready"
             label="to activate from the header when you are set"
           />
-        ) : null}
+        )}
       </HubSectionContent>
     </HubSection>
   );
