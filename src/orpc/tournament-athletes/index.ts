@@ -5,6 +5,7 @@ import {
   UpdateTournamentAthleteSchema,
 } from './dto';
 import { TournamentAthleteDAL } from './dal';
+import { bulkAddAthletesToTournament } from './bulk-add';
 import { authedProcedure } from '@/orpc/middleware';
 import { prisma } from '@/lib/db';
 
@@ -17,20 +18,11 @@ export const listTournamentAthletes = authedProcedure
 
 export const bulkAddAthletes = authedProcedure
   .input(BulkAddAthletesSchema)
-  .handler(async ({ input }) => {
-    const { tournamentId, athleteProfileIds } = input;
-
-    const profiles = await prisma.athleteProfile.findMany({
-      where: { id: { in: athleteProfileIds } },
+  .handler(async ({ input, context }) => {
+    return bulkAddAthletesToTournament({
+      ...input,
+      adminId: context.user.id,
     });
-
-    const created = await TournamentAthleteDAL.bulkCreate(
-      tournamentId,
-      profiles
-    );
-    const added = created.length;
-
-    return { added, assigned: 0, unassigned: added };
   });
 
 export const updateTournamentAthleteRecord = authedProcedure

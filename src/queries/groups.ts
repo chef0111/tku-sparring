@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import type { QueryClient } from '@tanstack/react-query';
 import type {
   AssignAthleteDTO,
+  AutoAssignAllDTO,
   AutoAssignDTO,
   UnassignAthleteDTO,
   UpdateGroupDTO,
@@ -82,15 +83,39 @@ export function useDeleteGroup(options?: { onSuccess?: () => void }) {
   });
 }
 
-export function useAutoAssignGroup(options?: { onSuccess?: () => void }) {
+export function useAutoAssignGroup(options?: {
+  onSuccess?: () => void;
+  suppressToast?: boolean;
+}) {
   const invalidate = useInvalidateGroups();
 
   return useMutation({
     mutationFn: (data: AutoAssignDTO) => client.group.autoAssign(data),
     onSuccess: (result) => {
       invalidate();
-      toast.success(`Auto-assigned ${result.assigned} athletes`);
+      if (!options?.suppressToast) {
+        toast.success(`Auto-assigned ${result.assigned} athletes`);
+      }
       options?.onSuccess?.();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+}
+
+export function useAutoAssignAll(options?: {
+  onSuccess?: (result: {
+    assigned: number;
+    groupsRun: number;
+    groupsSkipped: number;
+  }) => void;
+}) {
+  const invalidate = useInvalidateGroups();
+
+  return useMutation({
+    mutationFn: (data: AutoAssignAllDTO) => client.group.autoAssignAll(data),
+    onSuccess: (result) => {
+      invalidate();
+      options?.onSuccess?.(result);
     },
     onError: (err) => toast.error(err.message),
   });
