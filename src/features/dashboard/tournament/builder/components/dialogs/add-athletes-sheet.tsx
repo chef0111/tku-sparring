@@ -174,15 +174,16 @@ export function AddAthletesSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex w-full flex-col sm:max-w-lg">
+      <SheetContent className="flex w-full flex-col gap-2 sm:max-w-lg">
         <SheetHeader>
-          <SheetTitle>Add athletes</SheetTitle>
+          <SheetTitle className="text-lg">Add athletes</SheetTitle>
           <SheetDescription>
-            Pick athletes from your library to add to {tournamentName}.
+            Pick athletes from your library to add to{' '}
+            <span className="font-semibold">{tournamentName}</span>.
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden p-2">
+        <div className="flex min-h-0 flex-1 flex-col gap-3 p-2 pt-0">
           <div className="flex flex-col gap-2">
             <PoolSearchInput value={query} onChange={setQuery} />
             <div className="flex gap-2">
@@ -221,7 +222,8 @@ export function AddAthletesSheet({
                 htmlFor="select-all-page"
                 className="cursor-pointer text-xs font-normal"
               >
-                Select all on page ({pageIds.length})
+                Select all shown ({items.length}
+                {items.length < total ? ` of ${total}` : ''})
               </Label>
             </div>
           ) : null}
