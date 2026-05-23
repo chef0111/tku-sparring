@@ -16,3 +16,4 @@ updates:
       - dependency-name: '@prisma/client'
       - dependency-name: 'better-auth'
       - dependency-name: 'react-day-picker'
+      - dependency-name: '@vitejs/plugin-react'
