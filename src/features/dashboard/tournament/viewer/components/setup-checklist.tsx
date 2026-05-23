@@ -52,7 +52,7 @@ function StepStatusBadge({
 }) {
   if (complete) {
     return (
-      <Status status="online" className="gap-1.5 bg-transparent p-0">
+      <Status status="online" className="gap-1.5 bg-transparent p-0 pl-1">
         <StatusIndicator />
         <StatusLabel className="text-xs font-medium">Complete</StatusLabel>
       </Status>
@@ -61,7 +61,7 @@ function StepStatusBadge({
 
   if (isCurrent) {
     return (
-      <Status status="maintenance" className="gap-1.5 bg-transparent p-0">
+      <Status status="maintenance" className="gap-1.5 bg-transparent p-0 pl-1">
         <StatusIndicator />
         <StatusLabel className="text-xs font-medium">Next up</StatusLabel>
       </Status>
@@ -69,7 +69,7 @@ function StepStatusBadge({
   }
 
   return (
-    <Status status="degraded" className="gap-1.5 bg-transparent p-0">
+    <Status status="degraded" className="gap-1.5 bg-transparent p-0 pl-1">
       <StatusIndicator />
       <StatusLabel className="text-xs font-medium">Pending</StatusLabel>
     </Status>
@@ -175,7 +175,10 @@ function SetupStepRow({
               <Link
                 to="/dashboard/tournaments/$id/builder"
                 params={{ id: tournamentId }}
-                search={{ tab: step.builderTab }}
+                search={{
+                  tab: step.builderTab,
+                  ...(step.id === 'athletes' ? { addAthletes: true } : {}),
+                }}
               >
                 {step.ctaLabel}
                 <ArrowUpRight data-icon="inline-end" aria-hidden="true" />
