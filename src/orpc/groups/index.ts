@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
   AssignAthleteSchema,
+  AutoAssignAllSchema,
   AutoAssignSchema,
   CreateGroupSchema,
   UnassignAthleteSchema,
@@ -56,6 +57,15 @@ export const autoAssignGroup = authedProcedure
       adminId: context.user.id,
     });
     return result;
+  });
+
+export const autoAssignAllGroups = authedProcedure
+  .input(AutoAssignAllSchema)
+  .handler(async ({ input, context }) => {
+    return GroupDAL.autoAssignAllEligible({
+      tournamentId: input.tournamentId,
+      adminId: context.user.id,
+    });
   });
 
 export const assignAthleteToGroup = authedProcedure
