@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import type { GroupData } from '@/features/dashboard/types';
@@ -13,8 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { client } from '@/orpc/client';
-import { invalidateOrpcGroupListQueries } from '@/queries/groups';
+import { useAutoAssignAll } from '@/queries/groups';
 
 interface AutoAssignAllDialogProps {
   open: boolean;
@@ -29,8 +27,7 @@ export function AutoAssignAllDialog({
   tournamentId,
   groups,
 }: AutoAssignAllDialogProps) {
-  const queryClient = useQueryClient();
-  const [isRunning, setIsRunning] = React.useState(false);
+  const autoAssignAll = useAutoAssignAll();
 
   const { eligible, skipped } = React.useMemo(() => {
     const eligibleList: Array<GroupData> = [];
@@ -42,31 +39,22 @@ export function AutoAssignAllDialog({
     return { eligible: eligibleList, skipped: skippedList };
   }, [groups]);
 
-  const handleRun = async () => {
+  const handleRun = () => {
     if (eligible.length === 0) return;
-    setIsRunning(true);
-    let assignedSum = 0;
-    try {
-      for (const group of eligible) {
-        const result = await client.group.autoAssign({
-          groupId: group.id,
-          tournamentId,
-        });
-        assignedSum += result.assigned;
+    autoAssignAll.mutate(
+      { tournamentId },
+      {
+        onSuccess: (result) => {
+          toast.success(
+            `Auto-assigned ${result.assigned} athletes across ${result.groupsRun} groups (skipped ${result.groupsSkipped})`
+          );
+          onOpenChange(false);
+        },
       }
-      queryClient.invalidateQueries({ queryKey: ['tournament'] });
-      await invalidateOrpcGroupListQueries(queryClient);
-      queryClient.invalidateQueries({ queryKey: ['tournamentAthlete'] });
-      toast.success(
-        `Auto-assigned ${assignedSum} athletes across ${eligible.length} groups (skipped ${skipped.length})`
-      );
-      onOpenChange(false);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Auto-assign failed');
-    } finally {
-      setIsRunning(false);
-    }
+    );
   };
+
+  const isRunning = autoAssignAll.isPending;
 
   return (
     <Dialog

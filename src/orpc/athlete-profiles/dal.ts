@@ -32,6 +32,7 @@ export class AthleteProfileDAL {
       filterFlag,
       filters,
       joinOperator,
+      excludeTournamentId,
     } = input;
 
     const advancedTable =
@@ -94,7 +95,20 @@ export class AthleteProfileDAL {
         : {}),
     };
 
-    const where = advancedTable ? advancedWhere : legacyWhere;
+    const tournamentExclusion = excludeTournamentId
+      ? {
+          NOT: {
+            tournamentAthletes: {
+              some: { tournamentId: excludeTournamentId },
+            },
+          },
+        }
+      : null;
+
+    const baseWhere = advancedTable ? advancedWhere : legacyWhere;
+    const where = tournamentExclusion
+      ? { AND: [baseWhere, tournamentExclusion] }
+      : baseWhere;
 
     const orderBy =
       sorting.length > 0

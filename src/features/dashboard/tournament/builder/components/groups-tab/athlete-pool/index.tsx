@@ -14,6 +14,7 @@ import {
   PoolWeightFilter,
 } from './filters';
 import { AthletePoolRow } from './athlete-pool-row';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTournamentAthletesInfinite } from '@/queries/tournament-athletes';
@@ -22,6 +23,7 @@ interface AthletePoolProps {
   tournamentId: string;
   selectedGroupId: string | null;
   readOnly: boolean;
+  onOpenAddAthletes?: () => void;
 }
 
 const POOL_FILTER_PARSERS = {
@@ -37,6 +39,7 @@ export function AthletePool({
   tournamentId,
   selectedGroupId,
   readOnly,
+  onOpenAddAthletes,
 }: AthletePoolProps) {
   const {
     poolQuery,
@@ -99,9 +102,22 @@ export function AthletePool({
   return (
     <div className="bg-card flex w-xs shrink-0 flex-col overflow-hidden border-r">
       <div className="border-b p-3">
-        <div className="mb-2 flex items-center justify-between">
+        <div className="mb-2 flex items-center justify-between gap-2">
           <h3 className="text-sm font-semibold">Unassigned Athletes</h3>
-          <Badge variant="secondary">{total}</Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary">{total}</Badge>
+            {!readOnly && onOpenAddAthletes ? (
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 cursor-pointer"
+                onClick={onOpenAddAthletes}
+              >
+                <UserPlus data-icon="inline-start" aria-hidden="true" />
+                Add athletes
+              </Button>
+            ) : null}
+          </div>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -137,9 +153,27 @@ export function AthletePool({
             ))}
           </div>
         ) : items.length === 0 ? (
-          <div className="text-muted-foreground flex flex-col items-center justify-center gap-2 p-6 text-center text-sm">
-            <UserPlus className="size-8 opacity-50" />
-            {hasFilters ? 'No matches' : 'No unassigned athletes'}
+          <div className="text-muted-foreground flex flex-col items-center justify-center gap-3 p-6 text-center text-sm">
+            <UserPlus className="size-8 opacity-50" aria-hidden="true" />
+            {hasFilters ? (
+              <p>No matches</p>
+            ) : (
+              <>
+                <p className="text-foreground text-sm font-medium">
+                  No unassigned athletes
+                </p>
+                {!readOnly && onOpenAddAthletes ? (
+                  <Button
+                    size="sm"
+                    className="cursor-pointer"
+                    onClick={onOpenAddAthletes}
+                  >
+                    <UserPlus data-icon="inline-start" aria-hidden="true" />
+                    Add from library
+                  </Button>
+                ) : null}
+              </>
+            )}
           </div>
         ) : (
           <>

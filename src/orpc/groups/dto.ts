@@ -42,6 +42,10 @@ export const AutoAssignSchema = z.object({
   groupId: z.string(),
 });
 
+export const AutoAssignAllSchema = z.object({
+  tournamentId: z.string(),
+});
+
 export const AssignAthleteSchema = z.object({
   groupId: z.string(),
   tournamentAthleteId: z.string(),
@@ -55,5 +59,6 @@ export type GroupDTO = z.infer<typeof GroupSchema>;
 export type CreateGroupDTO = z.infer<typeof CreateGroupSchema>;
 export type UpdateGroupDTO = z.infer<typeof UpdateGroupSchema>;
 export type AutoAssignDTO = z.infer<typeof AutoAssignSchema>;
+export type AutoAssignAllDTO = z.infer<typeof AutoAssignAllSchema>;
 export type AssignAthleteDTO = z.infer<typeof AssignAthleteSchema>;
 export type UnassignAthleteDTO = z.infer<typeof UnassignAthleteSchema>;

@@ -52,7 +52,7 @@ export function HubMetricFooter({
 }: HubMetricFooterProps) {
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-x-1 text-xs">
-      <Status status={status} className="gap-1.5 bg-transparent p-0">
+      <Status status={status} className="gap-1.5 bg-transparent p-0 pl-1">
         <StatusIndicator />
         <StatusLabel className="text-foreground font-medium tabular-nums">
           {value}

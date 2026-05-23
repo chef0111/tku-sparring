@@ -118,6 +118,36 @@ export class GroupDAL {
     return result;
   }
 
+  static async autoAssignAllEligible(input: {
+    tournamentId: string;
+    adminId: string;
+  }) {
+    const groups = await prisma.group.findMany({
+      where: { tournamentId: input.tournamentId },
+      include: { _count: { select: { matches: true } } },
+    });
+
+    let assigned = 0;
+    let groupsRun = 0;
+    let groupsSkipped = 0;
+
+    for (const group of groups) {
+      if (group._count.matches > 0) {
+        groupsSkipped += 1;
+        continue;
+      }
+      groupsRun += 1;
+      const result = await GroupDAL.autoAssign({
+        tournamentId: input.tournamentId,
+        groupId: group.id,
+        adminId: input.adminId,
+      });
+      assigned += result.assigned;
+    }
+
+    return { assigned, groupsRun, groupsSkipped };
+  }
+
   static async assignAthlete(input: AssignAthleteDTO & { adminId: string }) {
     const updated = await prisma.$transaction(async (tx) => {
       const row = await tx.tournamentAthlete.update({

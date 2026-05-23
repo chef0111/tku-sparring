@@ -13,6 +13,7 @@ import {
 
 import {
   assignAthleteToGroup,
+  autoAssignAllGroups,
   autoAssignGroup,
   createGroup,
   getGroup,
@@ -89,6 +90,7 @@ export default {
     update: updateGroup,
     delete: removeGroup,
     autoAssign: autoAssignGroup,
+    autoAssignAll: autoAssignAllGroups,
     assignAthlete: assignAthleteToGroup,
     unassignAthlete: unassignAthleteFromGroup,
   },

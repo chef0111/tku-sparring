@@ -1,6 +1,7 @@
 import {
   keepPreviousData,
   queryOptions,
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
@@ -35,6 +36,22 @@ export function athleteProfilesQueryOptions(input: AthleteProfilesDTO) {
 export function useAthleteProfiles(input: AthleteProfilesDTO) {
   return useQuery({
     ...athleteProfilesQueryOptions(input),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useAthleteProfilesInfinite(
+  input: Omit<AthleteProfilesDTO, 'page'>
+) {
+  return useInfiniteQuery({
+    queryKey: ['athleteProfile', 'list', 'infinite', input] as const,
+    queryFn: ({ pageParam }: { pageParam: number }) =>
+      client.athleteProfile.list({ ...input, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (last, allPages) => {
+      const fetched = allPages.reduce((acc, p) => acc + p.items.length, 0);
+      return fetched < last.total ? allPages.length + 1 : undefined;
+    },
     placeholderData: keepPreviousData,
   });
 }

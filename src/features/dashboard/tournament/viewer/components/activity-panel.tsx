@@ -32,7 +32,7 @@ export function ActivityPanel({ tournamentId, onViewAll }: ActivityPanelProps) {
       description="Latest tournament events"
       className="bg-popover ring-border/10 rounded-xl p-4 ring-1"
       action={
-        <Button variant="ghost" size="sm" onClick={onViewAll}>
+        <Button variant="outline" size="sm" onClick={onViewAll}>
           <History data-icon="inline-start" />
           View all
         </Button>
