@@ -27,7 +27,7 @@ import {
   matchOptionLabel,
 } from '@/features/dashboard/tournament/builder/lib/custom-match';
 import { CreateCustomMatchFormSchema } from '@/lib/validations';
-import { useCreateCustomMatch } from '@/queries/matches';
+import { useCreateCustomMatch } from '@/queries/match';
 import { Label } from '@/components/ui/label';
 
 type FormValues = CreateCustomMatchFormValues;

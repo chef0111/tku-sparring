@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useDeleteAthleteProfile } from '@/queries/athlete-profiles';
+import { useDeleteAthleteProfile } from '@/queries/athlete-profile';
 
 interface DeleteAthleteDialogProps {
   athlete: AthleteProfileData | null;

@@ -1,6 +1,6 @@
 import { Dices } from 'lucide-react';
 import { toast } from 'sonner';
-import { useGenerateBracket } from '@/queries/matches';
+import { useGenerateBracket } from '@/queries/match';
 import { Button } from '@/components/ui/button';
 import {
   Empty,

@@ -37,7 +37,7 @@ import {
   useRetireArena,
   useSetArenaGroupOrder,
   useTournament,
-} from '@/queries/tournaments';
+} from '@/queries/tournament';
 import { cn } from '@/lib/utils';
 
 interface ArenaGroupOrdersPanelProps {

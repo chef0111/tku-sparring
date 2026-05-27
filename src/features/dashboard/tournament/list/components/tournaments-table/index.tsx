@@ -6,7 +6,7 @@ import type {
 } from '@/features/dashboard/types';
 import type { TournamentsManagerQuery } from '../../hooks/use-tournaments-manager-query';
 
-import { useTournamentList } from '@/queries/tournaments';
+import { useTournamentList } from '@/queries/tournament';
 import { useDataTable } from '@/hooks/use-data-table';
 import { cn } from '@/lib/utils';
 

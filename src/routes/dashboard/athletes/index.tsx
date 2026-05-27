@@ -7,7 +7,7 @@ import { DataTableSkeleton } from '@/components/data-table/data-table-skeleton';
 import {
   athleteProfilesDefaultListInput,
   athleteProfilesQueryOptions,
-} from '@/queries/athlete-profiles';
+} from '@/queries/athlete-profile';
 import { SiteHeader } from '@/features/dashboard/site-header';
 import AthletesManager from '@/features/dashboard/athlete';
 

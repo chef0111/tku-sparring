@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useAutoAssignAll } from '@/queries/groups';
+import { useAutoAssignAll } from '@/queries/group';
 
 interface AutoAssignAllDialogProps {
   open: boolean;

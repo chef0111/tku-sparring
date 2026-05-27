@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useBulkDeleteAthleteProfiles } from '@/queries/athlete-profiles';
+import { useBulkDeleteAthleteProfiles } from '@/queries/athlete-profile';
 import { Spinner } from '@/components/ui/spinner';
 
 const PREVIEW_NAME_LIMIT = 8;

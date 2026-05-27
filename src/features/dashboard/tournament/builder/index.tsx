@@ -15,8 +15,8 @@ import { TournamentActivitySheet } from '@/features/dashboard/tournament/tournam
 import LoadingScreen from '@/components/navigation/loading';
 import { Button } from '@/components/ui/button';
 import { useTournamentRealtimeStream } from '@/hooks/use-tournament-realtime-stream';
-import { useSetTournamentStatus, useTournament } from '@/queries/tournaments';
-import { useGroups } from '@/queries/groups';
+import { useSetTournamentStatus, useTournament } from '@/queries/tournament';
+import { useGroups } from '@/queries/group';
 
 interface TournamentBuilderPageProps {
   id: string;

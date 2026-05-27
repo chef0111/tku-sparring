@@ -16,7 +16,7 @@ import { useTimerStore } from '@/stores/timer-store';
 import { useMatchStore } from '@/stores/match-store';
 import { prepArena } from '@/stores/arena-scoring-actions';
 import { useDeviceId } from '@/hooks/use-device-id';
-import { arenaSelectionMatchesQueryOptions } from '@/features/app/hooks/use-arena-selection-view';
+import { arenaSelectionMatchesQueryOptions } from '@/queries/advance-settings/arena-selection-query-options';
 import { client } from '@/orpc/client';
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {

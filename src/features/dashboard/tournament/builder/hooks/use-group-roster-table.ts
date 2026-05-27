@@ -7,8 +7,8 @@ import type { GroupData } from '@/features/dashboard/types';
 import type { ListTournamentAthletesDTO } from '@/orpc/tournament-athletes/dto';
 import { getViolations } from '@/features/dashboard/tournament/builder/components/groups-tab/out-of-range-badge';
 import { getGroupRosterColumns } from '@/features/dashboard/tournament/builder/components/groups-tab/group-roster-table/group-roster-columns';
-import { useTournamentAthletes } from '@/queries/tournament-athletes';
-import { useAssignAthlete, useUnassignAthlete } from '@/queries/groups';
+import { useTournamentAthletes } from '@/queries/tournament-athlete';
+import { useAssignAthlete, useUnassignAthlete } from '@/queries/group';
 
 export interface UseGroupRosterTableArgs {
   group: GroupData;

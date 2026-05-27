@@ -1,7 +1,7 @@
 import { ArrowRight, UserPlus } from 'lucide-react';
 import type { GroupData } from '@/features/dashboard/types';
 import { Button } from '@/components/ui/button';
-import { useAutoAssignGroup } from '@/queries/groups';
+import { useAutoAssignGroup } from '@/queries/group';
 import { Spinner } from '@/components/ui/spinner';
 
 interface GroupRosterEmptyStateProps {

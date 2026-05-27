@@ -79,7 +79,7 @@ export function AddAthletesSheet({
             </div>
           </div>
 
-          {list.items.length > 0 ? (
+          {list.items.length > 0 && (
             <div className="flex items-center gap-2 px-1">
               <Checkbox
                 id="select-all-page"
@@ -94,7 +94,7 @@ export function AddAthletesSheet({
                 {list.items.length < list.total ? ` of ${list.total}` : ''})
               </Label>
             </div>
-          ) : null}
+          )}
 
           <AddAthletesList
             list={list}
@@ -118,12 +118,12 @@ export function AddAthletesSheet({
               >
                 Auto-assign by group constraints
               </Label>
-              {selection.autoAssign ? (
+              {selection.autoAssign && (
                 <p className="text-muted-foreground text-xs">
                   Athletes will be placed in groups matching their gender, belt,
                   and weight. Unmatched athletes go to the unassigned pool.
                 </p>
-              ) : null}
+              )}
             </div>
           </div>
 

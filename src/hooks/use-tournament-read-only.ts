@@ -1,4 +1,4 @@
-import { useTournament } from '@/queries/tournaments';
+import { useTournament } from '@/queries/tournament';
 
 export function useTournamentReadOnly(tournamentId: string) {
   const tournamentQuery = useTournament(tournamentId);

@@ -7,7 +7,7 @@ import {
   useRegenerateBracket,
   useResetBracket,
   useShuffleBracket,
-} from '@/queries/matches';
+} from '@/queries/match';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,

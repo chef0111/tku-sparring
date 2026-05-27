@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useCreateGroup } from '@/queries/groups';
+import { useCreateGroup } from '@/queries/group';
 import { Spinner } from '@/components/ui/spinner';
 
 interface AddGroupDialogProps {
