@@ -12,7 +12,7 @@ import {
   useSetWinner,
   useSwapParticipants,
   useUpdateScore,
-} from '@/queries/matches';
+} from '@/queries/match';
 import { getBracketRoundLabel } from '@/lib/tournament/bracket-round-label';
 
 const MATCH_STATUS_RANK: Record<MatchStatus, number> = {

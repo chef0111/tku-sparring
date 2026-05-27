@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
-import { useUpdateTournament } from '@/queries/tournaments';
+import { useUpdateTournament } from '@/queries/tournament';
 
 interface RenameTournamentDialogProps {
   tournament: TournamentListItem | null;

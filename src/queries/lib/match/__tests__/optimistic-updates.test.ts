@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { MatchData } from '@/features/dashboard/types';
-import { applyOptimisticUpdateScore } from '@/lib/queries/matches';
+import { applyOptimisticUpdateScore } from '@/queries/lib/match/optimistic-updates';
 
 function baseMatch(over: Partial<MatchData> = {}): MatchData {
   return {

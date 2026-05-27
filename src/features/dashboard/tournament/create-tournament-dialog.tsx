@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
-import { useCreateTournament } from '@/queries/tournaments';
+import { useCreateTournament } from '@/queries/tournament';
 
 interface CreateTournamentDialogProps {
   open: boolean;

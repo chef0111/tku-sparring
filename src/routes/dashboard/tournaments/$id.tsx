@@ -3,8 +3,8 @@ import { TournamentPage } from '@/features/dashboard';
 import { TournamentViewerLoading } from '@/features/dashboard/tournament/viewer/loading';
 import { groupListQueryOptions } from '@/queries/group/group-list-query-options';
 import { activityListInfiniteQueryOptions } from '@/queries/activity';
-import { tournamentMatchesQueryOptions } from '@/queries/matches';
-import { tournamentQueryOptions } from '@/queries/tournaments';
+import { tournamentMatchesQueryOptions } from '@/queries/match';
+import { tournamentQueryOptions } from '@/queries/tournament';
 
 export const Route = createFileRoute('/dashboard/tournaments/$id')({
   loader: async ({ params, context: { queryClient } }) => {

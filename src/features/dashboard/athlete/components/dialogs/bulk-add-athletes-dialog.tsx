@@ -22,8 +22,8 @@ import {
   LAST_USED_TOURNAMENT_KEY,
   bulkAddAthleteResult,
 } from '@/features/dashboard/athlete/lib/bulk-add-athletes';
-import { useBulkAddAthletes } from '@/queries/tournament-athletes';
-import { useTournaments } from '@/queries/tournaments';
+import { useBulkAddAthletes } from '@/queries/tournament-athlete';
+import { useTournaments } from '@/queries/tournament';
 import { Spinner } from '@/components/ui/spinner';
 
 interface BulkAddAthletesDialogProps {

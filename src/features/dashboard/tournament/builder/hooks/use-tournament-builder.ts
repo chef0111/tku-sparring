@@ -6,7 +6,7 @@ import type {
   TournamentData,
   TournamentStatus,
 } from '@/features/dashboard/types';
-import { invalidateOrpcGroupListQueries } from '@/queries/groups';
+import { invalidateGroupListQueries } from '@/queries/group';
 import { useTournamentReadOnly } from '@/hooks/use-tournament-read-only';
 import { authClient } from '@/lib/auth-client';
 
@@ -54,7 +54,7 @@ export function useTournamentBuilder({
     try {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['tournament'] }),
-        invalidateOrpcGroupListQueries(queryClient),
+        invalidateGroupListQueries(queryClient),
         queryClient.invalidateQueries({ queryKey: ['match'] }),
         queryClient.invalidateQueries({ queryKey: ['tournamentAthlete'] }),
       ]);

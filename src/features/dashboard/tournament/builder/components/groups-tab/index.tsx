@@ -10,7 +10,7 @@ import { GroupRosterTable } from './group-roster-table';
 import { GroupsRail } from './groups-rail';
 import type { DragEndEvent } from '@dnd-kit/core';
 import type { GroupData } from '@/features/dashboard/types';
-import { useAssignAthlete } from '@/queries/groups';
+import { useAssignAthlete } from '@/queries/group';
 
 interface GroupsTabProps {
   tournamentId: string;

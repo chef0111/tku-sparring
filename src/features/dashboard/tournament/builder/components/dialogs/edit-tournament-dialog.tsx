@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useUpdateTournament } from '@/queries/tournaments';
+import { useUpdateTournament } from '@/queries/tournament';
 import { Spinner } from '@/components/ui/spinner';
 
 interface EditTournamentDialogProps {

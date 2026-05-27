@@ -10,9 +10,9 @@ import {
   savedArenaGroupIds,
   shouldShowArenaOrderUi,
 } from '@/lib/tournament/arena-group-order';
-import { useMatches, useTournamentMatches } from '@/queries/matches';
-import { useTournamentAthletes } from '@/queries/tournament-athletes';
-import { useTournament } from '@/queries/tournaments';
+import { useMatches, useTournamentMatches } from '@/queries/match';
+import { useTournamentAthletes } from '@/queries/tournament-athlete';
+import { useTournament } from '@/queries/tournament';
 
 export interface UseBracketsTabQueriesArgs {
   tournamentId: string;

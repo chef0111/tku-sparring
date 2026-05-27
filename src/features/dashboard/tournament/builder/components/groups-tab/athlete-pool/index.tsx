@@ -17,7 +17,7 @@ import { AthletePoolRow } from './athlete-pool-row';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useTournamentAthletesInfinite } from '@/queries/tournament-athletes';
+import { useTournamentAthletesInfinite } from '@/queries/tournament-athlete';
 
 interface AthletePoolProps {
   tournamentId: string;

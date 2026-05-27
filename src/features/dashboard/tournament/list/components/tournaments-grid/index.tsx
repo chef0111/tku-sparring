@@ -8,7 +8,7 @@ import type {
   TournamentSortField,
   TournamentStatus,
 } from '@/features/dashboard/types';
-import { useTournamentList } from '@/queries/tournaments';
+import { useTournamentList } from '@/queries/tournament';
 import { cn } from '@/lib/utils';
 
 interface TournamentsGridProps {

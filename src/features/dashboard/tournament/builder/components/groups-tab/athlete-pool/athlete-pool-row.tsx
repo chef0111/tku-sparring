@@ -10,7 +10,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useAssignAthlete } from '@/queries/groups';
+import { useAssignAthlete } from '@/queries/group';
 import { cn } from '@/lib/utils';
 
 interface AthletePoolRowProps {

@@ -17,7 +17,7 @@ import {
   getFeederMatch,
 } from '@/lib/tournament/arena-match-label';
 import { cn } from '@/lib/utils';
-import { useSetLock } from '@/queries/matches';
+import { useSetLock } from '@/queries/match';
 
 interface BracketMatchNodeProps {
   pos: MatchPosition;

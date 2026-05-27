@@ -21,7 +21,7 @@ import { useAppForm } from '@/components/form/hooks';
 import {
   useCheckDuplicate,
   useUpdateAthleteProfile,
-} from '@/queries/athlete-profiles';
+} from '@/queries/athlete-profile';
 
 interface AthleteEditSheetProps {
   athlete: AthleteProfileData | null;

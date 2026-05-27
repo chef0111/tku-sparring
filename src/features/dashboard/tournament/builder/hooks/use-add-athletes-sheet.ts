@@ -2,11 +2,11 @@ import * as React from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import type { AthleteProfileData } from '@/features/dashboard/types';
 import { bulkAddAthleteResult } from '@/features/dashboard/athlete/lib/bulk-add-athletes';
-import { useBulkAddAthletes } from '@/queries/tournament-athletes';
+import { useBulkAddAthletes } from '@/queries/tournament-athlete';
 import {
   useAthleteProfilesInfinite,
   useAthleteProfilesOrgTotal,
-} from '@/queries/athlete-profiles';
+} from '@/queries/athlete-profile';
 
 const ROW_HEIGHT = 76;
 const PAGE_SIZE = 30;

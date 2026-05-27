@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { computeDashboardStats } from '../lib/compute-dashboard-stats';
 import type { TournamentListItem } from '@/features/dashboard/types';
-import { useTournaments } from '@/queries/tournaments';
+import { useTournaments } from '@/queries/tournament';
 
 export function useDashboardStats() {
   const query = useTournaments();

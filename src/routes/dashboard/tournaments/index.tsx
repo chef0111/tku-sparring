@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { TournamentListPage } from '@/features/dashboard';
 import { NotFound } from '@/components/not-found';
-import { tournamentsAllQueryOptions } from '@/queries/tournaments';
+import { tournamentsAllQueryOptions } from '@/queries/tournament';
 
 export const Route = createFileRoute('/dashboard/tournaments/')({
   loader: async ({ context: { queryClient } }) => {

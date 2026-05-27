@@ -15,7 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { SelectItem } from '@/components/ui/select';
 import { useAppForm } from '@/components/form/hooks';
-import { useDeleteGroup, useUpdateGroup } from '@/queries/groups';
+import { useDeleteGroup, useUpdateGroup } from '@/queries/group';
 import { Spinner } from '@/components/ui/spinner';
 import { BELT_LEVELS } from '@/config/athlete';
 

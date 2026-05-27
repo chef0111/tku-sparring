@@ -10,7 +10,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import type { AthleteProfileData } from '@/features/dashboard/types';
 
 import type { AthleteProfilesDTO } from '@/orpc/athlete-profiles/dto';
-import { useAthleteProfiles } from '@/queries/athlete-profiles';
+import { useAthleteProfiles } from '@/queries/athlete-profile';
 import { useFeatureFlags } from '@/contexts/feature-flags';
 import { useDataTable } from '@/hooks/use-data-table';
 import { DEFAULT_SORTING } from '@/config/athlete';

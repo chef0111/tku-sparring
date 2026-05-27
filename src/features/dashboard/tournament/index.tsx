@@ -5,9 +5,9 @@ import { TournamentViewerLoading } from './viewer/loading';
 import type { GroupData, MatchData, TournamentData } from '../types';
 import { Button } from '@/components/ui/button';
 import { useTournamentRealtimeStream } from '@/hooks/use-tournament-realtime-stream';
-import { useTournamentMatches } from '@/queries/matches';
-import { useTournament } from '@/queries/tournaments';
-import { useGroups } from '@/queries/groups';
+import { useTournamentMatches } from '@/queries/match';
+import { useTournament } from '@/queries/tournament';
+import { useGroups } from '@/queries/group';
 
 interface TournamentPageProps {
   id: string;

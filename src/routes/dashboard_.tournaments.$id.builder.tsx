@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { TournamentBuilderPage } from '@/features/dashboard/tournament/builder';
 import LoadingScreen from '@/components/navigation/loading';
 import { groupListQueryOptions } from '@/queries/group/group-list-query-options';
-import { tournamentQueryOptions } from '@/queries/tournaments';
+import { tournamentQueryOptions } from '@/queries/tournament';
 
 export const Route = createFileRoute('/dashboard_/tournaments/$id/builder')({
   loader: async ({ params, context: { queryClient } }) => {

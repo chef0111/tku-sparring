@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
-import { useDeleteTournament } from '@/queries/tournaments';
+import { useDeleteTournament } from '@/queries/tournament';
 
 interface DeleteTournamentDialogProps {
   tournament: TournamentListItem | null;

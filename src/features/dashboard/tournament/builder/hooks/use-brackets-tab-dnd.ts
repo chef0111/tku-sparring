@@ -3,7 +3,7 @@ import { MouseSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { toast } from 'sonner';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type { TournamentAthleteData } from '@/features/dashboard/types';
-import { useAssignSlot, useSwapSlots } from '@/queries/matches';
+import { useAssignSlot, useSwapSlots } from '@/queries/match';
 
 type DragLabel =
   | { kind: 'panel'; name: string; beltLevel: number; weight: number }

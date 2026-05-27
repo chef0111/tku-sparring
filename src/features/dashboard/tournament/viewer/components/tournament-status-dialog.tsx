@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
-import { useSetTournamentStatus } from '@/queries/tournaments';
+import { useSetTournamentStatus } from '@/queries/tournament';
 
 export type TournamentStatus = 'active' | 'completed';
 

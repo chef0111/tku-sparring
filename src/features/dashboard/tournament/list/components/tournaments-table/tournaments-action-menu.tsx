@@ -36,7 +36,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useSetTournamentStatus } from '@/queries/tournaments';
+import { useSetTournamentStatus } from '@/queries/tournament';
 
 interface TournamentsActionMenuProps {
   options: TournamentRowActionOptions;
