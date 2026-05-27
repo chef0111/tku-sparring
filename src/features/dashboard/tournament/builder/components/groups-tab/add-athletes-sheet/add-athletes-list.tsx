@@ -1,10 +1,18 @@
 import { Link } from '@tanstack/react-router';
-import { UserPlus, Users } from 'lucide-react';
+import { ArrowRight, UserX, Users } from 'lucide-react';
 import { AddAthleteProfileRow } from './add-athlete-profile-row';
 import type { AddAthletesSheetState } from '@/features/dashboard/tournament/builder/hooks/use-add-athletes-sheet';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
 
 function AthletesLoading({ className }: { className?: string }) {
   return (
@@ -44,29 +52,12 @@ export function AddAthletesList({
       {isPending ? (
         <AthletesLoading />
       ) : emptyLibrary ? (
-        <div className="text-muted-foreground flex flex-col items-center justify-center gap-3 p-8 text-center text-sm">
-          <Users className="size-8 opacity-50" aria-hidden="true" />
-          <p>No athletes in your library yet.</p>
-          <Button
-            variant="outline"
-            size="sm"
-            className="cursor-pointer"
-            asChild
-          >
-            <Link to="/dashboard/athletes">Go to Athletes</Link>
-          </Button>
-        </div>
+        <EmptyAthleteLibrary />
       ) : total === 0 ? (
-        <div className="text-muted-foreground flex flex-col items-center justify-center gap-2 p-8 text-center text-sm">
-          <UserPlus className="size-8 opacity-50" aria-hidden="true" />
-          <p>
-            {allInTournament
-              ? 'Everyone in your library is already in this tournament.'
-              : hasFilters
-                ? 'No athletes match for your filters.'
-                : 'No athletes available to add.'}
-          </p>
-        </div>
+        <NoAthletesFound
+          allInTournament={allInTournament}
+          hasFilters={hasFilters}
+        />
       ) : (
         <div
           className="relative w-full"
@@ -97,5 +88,51 @@ export function AddAthletesList({
         </div>
       )}
     </div>
+  );
+}
+
+function EmptyAthleteLibrary() {
+  return (
+    <Empty className="gap-2 p-8">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <Users />
+        </EmptyMedia>
+        <EmptyTitle>No athletes in your library yet.</EmptyTitle>
+        <EmptyDescription>
+          Add athletes to your library to get started.
+        </EmptyDescription>
+        <EmptyContent>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/dashboard/athletes">Go to Athletes</Link>
+            <ArrowRight />
+          </Button>
+        </EmptyContent>
+      </EmptyHeader>
+    </Empty>
+  );
+}
+
+function NoAthletesFound({
+  allInTournament,
+  hasFilters,
+}: {
+  allInTournament: boolean;
+  hasFilters: boolean;
+}) {
+  return (
+    <Empty className="gap-2 p-8">
+      <EmptyMedia variant="icon">
+        <UserX />
+      </EmptyMedia>
+      <EmptyTitle>No results found</EmptyTitle>
+      <EmptyDescription>
+        {allInTournament
+          ? 'Everyone in your library is already in this tournament.'
+          : hasFilters
+            ? 'No athletes match for your filters.'
+            : 'No athletes available to add.'}
+      </EmptyDescription>
+    </Empty>
   );
 }
