@@ -17,7 +17,7 @@ import { useDeviceId } from '@/hooks/use-device-id';
 import {
   useArenaSelectionCatalog,
   useArenaSelectionMatches,
-} from '@/features/app/hooks/use-arena-selection-view';
+} from '@/queries/advance-settings/use-arena-selection-queries';
 
 const SELECTION_MATCHES_POLL_MS = 4 * 1000;
 

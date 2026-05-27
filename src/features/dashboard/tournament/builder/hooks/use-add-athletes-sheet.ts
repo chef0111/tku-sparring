@@ -1,12 +1,11 @@
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import type { AthleteProfileData } from '@/features/dashboard/types';
 import { bulkAddAthleteResult } from '@/features/dashboard/athlete/lib/bulk-add-athletes';
 import { useBulkAddAthletes } from '@/queries/tournament-athletes';
 import {
-  athleteProfilesQueryOptions,
   useAthleteProfilesInfinite,
+  useAthleteProfilesOrgTotal,
 } from '@/queries/athlete-profiles';
 
 const ROW_HEIGHT = 76;
@@ -36,17 +35,8 @@ export function useAddAthletesSheet({
   const [weightMin, setWeightMin] = React.useState<number | null>(null);
   const [weightMax, setWeightMax] = React.useState<number | null>(null);
 
-  const orgQuery = useQuery({
-    ...athleteProfilesQueryOptions({
-      page: 1,
-      perPage: 1,
-      filters: [],
-      joinOperator: 'and',
-      sorting: [],
-    }),
-    enabled: open,
-  });
-  const orgTotal = orgQuery.data?.total ?? 0;
+  const orgQuery = useAthleteProfilesOrgTotal({ enabled: open });
+  const orgTotal = orgQuery.data ?? 0;
 
   const listQuery = useAthleteProfilesInfinite({
     excludeTournamentId: tournamentId,

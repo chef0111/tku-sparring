@@ -12,7 +12,7 @@ import type {
 import {
   arenaSelectionCatalogQueryOptions,
   arenaSelectionMatchesQueryOptions,
-} from '@/features/app/hooks/use-arena-selection-view';
+} from '@/queries/advance-settings/arena-selection-query-options';
 import { Status, StatusIndicator, StatusLabel } from '@/components/ui/status';
 
 type ArenaSelectionCatalogData = {

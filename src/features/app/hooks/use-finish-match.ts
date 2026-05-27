@@ -6,6 +6,8 @@ import { useArenaMutation } from '@/features/app/hooks/use-arena-mutation';
 import { useSettings } from '@/contexts/settings';
 import { useMatchStore } from '@/stores/match-store';
 import { afterFinish } from '@/stores/arena-scoring-actions';
+import { invalidateAdvanceSettingsQueries } from '@/queries/advance-settings/invalidate-advance-settings-cache';
+import { advanceSettingsKeys } from '@/queries/keys';
 
 const OBJECT_ID_RE = /^[a-f\d]{24}$/i;
 
@@ -23,11 +25,13 @@ export function useFinishMatch() {
   const selectedMatchId = formData.advance.match ?? matchId;
 
   const invalidateAdvanceSelection = React.useCallback(() => {
-    void queryClient.invalidateQueries({
-      predicate: (q) =>
-        Array.isArray(q.queryKey) && q.queryKey[0] === 'advanceSettings',
-    });
-  }, [queryClient]);
+    const tournamentId = formData.advance.tournament;
+    if (tournamentId) {
+      void invalidateAdvanceSettingsQueries(queryClient, tournamentId);
+      return;
+    }
+    void queryClient.invalidateQueries({ queryKey: advanceSettingsKeys.all });
+  }, [queryClient, formData.advance.tournament]);
 
   const resetArenaClientAfterResult = React.useCallback(() => {
     afterFinish();

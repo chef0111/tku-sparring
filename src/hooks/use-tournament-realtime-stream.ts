@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
 import type { Socket } from 'socket.io-client';
 
-import { invalidateAdvanceSelectionQueries } from '@/queries/advance-selection-invalidation';
+import { invalidateAdvanceSettingsQueries } from '@/queries/advance-settings/invalidate-advance-settings-cache';
 
 const realtimeUrl = import.meta.env.VITE_REALTIME_URL as string | undefined;
 
@@ -30,7 +30,7 @@ export function useTournamentRealtimeStream(
 
     const runInvalidate = () => {
       if (tournamentId) {
-        void invalidateAdvanceSelectionQueries(queryClient, tournamentId);
+        void invalidateAdvanceSettingsQueries(queryClient, tournamentId);
       } else {
         void queryClient.invalidateQueries({
           predicate: (q) =>
