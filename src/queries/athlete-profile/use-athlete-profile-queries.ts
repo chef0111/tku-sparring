@@ -6,7 +6,7 @@ import {
 import type { AthleteProfilesDTO } from '@/orpc/athlete-profiles/dto';
 import { athleteProfilesQueryOptions } from '@/queries/athlete-profile/athlete-profile-query-options';
 import { athleteProfileKeys } from '@/queries/keys';
-import { listAthleteProfiles } from '@/queries/lib/athlete-profile/athlete-profile-api';
+import { listAthleteProfiles } from '@/queries/api/athlete-profile-api';
 
 export function useAthleteProfiles(input: AthleteProfilesDTO) {
   return useQuery({

@@ -1,10 +1,13 @@
 import type {
+  CreateTournamentDTO,
   EnsureArenaSlotDTO,
   ListTournamentsDTO,
   MoveGroupArenaDTO,
   RetireArenaDTO,
+  SetArenaGroupOrderDTO,
+  SetTournamentStatusDTO,
+  UpdateTournamentDTO,
 } from '@/orpc/tournaments/dto';
-import type { TournamentStatus } from '@/features/dashboard/types';
 import { client } from '@/orpc/client';
 
 export function listTournaments(input: ListTournamentsDTO) {
@@ -15,23 +18,15 @@ export function getTournament(id: string) {
   return client.tournament.get({ id });
 }
 
-export function createTournament(data: { name: string }) {
+export function createTournament(data: CreateTournamentDTO) {
   return client.tournament.create(data);
 }
 
-export function updateTournament(data: {
-  id: string;
-  name?: string;
-  arenaCount?: number;
-  includeThirdPlaceMatch?: boolean;
-}) {
+export function updateTournament(data: UpdateTournamentDTO) {
   return client.tournament.update(data);
 }
 
-export function setArenaGroupOrder(input: {
-  tournamentId: string;
-  arenaGroupOrder: string;
-}) {
+export function setArenaGroupOrder(input: SetArenaGroupOrderDTO) {
   return client.tournament.setArenaGroupOrder(input);
 }
 
@@ -47,10 +42,7 @@ export function retireArena(input: RetireArenaDTO) {
   return client.tournament.retireArena(input);
 }
 
-export function setTournamentStatus(data: {
-  id: string;
-  status: TournamentStatus;
-}) {
+export function setTournamentStatus(data: SetTournamentStatusDTO) {
   return client.tournament.setStatus(data);
 }
 

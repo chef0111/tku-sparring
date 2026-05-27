@@ -1,7 +1,7 @@
 import { queryOptions } from '@tanstack/react-query';
 import type { ListTournamentAthletesDTO } from '@/orpc/tournament-athletes/dto';
 import { tournamentAthleteKeys } from '@/queries/keys';
-import { listTournamentAthletes } from '@/queries/lib/tournament-athlete/tournament-athlete-api';
+import { listTournamentAthletes } from '@/queries/api/tournament-athlete-api';
 
 export function tournamentAthletesQueryOptions(
   input: ListTournamentAthletesDTO
@@ -12,4 +12,4 @@ export function tournamentAthletesQueryOptions(
   });
 }
 
-export { listAthleteListIdentityKey } from '@/queries/lib/tournament-athlete/list-identity';
+export { listAthleteListIdentityKey } from '@/queries/api/tournament-athlete-api';

@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
 import { groupKeys } from '@/queries/keys';
-import { listGroups } from '@/queries/lib/group/list-groups';
+import { listGroups } from '@/queries/api/group-api';
 
 export function groupListQueryOptions(tournamentId: string) {
   return queryOptions({

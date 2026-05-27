@@ -9,7 +9,7 @@ import {
   bulkAddTournamentAthletes,
   removeTournamentAthlete,
   updateTournamentAthlete,
-} from '@/queries/lib/tournament-athlete/tournament-athlete-api';
+} from '@/queries/api/tournament-athlete-api';
 
 function useInvalidateTournamentAthletes() {
   const queryClient = useQueryClient();

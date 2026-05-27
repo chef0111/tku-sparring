@@ -1,6 +1,6 @@
 import type { TournamentActivityEventType } from '@/orpc/activity/event-types';
 import { activityKeys } from '@/queries/keys';
-import { listTournamentActivity } from '@/queries/lib/activity/list-activity';
+import { listTournamentActivity } from '@/queries/api/activity-api';
 
 export function activityListInfiniteQueryOptions(input: {
   tournamentId: string;

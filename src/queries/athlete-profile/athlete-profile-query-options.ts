@@ -2,7 +2,7 @@ import { queryOptions } from '@tanstack/react-query';
 import type { AthleteProfilesDTO } from '@/orpc/athlete-profiles/dto';
 import { DEFAULT_SORTING } from '@/config/athlete';
 import { athleteProfileKeys } from '@/queries/keys';
-import { listAthleteProfiles } from '@/queries/lib/athlete-profile/athlete-profile-api';
+import { listAthleteProfiles } from '@/queries/api/athlete-profile-api';
 
 export const athleteProfilesDefaultListInput = {
   page: 1,

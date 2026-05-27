@@ -13,11 +13,12 @@ Server state uses **TanStack Query** exclusively.
 
 ## Where code lives
 
-| Layer | Location |
-| ----- | -------- |
-| `useQuery` / `useMutation` / `useQueries` hooks | `src/queries/<domain>/` |
-| `queryFn` / `mutationFn` implementations | `src/queries/lib/<domain>/` |
-| Domain helpers (compose, bracket logic, offline queue) | `features/*/lib` |
+| Layer                                                  | Location                          |
+| ------------------------------------------------------ | --------------------------------- |
+| `useQuery` / `useMutation` / `useQueries` hooks        | `src/queries/<domain>/`           |
+| `queryFn` / `mutationFn` (oRPC adapters)               | `src/queries/api/*-api.ts`        |
+| Optimistic cache updates                               | `src/queries/optimistic-updates/` |
+| Domain helpers (compose, bracket logic, offline queue) | `features/*/lib`                  |
 
 ## Rules
 

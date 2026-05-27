@@ -3,7 +3,6 @@ import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import type {
   EnsureArenaSlotDTO,
-  MoveGroupArenaDTO,
   RetireArenaDTO,
 } from '@/orpc/tournaments/dto';
 import type { TournamentStatus } from '@/features/dashboard/types';
@@ -29,7 +28,7 @@ import {
   setArenaGroupOrder,
   setTournamentStatus,
   updateTournament,
-} from '@/queries/lib/tournament/tournament-api';
+} from '@/queries/api/tournament-api';
 
 function useInvalidateTournaments() {
   const queryClient = useQueryClient();

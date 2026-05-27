@@ -7,6 +7,10 @@ import type {
 } from '@/orpc/groups/dto';
 import { client } from '@/orpc/client';
 
+export function listGroups(tournamentId: string) {
+  return client.group.list({ tournamentId });
+}
+
 export function createGroup(data: { name: string; tournamentId: string }) {
   return client.group.create(data);
 }

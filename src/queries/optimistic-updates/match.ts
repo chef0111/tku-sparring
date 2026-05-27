@@ -28,7 +28,7 @@ export function findMatchListQueryKey(
     if (!Array.isArray(key) || key.length !== 3) continue;
     if (!Array.isArray(data)) continue;
     if (data.some((m) => m.id === matchId)) {
-      return key as MatchListQueryKey;
+      return key as unknown as MatchListQueryKey;
     }
   }
   return null;

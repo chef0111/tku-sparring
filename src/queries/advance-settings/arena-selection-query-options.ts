@@ -3,7 +3,7 @@ import { advanceSettingsKeys } from '@/queries/keys';
 import {
   selectionCatalog,
   selectionMatches,
-} from '@/queries/lib/advance-settings/advance-settings-api';
+} from '@/queries/api/advance-settings-api';
 
 export function arenaSelectionCatalogQueryOptions(args: {
   deviceId: string | undefined;

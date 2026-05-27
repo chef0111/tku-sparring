@@ -3,7 +3,7 @@ import { matchKeys } from '@/queries/keys';
 import {
   listMatchesByGroup,
   listMatchesByTournament,
-} from '@/queries/lib/match/list-matches';
+} from '@/queries/api/match-api';
 
 export function matchesByGroupQueryOptions(groupId: string) {
   return queryOptions({

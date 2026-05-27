@@ -1,10 +1,7 @@
 import { queryOptions } from '@tanstack/react-query';
 import type { ListTournamentsDTO } from '@/orpc/tournaments/dto';
 import { tournamentKeys } from '@/queries/keys';
-import {
-  getTournament,
-  listTournaments,
-} from '@/queries/lib/tournament/tournament-api';
+import { getTournament, listTournaments } from '@/queries/api/tournament-api';
 
 const ALL_TOURNAMENTS_PER_PAGE = 1000;
 

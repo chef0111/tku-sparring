@@ -9,7 +9,7 @@ import {
   deleteGroup,
   unassignAthlete,
   updateGroup,
-} from '@/queries/lib/group/group-mutations';
+} from '@/queries/api/group-api';
 
 function useInvalidateGroups() {
   const queryClient = useQueryClient();

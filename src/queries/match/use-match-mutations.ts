@@ -1,18 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import type {
-  AdminSetMatchStatusDTO,
-  AssignSlotDTO,
-  CreateCustomMatchDTO,
-  GenerateBracketDTO,
-  SetLockDTO,
-  SetWinnerDTO,
-  SwapParticipantsDTO,
-  SwapSlotsDTO,
-  UpdateScoreDTO,
-} from '@/orpc/matches/dto';
 import type { MatchData } from '@/features/dashboard/types';
-import type { BracketDnDMutationContext } from '@/queries/lib/match/optimistic-updates';
+import type { BracketDnDMutationContext } from '@/queries/optimistic-updates/match';
 import {
   applyOptimisticAssign,
   applyOptimisticSetLock,
@@ -20,7 +9,7 @@ import {
   applyOptimisticSwapParticipants,
   applyOptimisticUpdateScore,
   findMatchListQueryKey,
-} from '@/queries/lib/match/optimistic-updates';
+} from '@/queries/optimistic-updates/match';
 import {
   adminSetMatchStatus,
   assignMatchSlot,
@@ -35,7 +24,7 @@ import {
   swapMatchParticipants,
   swapMatchSlots,
   updateMatchScore,
-} from '@/queries/lib/match/match-mutations';
+} from '@/queries/api/match-api';
 import { invalidateAfterMatchWrite } from '@/queries/match/invalidate-match-cache';
 
 function useInvalidateMatches() {

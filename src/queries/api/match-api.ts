@@ -11,6 +11,14 @@ import type {
 } from '@/orpc/matches/dto';
 import { client } from '@/orpc/client';
 
+export function listMatchesByGroup(groupId: string) {
+  return client.match.list({ groupId });
+}
+
+export function listMatchesByTournament(tournamentId: string) {
+  return client.match.list({ tournamentId });
+}
+
 export function generateBracket(data: GenerateBracketDTO) {
   return client.bracket.generate(data);
 }

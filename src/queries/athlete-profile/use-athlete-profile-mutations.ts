@@ -1,10 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import type {
-  CheckDuplicateDTO,
-  CreateAthleteProfileDTO,
-  UpdateAthleteProfileDTO,
-} from '@/orpc/athlete-profiles/dto';
+import type { CheckDuplicateDTO } from '@/orpc/athlete-profiles/dto';
 import { invalidateAthleteProfileQueries } from '@/queries/athlete-profile/invalidate-athlete-profile-cache';
 import {
   bulkDeleteAthleteProfiles,
@@ -12,7 +8,7 @@ import {
   createAthleteProfile,
   deleteAthleteProfile,
   updateAthleteProfile,
-} from '@/queries/lib/athlete-profile/athlete-profile-api';
+} from '@/queries/api/athlete-profile-api';
 
 function useInvalidateAthleteProfiles() {
   const queryClient = useQueryClient();

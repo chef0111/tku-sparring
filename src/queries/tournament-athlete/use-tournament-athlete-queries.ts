@@ -5,8 +5,10 @@ import {
 } from '@tanstack/react-query';
 import type { ListTournamentAthletesDTO } from '@/orpc/tournament-athletes/dto';
 import { tournamentAthleteKeys } from '@/queries/keys';
-import { listAthleteListIdentityKey } from '@/queries/lib/tournament-athlete/list-identity';
-import { listTournamentAthletes } from '@/queries/lib/tournament-athlete/tournament-athlete-api';
+import {
+  listAthleteListIdentityKey,
+  listTournamentAthletes,
+} from '@/queries/api/tournament-athlete-api';
 import { tournamentAthletesQueryOptions } from '@/queries/tournament-athlete/tournament-athlete-query-options';
 
 export function useTournamentAthletes(input: ListTournamentAthletesDTO) {
