@@ -4,6 +4,8 @@ import type {
   BulkAddAthletesDTO,
   UpdateTournamentAthleteDTO,
 } from '@/orpc/tournament-athletes/dto';
+import { invalidateAthleteProfileQueries } from '@/queries/athlete-profile/invalidate-athlete-profile-cache';
+import { invalidateGroupListQueries } from '@/queries/group/invalidate-group-cache';
 import { invalidateTournamentAthleteQueries } from '@/queries/tournament-athlete/invalidate-tournament-athlete-cache';
 import {
   bulkAddTournamentAthletes,
@@ -23,12 +25,16 @@ export function useBulkAddAthletes(options?: {
     unassigned: number;
   }) => void;
 }) {
-  const invalidate = useInvalidateTournamentAthletes();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: BulkAddAthletesDTO) => bulkAddTournamentAthletes(data),
-    onSuccess: (result) => {
-      invalidate();
+    onSuccess: (result, variables) => {
+      invalidateTournamentAthleteQueries(queryClient);
+      invalidateAthleteProfileQueries(queryClient);
+      if (variables.autoAssign) {
+        void invalidateGroupListQueries(queryClient, variables.tournamentId);
+      }
       options?.onSuccess?.(result);
     },
     onError: (err) => toast.error(err.message),

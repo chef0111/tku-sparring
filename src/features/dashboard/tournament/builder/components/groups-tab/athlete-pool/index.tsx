@@ -103,21 +103,16 @@ export function AthletePool({
     <div className="bg-card flex w-xs shrink-0 flex-col overflow-hidden border-r">
       <div className="border-b p-3">
         <div className="mb-2 flex items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold">Unassigned Athletes</h3>
           <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold">Unassigned Athletes</h3>
             <Badge variant="secondary">{total}</Badge>
-            {!readOnly && onOpenAddAthletes ? (
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 cursor-pointer"
-                onClick={onOpenAddAthletes}
-              >
-                <UserPlus data-icon="inline-start" aria-hidden="true" />
-                Add athletes
-              </Button>
-            ) : null}
           </div>
+          {!readOnly && onOpenAddAthletes && (
+            <Button size="sm" variant="outline" onClick={onOpenAddAthletes}>
+              <UserPlus data-icon="inline-start" aria-hidden="true" />
+              Athletes
+            </Button>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">
