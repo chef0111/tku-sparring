@@ -1,0 +1,32 @@
+---
+description: TanStack Query conventions for server state in this repo
+globs:
+  - src/queries/**/*
+  - src/features/**/*
+  - src/routes/**/*
+alwaysApply: false
+---
+
+# TanStack Query
+
+Server state uses **TanStack Query** exclusively.
+
+## Where code lives
+
+| Layer | Location |
+| ----- | -------- |
+| `useQuery` / `useMutation` / `useQueries` hooks | `src/queries/<domain>/` |
+| `queryFn` / `mutationFn` implementations | `src/queries/lib/<domain>/` |
+| Domain helpers (compose, bracket logic, offline queue) | `features/*/lib` |
+
+## Rules
+
+- Do **not** add `useQuery` or `useMutation` outside `src/queries`.
+- Do **not** call oRPC `client.*` directly from UI components or providers — use query hooks.
+- Use key factories from `src/queries/keys.ts`; invalidate with **targeted** keys after mutations.
+- Route loaders prefetch via exported `*QueryOptions` from `src/queries/<domain>/` (same keys as hooks).
+- Follow `.agents/skills/tanstack/tanstack-query` for caching, optimistic updates, and error handling.
+
+## Feature hooks
+
+Keep only UI/device orchestration in `features/*/hooks` (URL state, DnD, offline queue, settings form). Remove manual `useState` + `fetch*` patterns once a query hook exists.
