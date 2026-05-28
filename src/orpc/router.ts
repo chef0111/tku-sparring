@@ -1,15 +1,4 @@
-import {
-  createTournament,
-  ensureArenaSlot,
-  getTournament,
-  listTournaments,
-  moveGroupArena,
-  removeTournament,
-  retireArena,
-  setArenaGroupOrder,
-  setTournamentStatus,
-  updateTournament,
-} from './tournaments';
+import { tournamentRouter } from './tournaments/router';
 
 import {
   assignAthleteToGroup,
@@ -71,18 +60,7 @@ import {
 import { getLastSelection, setLastSelection } from './device-last-selection';
 
 export default {
-  tournament: {
-    list: listTournaments,
-    get: getTournament,
-    create: createTournament,
-    update: updateTournament,
-    setStatus: setTournamentStatus,
-    setArenaGroupOrder,
-    moveGroupArena,
-    ensureArenaSlot,
-    retireArena,
-    delete: removeTournament,
-  },
+  tournament: tournamentRouter,
   group: {
     list: listGroups,
     get: getGroup,
