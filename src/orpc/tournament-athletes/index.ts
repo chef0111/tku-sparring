@@ -7,7 +7,6 @@ import {
 import { TournamentAthleteDAL } from './dal';
 import { bulkAddAthletesToTournament } from './bulk-add';
 import { authedProcedure } from '@/orpc/middleware';
-import { prisma } from '@/lib/db';
 
 export const listTournamentAthletes = authedProcedure
   .input(ListTournamentAthletesSchema)
