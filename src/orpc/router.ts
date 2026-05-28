@@ -8,14 +8,8 @@ import { athleteProfileRouter } from './athlete-profiles/router';
 
 import { tournamentAthleteRouter } from './tournament-athletes/router';
 import { activityRouter } from './activity/router';
-import {
-  selectionCatalog as advanceSettingsSelectionCatalog,
-  selectionMatches as advanceSettingsSelectionMatches,
-} from './advance-settings';
-import {
-  claim as arenaMatchClaim,
-  release as arenaMatchClaimRelease,
-} from './arena-match-claim';
+import { advanceSettingsRouter } from './advance-settings/router';
+import { arenaMatchClaimRouter } from './arena-match-claim/router';
 import { getLastSelection, setLastSelection } from './device-last-selection';
 
 export default {
@@ -26,14 +20,8 @@ export default {
   athleteProfile: athleteProfileRouter,
   tournamentAthlete: tournamentAthleteRouter,
   activity: activityRouter,
-  advanceSettings: {
-    selectionCatalog: advanceSettingsSelectionCatalog,
-    selectionMatches: advanceSettingsSelectionMatches,
-  },
-  arenaMatchClaim: {
-    claim: arenaMatchClaim,
-    release: arenaMatchClaimRelease,
-  },
+  advanceSettings: advanceSettingsRouter,
+  arenaMatchClaim: arenaMatchClaimRouter,
   device: {
     lastSelection: {
       get: getLastSelection,
