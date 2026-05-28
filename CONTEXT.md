@@ -69,7 +69,7 @@ _Avoid_: Tournament detail, viewer
 
 ## Naming conventions (code)
 
-Prefer **short imperative** names for APIs and modules, but keep **semantics** aligned with the domain terms above — a reader should still see what concept is acted on (e.g. a **Match**, a **round**), not only that something runs.
+Prefer **short imperative** names for APIs and modules, but keep **semantics** aligned with the domain terms above — a reader should still see what concept is acted on (e.g. a **Match**, a **round**), not only that something runs. See `.cursor/rules/concise-naming.mdc` for project-wide rules (functions, variables, constants, types).
 
 ## Relationships
 

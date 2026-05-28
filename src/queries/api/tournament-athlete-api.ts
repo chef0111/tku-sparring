@@ -9,7 +9,7 @@ import { client } from '@/orpc/client';
  * Stable identity for `placeholderData`: same filters / scope, excluding
  * page, perPage, and sorting so paginating or re-sorting keeps prior rows visible.
  */
-export function listAthleteListIdentityKey(
+export function getAthleteIdentityKey(
   input: ListTournamentAthletesDTO
 ): string {
   return JSON.stringify({

@@ -12,4 +12,4 @@ export function tournamentAthletesQueryOptions(
   });
 }
 
-export { listAthleteListIdentityKey } from '@/queries/api/tournament-athlete-api';
+export { getAthleteIdentityKey } from '@/queries/api/tournament-athlete-api';
