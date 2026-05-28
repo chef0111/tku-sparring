@@ -1,12 +1,23 @@
 # Handoff: `src/orpc` refactor (queries-inspired)
 
-**Date:** 2026-05-27  
-**Branch:** `staging` (verify with `git branch --show-current`)  
-**Next focus:** Refactor `src/orpc` using the same architectural goals as the completed `src/queries` layer, guided by `/improve-codebase-architecture`.
+**Date:** 2026-05-27 (completed 2026-05-28)  
+**Branch:** `staging`  
+**Status:** **Done** — layout refactor shipped. Spec: `docs/specs/2026-05-28-orpc-layout-design.md`. Rule: `.cursor/rules/orpc.mdc`.
 
 ---
 
-## Goal for the next session
+## Completed (oRPC layout refactor)
+
+- Per-domain **`router.ts`** fragments; root [`src/orpc/router.ts`](../../src/orpc/router.ts) is merge-only (`as const`).
+- **`matches/router.ts`** exports `matchRouter` + `bracketRouter`.
+- Procedure export cleanup (`*Endpoint` suffixes removed in `matches/index.ts`); dead `prisma` import removed from `tournament-athletes/index.ts`.
+- **`tournamentAthlete.bulkRemove`** kept for future remove-from-tournament UI.
+- Folder renames **deferred** (documented in spec + `CONTEXT.md` + `orpc.mdc`).
+- All `src/orpc` tests pass (109); full suite 218 tests.
+
+---
+
+## Goal (original)
 
 Make **`src/orpc`** as navigable and layered as **`src/queries`**: clear seams between router assembly, procedure definitions, DTOs, and DAL; domain colocation; concise names; one commit per logical step. **Do not** move TanStack Query into oRPC — client consumption stays in `src/queries/api/*-api.ts` → `@/orpc/client`.
 
@@ -48,7 +59,20 @@ src/queries/
 
 ---
 
-## Current `src/orpc` shape (starting point)
+## Target `src/orpc` layout (after refactor)
+
+```
+src/orpc/
+  router.ts, client.ts, middleware.ts
+  <domain>/
+    router.ts      # fragment → client.* keys
+    index.ts       # authedProcedure exports
+    dto.ts, dal.ts
+    *.ts           # use-cases (e.g. bulk-add.ts)
+    __tests__/
+```
+
+## Current `src/orpc` shape (starting point — historical)
 
 ~55 files under domain folders + root:
 
