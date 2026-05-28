@@ -7,7 +7,7 @@ import { bracketRouter, matchRouter } from './matches/router';
 import { athleteProfileRouter } from './athlete-profiles/router';
 
 import { tournamentAthleteRouter } from './tournament-athletes/router';
-import { listForTournament as listActivityForTournament } from './activity';
+import { activityRouter } from './activity/router';
 import {
   selectionCatalog as advanceSettingsSelectionCatalog,
   selectionMatches as advanceSettingsSelectionMatches,
@@ -25,9 +25,7 @@ export default {
   bracket: bracketRouter,
   athleteProfile: athleteProfileRouter,
   tournamentAthlete: tournamentAthleteRouter,
-  activity: {
-    listForTournament: listActivityForTournament,
-  },
+  activity: activityRouter,
   advanceSettings: {
     selectionCatalog: advanceSettingsSelectionCatalog,
     selectionMatches: advanceSettingsSelectionMatches,
