@@ -4,22 +4,9 @@ import { groupRouter } from './groups/router';
 
 import { bracketRouter, matchRouter } from './matches/router';
 
-import {
-  bulkDeleteAthleteProfiles,
-  checkDuplicate,
-  createAthleteProfile,
-  listAthleteProfiles,
-  removeAthleteProfile,
-  updateAthleteProfile,
-} from './athlete-profiles';
+import { athleteProfileRouter } from './athlete-profiles/router';
 
-import {
-  bulkAddAthletes,
-  bulkRemoveTournamentAthleteRecords,
-  listTournamentAthletes,
-  removeTournamentAthleteRecord,
-  updateTournamentAthleteRecord,
-} from './tournament-athletes';
+import { tournamentAthleteRouter } from './tournament-athletes/router';
 import { listForTournament as listActivityForTournament } from './activity';
 import {
   selectionCatalog as advanceSettingsSelectionCatalog,
@@ -36,21 +23,8 @@ export default {
   group: groupRouter,
   match: matchRouter,
   bracket: bracketRouter,
-  athleteProfile: {
-    list: listAthleteProfiles,
-    create: createAthleteProfile,
-    checkDuplicate,
-    update: updateAthleteProfile,
-    delete: removeAthleteProfile,
-    bulkDelete: bulkDeleteAthleteProfiles,
-  },
-  tournamentAthlete: {
-    list: listTournamentAthletes,
-    bulkAdd: bulkAddAthletes,
-    update: updateTournamentAthleteRecord,
-    remove: removeTournamentAthleteRecord,
-    bulkRemove: bulkRemoveTournamentAthleteRecords,
-  },
+  athleteProfile: athleteProfileRouter,
+  tournamentAthlete: tournamentAthleteRouter,
   activity: {
     listForTournament: listActivityForTournament,
   },
