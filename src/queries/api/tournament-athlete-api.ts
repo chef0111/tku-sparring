@@ -1,5 +1,6 @@
 import type {
   BulkAddAthletesDTO,
+  BulkRemoveTournamentAthletesDTO,
   ListTournamentAthletesDTO,
   UpdateTournamentAthleteDTO,
 } from '@/orpc/tournament-athletes/dto';
@@ -41,4 +42,10 @@ export function updateTournamentAthlete(data: UpdateTournamentAthleteDTO) {
 
 export function removeTournamentAthlete(data: { id: string }) {
   return client.tournamentAthlete.remove(data);
+}
+
+export function bulkRemoveTournamentAthletes(
+  data: BulkRemoveTournamentAthletesDTO
+) {
+  return client.tournamentAthlete.bulkRemove(data);
 }

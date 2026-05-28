@@ -32,11 +32,11 @@ Server state uses **TanStack Query** exclusively.
 
 Follow **concise naming** (`.cursor/rules/concise-naming.mdc`). Put helpers in `src/queries/<domain>/invalidate-*-cache.ts`.
 
-| Tier                | Pattern                     | Example                              | Use when                            |
-| ------------------- | --------------------------- | ------------------------------------ | ----------------------------------- |
-| Domain sweep        | `invalidate{Domain}Queries` | `invalidateTournamentAthleteQueries` | Default `onSuccess` for that domain |
-| Scoped sweep        | `invalidate{Domain}{Scope}` | `invalidateTournamentDetail`         | One id or subtree                   |
-| Cross-domain recipe | `invalidateOn{Effect}`      | `invalidateOnBulkAdd`                | Mutation touches multiple key trees |
+| Tier                | Pattern                     | Example                                     | Use when                            |
+| ------------------- | --------------------------- | ------------------------------------------- | ----------------------------------- |
+| Domain sweep        | `invalidate{Domain}Queries` | `invalidateTournamentAthleteQueries`        | Default `onSuccess` for that domain |
+| Scoped sweep        | `invalidate{Domain}{Scope}` | `invalidateTournamentDetail`                | One id or subtree                   |
+| Cross-domain recipe | `invalidateOn{Effect}`      | `invalidateOnBulkAdd`, `invalidateOnRemove` | Mutation touches multiple key trees |
 
 - Colocate `invalidateOn*` recipes in the **originating** domain’s invalidate module; don’t inline multiple sweeps in mutation hooks.
 - Prefer `On` over `After` for new recipes; rename legacy `invalidateAfter*` when touching that file.

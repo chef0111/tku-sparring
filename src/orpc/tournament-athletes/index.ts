@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
   BulkAddAthletesSchema,
+  BulkRemoveTournamentAthletesSchema,
   ListTournamentAthletesSchema,
   UpdateTournamentAthleteSchema,
 } from './dto';
@@ -45,7 +46,7 @@ export const removeTournamentAthleteRecord = authedProcedure
   });
 
 export const bulkRemoveTournamentAthleteRecords = authedProcedure
-  .input(z.object({ ids: z.array(z.string()).min(1) }))
+  .input(BulkRemoveTournamentAthletesSchema)
   .handler(async ({ input }) => {
     const count = await TournamentAthleteDAL.bulkRemoveTournamentAthletes(
       input.ids

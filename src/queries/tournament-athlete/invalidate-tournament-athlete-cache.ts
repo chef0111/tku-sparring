@@ -18,3 +18,9 @@ export function invalidateOnBulkAdd(
     void invalidateGroupListQueries(queryClient, input.tournamentId);
   }
 }
+
+/** After remove / bulkRemove — refresh roster lists and library exclude state. */
+export function invalidateOnRemove(queryClient: QueryClient) {
+  invalidateTournamentAthleteQueries(queryClient);
+  invalidateAthleteProfileQueries(queryClient);
+}

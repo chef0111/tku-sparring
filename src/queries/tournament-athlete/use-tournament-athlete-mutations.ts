@@ -2,17 +2,20 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type {
   BulkAddAthletesDTO,
+  BulkRemoveTournamentAthletesDTO,
   UpdateTournamentAthleteDTO,
 } from '@/orpc/tournament-athletes/dto';
 import {
-  invalidateOnBulkAdd,
-  invalidateTournamentAthleteQueries,
-} from '@/queries/tournament-athlete/invalidate-tournament-athlete-cache';
-import {
   bulkAddTournamentAthletes,
+  bulkRemoveTournamentAthletes,
   removeTournamentAthlete,
   updateTournamentAthlete,
 } from '@/queries/api/tournament-athlete-api';
+import {
+  invalidateOnBulkAdd,
+  invalidateOnRemove,
+  invalidateTournamentAthleteQueries,
+} from '@/queries/tournament-athlete/invalidate-tournament-athlete-cache';
 
 function useInvalidateTournamentAthletes() {
   const queryClient = useQueryClient();
@@ -57,14 +60,35 @@ export function useUpdateTournamentAthlete(options?: {
 export function useRemoveTournamentAthlete(options?: {
   onSuccess?: () => void;
 }) {
-  const invalidate = useInvalidateTournamentAthletes();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: removeTournamentAthlete,
     onSuccess: () => {
-      invalidate();
+      invalidateOnRemove(queryClient);
       toast.success('Athlete removed from tournament');
       options?.onSuccess?.();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+}
+
+export function useBulkRemoveTournamentAthletes(options?: {
+  onSuccess?: (removed: number) => void;
+}) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: BulkRemoveTournamentAthletesDTO) =>
+      bulkRemoveTournamentAthletes(data),
+    onSuccess: ({ removed }) => {
+      invalidateOnRemove(queryClient);
+      toast.success(
+        removed === 1
+          ? 'Athlete removed from tournament'
+          : `${removed} athletes removed from tournament`
+      );
+      options?.onSuccess?.(removed);
     },
     onError: (err) => toast.error(err.message),
   });
