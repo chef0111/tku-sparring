@@ -3,7 +3,6 @@ import { TournamentCardSkeleton } from './tournament-card-skeleton';
 import { TournamentCard } from './tournament-card';
 import type { TournamentsManagerQuery } from '../../hooks/use-tournaments-manager-query';
 import type {
-  TournamentListItem,
   TournamentRowActionOptions,
   TournamentSortField,
   TournamentStatus,
@@ -39,7 +38,7 @@ export function TournamentsGrid({
     sortDir: query.sort?.[0]?.desc ? 'desc' : 'asc',
   });
 
-  const tournaments = (data?.items ?? []) as Array<TournamentListItem>;
+  const tournaments = data?.items ?? [];
 
   if (isPending && !data) {
     return (

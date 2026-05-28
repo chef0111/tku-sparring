@@ -56,6 +56,24 @@ export const RetireArenaSchema = z.object({
   toArena: z.number().int().min(1).max(3),
 });
 
+export const TournamentListItemCountSchema = z.object({
+  groups: z.number(),
+  matches: z.number(),
+  tournamentAthletes: z.number(),
+  actionableMatches: z.number(),
+});
+
+export const TournamentListItemSchema = TournamentSchema.extend({
+  nameSortKey: z.string(),
+  arenaGroupOrder: z.unknown(),
+  _count: TournamentListItemCountSchema,
+});
+
+export const TournamentListPageSchema = z.object({
+  items: z.array(TournamentListItemSchema),
+  total: z.number(),
+});
+
 export const ListTournamentsSchema = z.object({
   page: z.number().int().positive().optional(),
   perPage: z.number().int().positive().optional(),
@@ -76,3 +94,5 @@ export type MoveGroupArenaDTO = z.infer<typeof MoveGroupArenaSchema>;
 export type EnsureArenaSlotDTO = z.infer<typeof EnsureArenaSlotSchema>;
 export type RetireArenaDTO = z.infer<typeof RetireArenaSchema>;
 export type ListTournamentsDTO = z.infer<typeof ListTournamentsSchema>;
+export type TournamentListItemDTO = z.infer<typeof TournamentListItemSchema>;
+export type TournamentListPageDTO = z.infer<typeof TournamentListPageSchema>;
