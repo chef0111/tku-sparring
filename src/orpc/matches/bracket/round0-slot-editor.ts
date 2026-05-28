@@ -1,4 +1,4 @@
-import type { AssignSlotDTO, SetLockDTO, SwapSlotsDTO } from './dto';
+import type { AssignSlotDTO, SetLockDTO, SwapSlotsDTO } from '../dto';
 import { prisma } from '@/lib/db';
 
 export async function setRound0SlotLock(input: SetLockDTO) {

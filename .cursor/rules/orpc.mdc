@@ -11,14 +11,14 @@ Server RPC lives under **`src/orpc`**. Client apps consume it via `@/orpc/client
 
 ## Where code lives
 
-| Layer           | Location                                   | Responsibility                                                    |
-| --------------- | ------------------------------------------ | ----------------------------------------------------------------- |
-| Router assembly | `src/orpc/router.ts`, `<domain>/router.ts` | Map `client.*` keys only; no business logic                       |
-| Procedures      | `<domain>/index.ts`                        | `authedProcedure` + input schema + delegate                       |
-| DTOs            | `<domain>/dto.ts`                          | Zod; consumed by procedures and `queries/api`                     |
-| DAL             | `<domain>/dal.ts`                          | Prisma / persistence                                              |
-| Use-cases       | `<domain>/*.ts` (e.g. `bulk-add.ts`)       | Multi-step / cross-DAL orchestration; procedures call in one line |
-| Tests           | `<domain>/__tests__/`                      | Colocated; keep                                                   |
+| Layer           | Location                                                     | Responsibility                                                    |
+| --------------- | ------------------------------------------------------------ | ----------------------------------------------------------------- |
+| Router assembly | `src/orpc/router.ts`, `<domain>/router.ts`                   | Map `client.*` keys only; no business logic                       |
+| Procedures      | `<domain>/index.ts`                                          | `authedProcedure` + input schema + delegate                       |
+| DTOs            | `<domain>/dto.ts`                                            | Zod; consumed by procedures and `queries/api`                     |
+| DAL             | `<domain>/dal.ts`                                            | Prisma / persistence                                              |
+| Use-cases       | `<domain>/*.ts` (e.g. `bulk-add.ts`, `bracket-lifecycle.ts`) | Multi-step / cross-DAL orchestration; procedures call in one line |
+| Tests           | `<domain>/__tests__/`                                        | Colocated; keep                                                   |
 
 ## Folder names vs router keys
 

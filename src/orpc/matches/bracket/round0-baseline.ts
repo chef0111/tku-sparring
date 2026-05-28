@@ -12,16 +12,16 @@ const Round0BaselineSlotSchema = z.object({
   blueLocked: z.boolean(),
 });
 
-export const Round0BaselineV1Schema = z.object({
+export const Round0BaselineSchema = z.object({
   v: z.literal(ROUND0_BASELINE_VERSION),
   slots: z.array(Round0BaselineSlotSchema),
 });
 
-export type Round0BaselineV1 = z.infer<typeof Round0BaselineV1Schema>;
-export type Round0BaselineSlotV1 = z.infer<typeof Round0BaselineSlotSchema>;
+export type Round0Baseline = z.infer<typeof Round0BaselineSchema>;
+export type Round0BaselineSlot = z.infer<typeof Round0BaselineSlotSchema>;
 
-export function parseRound0Baseline(raw: unknown): Round0BaselineV1 | null {
-  const r = Round0BaselineV1Schema.safeParse(raw);
+export function parseRound0Baseline(raw: unknown): Round0Baseline | null {
+  const r = Round0BaselineSchema.safeParse(raw);
   return r.success ? r.data : null;
 }
 
@@ -35,7 +35,7 @@ export function buildRound0Baseline(
     redLocked: boolean;
     blueLocked: boolean;
   }>
-): Round0BaselineV1 {
+): Round0Baseline {
   return {
     v: ROUND0_BASELINE_VERSION,
     slots: rows.map((m) => ({
