@@ -6,19 +6,19 @@ import {
 import type { ListTournamentAthletesDTO } from '@/orpc/tournament-athletes/dto';
 import { tournamentAthleteKeys } from '@/queries/keys';
 import {
-  listAthleteListIdentityKey,
+  getAthleteIdentityKey,
   listTournamentAthletes,
 } from '@/queries/api/tournament-athlete-api';
 import { tournamentAthletesQueryOptions } from '@/queries/tournament-athlete/tournament-athlete-query-options';
 
 export function useTournamentAthletes(input: ListTournamentAthletesDTO) {
-  const placeholderIdentity = listAthleteListIdentityKey(input);
+  const placeholderIdentity = getAthleteIdentityKey(input);
   return useQuery({
     ...tournamentAthletesQueryOptions(input),
     placeholderData: (previousData, previousQuery) => {
       if (!previousData || !previousQuery) return undefined;
       const prevInput = previousQuery.queryKey[2] as ListTournamentAthletesDTO;
-      if (listAthleteListIdentityKey(prevInput) !== placeholderIdentity) {
+      if (getAthleteIdentityKey(prevInput) !== placeholderIdentity) {
         return undefined;
       }
       return previousData;

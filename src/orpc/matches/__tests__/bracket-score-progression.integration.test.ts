@@ -51,7 +51,7 @@ function createInMemoryDb(initial: Array<MatchRow>) {
     })
   );
 
-  const db: ProgressionDb = {
+  const db = {
     match: {
       findUnique: async ({ where }: { where: { id: string } }) =>
         matches.get(where.id) ?? null,
@@ -92,7 +92,7 @@ function createInMemoryDb(initial: Array<MatchRow>) {
       findUnique: async ({ where }: { where: { id: string } }) =>
         athletes.get(where.id) ?? null,
     },
-  };
+  } as unknown as ProgressionDb;
 
   return { db, matches };
 }

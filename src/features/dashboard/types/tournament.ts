@@ -1,6 +1,10 @@
 import type { DataTableRowAction } from '@/types/data-table';
+import type {
+  TournamentListItemDTO,
+  TournamentStatusDTO,
+} from '@/orpc/tournaments/dto';
 
-export type TournamentStatus = 'draft' | 'active' | 'completed';
+export type TournamentStatus = TournamentStatusDTO;
 
 export type TournamentSortField =
   | 'name'
@@ -39,16 +43,5 @@ export interface TournamentData {
   _count: { groups: number; matches: number; tournamentAthletes: number };
 }
 
-export interface TournamentListItem {
-  id: string;
-  name: string;
-  status: TournamentStatus;
-  createdAt: Date;
-  _count: {
-    groups: number;
-    matches: number;
-    tournamentAthletes: number;
-    /** Builder queue count — excludes Advanced/BYE/empty slots. */
-    actionableMatches: number;
-  };
-}
+/** List row from `tournament.list` (includes `actionableMatches` on `_count`). */
+export type TournamentListItem = TournamentListItemDTO;

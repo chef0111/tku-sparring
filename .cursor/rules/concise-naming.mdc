@@ -1,0 +1,80 @@
+---
+description: Concise, semantic naming for functions, variables, constants, and types
+globs:
+  - src/**/*
+  - tests/**/*
+alwaysApply: true
+---
+
+# Concise naming
+
+Names should be **short and readable**, but still **identifiable without reading the body**. Align domain words with `CONTEXT.md`; follow this rule for shape and length.
+
+## Core principle
+
+**Say what changes or what it is — not where it lives, how it was triggered, or every flag.**
+
+| Prefer                  | Avoid                                       |
+| ----------------------- | ------------------------------------------- |
+| Outcome / role          | Full RPC path, file path, or stack of nouns |
+| Args for variants       | Encoding booleans or IDs in the name        |
+| Module path for context | Repeating the folder name in every symbol   |
+
+**Length guide:** aim for **≤ 4 lexical words** in composed identifiers (excluding allowed prefixes: `use`, `is`, `has`, `on`). Public exports that would be ambiguous in isolation may be one word longer.
+
+## Functions
+
+- **Imperative verb first:** `listGroups`, `patchArenaOrder`, `invalidateOnBulkAdd`
+- **Event / effect hooks:** `on` + past participle or noun — `onBulkAdd`, `onGroupWrite`, `onArenaLayout` (not `afterBulkAddTournamentAthletes`)
+- **Don't repeat** the module or domain when the file already establishes it:
+  - `tournament-athlete/invalidate-…ts` → `invalidateOnBulkAdd` ✓, not `invalidateTournamentAthleteOnBulkAdd`
+- **Query / mutation helpers:** see `.cursor/rules/tanstack-query.mdc` for `invalidate*` tiers
+
+```ts
+// ✓
+function invalidateOnBulkAdd(qc, { tournamentId, autoAssign }) { … }
+
+// ✗
+function invalidateAfterBulkAddTournamentAthletesToTournamentWithAutoAssign(…) { … }
+```
+
+## Variables
+
+- **Scope + role:** `items`, `orgTotal`, `tournamentId` — not `tournamentAthleteListDataResult`
+- **Booleans:** `isPending`, `hasFilters`, `canSubmit`, `allInTournament`
+- **Collections:** plural nouns — `groups`, `selectedIds` (not `groupArrayList`)
+- **Handlers:** `handleSubmit`, `toggleProfile` — not `onSubmitButtonClickHandler`
+- **Avoid** filler: `data`, `info`, `stuff`, `temp` unless distinguishing two values (e.g. `serverData` vs `draft`)
+
+## Constants
+
+- **True constants** (never reassigned, config literals): `SCREAMING_SNAKE` — `PAGE_SIZE`, `ROW_HEIGHT`
+- **Frozen config objects / key factories:** `camelCase` noun — `athleteProfileKeys`, `matchKeys`
+- **Enum-like unions:** domain term, not `ENUM_VALUE_FOR_X`
+
+## Types & interfaces
+
+- **Nouns / noun phrases:** `BulkAddAthletesDTO`, `AddAthletesSheetState`
+- **Props:** `{Component}Props` — `AddAthletesListProps`
+- **No** Hungarian or redundant suffixes: `IUser`, `UserType` (prefer `User` unless clash)
+- **Generics:** single letter or short role — `T`, `TData` (match existing file style)
+
+## Components & files
+
+- Match existing project patterns: `add-athletes-sheet`, `use-add-athletes-sheet.ts`
+- File name = primary export; don't duplicate the filename in every internal symbol
+
+## When a longer name is OK
+
+- Name would be **ambiguous** at call site without import context
+- **Generated / external** API surface must match schema
+- **Breaking** rename cost outweighs clarity — leave legacy names; use concise names for new code
+
+## Review checklist
+
+Before naming a new symbol, ask:
+
+1. Can I drop a noun already implied by the file or import path?
+2. Can a boolean or id move to a parameter or property instead?
+3. Does it use a `CONTEXT.md` term (Tournament, Group, Match, …) without chaining every parent concept?
+4. Would deleting the symbol force callers to repeat logic — if not, the name may still be too long?

@@ -1,5 +1,6 @@
 import type {
   BulkAddAthletesDTO,
+  BulkRemoveTournamentAthletesDTO,
   ListTournamentAthletesDTO,
   UpdateTournamentAthleteDTO,
 } from '@/orpc/tournament-athletes/dto';
@@ -9,7 +10,7 @@ import { client } from '@/orpc/client';
  * Stable identity for `placeholderData`: same filters / scope, excluding
  * page, perPage, and sorting so paginating or re-sorting keeps prior rows visible.
  */
-export function listAthleteListIdentityKey(
+export function getAthleteIdentityKey(
   input: ListTournamentAthletesDTO
 ): string {
   return JSON.stringify({
@@ -41,4 +42,10 @@ export function updateTournamentAthlete(data: UpdateTournamentAthleteDTO) {
 
 export function removeTournamentAthlete(data: { id: string }) {
   return client.tournamentAthlete.remove(data);
+}
+
+export function bulkRemoveTournamentAthletes(
+  data: BulkRemoveTournamentAthletesDTO
+) {
+  return client.tournamentAthlete.bulkRemove(data);
 }

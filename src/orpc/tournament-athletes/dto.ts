@@ -8,6 +8,10 @@ export const BulkAddAthletesSchema = z.object({
   autoAssign: z.boolean().optional().default(false),
 });
 
+export const BulkRemoveTournamentAthletesSchema = z.object({
+  ids: z.array(z.string()).min(1, 'At least one athlete is required'),
+});
+
 export const UpdateTournamentAthleteSchema = z.object({
   id: z.string(),
   groupId: z.string().nullable().optional(),
@@ -52,6 +56,9 @@ export const ListTournamentAthletesSchema = z.object({
 });
 
 export type BulkAddAthletesDTO = z.infer<typeof BulkAddAthletesSchema>;
+export type BulkRemoveTournamentAthletesDTO = z.infer<
+  typeof BulkRemoveTournamentAthletesSchema
+>;
 export type UpdateTournamentAthleteDTO = z.infer<
   typeof UpdateTournamentAthleteSchema
 >;

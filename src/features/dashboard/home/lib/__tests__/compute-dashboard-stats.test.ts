@@ -9,6 +9,9 @@ function makeTournament(
   return {
     name: 'Test',
     createdAt: new Date('2026-01-01'),
+    updatedAt: new Date('2026-01-01'),
+    nameSortKey: 'test',
+    arenaGroupOrder: null,
     _count: {
       groups: 0,
       matches: 0,

@@ -38,7 +38,7 @@ export function TournamentsTable({
   });
 
   const { table, state: tableState } = useDataTable({
-    data: (data?.items ?? []) as Array<TournamentListItem>,
+    data: data?.items ?? [],
     columns,
     pageCount: Math.max(1, Math.ceil((data?.total ?? 0) / query.perPage)),
     filteredRowCount: data?.total,

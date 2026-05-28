@@ -1,13 +1,13 @@
 import { z } from 'zod';
 import {
   BulkAddAthletesSchema,
+  BulkRemoveTournamentAthletesSchema,
   ListTournamentAthletesSchema,
   UpdateTournamentAthleteSchema,
 } from './dto';
 import { TournamentAthleteDAL } from './dal';
 import { bulkAddAthletesToTournament } from './bulk-add';
 import { authedProcedure } from '@/orpc/middleware';
-import { prisma } from '@/lib/db';
 
 export const listTournamentAthletes = authedProcedure
   .input(ListTournamentAthletesSchema)
@@ -46,7 +46,7 @@ export const removeTournamentAthleteRecord = authedProcedure
   });
 
 export const bulkRemoveTournamentAthleteRecords = authedProcedure
-  .input(z.object({ ids: z.array(z.string()).min(1) }))
+  .input(BulkRemoveTournamentAthletesSchema)
   .handler(async ({ input }) => {
     const count = await TournamentAthleteDAL.bulkRemoveTournamentAthletes(
       input.ids

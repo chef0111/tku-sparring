@@ -1,7 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import {
+  generateBracket,
+  regenerateBracket,
+  resetBracket,
+  shuffleBracket,
+} from '../bracket/bracket-lifecycle';
 import { MatchDAL } from '../dal';
-import { buildRound0BaselineV1 } from '../round0-baseline';
+import { buildRound0Baseline } from '../bracket/round0-baseline';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { prisma } from '@/lib/db';
 
@@ -82,7 +88,7 @@ describe('generateBracket', () => {
     });
     vi.mocked(prisma.match.findMany).mockResolvedValue([]);
 
-    await MatchDAL.generateBracket({ groupId: 'group-1' }, 'admin-1');
+    await generateBracket({ groupId: 'group-1' }, 'admin-1');
 
     expect(prisma.match.count).toHaveBeenCalledWith({
       where: { groupId: 'group-1', kind: 'bracket' },
@@ -109,7 +115,7 @@ describe('generateBracket', () => {
     vi.mocked(prisma.group.findUnique).mockResolvedValue(draftGroup as never);
     vi.mocked(prisma.match.count).mockResolvedValue(1);
     await expect(
-      MatchDAL.generateBracket({ groupId: 'group-1' }, 'admin-1')
+      generateBracket({ groupId: 'group-1' }, 'admin-1')
     ).rejects.toThrow(/already exist/);
   });
 
@@ -133,7 +139,7 @@ describe('generateBracket', () => {
     });
     vi.mocked(prisma.match.findMany).mockResolvedValue([]);
 
-    await MatchDAL.generateBracket({ groupId: 'group-1' }, 'admin-1');
+    await generateBracket({ groupId: 'group-1' }, 'admin-1');
 
     const creates = vi
       .mocked(prisma.match.create)
@@ -163,7 +169,7 @@ describe('generateBracket', () => {
     });
     vi.mocked(prisma.match.findMany).mockResolvedValue([]);
 
-    await MatchDAL.generateBracket({ groupId: 'group-1' }, 'admin-1');
+    await generateBracket({ groupId: 'group-1' }, 'admin-1');
 
     const creates = vi
       .mocked(prisma.match.create)
@@ -180,7 +186,7 @@ describe('resetBracket', () => {
       round0Baseline: null,
     } as never);
 
-    await expect(MatchDAL.resetBracket('group-1', 'admin-1')).rejects.toThrow(
+    await expect(resetBracket('group-1', 'admin-1')).rejects.toThrow(
       /Shuffle once/i
     );
     expect(prisma.match.findMany).not.toHaveBeenCalled();
@@ -203,7 +209,7 @@ describe('resetBracket', () => {
       winnerTournamentAthleteId: null,
       status: 'pending',
     };
-    const baseline = buildRound0BaselineV1([r0m0]);
+    const baseline = buildRound0Baseline([r0m0]);
 
     vi.mocked(prisma.group.findUnique).mockResolvedValue({
       ...draftGroup,
@@ -229,7 +235,7 @@ describe('resetBracket', () => {
     vi.mocked(prisma.match.update).mockResolvedValue({} as never);
     vi.mocked(prisma.match.findUnique).mockResolvedValue(null);
 
-    await MatchDAL.resetBracket('group-1', 'admin-1');
+    await resetBracket('group-1', 'admin-1');
 
     expect(recordTournamentActivity).toHaveBeenCalledWith(
       expect.objectContaining({ eventType: 'bracket.reset' })
@@ -328,7 +334,7 @@ describe('shuffleBracket', () => {
     vi.mocked(prisma.group.findUnique).mockResolvedValue(draftGroup as never);
     vi.mocked(prisma.match.findMany).mockResolvedValue([]);
 
-    await expect(MatchDAL.shuffleBracket('group-1', 'admin')).rejects.toThrow(
+    await expect(shuffleBracket('group-1', 'admin')).rejects.toThrow(
       /Generate a bracket first/
     );
   });
@@ -430,7 +436,7 @@ describe('shuffleBracket', () => {
     vi.mocked(prisma.match.update).mockResolvedValue({} as never);
     vi.mocked(prisma.match.findUnique).mockResolvedValue(null);
 
-    await MatchDAL.shuffleBracket('group-1', 'admin');
+    await shuffleBracket('group-1', 'admin');
 
     const updates = vi.mocked(prisma.match.update).mock.calls.map((c) => c[0]);
     const r0Update = updates.find((u) => u.where.id === 'm0');
@@ -517,7 +523,7 @@ describe('shuffleBracket', () => {
     vi.mocked(prisma.match.update).mockResolvedValue({} as never);
     vi.mocked(prisma.match.findUnique).mockResolvedValue(null);
 
-    await MatchDAL.shuffleBracket('group-1', 'admin');
+    await shuffleBracket('group-1', 'admin');
 
     const updates = vi.mocked(prisma.match.update).mock.calls.map((c) => c[0]);
     const r0Updates = updates.filter((u) =>
@@ -646,7 +652,7 @@ describe('regenerateBracket', () => {
     });
     vi.mocked(prisma.match.findMany).mockResolvedValue([]);
 
-    await MatchDAL.regenerateBracket('group-1', 'admin-1');
+    await regenerateBracket('group-1', 'admin-1');
 
     expect(prisma.match.updateMany).toHaveBeenCalledWith({
       where: { groupId: 'group-1' },

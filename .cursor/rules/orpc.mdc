@@ -1,0 +1,42 @@
+---
+description: oRPC server layer conventions (procedures, DTOs, DAL, router assembly)
+globs:
+  - src/orpc/**/*
+alwaysApply: false
+---
+
+# oRPC
+
+Server RPC lives under **`src/orpc`**. Client apps consume it via `@/orpc/client`; React apps use `src/queries/api/*-api.ts` adapters (see `.cursor/rules/tanstack-query.mdc`).
+
+## Where code lives
+
+| Layer           | Location                                                     | Responsibility                                                    |
+| --------------- | ------------------------------------------------------------ | ----------------------------------------------------------------- |
+| Router assembly | `src/orpc/router.ts`, `<domain>/router.ts`                   | Map `client.*` keys only; no business logic                       |
+| Procedures      | `<domain>/index.ts`                                          | `authedProcedure` + input schema + delegate                       |
+| DTOs            | `<domain>/dto.ts`                                            | Zod; consumed by procedures and `queries/api`                     |
+| DAL             | `<domain>/dal.ts`                                            | Prisma / persistence                                              |
+| Use-cases       | `<domain>/*.ts` (e.g. `bulk-add.ts`, `bracket-lifecycle.ts`) | Multi-step / cross-DAL orchestration; procedures call in one line |
+| Tests           | `<domain>/__tests__/`                                        | Colocated; keep                                                   |
+
+## Folder names vs router keys
+
+oRPC folders are often **plural** (`groups/`, `matches/`); `src/queries/<domain>/` uses **singular** names aligned with hooks. Router keys (`client.group`, `client.tournament`) are the runtime contract — see `CONTEXT.md` and `docs/specs/2026-05-28-orpc-layout-design.md` for the full map.
+
+## Rules
+
+- Do **not** call `client.*` from oRPC internals (except tests).
+- Do **not** add TanStack Query to `src/orpc`.
+- DTOs live only under `src/orpc`; queries import types from `@/orpc/<domain>/dto` — never redefine input shapes in queries.
+- Cross-domain flows: use-case module in the **originating** domain (mirror `invalidateOnBulkAdd` on the queries side).
+- `matches/router.ts` exports `matchRouter` and `bracketRouter` for `client.match` and `client.bracket`.
+- Follow `.cursor/rules/concise-naming.mdc`; prefer router key names over `*Endpoint` suffixes on procedure exports when renaming.
+
+## Adding a procedure
+
+1. Schema in `<domain>/dto.ts` if shared with client types.
+2. Logic in `dal.ts` or a use-case `*.ts` if multi-step.
+3. `authedProcedure` export in `<domain>/index.ts`.
+4. Wire in `<domain>/router.ts` and ensure root `router.ts` merges the fragment.
+5. Add thin adapter in `src/queries/api/*-api.ts` when the UI needs it.

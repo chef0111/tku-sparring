@@ -15,6 +15,12 @@ import {
   UpdateMatchSchema,
   UpdateScoreSchema,
 } from './dto';
+import {
+  generateBracket as runGenerateBracket,
+  regenerateBracket as runRegenerateBracket,
+  resetBracket as runResetBracket,
+  shuffleBracket as runShuffleBracket,
+} from './bracket/bracket-lifecycle';
 import { MatchDAL } from './dal';
 import { throwMatchBadRequest } from './match-domain-error';
 import { authedProcedure } from '@/orpc/middleware';
@@ -69,7 +75,7 @@ export const updateMatch = authedProcedure
     return match;
   });
 
-export const adminSetMatchStatusEndpoint = authedProcedure
+export const adminSetMatchStatus = authedProcedure
   .input(AdminSetMatchStatusSchema)
   .handler(async ({ input, context }) => {
     return MatchDAL.adminSetMatchStatus(input, context.user.id);
@@ -86,62 +92,56 @@ export const removeMatch = authedProcedure
     return MatchDAL.deleteMatch(input.id);
   });
 
-export const generateBracketEndpoint = authedProcedure
+export const generateBracket = authedProcedure
   .input(GenerateBracketSchema)
   .handler(async ({ input, context }) => {
-    const matches = await MatchDAL.generateBracket(input, context.user.id);
+    const matches = await runGenerateBracket(input, context.user.id);
     return matches;
   });
 
-export const shuffleBracketEndpoint = authedProcedure
+export const shuffleBracket = authedProcedure
   .input(ShuffleBracketSchema)
   .handler(async ({ input, context }) => {
-    const matches = await MatchDAL.shuffleBracket(
-      input.groupId,
-      context.user.id
-    );
+    const matches = await runShuffleBracket(input.groupId, context.user.id);
     return matches;
   });
 
-export const regenerateBracketEndpoint = authedProcedure
+export const regenerateBracket = authedProcedure
   .input(RegenerateBracketSchema)
   .handler(async ({ input, context }) => {
-    const matches = await MatchDAL.regenerateBracket(
-      input.groupId,
-      context.user.id
-    );
+    const matches = await runRegenerateBracket(input.groupId, context.user.id);
     return matches;
   });
 
-export const resetBracketEndpoint = authedProcedure
+export const resetBracket = authedProcedure
   .input(ResetBracketSchema)
   .handler(async ({ input, context }) => {
-    const matches = await MatchDAL.resetBracket(input.groupId, context.user.id);
+    const matches = await runResetBracket(input.groupId, context.user.id);
     return matches;
   });
 
-export const setLockEndpoint = authedProcedure
+export const setLock = authedProcedure
   .input(SetLockSchema)
   .handler(async ({ input }) => {
     const match = await MatchDAL.setLock(input);
     return match;
   });
 
-export const updateScoreEndpoint = authedProcedure
+export const updateScore = authedProcedure
   .input(UpdateScoreSchema)
   .handler(async ({ input, context }) => {
     const score = await MatchDAL.updateScore(input, context.user.id);
     return score;
   });
 
-export const setWinnerEndpoint = authedProcedure
+export const setWinner = authedProcedure
   .input(SetWinnerSchema)
   .handler(async ({ input, context }) => {
     const winner = await MatchDAL.setWinner(input, context.user.id);
     return winner;
   });
 
-export const swapParticipantsEndpoint = authedProcedure
+export const swapParticipants = authedProcedure
   .input(SwapParticipantsSchema)
   .handler(async ({ input, context }) => {
     const participants = await MatchDAL.swapParticipants(
@@ -151,14 +151,14 @@ export const swapParticipantsEndpoint = authedProcedure
     return participants;
   });
 
-export const assignSlotEndpoint = authedProcedure
+export const assignSlot = authedProcedure
   .input(AssignSlotSchema)
   .handler(async ({ input, context }) => {
     const slot = await MatchDAL.assignSlot(input, context.user.id);
     return slot;
   });
 
-export const swapSlotsEndpoint = authedProcedure
+export const swapSlots = authedProcedure
   .input(SwapSlotsSchema)
   .handler(async ({ input, context }) => {
     const slots = await MatchDAL.swapSlots(input, context.user.id);

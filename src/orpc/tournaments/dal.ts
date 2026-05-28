@@ -9,6 +9,7 @@ import type {
   RetireArenaDTO,
   SetArenaGroupOrderDTO,
   SetTournamentStatusDTO,
+  TournamentListPageDTO,
   TournamentStatusDTO,
   UpdateTournamentDTO,
 } from './dto';
@@ -199,7 +200,9 @@ export class TournamentDAL {
     }
   }
 
-  static async findMany(input: ListTournamentsDTO) {
+  static async findMany(
+    input: ListTournamentsDTO
+  ): Promise<TournamentListPageDTO> {
     const {
       page = 1,
       perPage = 20,
@@ -235,7 +238,7 @@ export class TournamentDAL {
         ? ({ AND: filters } satisfies Prisma.TournamentWhereInput)
         : undefined;
 
-    const [items, total] = await Promise.all([
+    const [rows, total] = await Promise.all([
       prisma.tournament.findMany({
         where,
         orderBy: TournamentDAL.toOrderBy(sort, sortDir),
@@ -250,10 +253,14 @@ export class TournamentDAL {
       prisma.tournament.count({ where }),
     ]);
 
-    const enrichedItems =
-      await TournamentDAL.attachActionableMatchCounts(items);
+    const enrichedItems = await TournamentDAL.attachActionableMatchCounts(rows);
 
-    return { items: enrichedItems, total };
+    const items = enrichedItems.map((item) => ({
+      ...item,
+      status: TournamentStatusSchema.parse(item.status),
+    }));
+
+    return { items, total } as TournamentListPageDTO;
   }
 
   static async findById(id: string) {

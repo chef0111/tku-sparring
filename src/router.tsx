@@ -23,7 +23,8 @@ export function getRouter() {
   });
 
   setupRouterSsrQueryIntegration({
-    router,
+    // Single router-core instance via package.json override; ssr-query types may lag.
+    router: router as never,
     queryClient: context.queryClient,
     wrapQueryClient: false,
   });

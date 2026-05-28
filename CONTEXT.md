@@ -69,7 +69,9 @@ _Avoid_: Tournament detail, viewer
 
 ## Naming conventions (code)
 
-Prefer **short imperative** names for APIs and modules, but keep **semantics** aligned with the domain terms above — a reader should still see what concept is acted on (e.g. a **Match**, a **round**), not only that something runs.
+Prefer **short imperative** names for APIs and modules, but keep **semantics** aligned with the domain terms above — a reader should still see what concept is acted on (e.g. a **Match**, a **round**), not only that something runs. See `.cursor/rules/concise-naming.mdc` for project-wide rules (functions, variables, constants, types).
+
+**oRPC vs queries folders:** `src/orpc` often uses plural directory names (`groups/`, `matches/`); `src/queries` uses singular domain folders (`group/`, `match/`). Router keys (`client.group`, `client.tournament`, …) are stable — see `.cursor/rules/orpc.mdc` and `docs/specs/2026-05-28-orpc-layout-design.md`.
 
 ## Relationships
 
