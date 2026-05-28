@@ -1,36 +1,8 @@
 import { tournamentRouter } from './tournaments/router';
 
-import {
-  assignAthleteToGroup,
-  autoAssignAllGroups,
-  autoAssignGroup,
-  createGroup,
-  getGroup,
-  listGroups,
-  removeGroup,
-  unassignAthleteFromGroup,
-  updateGroup,
-} from './groups';
+import { groupRouter } from './groups/router';
 
-import {
-  adminSetMatchStatusEndpoint,
-  assignSlotEndpoint,
-  createCustomMatch,
-  createMatch,
-  generateBracketEndpoint,
-  getMatch,
-  listMatches,
-  regenerateBracketEndpoint,
-  removeMatch,
-  resetBracketEndpoint,
-  setLockEndpoint,
-  setWinnerEndpoint,
-  shuffleBracketEndpoint,
-  swapParticipantsEndpoint,
-  swapSlotsEndpoint,
-  updateMatch,
-  updateScoreEndpoint,
-} from './matches';
+import { bracketRouter, matchRouter } from './matches/router';
 
 import {
   bulkDeleteAthleteProfiles,
@@ -61,38 +33,9 @@ import { getLastSelection, setLastSelection } from './device-last-selection';
 
 export default {
   tournament: tournamentRouter,
-  group: {
-    list: listGroups,
-    get: getGroup,
-    create: createGroup,
-    update: updateGroup,
-    delete: removeGroup,
-    autoAssign: autoAssignGroup,
-    autoAssignAll: autoAssignAllGroups,
-    assignAthlete: assignAthleteToGroup,
-    unassignAthlete: unassignAthleteFromGroup,
-  },
-  match: {
-    list: listMatches,
-    get: getMatch,
-    create: createMatch,
-    createCustom: createCustomMatch,
-    update: updateMatch,
-    adminSetMatchStatus: adminSetMatchStatusEndpoint,
-    delete: removeMatch,
-    updateScore: updateScoreEndpoint,
-    setWinner: setWinnerEndpoint,
-    swapParticipants: swapParticipantsEndpoint,
-    setLock: setLockEndpoint,
-    assignSlot: assignSlotEndpoint,
-    swapSlots: swapSlotsEndpoint,
-  },
-  bracket: {
-    generate: generateBracketEndpoint,
-    shuffle: shuffleBracketEndpoint,
-    regenerate: regenerateBracketEndpoint,
-    reset: resetBracketEndpoint,
-  },
+  group: groupRouter,
+  match: matchRouter,
+  bracket: bracketRouter,
   athleteProfile: {
     list: listAthleteProfiles,
     create: createAthleteProfile,
