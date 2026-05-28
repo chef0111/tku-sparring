@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MatchDAL } from '../dal';
-import { buildRound0BaselineV1 } from '../round0-baseline';
+import { buildRound0Baseline } from '../round0-baseline';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { prisma } from '@/lib/db';
 
@@ -203,7 +203,7 @@ describe('resetBracket', () => {
       winnerTournamentAthleteId: null,
       status: 'pending',
     };
-    const baseline = buildRound0BaselineV1([r0m0]);
+    const baseline = buildRound0Baseline([r0m0]);
 
     vi.mocked(prisma.group.findUnique).mockResolvedValue({
       ...draftGroup,

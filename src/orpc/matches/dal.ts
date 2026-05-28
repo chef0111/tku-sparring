@@ -17,7 +17,7 @@ import {
   round0ShuffleResetPatch,
   shuffleAthletePool,
 } from './bracket-helpers';
-import { buildRound0BaselineV1, parseRound0Baseline } from './round0-baseline';
+import { buildRound0Baseline, parseRound0Baseline } from './round0-baseline';
 import type { Round0BaselineV1 } from './round0-baseline';
 import type {
   AdminSetMatchStatusDTO,
@@ -60,7 +60,7 @@ type GroupBaselineRow = { round0Baseline?: unknown };
 function groupUpdateRound0Baseline(
   db: MatchBracketWriteDb,
   groupId: string,
-  baseline: ReturnType<typeof buildRound0BaselineV1> | null
+  baseline: ReturnType<typeof buildRound0Baseline> | null
 ) {
   return db.group.update({
     where: { id: groupId },
@@ -222,7 +222,7 @@ export class MatchDAL {
    * Re-seeds round 0 from a shuffled athlete pool, clears higher-round progression,
    * then applies round-0 bye advancement. Used by shuffle only.
    *
-   * Persists {@link buildRound0BaselineV1} on the group after placements (pre-bye) so
+   * Persists {@link buildRound0Baseline} on the group after placements (pre-bye) so
    * {@link MatchDAL.resetBracket} can restore that layout without reshuffling.
    *
    * Clears all **Match** bout state in the **Group** (custom rows + bracket upper rounds,
@@ -345,7 +345,7 @@ export class MatchDAL {
     await groupUpdateRound0Baseline(
       db,
       groupId,
-      buildRound0BaselineV1(placedForBaseline)
+      buildRound0Baseline(placedForBaseline)
     );
 
     await applyRound0ByeAdvancement(groupId, tournamentId, db);

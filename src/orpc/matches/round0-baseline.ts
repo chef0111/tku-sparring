@@ -25,7 +25,7 @@ export function parseRound0Baseline(raw: unknown): Round0BaselineV1 | null {
   return r.success ? r.data : null;
 }
 
-export function buildRound0BaselineV1(
+export function buildRound0Baseline(
   rows: ReadonlyArray<{
     matchIndex: number;
     redTournamentAthleteId: string | null;
