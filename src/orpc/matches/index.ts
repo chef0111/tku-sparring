@@ -103,7 +103,7 @@ export const shuffleBracket = authedProcedure
     return matches;
   });
 
-export const regenerateBracketEndpoint = authedProcedure
+export const regenerateBracket = authedProcedure
   .input(RegenerateBracketSchema)
   .handler(async ({ input, context }) => {
     const matches = await MatchDAL.regenerateBracket(
