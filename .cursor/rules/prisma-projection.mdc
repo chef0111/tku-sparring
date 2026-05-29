@@ -1,0 +1,51 @@
+---
+description: Shared Prisma select + row-to-domain projection (avoid duplicate inline types)
+globs:
+  - src/lib/**/*
+  - src/orpc/**/*
+alwaysApply: false
+---
+
+# Prisma projection
+
+When Prisma rows are mapped to an existing domain/UI type, use **one module** — not copy-pasted field lists or mappers.
+
+## Pattern
+
+```ts
+// src/lib/<area>/<entity>-projection.ts
+export const matchProjectionSelect = { id: true, kind: true, … } as const satisfies Prisma.MatchSelect;
+
+export type MatchProjectionRow = Prisma.MatchGetPayload<{ select: typeof matchProjectionSelect }> & {
+  arenaSequenceRank?: number | null; // only if not a DB column
+};
+
+export function toMatchData(m: MatchProjectionRow): MatchData { … }
+```
+
+Queries: `prisma.match.findMany({ select: matchProjectionSelect, … })` then `.map(toMatchData)`.
+
+## Do not
+
+- Inline a 15+ field anonymous type on a private `prismaXToY` helper in a DAL.
+- Duplicate `kind === 'custom' ? …` / `displayLabel ?? null` — use `@/lib/tournament/match-kind` (`matchKindFromDb`, `matchDisplayLabelFromDb`).
+- Redefine the **output** type if it already exists — import `MatchData` (or the Zod-inferred DTO) and map into it.
+
+**Layers stay separate:** `match-kind` is the shared **domain invariant** only. `toMatchData` and `coalesceMatchRead` remain different projections; they call `match-kind`, they do not replace each other.
+
+## Where modules live
+
+| Output used by                                    | Projection home                                                                   |
+| ------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Arena labels, bracket tooling, multiple oRPC DALs | `@/lib/tournament/match-projection` (`toMatchData`)                               |
+| `kind` / `displayLabel` DB → domain rule          | `@/lib/tournament/match-kind`                                                     |
+| oRPC procedure JSON (full row, light normalize)   | `orpc/matches/match-read` (`coalesceMatchRead`) — different seam than `MatchData` |
+| RPC contract / client types                       | `orpc/<domain>/dto.ts` (Zod) — not a Prisma projection                            |
+
+Add `<entity>-projection.ts` under `src/lib/` when **two or more** call sites need the same Prisma → domain map.
+
+## New entity checklist
+
+1. Output type exists? (Zod DTO or `features/…/types` — prefer moving shared types to `lib` when server + UI both need them.)
+2. `*ProjectionSelect` + `*ProjectionRow` + `to*` in one file.
+3. Unit test normalization edge cases once (`kind`, null coalescing, optional computed fields).

@@ -1,5 +1,9 @@
 import type { Prisma } from '@prisma/client';
 import type { MatchData } from '@/features/dashboard/types';
+import {
+  matchDisplayLabelFromDb,
+  matchKindFromDb,
+} from '@/lib/tournament/match-kind';
 
 /** Fields required to build {@link MatchData} for arena labels and bracket tooling. */
 export const matchProjectionSelect = {
@@ -34,8 +38,8 @@ export type MatchProjectionRow = Prisma.MatchGetPayload<{
 export function toMatchData(m: MatchProjectionRow): MatchData {
   return {
     id: m.id,
-    kind: m.kind === 'custom' ? 'custom' : 'bracket',
-    displayLabel: m.displayLabel ?? null,
+    kind: matchKindFromDb(m.kind),
+    displayLabel: matchDisplayLabelFromDb(m.displayLabel),
     round: m.round,
     matchIndex: m.matchIndex,
     status: m.status as MatchData['status'],

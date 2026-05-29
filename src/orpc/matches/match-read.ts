@@ -1,3 +1,7 @@
+import {
+  matchDisplayLabelFromDb,
+  matchKindFromDb,
+} from '@/lib/tournament/match-kind';
 import { prisma } from '@/lib/db';
 
 export function coalesceMatchRead<
@@ -8,8 +12,8 @@ export function coalesceMatchRead<
 >(m: T): T & { kind: 'bracket' | 'custom'; displayLabel: string | null } {
   return {
     ...m,
-    kind: m.kind === 'custom' ? 'custom' : 'bracket',
-    displayLabel: m.displayLabel ?? null,
+    kind: matchKindFromDb(m.kind),
+    displayLabel: matchDisplayLabelFromDb(m.displayLabel),
   };
 }
 
