@@ -1,5 +1,4 @@
 import { MatchStatusSchema } from './dto';
-import { advanceWinner, clearWinnerAdvancement } from './match-progression';
 import {
   assignRound0Slot,
   setRound0SlotLock,
@@ -8,6 +7,7 @@ import {
 import { assertLabelAvailable } from './custom-match-label';
 import { throwMatchBadRequest } from './match-domain-error';
 import { coalesceMatchRead, findMatchesByGroupId } from './match-read';
+import { applyMatchTransition } from './match-transition-write';
 import type {
   AdminSetMatchStatusDTO,
   AssignSlotDTO,
@@ -22,9 +22,9 @@ import type {
   UpdateScoreDTO,
 } from './dto';
 import {
-  getAdminStatusTransition,
-  getScoreTransition,
-  getWinnerOverrideTransition,
+  buildAdminStatusPlan,
+  buildScoreTransitionPlan,
+  buildWinnerOverridePlan,
 } from '@/lib/tournament/match-transition';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { publishMatchInvalidateEvent } from '@/lib/tournament/tournament-sse-bus';
@@ -84,41 +84,25 @@ export class MatchDAL {
     });
     if (!match) throw new Error('Match not found');
 
-    const transition = getScoreTransition({
+    const plan = buildScoreTransitionPlan({
       match,
       redWins: input.redWins,
       blueWins: input.blueWins,
     });
 
-    if (transition.clearAdvancement) {
-      await clearWinnerAdvancement(match);
-    }
-
-    const updated = await prisma.match.update({
-      where: { id: input.matchId },
-      data: transition.data,
-    });
-
-    if (transition.data.status === 'complete' && transition.advancedWinnerId) {
-      await advanceWinner(input.matchId, transition.advancedWinnerId);
-    }
-
-    await recordTournamentActivity({
-      tournamentId: match.tournamentId,
+    return applyMatchTransition({
+      matchId: input.matchId,
+      plan,
       adminId,
-      eventType: 'match.score_edit',
-      entityType: 'match',
-      entityId: input.matchId,
-      payload: {
-        redWins: input.redWins,
-        blueWins: input.blueWins,
-        status: transition.data.status,
+      activity: {
+        eventType: 'match.score_edit',
+        payload: {
+          redWins: input.redWins,
+          blueWins: input.blueWins,
+          status: plan.data.status,
+        },
       },
     });
-
-    publishMatchInvalidateEvent(match.tournamentId);
-
-    return coalesceMatchRead(updated);
   }
 
   static async setWinner(input: SetWinnerDTO, adminId: string) {
@@ -127,34 +111,23 @@ export class MatchDAL {
     });
     if (!match) throw new Error('Match not found');
 
-    const transition = getWinnerOverrideTransition({
+    const plan = buildWinnerOverridePlan({
       match,
       winnerSide: input.winnerSide,
     });
 
-    const updated = await prisma.match.update({
-      where: { id: input.matchId },
-      data: transition.data,
-    });
-
-    if (transition.advancedWinnerId)
-      await advanceWinner(input.matchId, transition.advancedWinnerId);
-
-    await recordTournamentActivity({
-      tournamentId: match.tournamentId,
+    return applyMatchTransition({
+      matchId: input.matchId,
+      plan,
       adminId,
-      eventType: 'match.winner_override',
-      entityType: 'match',
-      entityId: input.matchId,
-      payload: {
-        winnerSide: input.winnerSide,
-        reason: input.reason,
+      activity: {
+        eventType: 'match.winner_override',
+        payload: {
+          winnerSide: input.winnerSide,
+          reason: input.reason,
+        },
       },
     });
-
-    publishMatchInvalidateEvent(match.tournamentId);
-
-    return coalesceMatchRead(updated);
   }
 
   static async swapParticipants(input: SwapParticipantsDTO, adminId: string) {
@@ -222,62 +195,21 @@ export class MatchDAL {
     if (!match) throw new Error('Match not found');
 
     const current = MatchStatusSchema.parse(match.status);
-    const next = input.status;
-    const transition = getAdminStatusTransition({
-      match,
-      status: next,
-    });
+    const plan = buildAdminStatusPlan({ match, status: input.status });
 
-    if (transition.clearAdvancement) {
-      await clearWinnerAdvancement(match);
-    }
-
-    let updated = await prisma.match.update({
-      where: { id: input.matchId },
-      data: transition.data,
-    });
-
-    if (next === 'complete' && !transition.clearedScores) {
-      const scoreTransition = getScoreTransition({
-        match: { ...match, ...updated },
-        redWins: updated.redWins,
-        blueWins: updated.blueWins,
-      });
-
-      if (scoreTransition.data.status === 'complete') {
-        updated = await prisma.match.update({
-          where: { id: input.matchId },
-          data: {
-            redWins: scoreTransition.data.redWins,
-            blueWins: scoreTransition.data.blueWins,
-            winnerId: scoreTransition.data.winnerId ?? null,
-            tournamentWinnerId: scoreTransition.data.tournamentWinnerId ?? null,
-            status: 'complete',
-          },
-        });
-
-        if (scoreTransition.advancedWinnerId) {
-          await advanceWinner(input.matchId, scoreTransition.advancedWinnerId);
-        }
-      }
-    }
-
-    await recordTournamentActivity({
-      tournamentId: match.tournamentId,
+    return applyMatchTransition({
+      matchId: input.matchId,
+      plan,
       adminId,
-      eventType: 'match.status_admin',
-      entityType: 'match',
-      entityId: input.matchId,
-      payload: {
-        fromStatus: current,
-        toStatus: next,
-        clearedScores: transition.clearedScores,
+      activity: {
+        eventType: 'match.status_admin',
+        payload: {
+          fromStatus: current,
+          toStatus: input.status,
+          clearedScores: plan.clearedScores,
+        },
       },
     });
-
-    publishMatchInvalidateEvent(match.tournamentId);
-
-    return coalesceMatchRead(updated);
   }
 
   private static async resolveCustomSlot(

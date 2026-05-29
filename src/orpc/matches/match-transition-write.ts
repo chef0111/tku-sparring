@@ -1,0 +1,48 @@
+import { advanceWinner, clearWinnerAdvancement } from './match-progression';
+import { coalesceMatchRead } from './match-read';
+import type { MatchTransitionPlan } from '@/lib/tournament/match-transition';
+import { recordTournamentActivity } from '@/orpc/activity/dal';
+import { publishMatchInvalidateEvent } from '@/lib/tournament/tournament-sse-bus';
+import { prisma } from '@/lib/db';
+
+export async function applyMatchTransition(input: {
+  matchId: string;
+  plan: MatchTransitionPlan;
+  adminId: string;
+  activity: { eventType: string; payload: Record<string, unknown> };
+}) {
+  const result = await prisma.$transaction(async (tx) => {
+    const match = await tx.match.findUnique({ where: { id: input.matchId } });
+    if (!match) throw new Error('Match not found');
+
+    if (input.plan.clearAdvancement) {
+      await clearWinnerAdvancement(match, tx);
+    }
+
+    const updated = await tx.match.update({
+      where: { id: input.matchId },
+      data: input.plan.data,
+    });
+
+    if (input.plan.advancedWinnerId) {
+      await advanceWinner(input.matchId, input.plan.advancedWinnerId, tx);
+    }
+
+    await recordTournamentActivity(
+      {
+        tournamentId: match.tournamentId,
+        adminId: input.adminId,
+        eventType: input.activity.eventType,
+        entityType: 'match',
+        entityId: input.matchId,
+        payload: input.activity.payload,
+      },
+      tx
+    );
+
+    return { updated, tournamentId: match.tournamentId };
+  });
+
+  publishMatchInvalidateEvent(result.tournamentId);
+  return coalesceMatchRead(result.updated);
+}

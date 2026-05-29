@@ -599,7 +599,8 @@ describe('MatchDAL.adminSetMatchStatus', () => {
           clearedScores: true,
           toStatus: 'active',
         }),
-      })
+      }),
+      expect.anything()
     );
   });
 
@@ -779,7 +780,6 @@ describe('adminSetMatchStatus', () => {
       } as never);
 
     vi.mocked(prisma.match.update)
-      .mockResolvedValueOnce({ ...match, status: 'complete' } as never)
       .mockResolvedValueOnce({
         ...match,
         status: 'complete',
@@ -804,8 +804,18 @@ describe('adminSetMatchStatus', () => {
       'admin-1'
     );
 
-    expect(prisma.match.update).toHaveBeenCalledTimes(3);
-    expect(prisma.match.update).toHaveBeenNthCalledWith(3, {
+    expect(prisma.match.update).toHaveBeenCalledTimes(2);
+    expect(prisma.match.update).toHaveBeenNthCalledWith(1, {
+      where: { id: 'm-r0-0' },
+      data: {
+        redWins: 2,
+        blueWins: 0,
+        winnerId: 'ap-red',
+        tournamentWinnerId: 'ta-red',
+        status: 'complete',
+      },
+    });
+    expect(prisma.match.update).toHaveBeenNthCalledWith(2, {
       where: { id: 'm-r1-0' },
       data: {
         redTournamentAthleteId: 'ta-red',
