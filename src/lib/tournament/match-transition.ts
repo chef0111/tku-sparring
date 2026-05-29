@@ -1,12 +1,12 @@
-import type { MatchStatusDTO } from '@/orpc/matches/dto';
-import { MatchStatusSchema } from '@/orpc/matches/dto';
+import { MATCH_STATUS_RANK, MatchStatusSchema } from './match-status';
+import type { MatchStatus } from './match-status';
 
 export type MatchTransitionData = {
   redWins?: number;
   blueWins?: number;
   winnerId?: string | null;
   tournamentWinnerId?: string | null;
-  status: MatchStatusDTO;
+  status: MatchStatus;
 };
 
 export type ScoreTransitionMatch = {
@@ -68,7 +68,7 @@ export function getScoreTransition(input: {
     winsNeeded
   );
 
-  const status: MatchStatusDTO = winner
+  const status: MatchStatus = winner
     ? 'complete'
     : input.redWins > 0 || input.blueWins > 0
       ? 'active'
@@ -103,15 +103,9 @@ export type AdminStatusTransitionMatch = {
   tournamentWinnerId: string | null;
 };
 
-const MATCH_STATUS_RANK: Record<MatchStatusDTO, number> = {
-  pending: 0,
-  active: 1,
-  complete: 2,
-};
-
 export function getAdminStatusTransition(input: {
   match: AdminStatusTransitionMatch;
-  status: MatchStatusDTO;
+  status: MatchStatus;
 }): {
   data: MatchTransitionData;
   clearAdvancement: boolean;
