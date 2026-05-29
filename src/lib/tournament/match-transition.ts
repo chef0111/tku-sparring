@@ -164,3 +164,77 @@ export function getWinnerOverrideTransition(input: {
     advancedWinnerId: tournamentWinnerId,
   };
 }
+
+export type MatchTransitionPlan = {
+  data: MatchTransitionData;
+  clearAdvancement: boolean;
+  advancedWinnerId: string | null;
+};
+
+export function buildScoreTransitionPlan(input: {
+  match: ScoreTransitionMatch;
+  redWins: number;
+  blueWins: number;
+}): MatchTransitionPlan {
+  return getScoreTransition(input);
+}
+
+export function buildWinnerOverridePlan(input: {
+  match: WinnerOverrideMatch;
+  winnerSide: 'red' | 'blue';
+}): MatchTransitionPlan {
+  const transition = getWinnerOverrideTransition(input);
+  return {
+    data: transition.data,
+    clearAdvancement: false,
+    advancedWinnerId: transition.advancedWinnerId,
+  };
+}
+
+export type AdminStatusPlanMatch = AdminStatusTransitionMatch &
+  ScoreTransitionMatch;
+
+export type AdminStatusPlan = MatchTransitionPlan & {
+  clearedScores: boolean;
+};
+
+export function buildAdminStatusPlan(input: {
+  match: AdminStatusPlanMatch;
+  status: MatchStatus;
+}): AdminStatusPlan {
+  const admin = getAdminStatusTransition({
+    match: input.match,
+    status: input.status,
+  });
+
+  let plan: MatchTransitionPlan = {
+    data: admin.data,
+    clearAdvancement: admin.clearAdvancement,
+    advancedWinnerId: null,
+  };
+
+  if (input.status === 'complete' && !admin.clearedScores) {
+    const merged = { ...input.match, ...admin.data };
+    const score = getScoreTransition({
+      match: merged,
+      redWins: merged.redWins,
+      blueWins: merged.blueWins,
+    });
+
+    if (score.data.status === 'complete') {
+      plan = {
+        data: {
+          redWins: score.data.redWins,
+          blueWins: score.data.blueWins,
+          winnerId: score.data.winnerId ?? null,
+          tournamentWinnerId: score.data.tournamentWinnerId ?? null,
+          status: 'complete',
+        },
+        clearAdvancement: admin.clearAdvancement,
+        advancedWinnerId: score.advancedWinnerId,
+      };
+    }
+  }
+
+  return { ...plan, clearedScores: admin.clearedScores };
+}
