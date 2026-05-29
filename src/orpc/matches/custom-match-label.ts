@@ -1,61 +1,16 @@
 import { throwMatchBadRequest } from './match-domain-error';
-import type { MatchData } from '@/features/dashboard/types';
 import {
   buildManualRankMapFromMatches,
   buildMatchNumber,
   formatArenaMatchTitle,
   resolveArenaGroupOrder,
 } from '@/lib/tournament/arena-match-label';
+import {
+  matchProjectionSelect,
+  toMatchData,
+} from '@/lib/tournament/match-projection';
 import { prisma } from '@/lib/db';
 import { savedArenaGroupIds } from '@/lib/tournament/arena-group-order';
-
-function prismaRowToMatchData(m: {
-  id: string;
-  kind: string;
-  displayLabel: string | null;
-  round: number;
-  matchIndex: number;
-  status: string;
-  bestOf: number;
-  redAthleteId: string | null;
-  blueAthleteId: string | null;
-  redTournamentAthleteId: string | null;
-  blueTournamentAthleteId: string | null;
-  redWins: number;
-  blueWins: number;
-  winnerId: string | null;
-  winnerTournamentAthleteId: string | null;
-  redLocked: boolean;
-  blueLocked: boolean;
-  updatedAt: Date;
-  groupId: string;
-  tournamentId: string;
-  arenaSequenceRank?: number | null;
-}): MatchData {
-  return {
-    id: m.id,
-    kind: m.kind === 'custom' ? 'custom' : 'bracket',
-    displayLabel: m.displayLabel ?? null,
-    round: m.round,
-    matchIndex: m.matchIndex,
-    status: m.status as MatchData['status'],
-    bestOf: m.bestOf,
-    redAthleteId: m.redAthleteId,
-    blueAthleteId: m.blueAthleteId,
-    redTournamentAthleteId: m.redTournamentAthleteId,
-    blueTournamentAthleteId: m.blueTournamentAthleteId,
-    redWins: m.redWins,
-    blueWins: m.blueWins,
-    winnerId: m.winnerId,
-    updatedAt: m.updatedAt,
-    winnerTournamentAthleteId: m.winnerTournamentAthleteId,
-    redLocked: m.redLocked,
-    blueLocked: m.blueLocked,
-    groupId: m.groupId,
-    tournamentId: m.tournamentId,
-    arenaSequenceRank: m.arenaSequenceRank ?? null,
-  };
-}
 
 export function normalizeMatchLabelKey(label: string): string {
   return label.trim().toLowerCase();
@@ -65,7 +20,7 @@ export function normalizeMatchLabelKey(label: string): string {
  * Ensures `displayLabel` does not collide with another custom label (tournament-wide)
  * or an arena-assigned `Match {n}` title for this group's arena (cross-group on same arena).
  */
-export async function assertCustomMatchDisplayLabelAvailable(input: {
+export async function assertLabelAvailable(input: {
   tournamentId: string;
   groupId: string;
   displayLabel: string;
@@ -123,6 +78,7 @@ export async function assertCustomMatchDisplayLabelAvailable(input: {
 
   const allMatches = await prisma.match.findMany({
     where: { groupId: { in: groupIdsOnArena } },
+    select: matchProjectionSelect,
     orderBy: [{ round: 'asc' }, { matchIndex: 'asc' }],
   });
 
@@ -142,7 +98,7 @@ export async function assertCustomMatchDisplayLabelAvailable(input: {
     id: g.id,
     thirdPlaceMatch: g.thirdPlaceMatch,
   }));
-  const matchDataList = allMatches.map(prismaRowToMatchData);
+  const matchDataList = allMatches.map(toMatchData);
   const numbers = buildMatchNumber({
     arenaIndex,
     groups: meta,

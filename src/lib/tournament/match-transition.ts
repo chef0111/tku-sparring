@@ -5,7 +5,7 @@ export type MatchTransitionData = {
   redWins?: number;
   blueWins?: number;
   winnerId?: string | null;
-  winnerTournamentAthleteId?: string | null;
+  tournamentWinnerId?: string | null;
   status: MatchStatusDTO;
 };
 
@@ -19,7 +19,7 @@ export type ScoreTransitionMatch = {
   redTournamentAthleteId: string | null;
   blueTournamentAthleteId: string | null;
   winnerId: string | null;
-  winnerTournamentAthleteId: string | null;
+  tournamentWinnerId: string | null;
 };
 
 function pickScoreWinner(
@@ -53,7 +53,7 @@ export function getScoreTransition(input: {
 }): {
   data: MatchTransitionData;
   clearAdvancement: boolean;
-  advanceWinnerTournamentAthleteId: string | null;
+  advancedWinnerId: string | null;
 } {
   const winsNeeded = Math.ceil(input.match.bestOf / 2);
   const hadCompleted =
@@ -77,7 +77,7 @@ export function getScoreTransition(input: {
         ? 'pending'
         : 'active';
 
-  const advanceWinnerTournamentAthleteId =
+  const advancedWinnerId =
     status === 'complete' && winner?.tournamentAthleteId
       ? winner.tournamentAthleteId
       : null;
@@ -87,20 +87,20 @@ export function getScoreTransition(input: {
       redWins: input.redWins,
       blueWins: input.blueWins,
       winnerId: winner?.athleteProfileId ?? null,
-      winnerTournamentAthleteId: winner?.tournamentAthleteId ?? null,
+      tournamentWinnerId: winner?.tournamentAthleteId ?? null,
       status,
     },
     clearAdvancement:
       status !== 'complete' &&
       hadCompleted &&
-      input.match.winnerTournamentAthleteId != null,
-    advanceWinnerTournamentAthleteId,
+      input.match.tournamentWinnerId != null,
+    advancedWinnerId,
   };
 }
 
 export type AdminStatusTransitionMatch = {
   status: string;
-  winnerTournamentAthleteId: string | null;
+  tournamentWinnerId: string | null;
 };
 
 const MATCH_STATUS_RANK: Record<MatchStatusDTO, number> = {
@@ -129,12 +129,11 @@ export function getAdminStatusTransition(input: {
             redWins: 0,
             blueWins: 0,
             winnerId: null,
-            winnerTournamentAthleteId: null,
+            tournamentWinnerId: null,
           }
         : {}),
     },
-    clearAdvancement:
-      isDowngrade && input.match.winnerTournamentAthleteId != null,
+    clearAdvancement: isDowngrade && input.match.tournamentWinnerId != null,
     clearedScores: isDowngrade,
   };
 }
@@ -151,13 +150,13 @@ export function getWinnerOverrideTransition(input: {
   winnerSide: 'red' | 'blue';
 }): {
   data: MatchTransitionData;
-  advanceWinnerTournamentAthleteId: string | null;
+  advancedWinnerId: string | null;
 } {
   const winnerId =
     input.winnerSide === 'red'
       ? input.match.redAthleteId
       : input.match.blueAthleteId;
-  const winnerTournamentAthleteId =
+  const tournamentWinnerId =
     input.winnerSide === 'red'
       ? input.match.redTournamentAthleteId
       : input.match.blueTournamentAthleteId;
@@ -165,9 +164,9 @@ export function getWinnerOverrideTransition(input: {
   return {
     data: {
       winnerId,
-      winnerTournamentAthleteId,
+      tournamentWinnerId,
       status: 'complete',
     },
-    advanceWinnerTournamentAthleteId: winnerTournamentAthleteId,
+    advancedWinnerId: tournamentWinnerId,
   };
 }

@@ -12,7 +12,7 @@ function clearMatchProgressionData() {
     redWins: 0,
     blueWins: 0,
     winnerId: null,
-    winnerTournamentAthleteId: null,
+    tournamentWinnerId: null,
     status: 'pending' as const,
   };
 }
@@ -48,7 +48,7 @@ export function round0ShuffleResetPatch(m: {
     redWins: 0,
     blueWins: 0,
     winnerId: null,
-    winnerTournamentAthleteId: null,
+    tournamentWinnerId: null,
     status: 'pending' as const,
     redTournamentAthleteId:
       m.redLocked && m.redTournamentAthleteId != null

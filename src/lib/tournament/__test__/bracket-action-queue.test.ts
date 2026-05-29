@@ -19,7 +19,7 @@ function baseMatch(over: Partial<MatchData>): MatchData {
     redWins: over.redWins ?? 0,
     blueWins: over.blueWins ?? 0,
     winnerId: over.winnerId ?? null,
-    winnerTournamentAthleteId: over.winnerTournamentAthleteId ?? null,
+    tournamentWinnerId: over.tournamentWinnerId ?? null,
     redLocked: over.redLocked ?? false,
     blueLocked: over.blueLocked ?? false,
     updatedAt: over.updatedAt ?? new Date(0),
@@ -76,7 +76,7 @@ describe('buildBracketActionQueue', () => {
         matchIndex: 0,
         redTournamentAthleteId: 'r',
         blueTournamentAthleteId: 'b',
-        winnerTournamentAthleteId: null,
+        tournamentWinnerId: null,
         status: 'pending',
       }),
     ];
@@ -93,7 +93,7 @@ describe('buildBracketActionQueue', () => {
         matchIndex: 0,
         redTournamentAthleteId: 'r',
         blueTournamentAthleteId: 'b',
-        winnerTournamentAthleteId: 'wta',
+        tournamentWinnerId: 'wta',
         status: 'complete',
       }),
     ];
@@ -146,7 +146,7 @@ describe('buildBracketActionQueue', () => {
         matchIndex: 0,
         redTournamentAthleteId: 'ta1',
         blueTournamentAthleteId: null,
-        winnerTournamentAthleteId: 'ta1',
+        tournamentWinnerId: 'ta1',
         status: 'complete',
       }),
       baseMatch({
@@ -177,7 +177,7 @@ describe('buildBracketActionQueue', () => {
         matchIndex: 0,
         redTournamentAthleteId: 'w',
         blueTournamentAthleteId: null,
-        winnerTournamentAthleteId: 'w',
+        tournamentWinnerId: 'w',
         status: 'complete',
       }),
     ];
@@ -225,7 +225,7 @@ describe('buildBracketActionQueue', () => {
         displayLabel: 'Bronze',
         redTournamentAthleteId: 'r2',
         blueTournamentAthleteId: 'b2',
-        winnerTournamentAthleteId: null,
+        tournamentWinnerId: null,
         status: 'pending',
       }),
     ];
@@ -243,7 +243,7 @@ describe('buildBracketActionQueue', () => {
         round: 900,
         redTournamentAthleteId: 'r',
         blueTournamentAthleteId: 'b',
-        winnerTournamentAthleteId: 'w',
+        tournamentWinnerId: 'w',
         status: 'complete',
       }),
     ]);

@@ -243,7 +243,7 @@ async function restoreBracketFromRound0Baseline(
           redWins: 0,
           blueWins: 0,
           winnerId: null,
-          winnerTournamentAthleteId: null,
+          tournamentWinnerId: null,
           status: 'pending',
         },
       });

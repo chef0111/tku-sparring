@@ -5,7 +5,7 @@ import {
   setRound0SlotLock,
   swapRound0Slots,
 } from './bracket/round0-slot-editor';
-import { assertCustomMatchDisplayLabelAvailable } from './custom-match-label';
+import { assertLabelAvailable } from './custom-match-label';
 import { throwMatchBadRequest } from './match-domain-error';
 import { coalesceMatchRead, findMatchesByGroupId } from './match-read';
 import type {
@@ -99,14 +99,8 @@ export class MatchDAL {
       data: transition.data,
     });
 
-    if (
-      transition.data.status === 'complete' &&
-      transition.advanceWinnerTournamentAthleteId
-    ) {
-      await advanceWinner(
-        input.matchId,
-        transition.advanceWinnerTournamentAthleteId
-      );
+    if (transition.data.status === 'complete' && transition.advancedWinnerId) {
+      await advanceWinner(input.matchId, transition.advancedWinnerId);
     }
 
     await recordTournamentActivity({
@@ -143,12 +137,8 @@ export class MatchDAL {
       data: transition.data,
     });
 
-    if (transition.advanceWinnerTournamentAthleteId) {
-      await advanceWinner(
-        input.matchId,
-        transition.advanceWinnerTournamentAthleteId
-      );
-    }
+    if (transition.advancedWinnerId)
+      await advanceWinner(input.matchId, transition.advancedWinnerId);
 
     await recordTournamentActivity({
       tournamentId: match.tournamentId,
@@ -209,8 +199,8 @@ export class MatchDAL {
           entityType: 'match',
           entityId: input.matchId,
           payload: {
-            previousRedTournamentAthleteId: match.redTournamentAthleteId,
-            previousBlueTournamentAthleteId: match.blueTournamentAthleteId,
+            previousRedAthleteId: match.redTournamentAthleteId,
+            previousBlueAthleteId: match.blueTournamentAthleteId,
             redTournamentAthleteId: input.redTournamentAthleteId,
             blueTournamentAthleteId: input.blueTournamentAthleteId,
           },
@@ -261,17 +251,13 @@ export class MatchDAL {
             redWins: scoreTransition.data.redWins,
             blueWins: scoreTransition.data.blueWins,
             winnerId: scoreTransition.data.winnerId ?? null,
-            winnerTournamentAthleteId:
-              scoreTransition.data.winnerTournamentAthleteId ?? null,
+            tournamentWinnerId: scoreTransition.data.tournamentWinnerId ?? null,
             status: 'complete',
           },
         });
 
-        if (scoreTransition.advanceWinnerTournamentAthleteId) {
-          await advanceWinner(
-            input.matchId,
-            scoreTransition.advanceWinnerTournamentAthleteId
-          );
+        if (scoreTransition.advancedWinnerId) {
+          await advanceWinner(input.matchId, scoreTransition.advancedWinnerId);
         }
       }
     }
@@ -326,7 +312,7 @@ export class MatchDAL {
     if (feeder.status !== 'complete') {
       throwMatchBadRequest('Feeder match must be complete');
     }
-    if (!feeder.winnerTournamentAthleteId) {
+    if (!feeder.tournamentWinnerId) {
       throwMatchBadRequest('Feeder match has no winner');
     }
 
@@ -340,12 +326,12 @@ export class MatchDAL {
         );
       }
       const ta = await prisma.tournamentAthlete.findUnique({
-        where: { id: feeder.winnerTournamentAthleteId },
+        where: { id: feeder.tournamentWinnerId },
         select: { athleteProfileId: true },
       });
       if (!ta) throwMatchBadRequest('Winner tournament athlete missing');
       return {
-        tournamentAthleteId: feeder.winnerTournamentAthleteId,
+        tournamentAthleteId: feeder.tournamentWinnerId,
         athleteProfileId: ta.athleteProfileId,
       };
     }
@@ -358,7 +344,7 @@ export class MatchDAL {
         'Loser slot requires both athletes in the feeder match'
       );
     }
-    const w = feeder.winnerTournamentAthleteId;
+    const w = feeder.tournamentWinnerId;
     let loserTa: string | null = null;
     if (w === feeder.redTournamentAthleteId) {
       loserTa = feeder.blueTournamentAthleteId;
@@ -392,7 +378,7 @@ export class MatchDAL {
     }
 
     const displayLabel = input.displayLabel.trim();
-    await assertCustomMatchDisplayLabelAvailable({
+    await assertLabelAvailable({
       tournamentId: group.tournamentId,
       groupId: input.groupId,
       displayLabel,

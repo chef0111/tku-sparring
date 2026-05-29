@@ -48,7 +48,7 @@ export interface MatchData {
   redWins: number;
   blueWins: number;
   winnerId: string | null;
-  winnerTournamentAthleteId: string | null;
+  tournamentWinnerId: string | null;
   redLocked: boolean;
   blueLocked: boolean;
   updatedAt: Date;

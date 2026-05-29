@@ -19,7 +19,7 @@ function baseMatch(over: Partial<MatchData> = {}): MatchData {
     redWins: 0,
     blueWins: 0,
     winnerId: null,
-    winnerTournamentAthleteId: null,
+    tournamentWinnerId: null,
     redLocked: false,
     blueLocked: false,
     updatedAt: new Date(0),
@@ -51,7 +51,7 @@ describe('applyOptimisticUpdateScore', () => {
     });
 
     expect(next[0]?.status).toBe('complete');
-    expect(next[0]?.winnerTournamentAthleteId).toBe('ta-red');
+    expect(next[0]?.tournamentWinnerId).toBe('ta-red');
     expect(next[1]?.redTournamentAthleteId).toBe('ta-red');
     expect(next[1]?.redAthleteId).toBe('ap-red');
   });

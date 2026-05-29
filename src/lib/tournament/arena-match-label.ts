@@ -107,10 +107,10 @@ export function formatFeederWinnerPlaceholder(
   if (n != null) return formatFeederWinnerLabel(n);
   if (
     feeder.status === 'complete' &&
-    feeder.winnerTournamentAthleteId &&
+    feeder.tournamentWinnerId &&
     resolveAthleteName
   ) {
-    const name = resolveAthleteName(feeder.winnerTournamentAthleteId);
+    const name = resolveAthleteName(feeder.tournamentWinnerId);
     if (name) return name;
   }
   return 'Open';

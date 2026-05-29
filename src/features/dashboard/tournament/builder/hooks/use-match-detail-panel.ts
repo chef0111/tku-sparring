@@ -131,7 +131,7 @@ export function useMatchDetailPanel() {
   const hasCompletedWinner =
     !!match &&
     match.status === 'complete' &&
-    (match.winnerTournamentAthleteId != null || match.winnerId != null);
+    (match.tournamentWinnerId != null || match.winnerId != null);
   const showWinnerSummary = hasScoreWinner || hasCompletedWinner;
 
   const winnerSummaryName = React.useMemo(() => {
@@ -141,10 +141,10 @@ export function useMatchDetailPanel() {
         ? (redAthlete?.name ?? 'Red')
         : (blueAthlete?.name ?? 'Blue');
     }
-    if (match.winnerTournamentAthleteId === match.redTournamentAthleteId) {
+    if (match.tournamentWinnerId === match.redTournamentAthleteId) {
       return redAthlete?.name ?? 'Red';
     }
-    if (match.winnerTournamentAthleteId === match.blueTournamentAthleteId) {
+    if (match.tournamentWinnerId === match.blueTournamentAthleteId) {
       return blueAthlete?.name ?? 'Blue';
     }
     if (match.winnerId && match.winnerId === match.redAthleteId) {

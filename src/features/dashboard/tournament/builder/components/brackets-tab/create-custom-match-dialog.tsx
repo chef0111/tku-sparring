@@ -65,7 +65,7 @@ export function CreateCustomMatchDialog({
         (m) =>
           m.kind !== 'custom' &&
           m.status === 'complete' &&
-          m.winnerTournamentAthleteId != null &&
+          m.tournamentWinnerId != null &&
           m.redTournamentAthleteId != null &&
           m.blueTournamentAthleteId != null
       ),
@@ -78,7 +78,7 @@ export function CreateCustomMatchDialog({
         (m) =>
           m.kind !== 'custom' &&
           m.status === 'complete' &&
-          m.winnerTournamentAthleteId != null &&
+          m.tournamentWinnerId != null &&
           m.redTournamentAthleteId != null &&
           m.blueTournamentAthleteId != null
       ),
