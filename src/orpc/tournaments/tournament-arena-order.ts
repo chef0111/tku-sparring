@@ -10,12 +10,12 @@ import {
   mergeArenaGroupOrderAfterRetireArena,
   patchArenaGroupOrderJson,
 } from '@/lib/tournament/arena-group-order';
+import { publishSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
 import { prisma } from '@/lib/db';
-import { publishTournamentSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
 
-export async function setArenaGroupOrder(input: SetArenaGroupOrderDTO) {
+async function loadTournament(tournamentId: string, draftMessage: string) {
   const tournament = await prisma.tournament.findUnique({
-    where: { id: input.tournamentId },
+    where: { id: tournamentId },
     select: {
       id: true,
       status: true,
@@ -23,21 +23,35 @@ export async function setArenaGroupOrder(input: SetArenaGroupOrderDTO) {
       groups: { select: { id: true, arenaIndex: true } },
     },
   });
-  if (!tournament) {
-    throw new Error('Tournament not found');
-  }
-  if (tournament.status !== 'draft') {
-    throw new Error('Arena group order can only be changed in draft');
-  }
+  if (!tournament) throw new Error('Tournament not found');
+  if (tournament.status !== 'draft') throw new Error(draftMessage);
+  return tournament;
+}
+
+async function finishArenaOrderMutation(tournamentId: string) {
+  const full = await findTournamentById(tournamentId);
+  if (!full) throw new Error('Tournament not found');
+  publishSelectionInvalidate(tournamentId);
+  return full;
+}
+
+export async function setArenaGroupOrder(input: SetArenaGroupOrderDTO) {
+  const tournament = await loadTournament(
+    input.tournamentId,
+    'Arena group order can only be changed in draft'
+  );
+
   const onArena = tournament.groups.filter(
     (g) => g.arenaIndex === input.arenaIndex
   );
+
   const expected = new Set(onArena.map((g) => g.id));
   if (input.groupIds.length !== expected.size) {
     throw new Error(
       'Group list must include every group on this arena exactly once'
     );
   }
+
   for (const gid of input.groupIds) {
     if (!expected.has(gid)) {
       throw new Error(
@@ -45,59 +59,41 @@ export async function setArenaGroupOrder(input: SetArenaGroupOrderDTO) {
       );
     }
   }
+
   const nextJson = patchArenaGroupOrderJson(
     tournament.arenaGroupOrder,
     input.arenaIndex,
     input.groupIds
   );
+
   await prisma.tournament.update({
     where: { id: input.tournamentId },
     data: { arenaGroupOrder: nextJson },
   });
-  const full = await findTournamentById(input.tournamentId);
-  if (!full) {
-    throw new Error('Tournament not found');
-  }
-  publishTournamentSelectionInvalidate(input.tournamentId);
-  return full;
+
+  return finishArenaOrderMutation(input.tournamentId);
 }
 
 export async function moveGroupBetweenArenas(input: MoveGroupArenaDTO) {
-  if (input.fromArena === input.toArena) {
+  if (input.fromArena === input.toArena)
     throw new Error('Same-arena reorder uses setArenaGroupOrder');
-  }
 
-  const tournament = await prisma.tournament.findUnique({
-    where: { id: input.tournamentId },
-    select: {
-      id: true,
-      status: true,
-      arenaGroupOrder: true,
-      groups: { select: { id: true, arenaIndex: true } },
-    },
-  });
-  if (!tournament) {
-    throw new Error('Tournament not found');
-  }
-  if (tournament.status !== 'draft') {
-    throw new Error('Arena assignment can only be changed in draft');
-  }
+  const tournament = await loadTournament(
+    input.tournamentId,
+    'Arena assignment can only be changed in draft'
+  );
 
   const group = tournament.groups.find((g) => g.id === input.groupId);
-  if (!group) {
-    throw new Error('Group not found on this tournament');
-  }
-  if (group.arenaIndex !== input.fromArena) {
+  if (!group) throw new Error('Group not found on this tournament');
+  if (group.arenaIndex !== input.fromArena)
     throw new Error('Group is not on the source arena');
-  }
 
   const onToAll = tournament.groups.filter(
     (g) => g.arenaIndex === input.toArena
   );
   const maxInsert = onToAll.length;
-  if (input.insertIndex < 0 || input.insertIndex > maxInsert) {
+  if (input.insertIndex < 0 || input.insertIndex > maxInsert)
     throw new Error('Invalid insert index');
-  }
 
   const nextJson = mergeArenaGroupOrderAfterCrossArenaMove({
     arenaGroupOrder: tournament.arenaGroupOrder,
@@ -119,39 +115,23 @@ export async function moveGroupBetweenArenas(input: MoveGroupArenaDTO) {
     }),
   ]);
 
-  const full = await findTournamentById(input.tournamentId);
-  if (!full) {
-    throw new Error('Tournament not found');
-  }
-  publishTournamentSelectionInvalidate(input.tournamentId);
-  return full;
+  return finishArenaOrderMutation(input.tournamentId);
 }
 
 export async function ensureArenaSlot(input: EnsureArenaSlotDTO) {
-  const tournament = await prisma.tournament.findUnique({
-    where: { id: input.tournamentId },
-    select: {
-      id: true,
-      status: true,
-      arenaGroupOrder: true,
-      groups: { select: { id: true, arenaIndex: true } },
-    },
-  });
-  if (!tournament) {
-    throw new Error('Tournament not found');
-  }
-  if (tournament.status !== 'draft') {
-    throw new Error('Arena slots can only be changed in draft');
-  }
-  if (input.arenaIndex < 1 || input.arenaIndex > 3) {
+  const tournament = await loadTournament(
+    input.tournamentId,
+    'Arena slots can only be changed in draft'
+  );
+
+  if (input.arenaIndex < 1 || input.arenaIndex > 3)
     throw new Error('Arena index must be between 1 and 3');
-  }
+
   const onArena = tournament.groups.filter(
     (g) => g.arenaIndex === input.arenaIndex
   );
-  if (onArena.length > 0) {
-    throw new Error('That arena already has groups');
-  }
+  if (onArena.length > 0) throw new Error('That arena already has groups');
+
   const nextJson = patchArenaGroupOrderJson(
     tournament.arenaGroupOrder,
     input.arenaIndex,
@@ -161,12 +141,8 @@ export async function ensureArenaSlot(input: EnsureArenaSlotDTO) {
     where: { id: input.tournamentId },
     data: { arenaGroupOrder: nextJson },
   });
-  const full = await findTournamentById(input.tournamentId);
-  if (!full) {
-    throw new Error('Tournament not found');
-  }
-  publishTournamentSelectionInvalidate(input.tournamentId);
-  return full;
+
+  return finishArenaOrderMutation(input.tournamentId);
 }
 
 export async function retireArena(input: RetireArenaDTO) {
@@ -180,21 +156,10 @@ export async function retireArena(input: RetireArenaDTO) {
     throw new Error('Invalid target arena');
   }
 
-  const tournament = await prisma.tournament.findUnique({
-    where: { id: input.tournamentId },
-    select: {
-      id: true,
-      status: true,
-      arenaGroupOrder: true,
-      groups: { select: { id: true, arenaIndex: true } },
-    },
-  });
-  if (!tournament) {
-    throw new Error('Tournament not found');
-  }
-  if (tournament.status !== 'draft') {
-    throw new Error('Arena assignment can only be changed in draft');
-  }
+  const tournament = await loadTournament(
+    input.tournamentId,
+    'Arena assignment can only be changed in draft'
+  );
 
   const nextJson = mergeArenaGroupOrderAfterRetireArena({
     arenaGroupOrder: tournament.arenaGroupOrder,
@@ -217,10 +182,5 @@ export async function retireArena(input: RetireArenaDTO) {
     }),
   ]);
 
-  const full = await findTournamentById(input.tournamentId);
-  if (!full) {
-    throw new Error('Tournament not found');
-  }
-  publishTournamentSelectionInvalidate(input.tournamentId);
-  return full;
+  return finishArenaOrderMutation(input.tournamentId);
 }

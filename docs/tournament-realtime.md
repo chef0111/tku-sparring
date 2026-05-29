@@ -1,6 +1,6 @@
 # Tournament realtime (Socket.io)
 
-Replaces the former in-process SSE bus. The **web app** (Vercel) does not hold WebSocket connections; a small **Node realtime service** in [`realtime/`](../realtime/) runs Socket.io. After mutations, server code calls `publishTournamentSelectionInvalidate` in [`src/lib/tournament/tournament-sse-bus.ts`](../src/lib/tournament/tournament-sse-bus.ts), which `POST`s to the realtime service’s `/internal/broadcast` endpoint so all browsers in room `tournament:{id}` receive an `invalidate` event and refetch via TanStack Query ([`advance-selection-invalidation.ts`](../src/queries/advance-selection-invalidation.ts)).
+Replaces the former in-process SSE bus. The **web app** (Vercel) does not hold WebSocket connections; a small **Node realtime service** in [`realtime/`](../realtime/) runs Socket.io. After mutations, server code calls `publishSelectionInvalidate` in [`src/lib/tournament/tournament-sse-bus.ts`](../src/lib/tournament/tournament-sse-bus.ts), which `POST`s to the realtime service’s `/internal/broadcast` endpoint so all browsers in room `tournament:{id}` receive an `invalidate` event and refetch via TanStack Query ([`advance-selection-invalidation.ts`](../src/queries/advance-selection-invalidation.ts)).
 
 ## Environment (main app)
 

@@ -4,7 +4,7 @@ import { TournamentDAL } from '../dal';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/tournament/tournament-sse-bus', () => ({
-  publishTournamentSelectionInvalidate: vi.fn(),
+  publishSelectionInvalidate: vi.fn(),
 }));
 
 vi.mock('@/lib/db', () => ({

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ArenaMatchClaimDAL } from '../dal';
 import { prisma } from '@/lib/db';
-import { publishTournamentSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
+import { publishSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
 
 const tx = {
   arenaMatchClaim: {
@@ -38,7 +38,7 @@ vi.mock('@/lib/db', () => ({
 }));
 
 vi.mock('@/lib/tournament/tournament-sse-bus', () => ({
-  publishTournamentSelectionInvalidate: vi.fn(),
+  publishSelectionInvalidate: vi.fn(),
 }));
 
 beforeEach(() => {
@@ -81,7 +81,7 @@ describe('ArenaMatchClaimDAL.claim', () => {
       where: { id: 'm1' },
       data: { status: 'active' },
     });
-    expect(publishTournamentSelectionInvalidate).toHaveBeenCalledWith('t1');
+    expect(publishSelectionInvalidate).toHaveBeenCalledWith('t1');
   });
 });
 
@@ -108,6 +108,6 @@ describe('ArenaMatchClaimDAL.release', () => {
 
     expect(prisma.$transaction).toHaveBeenCalledTimes(1);
     expect(tx.arenaMatchClaim.delete).toHaveBeenCalled();
-    expect(publishTournamentSelectionInvalidate).toHaveBeenCalledWith('t1');
+    expect(publishSelectionInvalidate).toHaveBeenCalledWith('t1');
   });
 });

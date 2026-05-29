@@ -8,7 +8,7 @@ import type {
 } from './dto';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { prisma } from '@/lib/db';
-import { publishTournamentSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
+import { publishSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
 
 export class GroupDAL {
   private static readonly UNASSIGNED_GROUP_FILTER = {
@@ -42,13 +42,13 @@ export class GroupDAL {
 
   static async create(data: CreateGroupDTO) {
     const created = await prisma.group.create({ data });
-    publishTournamentSelectionInvalidate(created.tournamentId);
+    publishSelectionInvalidate(created.tournamentId);
     return created;
   }
 
   static async update(id: string, data: Omit<UpdateGroupDTO, 'id'>) {
     const updated = await prisma.group.update({ where: { id }, data });
-    publishTournamentSelectionInvalidate(updated.tournamentId);
+    publishSelectionInvalidate(updated.tournamentId);
     return updated;
   }
 
@@ -61,7 +61,7 @@ export class GroupDAL {
       throw new Error('Group not found');
     }
     const deleted = await prisma.group.delete({ where: { id } });
-    publishTournamentSelectionInvalidate(existing.tournamentId);
+    publishSelectionInvalidate(existing.tournamentId);
     return deleted;
   }
 
@@ -114,7 +114,7 @@ export class GroupDAL {
 
       return { assigned: unassigned.length };
     });
-    publishTournamentSelectionInvalidate(input.tournamentId);
+    publishSelectionInvalidate(input.tournamentId);
     return result;
   }
 
@@ -172,7 +172,7 @@ export class GroupDAL {
 
       return row;
     });
-    publishTournamentSelectionInvalidate(updated.tournamentId);
+    publishSelectionInvalidate(updated.tournamentId);
     return updated;
   }
 
@@ -209,7 +209,7 @@ export class GroupDAL {
 
       return row;
     });
-    publishTournamentSelectionInvalidate(updated.tournamentId);
+    publishSelectionInvalidate(updated.tournamentId);
     return updated;
   }
 }

@@ -48,7 +48,7 @@ const tournamentForSelectionSelect = {
   },
 } as const;
 
-async function loadTournamentForSelection(tournamentId: string) {
+async function loadTournament(tournamentId: string) {
   return prisma.tournament.findUnique({
     where: { id: tournamentId },
     select: tournamentForSelectionSelect,
@@ -96,7 +96,7 @@ export class AdvanceSettingsDAL {
       return { tournaments, groups: groupsOut };
     }
 
-    const tournament = await loadTournamentForSelection(effectiveTournamentId);
+    const tournament = await loadTournament(effectiveTournamentId);
     if (!tournament || tournament.status !== 'active') {
       return { tournaments, groups: groupsOut };
     }
@@ -149,7 +149,7 @@ export class AdvanceSettingsDAL {
       throw new Error('Group does not belong to the selected tournament');
     }
 
-    const tournament = await loadTournamentForSelection(tournamentId);
+    const tournament = await loadTournament(tournamentId);
     const matchesOut: Array<SelectionMatchRow> = [];
     if (!tournament || tournament.status !== 'active') {
       return { matches: matchesOut };
@@ -160,7 +160,6 @@ export class AdvanceSettingsDAL {
       throw new Error('Group not found on tournament');
     }
 
-    const arenaIndex = targetGroup.arenaIndex;
     const { numbers, allMatches } = await loadMatchLabelContext({
       tournamentId,
       groupId,

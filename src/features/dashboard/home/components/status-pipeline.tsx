@@ -210,7 +210,7 @@ export function StatusPipeline({ pipeline }: StatusPipelineProps) {
       description="Recent tournaments grouped by lifecycle stage"
       className="overflow-x-hidden! xl:overflow-visible"
       action={
-        <Button variant="ghost" size="sm" className="cursor-pointer" asChild>
+        <Button variant="ghost" className="cursor-pointer" asChild>
           <Link to="/dashboard/tournaments">
             View all tournaments
             <ArrowRight data-icon="inline-end" aria-hidden="true" />

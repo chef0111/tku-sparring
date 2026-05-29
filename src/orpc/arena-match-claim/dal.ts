@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db';
-import { publishTournamentSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
+import { publishSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
 
 const CLAIM_TTL_MS = 30 * 60 * 1000;
 
@@ -125,7 +125,7 @@ export class ArenaMatchClaimDAL {
       return claimRow;
     });
 
-    publishTournamentSelectionInvalidate(input.tournamentId);
+    publishSelectionInvalidate(input.tournamentId);
     return row;
   }
 
@@ -165,7 +165,7 @@ export class ArenaMatchClaimDAL {
     });
 
     if (result.removed && result.tournamentId) {
-      publishTournamentSelectionInvalidate(result.tournamentId);
+      publishSelectionInvalidate(result.tournamentId);
     }
 
     return { removed: result.removed };

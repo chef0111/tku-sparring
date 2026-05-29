@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   publishMatchInvalidateEvent,
-  publishTournamentSelectionInvalidate,
+  publishSelectionInvalidate,
 } from '../tournament-sse-bus';
 
 describe('tournament realtime bus', () => {
@@ -25,7 +25,7 @@ describe('tournament realtime bus', () => {
   });
 
   it('POSTs invalidate payload to internal broadcast URL', async () => {
-    publishTournamentSelectionInvalidate('t-1');
+    publishSelectionInvalidate('t-1');
     await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     expect(fetchMock).toHaveBeenCalledWith(
       'http://localhost:3331/internal/broadcast',
