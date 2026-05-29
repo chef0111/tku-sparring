@@ -9,7 +9,7 @@ export type ProgressionDb = Pick<PrismaClient, 'match' | 'tournamentAthlete'>;
 
 export async function advanceWinner(
   matchId: string,
-  winnerTournamentAthleteId: string,
+  tournamentWinnerId: string,
   db: ProgressionDb = prisma
 ) {
   const match = await db.match.findUnique({ where: { id: matchId } });
@@ -21,7 +21,7 @@ export async function advanceWinner(
     matchIndex: match.matchIndex,
   });
   const winner = await db.tournamentAthlete.findUnique({
-    where: { id: winnerTournamentAthleteId },
+    where: { id: tournamentWinnerId },
   });
 
   const nextMatch = await db.match.findFirst({
@@ -39,11 +39,11 @@ export async function advanceWinner(
     data:
       successor.side === 'red'
         ? {
-            redTournamentAthleteId: winnerTournamentAthleteId,
+            redTournamentAthleteId: tournamentWinnerId,
             redAthleteId: winner?.athleteProfileId ?? null,
           }
         : {
-            blueTournamentAthleteId: winnerTournamentAthleteId,
+            blueTournamentAthleteId: tournamentWinnerId,
             blueAthleteId: winner?.athleteProfileId ?? null,
           },
   });
@@ -54,14 +54,14 @@ export async function clearWinnerAdvancement(
     groupId: string;
     round: number;
     matchIndex: number;
-    winnerTournamentAthleteId: string | null;
+    tournamentWinnerId: string | null;
     kind?: string;
   },
   db: ProgressionDb = prisma
 ) {
   if (match.kind === 'custom') return;
 
-  const wta = match.winnerTournamentAthleteId;
+  const wta = match.tournamentWinnerId;
   if (!wta) return;
 
   const successor = getSuccessorSlot({
@@ -109,7 +109,7 @@ export async function applyRound0ByeAdvancement(
   for (const match of round0) {
     if (!isRound0ByeMatch(match)) continue;
 
-    const winnerTournamentAthleteId =
+    const tournamentWinnerId =
       match.redTournamentAthleteId ?? match.blueTournamentAthleteId;
     const winnerProfileId = match.redAthleteId ?? match.blueAthleteId;
 
@@ -117,13 +117,13 @@ export async function applyRound0ByeAdvancement(
       where: { id: match.id },
       data: {
         status: 'complete',
-        winnerTournamentAthleteId,
+        tournamentWinnerId,
         winnerId: winnerProfileId,
         redWins: 0,
         blueWins: 0,
       },
     });
 
-    await advanceWinner(match.id, winnerTournamentAthleteId!, db);
+    await advanceWinner(match.id, tournamentWinnerId!, db);
   }
 }

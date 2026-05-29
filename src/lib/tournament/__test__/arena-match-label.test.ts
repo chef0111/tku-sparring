@@ -32,7 +32,7 @@ function m(
     redWins: 0,
     blueWins: 0,
     winnerId: null,
-    winnerTournamentAthleteId: null,
+    tournamentWinnerId: null,
     redLocked: false,
     blueLocked: false,
     updatedAt: new Date(0),
@@ -233,7 +233,7 @@ describe('formatFeederWinnerPlaceholder', () => {
     const map = new Map<string, number | null>([['f', 205]]);
     const feeder = m('f', 0, 0, {
       status: 'complete',
-      winnerTournamentAthleteId: 'w',
+      tournamentWinnerId: 'w',
     });
     expect(formatFeederWinnerPlaceholder(feeder, map)).toBe('Winner 205');
   });
@@ -242,7 +242,7 @@ describe('formatFeederWinnerPlaceholder', () => {
     const map = new Map<string, number | null>([['f', null]]);
     const feeder = m('f', 0, 0, {
       status: 'complete',
-      winnerTournamentAthleteId: 'ta-x',
+      tournamentWinnerId: 'ta-x',
     });
     expect(formatFeederWinnerPlaceholder(feeder, map, () => 'Pat Lee')).toBe(
       'Pat Lee'

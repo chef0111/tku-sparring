@@ -43,7 +43,7 @@ vi.mock('@/lib/tournament/tournament-sse-bus', () => ({
 }));
 
 vi.mock('@/orpc/matches/custom-match-label', () => ({
-  assertCustomMatchDisplayLabelAvailable: vi.fn().mockResolvedValue(undefined),
+  assertLabelAvailable: vi.fn().mockResolvedValue(undefined),
 }));
 
 const draftGroup = {
@@ -206,7 +206,7 @@ describe('resetBracket', () => {
       redWins: 0,
       blueWins: 0,
       winnerId: null,
-      winnerTournamentAthleteId: null,
+      tournamentWinnerId: null,
       status: 'pending',
     };
     const baseline = buildRound0Baseline([r0m0]);
@@ -354,7 +354,7 @@ describe('shuffleBracket', () => {
       redWins: 0,
       blueWins: 0,
       winnerId: null,
-      winnerTournamentAthleteId: null,
+      tournamentWinnerId: null,
       status: 'pending',
     };
     const r0m1 = {
@@ -370,7 +370,7 @@ describe('shuffleBracket', () => {
       redWins: 0,
       blueWins: 0,
       winnerId: null,
-      winnerTournamentAthleteId: null,
+      tournamentWinnerId: null,
       status: 'pending',
     };
 
@@ -462,7 +462,7 @@ describe('shuffleBracket', () => {
       redWins: 0,
       blueWins: 0,
       winnerId: null,
-      winnerTournamentAthleteId: null,
+      tournamentWinnerId: null,
       status: 'pending',
     });
     const r0 = [0, 1, 2, 3].map(baseR0);
@@ -479,7 +479,7 @@ describe('shuffleBracket', () => {
       redWins: 0,
       blueWins: 0,
       winnerId: null,
-      winnerTournamentAthleteId: null,
+      tournamentWinnerId: null,
       status: 'pending',
     }));
     const r2 = {
@@ -495,7 +495,7 @@ describe('shuffleBracket', () => {
       redWins: 0,
       blueWins: 0,
       winnerId: null,
-      winnerTournamentAthleteId: null,
+      tournamentWinnerId: null,
       status: 'pending',
     };
 
@@ -560,7 +560,7 @@ describe('MatchDAL.adminSetMatchStatus', () => {
       redWins: 2,
       blueWins: 0,
       winnerId: 'p-red',
-      winnerTournamentAthleteId: 'ta-red',
+      tournamentWinnerId: 'ta-red',
       tournamentId: 't-1',
       groupId: 'g-1',
       round: 0,
@@ -574,7 +574,7 @@ describe('MatchDAL.adminSetMatchStatus', () => {
       redWins: 0,
       blueWins: 0,
       winnerId: null,
-      winnerTournamentAthleteId: null,
+      tournamentWinnerId: null,
     } as never);
 
     await MatchDAL.adminSetMatchStatus(
@@ -589,7 +589,7 @@ describe('MatchDAL.adminSetMatchStatus', () => {
         redWins: 0,
         blueWins: 0,
         winnerId: null,
-        winnerTournamentAthleteId: null,
+        tournamentWinnerId: null,
       },
     });
     expect(vi.mocked(recordTournamentActivity)).toHaveBeenCalledWith(
@@ -610,7 +610,7 @@ describe('MatchDAL.adminSetMatchStatus', () => {
       redWins: 0,
       blueWins: 0,
       winnerId: null,
-      winnerTournamentAthleteId: null,
+      tournamentWinnerId: null,
       tournamentId: 't-1',
       groupId: 'g-1',
       round: 0,
@@ -696,7 +696,7 @@ describe('updateScore', () => {
       redAthleteId: 'ap-red',
       blueAthleteId: 'ap-blue',
       winnerId: null,
-      winnerTournamentAthleteId: null,
+      tournamentWinnerId: null,
     };
 
     vi.mocked(prisma.match.findUnique)
@@ -707,7 +707,7 @@ describe('updateScore', () => {
         redWins: 2,
         blueWins: 0,
         winnerId: 'ap-red',
-        winnerTournamentAthleteId: 'ta-red',
+        tournamentWinnerId: 'ta-red',
       } as never);
 
     vi.mocked(prisma.match.update)
@@ -717,7 +717,7 @@ describe('updateScore', () => {
         redWins: 2,
         blueWins: 0,
         winnerId: 'ap-red',
-        winnerTournamentAthleteId: 'ta-red',
+        tournamentWinnerId: 'ta-red',
       } as never)
       .mockResolvedValueOnce({ id: 'm-r1-0' } as never);
 
@@ -766,7 +766,7 @@ describe('adminSetMatchStatus', () => {
       redAthleteId: 'ap-red',
       blueAthleteId: 'ap-blue',
       winnerId: null,
-      winnerTournamentAthleteId: null,
+      tournamentWinnerId: null,
     };
 
     vi.mocked(prisma.match.findUnique)
@@ -775,7 +775,7 @@ describe('adminSetMatchStatus', () => {
         ...match,
         status: 'complete',
         winnerId: 'ap-red',
-        winnerTournamentAthleteId: 'ta-red',
+        tournamentWinnerId: 'ta-red',
       } as never);
 
     vi.mocked(prisma.match.update)
@@ -784,7 +784,7 @@ describe('adminSetMatchStatus', () => {
         ...match,
         status: 'complete',
         winnerId: 'ap-red',
-        winnerTournamentAthleteId: 'ta-red',
+        tournamentWinnerId: 'ta-red',
       } as never)
       .mockResolvedValueOnce({ id: 'm-r1-0' } as never);
 

@@ -194,10 +194,7 @@ export function applyOptimisticUpdateScore(
 
   Object.assign(m, transition.data);
 
-  if (
-    transition.data.status !== 'complete' ||
-    !transition.advanceWinnerTournamentAthleteId
-  ) {
+  if (transition.data.status !== 'complete' || !transition.advancedWinnerId) {
     return out;
   }
 
@@ -214,7 +211,7 @@ export function applyOptimisticUpdateScore(
   );
   if (!next) return out;
 
-  const wta = transition.advanceWinnerTournamentAthleteId;
+  const wta = transition.advancedWinnerId;
   const profileId = findProfileId(matches, wta);
   if (successor.side === 'red') {
     next.redTournamentAthleteId = wta;

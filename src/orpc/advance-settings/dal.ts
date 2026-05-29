@@ -1,4 +1,3 @@
-import type { MatchData, MatchStatus } from '@/features/dashboard/types';
 import type { SelectionCatalogDTO, SelectionMatchesDTO } from './dto';
 import { savedArenaGroupIds } from '@/lib/tournament/arena-group-order';
 import {
@@ -7,6 +6,10 @@ import {
   formatArenaMatchTitle,
   resolveArenaGroupOrder,
 } from '@/lib/tournament/arena-match-label';
+import {
+  matchProjectionSelect,
+  toMatchData,
+} from '@/lib/tournament/match-projection';
 import { prisma } from '@/lib/db';
 import { ArenaMatchClaimDAL } from '@/orpc/arena-match-claim/dal';
 
@@ -36,54 +39,6 @@ export function deriveGroupStatusForSelectionView(
     return 'active';
   }
   return 'draft';
-}
-
-function prismaMatchToMatchData(m: {
-  id: string;
-  kind: string;
-  displayLabel: string | null;
-  round: number;
-  matchIndex: number;
-  status: string;
-  bestOf: number;
-  redAthleteId: string | null;
-  blueAthleteId: string | null;
-  redTournamentAthleteId: string | null;
-  blueTournamentAthleteId: string | null;
-  redWins: number;
-  blueWins: number;
-  winnerId: string | null;
-  winnerTournamentAthleteId: string | null;
-  redLocked: boolean;
-  blueLocked: boolean;
-  updatedAt: Date;
-  groupId: string;
-  tournamentId: string;
-  arenaSequenceRank?: number | null;
-}): MatchData {
-  return {
-    id: m.id,
-    kind: m.kind === 'custom' ? 'custom' : 'bracket',
-    displayLabel: m.displayLabel ?? null,
-    round: m.round,
-    matchIndex: m.matchIndex,
-    status: m.status as MatchStatus,
-    bestOf: m.bestOf,
-    redAthleteId: m.redAthleteId,
-    blueAthleteId: m.blueAthleteId,
-    redTournamentAthleteId: m.redTournamentAthleteId,
-    blueTournamentAthleteId: m.blueTournamentAthleteId,
-    redWins: m.redWins,
-    blueWins: m.blueWins,
-    winnerId: m.winnerId,
-    winnerTournamentAthleteId: m.winnerTournamentAthleteId,
-    redLocked: m.redLocked,
-    blueLocked: m.blueLocked,
-    updatedAt: m.updatedAt,
-    groupId: m.groupId,
-    tournamentId: m.tournamentId,
-    arenaSequenceRank: m.arenaSequenceRank ?? null,
-  };
 }
 
 const tournamentForSelectionSelect = {
@@ -224,6 +179,7 @@ export class AdvanceSettingsDAL {
 
     const allMatches = await prisma.match.findMany({
       where: { groupId: { in: groupIdsOnArena } },
+      select: matchProjectionSelect,
       orderBy: [{ round: 'asc' }, { matchIndex: 'asc' }],
     });
 
@@ -243,7 +199,7 @@ export class AdvanceSettingsDAL {
       id: x.id,
       thirdPlaceMatch: x.thirdPlaceMatch,
     }));
-    const matchDataList = allMatches.map(prismaMatchToMatchData);
+    const matchDataList = allMatches.map(toMatchData);
     const numbers = buildMatchNumber({
       arenaIndex,
       groups: meta,

@@ -13,17 +13,16 @@ import type {
   TournamentStatusDTO,
   UpdateTournamentDTO,
 } from './dto';
-import type {
-  MatchData,
-  MatchKind,
-  MatchStatus,
-} from '@/features/dashboard/types';
 import {
   mergeArenaGroupOrderAfterCrossArenaMove,
   mergeArenaGroupOrderAfterRetireArena,
   patchArenaGroupOrderJson,
 } from '@/lib/tournament/arena-group-order';
 import { countActionableMatchesByTournamentId } from '@/lib/tournament/bracket-action-queue';
+import {
+  matchProjectionSelect,
+  toMatchData,
+} from '@/lib/tournament/match-projection';
 import { prisma } from '@/lib/db';
 import { getNameSortKey } from '@/lib/sort/name-sort-key';
 import { publishTournamentSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
@@ -94,17 +93,6 @@ export class TournamentDAL {
     }
   }
 
-  private static toMatchData(
-    match: Prisma.MatchGetPayload<Record<string, never>>
-  ): MatchData {
-    return {
-      ...match,
-      kind: (match.kind === 'custom' ? 'custom' : 'bracket') as MatchKind,
-      displayLabel: match.displayLabel ?? null,
-      status: match.status as MatchStatus,
-    };
-  }
-
   private static async attachActionableMatchCounts<
     T extends {
       id: string;
@@ -125,12 +113,13 @@ export class TournamentDAL {
       }),
       prisma.match.findMany({
         where: { tournamentId: { in: tournamentIds } },
+        select: matchProjectionSelect,
       }),
     ]);
 
     const actionableByTournamentId = countActionableMatchesByTournamentId(
       groups,
-      matches.map((match) => TournamentDAL.toMatchData(match))
+      matches.map(toMatchData)
     );
 
     return items.map((item) => ({

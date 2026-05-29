@@ -22,7 +22,7 @@ type MatchRow = {
   redAthleteId: string | null;
   blueAthleteId: string | null;
   winnerId: string | null;
-  winnerTournamentAthleteId: string | null;
+  tournamentWinnerId: string | null;
 };
 
 function createInMemoryDb(initial: Array<MatchRow>) {
@@ -105,15 +105,8 @@ async function simulateUpdateScore(
 ) {
   const transition = getScoreTransition({ match, redWins, blueWins });
   Object.assign(match, transition.data);
-  if (
-    transition.data.status === 'complete' &&
-    transition.advanceWinnerTournamentAthleteId
-  ) {
-    await advanceWinner(
-      match.id,
-      transition.advanceWinnerTournamentAthleteId,
-      db
-    );
+  if (transition.data.status === 'complete' && transition.advancedWinnerId) {
+    await advanceWinner(match.id, transition.advancedWinnerId, db);
   }
 }
 
@@ -142,7 +135,7 @@ describe('bracket score progression integration', () => {
       redAthleteId: null,
       blueAthleteId: null,
       winnerId: null,
-      winnerTournamentAthleteId: null,
+      tournamentWinnerId: null,
       ...(i === 0
         ? {
             redTournamentAthleteId: 'ta-red',
@@ -172,7 +165,7 @@ describe('bracket score progression integration', () => {
     )!;
 
     expect(r0m0.status).toBe('complete');
-    expect(r0m0.winnerTournamentAthleteId).toBe('ta-red');
+    expect(r0m0.tournamentWinnerId).toBe('ta-red');
     expect(next.redTournamentAthleteId).toBe('ta-red');
     expect(next.redAthleteId).toBe('ap-red');
   });

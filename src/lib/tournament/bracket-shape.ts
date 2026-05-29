@@ -89,7 +89,7 @@ export type Round0PlacementUpdate = {
     redWins: number;
     blueWins: number;
     winnerId: null;
-    winnerTournamentAthleteId: null;
+    tournamentWinnerId: null;
     status: 'pending';
   };
 };
@@ -138,7 +138,7 @@ function planRound0MatchUpdate(
       redWins: 0,
       blueWins: 0,
       winnerId: null,
-      winnerTournamentAthleteId: null,
+      tournamentWinnerId: null,
       status: 'pending',
     },
   };

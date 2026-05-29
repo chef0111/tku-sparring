@@ -147,7 +147,7 @@ model Match {
   redWins                  Int      @default(0)
   blueWins                 Int      @default(0)
   winnerId                 String?  @db.ObjectId
-  winnerTournamentAthleteId String? @db.ObjectId
+  tournamentWinnerId String? @db.ObjectId
   redLocked                Boolean  @default(false)
   blueLocked               Boolean  @default(false)
   groupId                  String   @db.ObjectId

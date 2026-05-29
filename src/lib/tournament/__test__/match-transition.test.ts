@@ -16,7 +16,7 @@ const baseMatch = {
   redTournamentAthleteId: 'ta-red',
   blueTournamentAthleteId: 'ta-blue',
   winnerId: null,
-  winnerTournamentAthleteId: null,
+  tournamentWinnerId: null,
 } as const;
 
 describe('getScoreTransition', () => {
@@ -28,11 +28,11 @@ describe('getScoreTransition', () => {
         redWins: 2,
         blueWins: 0,
         winnerId: 'ap-red',
-        winnerTournamentAthleteId: 'ta-red',
+        tournamentWinnerId: 'ta-red',
         status: 'complete',
       },
       clearAdvancement: false,
-      advanceWinnerTournamentAthleteId: 'ta-red',
+      advancedWinnerId: 'ta-red',
     });
   });
 
@@ -53,7 +53,7 @@ describe('getAdminStatusTransition', () => {
       getAdminStatusTransition({
         match: {
           status: 'complete',
-          winnerTournamentAthleteId: 'ta-red',
+          tournamentWinnerId: 'ta-red',
         },
         status: 'active',
       })
@@ -63,7 +63,7 @@ describe('getAdminStatusTransition', () => {
         redWins: 0,
         blueWins: 0,
         winnerId: null,
-        winnerTournamentAthleteId: null,
+        tournamentWinnerId: null,
       },
       clearAdvancement: true,
       clearedScores: true,
@@ -75,7 +75,7 @@ describe('getAdminStatusTransition', () => {
       getAdminStatusTransition({
         match: {
           status: 'pending',
-          winnerTournamentAthleteId: null,
+          tournamentWinnerId: null,
         },
         status: 'complete',
       })
@@ -94,10 +94,10 @@ describe('getWinnerOverrideTransition', () => {
     ).toEqual({
       data: {
         winnerId: 'ap-blue',
-        winnerTournamentAthleteId: 'ta-blue',
+        tournamentWinnerId: 'ta-blue',
         status: 'complete',
       },
-      advanceWinnerTournamentAthleteId: 'ta-blue',
+      advancedWinnerId: 'ta-blue',
     });
   });
 });
