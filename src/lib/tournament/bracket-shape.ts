@@ -1,6 +1,5 @@
 import { buildSlotMap } from './bracket-seeding';
-
-import type { CreateMatchDTO } from '@/orpc/matches/dto';
+import type { BracketMatchInput } from './bracket-match-input';
 
 export function nextPowerOfTwo(n: number): number {
   let p = 1;
@@ -13,7 +12,7 @@ function createEmptyMatch(
   tournamentId: string,
   round: number,
   matchIndex: number
-): CreateMatchDTO {
+): BracketMatchInput {
   return {
     kind: 'bracket',
     round,
@@ -39,11 +38,11 @@ export function planBracketShell(input: {
 }): {
   bracketSize: number;
   totalRounds: number;
-  matches: Array<CreateMatchDTO>;
+  matches: Array<BracketMatchInput>;
 } {
   const bracketSize = nextPowerOfTwo(input.athleteCount);
   const totalRounds = Math.log2(bracketSize);
-  const matches: Array<CreateMatchDTO> = [];
+  const matches: Array<BracketMatchInput> = [];
 
   for (let round = 0; round < totalRounds; round++) {
     const matchesInRound = bracketSize / Math.pow(2, round + 1);

@@ -1,12 +1,12 @@
-import type { MatchStatusDTO } from '@/orpc/matches/dto';
-import { MatchStatusSchema } from '@/orpc/matches/dto';
+import { MATCH_STATUS_RANK, MatchStatusSchema } from './match-status';
+import type { MatchStatus } from './match-status';
 
 export type MatchTransitionData = {
   redWins?: number;
   blueWins?: number;
   winnerId?: string | null;
   tournamentWinnerId?: string | null;
-  status: MatchStatusDTO;
+  status: MatchStatus;
 };
 
 export type ScoreTransitionMatch = {
@@ -68,7 +68,7 @@ export function getScoreTransition(input: {
     winsNeeded
   );
 
-  const status: MatchStatusDTO = winner
+  const status: MatchStatus = winner
     ? 'complete'
     : input.redWins > 0 || input.blueWins > 0
       ? 'active'
@@ -103,15 +103,9 @@ export type AdminStatusTransitionMatch = {
   tournamentWinnerId: string | null;
 };
 
-const MATCH_STATUS_RANK: Record<MatchStatusDTO, number> = {
-  pending: 0,
-  active: 1,
-  complete: 2,
-};
-
 export function getAdminStatusTransition(input: {
   match: AdminStatusTransitionMatch;
-  status: MatchStatusDTO;
+  status: MatchStatus;
 }): {
   data: MatchTransitionData;
   clearAdvancement: boolean;
@@ -169,4 +163,78 @@ export function getWinnerOverrideTransition(input: {
     },
     advancedWinnerId: tournamentWinnerId,
   };
+}
+
+export type MatchTransitionPlan = {
+  data: MatchTransitionData;
+  clearAdvancement: boolean;
+  advancedWinnerId: string | null;
+};
+
+export function buildScoreTransitionPlan(input: {
+  match: ScoreTransitionMatch;
+  redWins: number;
+  blueWins: number;
+}): MatchTransitionPlan {
+  return getScoreTransition(input);
+}
+
+export function buildWinnerOverridePlan(input: {
+  match: WinnerOverrideMatch;
+  winnerSide: 'red' | 'blue';
+}): MatchTransitionPlan {
+  const transition = getWinnerOverrideTransition(input);
+  return {
+    data: transition.data,
+    clearAdvancement: false,
+    advancedWinnerId: transition.advancedWinnerId,
+  };
+}
+
+export type AdminStatusPlanMatch = AdminStatusTransitionMatch &
+  ScoreTransitionMatch;
+
+export type AdminStatusPlan = MatchTransitionPlan & {
+  clearedScores: boolean;
+};
+
+export function buildAdminStatusPlan(input: {
+  match: AdminStatusPlanMatch;
+  status: MatchStatus;
+}): AdminStatusPlan {
+  const admin = getAdminStatusTransition({
+    match: input.match,
+    status: input.status,
+  });
+
+  let plan: MatchTransitionPlan = {
+    data: admin.data,
+    clearAdvancement: admin.clearAdvancement,
+    advancedWinnerId: null,
+  };
+
+  if (input.status === 'complete' && !admin.clearedScores) {
+    const merged = { ...input.match, ...admin.data };
+    const score = getScoreTransition({
+      match: merged,
+      redWins: merged.redWins,
+      blueWins: merged.blueWins,
+    });
+
+    if (score.data.status === 'complete') {
+      plan = {
+        data: {
+          redWins: score.data.redWins,
+          blueWins: score.data.blueWins,
+          winnerId: score.data.winnerId ?? null,
+          tournamentWinnerId: score.data.tournamentWinnerId ?? null,
+          status: 'complete',
+        },
+        clearAdvancement: admin.clearAdvancement,
+        advancedWinnerId: score.advancedWinnerId,
+      };
+    }
+  }
+
+  return { ...plan, clearedScores: admin.clearedScores };
 }

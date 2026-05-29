@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  buildAdminStatusPlan,
   getAdminStatusTransition,
   getScoreTransition,
   getWinnerOverrideTransition,
@@ -98,6 +99,47 @@ describe('getWinnerOverrideTransition', () => {
         status: 'complete',
       },
       advancedWinnerId: 'ta-blue',
+    });
+  });
+});
+
+describe('buildAdminStatusPlan', () => {
+  it('derives winner from existing scores when marking complete', () => {
+    expect(
+      buildAdminStatusPlan({
+        match: {
+          ...baseMatch,
+          status: 'active',
+          redWins: 2,
+          blueWins: 0,
+        },
+        status: 'complete',
+      })
+    ).toEqual({
+      data: {
+        redWins: 2,
+        blueWins: 0,
+        winnerId: 'ap-red',
+        tournamentWinnerId: 'ta-red',
+        status: 'complete',
+      },
+      clearAdvancement: false,
+      advancedWinnerId: 'ta-red',
+      clearedScores: false,
+    });
+  });
+
+  it('keeps status-only complete when scores do not finish the match', () => {
+    expect(
+      buildAdminStatusPlan({
+        match: baseMatch,
+        status: 'complete',
+      })
+    ).toEqual({
+      data: { status: 'complete' },
+      clearAdvancement: false,
+      advancedWinnerId: null,
+      clearedScores: false,
     });
   });
 });

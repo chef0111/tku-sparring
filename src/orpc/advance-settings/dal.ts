@@ -1,15 +1,6 @@
 import type { SelectionCatalogDTO, SelectionMatchesDTO } from './dto';
-import { savedArenaGroupIds } from '@/lib/tournament/arena-group-order';
-import {
-  buildManualRankMapFromMatches,
-  buildMatchNumber,
-  formatArenaMatchTitle,
-  resolveArenaGroupOrder,
-} from '@/lib/tournament/arena-match-label';
-import {
-  matchProjectionSelect,
-  toMatchData,
-} from '@/lib/tournament/match-projection';
+import { formatArenaMatchTitle } from '@/lib/tournament/arena-match-label';
+import { loadMatchLabelContext } from '@/lib/tournament/match-label-context';
 import { prisma } from '@/lib/db';
 import { ArenaMatchClaimDAL } from '@/orpc/arena-match-claim/dal';
 
@@ -57,7 +48,7 @@ const tournamentForSelectionSelect = {
   },
 } as const;
 
-async function loadTournamentForSelection(tournamentId: string) {
+async function loadTournament(tournamentId: string) {
   return prisma.tournament.findUnique({
     where: { id: tournamentId },
     select: tournamentForSelectionSelect,
@@ -105,7 +96,7 @@ export class AdvanceSettingsDAL {
       return { tournaments, groups: groupsOut };
     }
 
-    const tournament = await loadTournamentForSelection(effectiveTournamentId);
+    const tournament = await loadTournament(effectiveTournamentId);
     if (!tournament || tournament.status !== 'active') {
       return { tournaments, groups: groupsOut };
     }
@@ -158,7 +149,7 @@ export class AdvanceSettingsDAL {
       throw new Error('Group does not belong to the selected tournament');
     }
 
-    const tournament = await loadTournamentForSelection(tournamentId);
+    const tournament = await loadTournament(tournamentId);
     const matchesOut: Array<SelectionMatchRow> = [];
     if (!tournament || tournament.status !== 'active') {
       return { matches: matchesOut };
@@ -169,44 +160,9 @@ export class AdvanceSettingsDAL {
       throw new Error('Group not found on tournament');
     }
 
-    const arenaIndex = targetGroup.arenaIndex;
-    const groupsOnArena = tournament.groups.filter(
-      (x) => x.arenaIndex === arenaIndex
-    );
-    const saved = savedArenaGroupIds(tournament.arenaGroupOrder, arenaIndex);
-    const groupOrder = resolveArenaGroupOrder(groupsOnArena, saved);
-    const groupIdsOnArena = groupsOnArena.map((x) => x.id);
-
-    const allMatches = await prisma.match.findMany({
-      where: { groupId: { in: groupIdsOnArena } },
-      select: matchProjectionSelect,
-      orderBy: [{ round: 'asc' }, { matchIndex: 'asc' }],
-    });
-
-    const athleteCountRows = await prisma.tournamentAthlete.groupBy({
-      by: ['groupId'],
-      where: { groupId: { in: groupIdsOnArena } },
-      _count: { _all: true },
-    });
-    const groupAthleteCountById = new Map<string, number>();
-    for (const row of athleteCountRows) {
-      if (row.groupId != null) {
-        groupAthleteCountById.set(row.groupId, row._count._all);
-      }
-    }
-
-    const meta = groupsOnArena.map((x) => ({
-      id: x.id,
-      thirdPlaceMatch: x.thirdPlaceMatch,
-    }));
-    const matchDataList = allMatches.map(toMatchData);
-    const numbers = buildMatchNumber({
-      arenaIndex,
-      groups: meta,
-      matches: matchDataList,
-      groupOrder,
-      groupAthleteCountById,
-      manualRankByMatchId: buildManualRankMapFromMatches(matchDataList),
+    const { numbers, allMatches } = await loadMatchLabelContext({
+      tournamentId,
+      groupId,
     });
 
     const taIds = new Set<string>();

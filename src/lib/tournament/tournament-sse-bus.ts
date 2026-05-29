@@ -46,11 +46,11 @@ async function postInternalBroadcast(
 }
 
 /** Notifies all browsers in `tournament:{id}` via the external realtime service. */
-export function publishTournamentSelectionInvalidate(tournamentId: string) {
+export function publishSelectionInvalidate(tournamentId: string) {
   const event: TournamentSseEvent = { type: 'invalidate', tournamentId };
   void postInternalBroadcast(tournamentId, event);
 }
 
 export function publishMatchInvalidateEvent(tournamentId: string) {
-  publishTournamentSelectionInvalidate(tournamentId);
+  publishSelectionInvalidate(tournamentId);
 }

@@ -1,15 +1,20 @@
 import { prisma } from '@/lib/db';
-import { publishTournamentSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
+import { publishSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
 
 const CLAIM_TTL_MS = 30 * 60 * 1000;
+
+type ClaimDb = Pick<typeof prisma, 'arenaMatchClaim' | 'match'>;
 
 export class ArenaMatchClaimDAL {
   private static expiresAt(now: Date) {
     return new Date(now.getTime() + CLAIM_TTL_MS);
   }
 
-  static async cleanupExpired(now: Date) {
-    await prisma.arenaMatchClaim.deleteMany({
+  static async cleanupExpired(
+    now: Date,
+    db: Pick<typeof prisma, 'arenaMatchClaim'> = prisma
+  ) {
+    await db.arenaMatchClaim.deleteMany({
       where: {
         expiresAt: {
           lte: now,
@@ -20,7 +25,7 @@ export class ArenaMatchClaimDAL {
 
   static async releaseAllForDeviceInGroup(
     input: { groupId: string; deviceId: string },
-    db: Pick<typeof prisma, 'arenaMatchClaim' | 'match'> = prisma
+    db: ClaimDb = prisma
   ) {
     const claims = await db.arenaMatchClaim.findMany({
       where: { groupId: input.groupId, deviceId: input.deviceId },
@@ -48,112 +53,122 @@ export class ArenaMatchClaimDAL {
     }
   }
 
-  static async claim(
-    input: {
-      matchId: string;
-      groupId: string;
-      tournamentId: string;
-      deviceId: string;
-      userId: string;
-    },
-    db: Pick<typeof prisma, 'arenaMatchClaim' | 'match'> = prisma
-  ) {
+  static async claim(input: {
+    matchId: string;
+    groupId: string;
+    tournamentId: string;
+    deviceId: string;
+    userId: string;
+  }) {
     const now = new Date();
-    await this.cleanupExpired(now);
 
-    const match = await db.match.findUnique({
-      where: { id: input.matchId },
-      select: { id: true, groupId: true, tournamentId: true, status: true },
-    });
+    const row = await prisma.$transaction(async (tx) => {
+      await ArenaMatchClaimDAL.cleanupExpired(now, tx);
 
-    if (!match || match.groupId !== input.groupId) {
-      throw new Error('Match not found for this group');
-    }
-    if (match.tournamentId !== input.tournamentId) {
-      throw new Error('Match does not belong to this tournament');
-    }
-
-    const existing = await db.arenaMatchClaim.findUnique({
-      where: { matchId: input.matchId },
-    });
-
-    if (
-      existing &&
-      existing.expiresAt > now &&
-      existing.deviceId !== input.deviceId
-    ) {
-      throw new Error('Match is in use on another device');
-    }
-
-    await this.releaseAllForDeviceInGroup(
-      {
-        groupId: input.groupId,
-        deviceId: input.deviceId,
-      },
-      db
-    );
-
-    const exp = this.expiresAt(now);
-    const data = {
-      deviceId: input.deviceId,
-      userId: input.userId,
-      groupId: input.groupId,
-      tournamentId: input.tournamentId,
-      expiresAt: exp,
-    };
-
-    const row = await db.arenaMatchClaim.upsert({
-      where: { matchId: input.matchId },
-      create: {
-        matchId: input.matchId,
-        ...data,
-      },
-      update: data,
-    });
-
-    if (match.status !== 'complete') {
-      await db.match.update({
+      const match = await tx.match.findUnique({
         where: { id: input.matchId },
-        data: { status: 'active' },
+        select: { id: true, groupId: true, tournamentId: true, status: true },
       });
-    }
 
-    publishTournamentSelectionInvalidate(input.tournamentId);
+      if (!match || match.groupId !== input.groupId) {
+        throw new Error('Match not found for this group');
+      }
+      if (match.tournamentId !== input.tournamentId) {
+        throw new Error('Match does not belong to this tournament');
+      }
+
+      const existing = await tx.arenaMatchClaim.findUnique({
+        where: { matchId: input.matchId },
+      });
+
+      if (
+        existing &&
+        existing.expiresAt > now &&
+        existing.deviceId !== input.deviceId
+      ) {
+        throw new Error('Match is in use on another device');
+      }
+
+      await ArenaMatchClaimDAL.releaseAllForDeviceInGroup(
+        {
+          groupId: input.groupId,
+          deviceId: input.deviceId,
+        },
+        tx
+      );
+
+      const exp = ArenaMatchClaimDAL.expiresAt(now);
+      const data = {
+        deviceId: input.deviceId,
+        userId: input.userId,
+        groupId: input.groupId,
+        tournamentId: input.tournamentId,
+        expiresAt: exp,
+      };
+
+      const claimRow = await tx.arenaMatchClaim.upsert({
+        where: { matchId: input.matchId },
+        create: {
+          matchId: input.matchId,
+          ...data,
+        },
+        update: data,
+      });
+
+      if (match.status !== 'complete') {
+        await tx.match.update({
+          where: { id: input.matchId },
+          data: { status: 'active' },
+        });
+      }
+
+      return claimRow;
+    });
+
+    publishSelectionInvalidate(input.tournamentId);
     return row;
   }
 
-  static async release(
-    input: { matchId: string; deviceId: string; userId: string },
-    db: Pick<typeof prisma, 'arenaMatchClaim' | 'match'> = prisma
-  ) {
-    const row = await db.arenaMatchClaim.findUnique({
-      where: { matchId: input.matchId },
-    });
-
-    if (!row || row.deviceId !== input.deviceId) {
-      return { removed: false as const };
-    }
-
-    const tournamentId = row.tournamentId;
-    const matchId = row.matchId;
-    await db.arenaMatchClaim.delete({
-      where: { matchId: input.matchId },
-    });
-
-    const m = await db.match.findUnique({
-      where: { id: matchId },
-      select: { redWins: true, blueWins: true, status: true },
-    });
-    if (m && m.status !== 'complete') {
-      const idle = m.redWins === 0 && m.blueWins === 0;
-      await db.match.update({
-        where: { id: matchId },
-        data: { status: idle ? 'pending' : 'active' },
+  static async release(input: {
+    matchId: string;
+    deviceId: string;
+    userId: string;
+  }) {
+    const result = await prisma.$transaction(async (tx) => {
+      const row = await tx.arenaMatchClaim.findUnique({
+        where: { matchId: input.matchId },
       });
+
+      if (!row || row.deviceId !== input.deviceId) {
+        return { removed: false as const, tournamentId: null as string | null };
+      }
+
+      const tournamentId = row.tournamentId;
+      const matchId = row.matchId;
+      await tx.arenaMatchClaim.delete({
+        where: { matchId: input.matchId },
+      });
+
+      const m = await tx.match.findUnique({
+        where: { id: matchId },
+        select: { redWins: true, blueWins: true, status: true },
+      });
+      if (m && m.status !== 'complete') {
+        const idle = m.redWins === 0 && m.blueWins === 0;
+        await tx.match.update({
+          where: { id: matchId },
+          data: { status: idle ? 'pending' : 'active' },
+        });
+      }
+
+      return { removed: true as const, tournamentId };
+    });
+
+    if (result.removed && result.tournamentId) {
+      publishSelectionInvalidate(result.tournamentId);
     }
 
-    publishTournamentSelectionInvalidate(tournamentId);
-    return { removed: true as const };
+    return { removed: result.removed };
   }
 
   /** For selection list: active claims for these matches (non-expired). */

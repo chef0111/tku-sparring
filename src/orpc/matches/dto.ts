@@ -1,6 +1,10 @@
 import { z } from 'zod';
+import { MatchStatusSchema } from '@/lib/tournament/match-status';
 
-export const MatchStatusSchema = z.enum(['pending', 'active', 'complete']);
+export {
+  MatchStatusSchema,
+  type MatchStatus as MatchStatusDTO,
+} from '@/lib/tournament/match-status';
 
 export const MatchKindSchema = z.enum(['bracket', 'custom']);
 
@@ -137,7 +141,6 @@ export const CreateCustomMatchSchema = z.object({
   bestOf: z.number().int().min(1).max(5).optional(),
 });
 
-export type MatchStatusDTO = z.infer<typeof MatchStatusSchema>;
 export type MatchDTO = z.infer<typeof MatchSchema>;
 export type CreateMatchDTO = z.infer<typeof CreateMatchSchema>;
 export type UpdateMatchDTO = z.infer<typeof UpdateMatchSchema>;
