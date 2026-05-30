@@ -80,7 +80,15 @@ export function useAddAthletesSheet({
     getScrollElement: () => scrollRef.current,
     estimateSize: () => ROW_HEIGHT,
     overscan: 8,
+    enabled: open,
   });
+
+  React.useLayoutEffect(() => {
+    if (!open) return;
+    rowVirtualizer.measure();
+    const frame = requestAnimationFrame(() => rowVirtualizer.measure());
+    return () => cancelAnimationFrame(frame);
+  }, [open, rowVirtualizer]);
 
   const virtualItems = rowVirtualizer.getVirtualItems();
   const lastVirtualItem = virtualItems[virtualItems.length - 1];

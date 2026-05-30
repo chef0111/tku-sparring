@@ -130,12 +130,14 @@ interface PrimitiveTabsTabProps extends Omit<
 }
 
 function PrimitiveTabsTab({
+  asChild,
   value = '',
   ...props
 }: PrimitiveTabsTabProps = {}) {
   return (
     <TabsPrimitive.Trigger
-      data-slot="tabs-tab"
+      data-slot={asChild ? undefined : 'tabs-tab'}
+      asChild={asChild}
       value={normalizeTabsValue(value)}
       {...props}
     />

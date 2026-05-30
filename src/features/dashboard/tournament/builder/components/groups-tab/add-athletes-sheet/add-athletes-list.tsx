@@ -104,8 +104,10 @@ function EmptyAthleteLibrary() {
         </EmptyDescription>
         <EmptyContent>
           <Button variant="outline" size="sm" asChild>
-            <Link to="/dashboard/athletes">Go to Athletes</Link>
-            <ArrowRight />
+            <Link to="/dashboard/athletes">
+              Go to Athletes
+              <ArrowRight data-icon="inline-end" />
+            </Link>
           </Button>
         </EmptyContent>
       </EmptyHeader>

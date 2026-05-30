@@ -10,13 +10,14 @@ import { DataTable } from '@/components/data-table/data-table';
 import { getBeltLabel } from '@/config/athlete';
 import { cn } from '@/lib/utils';
 import { DataTableSkeleton } from '@/components/data-table/data-table-skeleton';
+import { SheetTrigger } from '@/components/ui/sheet';
 
 export interface GroupRosterTableProps {
   group: GroupData | null;
   tournamentId: string;
   groups: Array<GroupData>;
   readOnly: boolean;
-  onOpenSettings: (group: GroupData) => void;
+  prepareSettingsGroup: (group: GroupData) => void;
 }
 
 export function GroupRosterTable({
@@ -24,7 +25,7 @@ export function GroupRosterTable({
   tournamentId,
   groups,
   readOnly,
-  onOpenSettings,
+  prepareSettingsGroup,
 }: GroupRosterTableProps) {
   if (!group) {
     return (
@@ -40,7 +41,7 @@ export function GroupRosterTable({
       tournamentId={tournamentId}
       groups={groups}
       readOnly={readOnly}
-      onOpenSettings={onOpenSettings}
+      prepareSettingsGroup={prepareSettingsGroup}
     />
   );
 }
@@ -54,7 +55,7 @@ function GroupRosterActive({
   tournamentId,
   groups,
   readOnly,
-  onOpenSettings,
+  prepareSettingsGroup,
 }: GroupRosterActiveProps) {
   const roster = useGroupRosterTable({
     group,
@@ -92,14 +93,17 @@ function GroupRosterActive({
               <StatusLabel>Ready</StatusLabel>
             </Status>
             {!readOnly && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7"
-                onClick={() => onOpenSettings(group)}
-              >
-                <Settings className="size-4" />
-              </Button>
+              <SheetTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="size-7"
+                  onClick={() => prepareSettingsGroup(group)}
+                >
+                  <Settings className="size-4" />
+                </Button>
+              </SheetTrigger>
             )}
           </div>
         </div>

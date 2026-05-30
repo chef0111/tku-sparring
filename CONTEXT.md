@@ -55,6 +55,14 @@ _Avoid_: Match code
 A dedicated match between the semifinal losers to determine third place in a group. It is only materialized when the group has **at least four athletes** and the per-group toggle is on.
 _Avoid_: Consolation bout
 
+**Bracket canvas**:
+The builder visualization of a **Group** single-elimination tree: two **wings** (left and right) converge on a centered **Final**; optional **Third-Place Match** sits below the final. Wings are a display partition only — progression still follows `(round, matchIndex)` on the server.
+_Avoid_: Bracket panel, tree view
+
+**Wing** (bracket canvas):
+The left or right half of the canvas subtree that feeds one semifinal side. Left-wing nodes read left-to-right; right-wing nodes read right-to-left.
+_Avoid_: Side, hemisphere
+
 **Advance Settings**:
 The client-side selection flow for tournament, group, and match used before a bout starts.
 _Avoid_: Setup wizard

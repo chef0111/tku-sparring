@@ -22,6 +22,7 @@ type ComboboxTriggerProps = ComboboxPrimitive.Trigger.Props & {
 };
 
 function ComboboxTrigger({
+  asChild,
   className,
   children,
   showChevron = true,
@@ -29,7 +30,8 @@ function ComboboxTrigger({
 }: ComboboxTriggerProps) {
   return (
     <ComboboxPrimitive.Trigger
-      data-slot="combobox-trigger"
+      data-slot={asChild ? undefined : 'combobox-trigger'}
+      asChild={asChild}
       className={cn("[&_svg:not([class*='size-'])]:size-4", className)}
       {...props}
     >
