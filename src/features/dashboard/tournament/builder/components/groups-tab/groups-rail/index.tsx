@@ -8,8 +8,8 @@ interface GroupsRailProps {
   selectedGroupId: string | null;
   readOnly: boolean;
   onSelect: (groupId: string) => void;
-  onAdd: () => void;
-  onOpenSettings: (group: GroupData) => void;
+  prepareSettingsGroup: (group: GroupData) => void;
+  onOpenAddGroup: () => void;
 }
 
 export function GroupsRail({
@@ -17,18 +17,19 @@ export function GroupsRail({
   selectedGroupId,
   readOnly,
   onSelect,
-  onAdd,
-  onOpenSettings,
+  prepareSettingsGroup,
+  onOpenAddGroup,
 }: GroupsRailProps) {
   return (
     <div className="bg-card flex w-64 shrink-0 flex-col overflow-hidden border-l">
       {!readOnly && (
         <div className="border-b p-2">
           <Button
+            type="button"
             size="sm"
             variant="outline"
             className="w-full"
-            onClick={onAdd}
+            onClick={onOpenAddGroup}
           >
             <Plus className="mr-1 size-3.5" />
             Add Group
@@ -49,7 +50,7 @@ export function GroupsRail({
                 active={group.id === selectedGroupId}
                 readOnly={readOnly}
                 onSelect={onSelect}
-                onOpenSettings={onOpenSettings}
+                prepareSettingsGroup={prepareSettingsGroup}
               />
             ))}
           </div>

@@ -24,7 +24,6 @@ interface AthletePoolProps {
   tournamentId: string;
   selectedGroupId: string | null;
   readOnly: boolean;
-  onAddAthletes?: () => void;
 }
 
 const POOL_FILTER_PARSERS = {
@@ -37,7 +36,6 @@ const POOL_FILTER_PARSERS = {
 };
 
 export function AthletePool({
-  onAddAthletes,
   tournamentId,
   selectedGroupId,
   readOnly,
@@ -108,7 +106,7 @@ export function AthletePool({
             <h3 className="text-sm font-semibold">Unassigned Athletes</h3>
             <Badge variant="secondary">{total}</Badge>
           </div>
-          {!readOnly && onAddAthletes && (
+          {!readOnly && (
             <SheetTrigger asChild>
               <Button size="sm" variant="outline">
                 <UserPlus data-icon="inline-start" aria-hidden="true" />
@@ -160,7 +158,7 @@ export function AthletePool({
                 <p className="text-foreground text-sm font-medium">
                   No unassigned athletes
                 </p>
-                {!readOnly && onAddAthletes && (
+                {!readOnly && (
                   <SheetTrigger asChild>
                     <Button size="sm">
                       <UserPlus data-icon="inline-start" aria-hidden="true" />

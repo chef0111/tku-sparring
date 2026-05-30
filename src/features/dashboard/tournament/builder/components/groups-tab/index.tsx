@@ -11,6 +11,7 @@ import { GroupsRail } from './groups-rail';
 import type { DragEndEvent } from '@dnd-kit/core';
 import type { GroupData } from '@/features/dashboard/types';
 import { useAssignAthlete } from '@/queries/group';
+import { Dialog } from '@/components/ui/dialog';
 import { Sheet } from '@/components/ui/sheet';
 
 interface GroupsTabProps {
@@ -84,9 +85,13 @@ export function GroupsTab({
     );
   };
 
-  const handleOpenSettings = (group: GroupData) => {
+  const prepareSettingsGroup = (group: GroupData) => {
     setSettingsGroup(group);
-    setSettingsOpen(true);
+  };
+
+  const handleSettingsOpenChange = (open: boolean) => {
+    setSettingsOpen(open);
+    if (!open) setSettingsGroup(null);
   };
 
   return (
@@ -97,7 +102,6 @@ export function GroupsTab({
             tournamentId={tournamentId}
             selectedGroupId={selectedGroupId}
             readOnly={readOnly}
-            onAddAthletes={() => setAddAthletesOpen(true)}
           />
           <AddAthletesSheet
             open={addAthletesOpen}
@@ -107,33 +111,39 @@ export function GroupsTab({
             readOnly={readOnly}
           />
         </Sheet>
-        <GroupRosterTable
-          group={selectedGroup}
-          tournamentId={tournamentId}
-          groups={groups}
-          readOnly={readOnly}
-          onOpenSettings={handleOpenSettings}
-        />
-        <GroupsRail
-          groups={groups}
-          selectedGroupId={selectedGroupId}
-          readOnly={readOnly}
-          onSelect={(id) => void setSelectedGroup(id)}
-          onAdd={() => setShowAddGroup(true)}
-          onOpenSettings={handleOpenSettings}
-        />
+        <Sheet
+          open={settingsOpen}
+          onOpenChange={handleSettingsOpenChange}
+          modal={false}
+        >
+          <GroupRosterTable
+            group={selectedGroup}
+            tournamentId={tournamentId}
+            groups={groups}
+            readOnly={readOnly}
+            prepareSettingsGroup={prepareSettingsGroup}
+          />
+          <GroupsRail
+            groups={groups}
+            selectedGroupId={selectedGroupId}
+            readOnly={readOnly}
+            onSelect={(id) => void setSelectedGroup(id)}
+            prepareSettingsGroup={prepareSettingsGroup}
+            onOpenAddGroup={() => setShowAddGroup(true)}
+          />
+          <GroupSettingsSheet
+            group={settingsGroup}
+            onOpenChange={handleSettingsOpenChange}
+          />
+        </Sheet>
+        <Dialog open={showAddGroup} onOpenChange={setShowAddGroup}>
+          <AddGroupDialog
+            key={String(showAddGroup)}
+            onOpenChange={setShowAddGroup}
+            tournamentId={tournamentId}
+          />
+        </Dialog>
       </div>
-
-      <AddGroupDialog
-        open={showAddGroup}
-        onOpenChange={setShowAddGroup}
-        tournamentId={tournamentId}
-      />
-      <GroupSettingsSheet
-        open={settingsOpen}
-        onOpenChange={setSettingsOpen}
-        group={settingsGroup}
-      />
     </DndContext>
   );
 }

@@ -21,6 +21,7 @@ export interface BracketSlotProps {
   locked: boolean;
   wins: number;
   isWinner: boolean;
+  isFinal?: boolean;
   onSlotClick: (match: MatchData) => void;
   onToggleLock: () => void;
   readOnly: boolean;
@@ -37,6 +38,7 @@ export function BracketSlot({
   locked,
   wins,
   isWinner,
+  isFinal = false,
   onSlotClick,
   onToggleLock,
   readOnly,
@@ -98,9 +100,15 @@ export function BracketSlot({
         height: ATHLETE_ROW_H,
       }}
       className={cn(
-        'relative z-2 flex touch-none items-stretch rounded-md border border-transparent bg-transparent active:cursor-grabbing',
+        'relative z-2 flex touch-none items-stretch rounded-md bg-transparent active:cursor-grabbing',
         athlete || assignedName ? 'cursor-grab' : 'cursor-pointer',
-        locked && 'border-amber-500/60',
+        locked && 'opacity-50',
+        isFinal &&
+          side === 'red' &&
+          'rounded-b-none border-2 border-b-0 border-red-500',
+        isFinal &&
+          side === 'blue' &&
+          'rounded-t-none border-2 border-t-0 border-blue-500',
         isOver && canDrop && 'ring-primary/30 ring-1',
         isDragging && 'opacity-60',
         isRtl && 'flex-row-reverse'
@@ -114,7 +122,7 @@ export function BracketSlot({
         if (e.key === 'Enter' || e.key === ' ') onSlotClick(match);
       }}
     >
-      {showSideBar ? (
+      {showSideBar && (
         <div
           className={cn(
             'w-1.5 shrink-0',
@@ -122,7 +130,7 @@ export function BracketSlot({
             sideBar
           )}
         />
-      ) : null}
+      )}
 
       <div
         className={cn(
@@ -149,7 +157,7 @@ export function BracketSlot({
               aria-label={locked ? 'Unlock slot' : 'Lock slot'}
             >
               {locked ? (
-                <Lock data-icon="inline-start" />
+                <Lock data-icon="inline-start" className="text-amber-500" />
               ) : (
                 <LockOpen data-icon="inline-start" />
               )}
