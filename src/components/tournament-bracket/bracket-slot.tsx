@@ -9,37 +9,46 @@ import { ATHLETE_ROW_H, MATCH_W } from '@/lib/tournament/bracket-layout';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+export type BracketSlotDirection = 'ltr' | 'rtl';
+
 export interface BracketSlotProps {
   match: MatchData;
   side: 'red' | 'blue';
+  direction: BracketSlotDirection;
   athlete: TournamentAthleteData | null | undefined;
   emptyLabel: string;
   assignedName?: string | null;
   locked: boolean;
   wins: number;
   isWinner: boolean;
+  isFinal?: boolean;
   onSlotClick: (match: MatchData) => void;
   onToggleLock: () => void;
   readOnly: boolean;
+  showIndicator?: boolean;
 }
 
 export function BracketSlot({
   match,
   side,
+  direction,
   athlete,
   emptyLabel,
   assignedName,
   locked,
   wins,
   isWinner,
+  isFinal = false,
   onSlotClick,
   onToggleLock,
   readOnly,
+  showIndicator = true,
 }: BracketSlotProps) {
   const id = `slot-${match.id}-${side}`;
   const slotLabel = athlete?.name ?? assignedName ?? emptyLabel;
   const canDrag = !locked && !!athlete && match.round === 0 && !readOnly;
   const canDrop = match.round === 0 && !locked;
+  const isRtl = direction === 'rtl';
 
   const {
     attributes,
@@ -76,7 +85,7 @@ export function BracketSlot({
     [setDragRef, setDropRef]
   );
 
-  const sideBar = side === 'red' ? 'bg-red-500' : 'bg-blue-500';
+  const sideBar = side === 'red' ? 'bg-red-500 mt-px' : 'bg-blue-500 mb-px';
   const rowTop = side === 'red' ? 0 : ATHLETE_ROW_H;
 
   return (
@@ -91,11 +100,18 @@ export function BracketSlot({
         height: ATHLETE_ROW_H,
       }}
       className={cn(
-        'relative z-2 flex touch-none items-stretch rounded-md border border-transparent bg-transparent active:cursor-grabbing',
+        'relative z-2 flex touch-none items-stretch rounded-md bg-transparent active:cursor-grabbing',
         athlete || assignedName ? 'cursor-grab' : 'cursor-pointer',
-        locked && 'border-amber-500/60',
+        locked && 'opacity-50',
+        isFinal &&
+          side === 'red' &&
+          'rounded-b-none border-2 border-b-0 border-red-500',
+        isFinal &&
+          side === 'blue' &&
+          'rounded-t-none border-2 border-t-0 border-blue-500',
         isOver && canDrop && 'ring-primary/30 ring-1',
-        isDragging && 'opacity-60'
+        isDragging && 'opacity-60',
+        isRtl && 'flex-row-reverse'
       )}
       {...(canDrag ? listeners : {})}
       {...(canDrag ? attributes : {})}
@@ -106,10 +122,28 @@ export function BracketSlot({
         if (e.key === 'Enter' || e.key === ' ') onSlotClick(match);
       }}
     >
-      <div className={cn('w-1.5 shrink-0 rounded-l-lg', sideBar)} />
+      {showIndicator && (
+        <div
+          className={cn(
+            'w-2 shrink-0',
+            isRtl ? 'mr-px rounded-r-lg' : 'ml-px rounded-l-lg',
+            sideBar
+          )}
+        />
+      )}
 
-      <div className="flex min-w-0 flex-1 flex-col justify-center px-1.5 py-0.5 pl-2">
-        <div className="flex min-w-0 items-center gap-1">
+      <div
+        className={cn(
+          'flex min-w-0 flex-1 flex-col justify-center px-1.5 py-0.5',
+          isRtl ? 'pr-2 pl-1.5' : 'pl-2'
+        )}
+      >
+        <div
+          className={cn(
+            'flex min-w-0 items-center gap-1',
+            isRtl && 'flex-row-reverse'
+          )}
+        >
           {!readOnly && (
             <Button
               type="button"
@@ -123,7 +157,7 @@ export function BracketSlot({
               aria-label={locked ? 'Unlock slot' : 'Lock slot'}
             >
               {locked ? (
-                <Lock data-icon="inline-start" />
+                <Lock data-icon="inline-start" className="text-amber-500" />
               ) : (
                 <LockOpen data-icon="inline-start" />
               )}
@@ -135,7 +169,8 @@ export function BracketSlot({
               athlete || assignedName
                 ? 'text-foreground'
                 : 'text-muted-foreground italic',
-              isWinner && 'font-semibold text-emerald-600'
+              isWinner && 'font-semibold text-emerald-600',
+              isRtl && 'text-right'
             )}
           >
             {slotLabel}
@@ -145,8 +180,9 @@ export function BracketSlot({
 
       <div
         className={cn(
-          'flex shrink-0 items-center pr-2 text-xs font-semibold tabular-nums select-none!',
-          isWinner ? 'font-semibold text-emerald-600' : 'text-muted-foreground'
+          'flex shrink-0 items-center text-xs font-semibold tabular-nums select-none!',
+          isWinner ? 'font-semibold text-emerald-600' : 'text-muted-foreground',
+          isRtl ? 'pl-2' : 'pr-2'
         )}
       >
         {wins}

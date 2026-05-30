@@ -1,7 +1,6 @@
 import { SaveIcon, Trash2 } from 'lucide-react';
 import type { GroupData } from '@/features/dashboard/types';
 import {
-  Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -20,33 +19,29 @@ import { Spinner } from '@/components/ui/spinner';
 import { BELT_LEVELS } from '@/config/athlete';
 
 interface GroupSettingsSheetProps {
-  open: boolean;
   onOpenChange: (open: boolean) => void;
   group: GroupData | null;
 }
 
 export function GroupSettingsSheet({
-  open,
   onOpenChange,
   group,
 }: GroupSettingsSheetProps) {
   if (!group) return null;
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} modal={false}>
-      <SheetContent className="flex flex-col overflow-y-auto sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle className="text-lg font-semibold">
-            Group Settings
-          </SheetTitle>
-          <SheetDescription>
-            Edit constraints, arena, and preferences for {group.name}.
-          </SheetDescription>
-        </SheetHeader>
+    <SheetContent className="flex flex-col overflow-y-auto sm:max-w-md">
+      <SheetHeader>
+        <SheetTitle className="text-lg font-semibold">
+          Group Settings
+        </SheetTitle>
+        <SheetDescription>
+          Edit constraints, arena, and preferences for {group.name}.
+        </SheetDescription>
+      </SheetHeader>
 
-        <GroupSettingsForm group={group} onClose={() => onOpenChange(false)} />
-      </SheetContent>
-    </Sheet>
+      <GroupSettingsForm group={group} onClose={() => onOpenChange(false)} />
+    </SheetContent>
   );
 }
 

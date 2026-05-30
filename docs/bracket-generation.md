@@ -53,6 +53,17 @@ Example: Groups **A** and **B** on Arena 1, same structure, group order `[A, B]`
 - `round === 1` for B: 111–112
 - …and so on for later rounds.
 
+## Canvas layout (builder)
+
+The brackets tab renders a **two-sided** tree (see **Bracket canvas** / **Wing** in [CONTEXT.md](../CONTEXT.md)):
+
+- **Left wing**: matches whose `matchIndex` is below `2^(maxRound - 1 - round)` for that round; connectors flow left-to-right toward the center.
+- **Right wing**: remaining matches in the round; connectors flow right-to-left (mirrored).
+- **Final**: `matchIndex === 0` on the main bracket’s last round, horizontally centered; left and right semifinals share its vertical band.
+- **Third-Place Match**: centered under the final (same `x`); excluded from wing connector logic.
+
+Layout and connectors are computed in [`src/lib/tournament/bracket-layout.ts`](../src/lib/tournament/bracket-layout.ts); UI lives under [`src/components/tournament-bracket/`](../src/components/tournament-bracket/).
+
 ## Builder UI labels
 
 - **Round 0**, empty athlete slot: show **Open** (not a “winner” placeholder).

@@ -11,6 +11,8 @@ import { GroupsRail } from './groups-rail';
 import type { DragEndEvent } from '@dnd-kit/core';
 import type { GroupData } from '@/features/dashboard/types';
 import { useAssignAthlete } from '@/queries/group';
+import { Dialog } from '@/components/ui/dialog';
+import { Sheet } from '@/components/ui/sheet';
 
 interface GroupsTabProps {
   tournamentId: string;
@@ -46,17 +48,17 @@ export function GroupsTab({
   React.useEffect(() => {
     if (readOnly) {
       setShowAddGroup(false);
-      setAddAthletesOpen(false);
       setSettingsOpen(false);
+      setAddAthletesOpen(false);
     }
   }, [readOnly]);
 
   React.useEffect(() => {
     if (addAthletes && !readOnly) {
-      setAddAthletesOpen(true);
       void setAddAthletes(null);
+      setAddAthletesOpen(false);
     }
-  }, [addAthletes, readOnly, setAddAthletes]);
+  }, [addAthletes, readOnly, setAddAthletes, setAddAthletesOpen]);
 
   const selectedGroup = groups.find((g) => g.id === selectedGroupId) ?? null;
 
@@ -83,54 +85,65 @@ export function GroupsTab({
     );
   };
 
-  const handleOpenSettings = (group: GroupData) => {
+  const prepareSettingsGroup = (group: GroupData) => {
     setSettingsGroup(group);
-    setSettingsOpen(true);
+  };
+
+  const handleSettingsOpenChange = (open: boolean) => {
+    setSettingsOpen(open);
+    if (!open) setSettingsGroup(null);
   };
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
       <div className="flex h-full min-h-0 w-full">
-        <AthletePool
-          tournamentId={tournamentId}
-          selectedGroupId={selectedGroupId}
-          readOnly={readOnly}
-          onOpenAddAthletes={() => setAddAthletesOpen(true)}
-        />
-        <GroupRosterTable
-          group={selectedGroup}
-          tournamentId={tournamentId}
-          groups={groups}
-          readOnly={readOnly}
-          onOpenSettings={handleOpenSettings}
-        />
-        <GroupsRail
-          groups={groups}
-          selectedGroupId={selectedGroupId}
-          readOnly={readOnly}
-          onSelect={(id) => void setSelectedGroup(id)}
-          onAdd={() => setShowAddGroup(true)}
-          onOpenSettings={handleOpenSettings}
-        />
+        <Sheet open={addAthletesOpen} onOpenChange={setAddAthletesOpen}>
+          <AthletePool
+            tournamentId={tournamentId}
+            selectedGroupId={selectedGroupId}
+            readOnly={readOnly}
+          />
+          <AddAthletesSheet
+            open={addAthletesOpen}
+            onOpenChange={setAddAthletesOpen}
+            tournamentId={tournamentId}
+            tournamentName={tournamentName}
+            readOnly={readOnly}
+          />
+        </Sheet>
+        <Sheet
+          open={settingsOpen}
+          onOpenChange={handleSettingsOpenChange}
+          modal={false}
+        >
+          <GroupRosterTable
+            group={selectedGroup}
+            tournamentId={tournamentId}
+            groups={groups}
+            readOnly={readOnly}
+            prepareSettingsGroup={prepareSettingsGroup}
+          />
+          <GroupsRail
+            groups={groups}
+            selectedGroupId={selectedGroupId}
+            readOnly={readOnly}
+            onSelect={(id) => void setSelectedGroup(id)}
+            prepareSettingsGroup={prepareSettingsGroup}
+            onOpenAddGroup={() => setShowAddGroup(true)}
+          />
+          <GroupSettingsSheet
+            group={settingsGroup}
+            onOpenChange={handleSettingsOpenChange}
+          />
+        </Sheet>
+        <Dialog open={showAddGroup} onOpenChange={setShowAddGroup}>
+          <AddGroupDialog
+            key={String(showAddGroup)}
+            onOpenChange={setShowAddGroup}
+            tournamentId={tournamentId}
+          />
+        </Dialog>
       </div>
-
-      <AddAthletesSheet
-        open={addAthletesOpen}
-        onOpenChange={setAddAthletesOpen}
-        tournamentId={tournamentId}
-        tournamentName={tournamentName}
-        readOnly={readOnly}
-      />
-      <AddGroupDialog
-        open={showAddGroup}
-        onOpenChange={setShowAddGroup}
-        tournamentId={tournamentId}
-      />
-      <GroupSettingsSheet
-        open={settingsOpen}
-        onOpenChange={setSettingsOpen}
-        group={settingsGroup}
-      />
     </DndContext>
   );
 }

@@ -2,6 +2,7 @@ import { Settings } from 'lucide-react';
 import { useDroppable } from '@dnd-kit/core';
 import type { GroupData } from '@/features/dashboard/types';
 import { Button } from '@/components/ui/button';
+import { SheetTrigger } from '@/components/ui/sheet';
 import { Status, StatusIndicator } from '@/components/ui/status';
 import { cn } from '@/lib/utils';
 
@@ -10,7 +11,7 @@ interface GroupRailRowProps {
   active: boolean;
   readOnly: boolean;
   onSelect: (groupId: string) => void;
-  onOpenSettings: (group: GroupData) => void;
+  prepareSettingsGroup: (group: GroupData) => void;
 }
 
 export function GroupRailRow({
@@ -18,7 +19,7 @@ export function GroupRailRow({
   active,
   readOnly,
   onSelect,
-  onOpenSettings,
+  prepareSettingsGroup,
 }: GroupRailRowProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: group.id,
@@ -49,19 +50,23 @@ export function GroupRailRow({
           {group._count.tournamentAthletes}
         </span>
       </button>
-      {active && !readOnly && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="mr-1 size-6 shrink-0"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenSettings(group);
-          }}
-          aria-label="Group settings"
-        >
-          <Settings className="size-3.5" />
-        </Button>
+      {!readOnly && (
+        <SheetTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="mr-1 size-6 shrink-0"
+            aria-label="Group settings"
+            disabled={!active}
+            onClick={(e) => {
+              e.stopPropagation();
+              prepareSettingsGroup(group);
+            }}
+          >
+            <Settings className="size-3.5" />
+          </Button>
+        </SheetTrigger>
       )}
     </div>
   );

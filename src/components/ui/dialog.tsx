@@ -12,9 +12,16 @@ function Dialog({
 }
 
 function DialogTrigger({
+  asChild,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
-  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
+  return (
+    <DialogPrimitive.Trigger
+      data-slot={asChild ? undefined : 'dialog-trigger'}
+      asChild={asChild}
+      {...props}
+    />
+  );
 }
 
 function DialogPortal({
