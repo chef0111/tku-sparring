@@ -16,7 +16,6 @@ function baseBracket(over: Partial<MatchData> = {}): MatchData {
     round: 0,
     matchIndex: 0,
     status: 'pending',
-    bestOf: 1,
     redAthleteId: null,
     blueAthleteId: null,
     redTournamentAthleteId: null,

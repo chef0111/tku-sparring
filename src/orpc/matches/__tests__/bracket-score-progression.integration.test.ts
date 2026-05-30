@@ -14,7 +14,6 @@ type MatchRow = {
   round: number;
   matchIndex: number;
   status: string;
-  bestOf: number;
   redWins: number;
   blueWins: number;
   redTournamentAthleteId: string | null;
@@ -54,7 +53,7 @@ function createInMemoryDb(initial: Array<MatchRow>) {
   const db = {
     match: {
       findUnique: async ({ where }: { where: { id: string } }) =>
-        matches.get(where.id) ?? null,
+        (await matches.get(where.id)) ?? null,
       findFirst: async ({
         where,
       }: {
@@ -64,7 +63,7 @@ function createInMemoryDb(initial: Array<MatchRow>) {
           matchIndex: number;
         };
       }) => {
-        for (const m of matches.values()) {
+        for (const m of await matches.values()) {
           if (
             m.groupId === where.groupId &&
             m.round === where.round &&
@@ -82,7 +81,7 @@ function createInMemoryDb(initial: Array<MatchRow>) {
         where: { id: string };
         data: Partial<MatchRow>;
       }) => {
-        const row = matches.get(where.id);
+        const row = await matches.get(where.id);
         if (!row) throw new Error('missing');
         Object.assign(row, data);
         return row;
@@ -90,7 +89,7 @@ function createInMemoryDb(initial: Array<MatchRow>) {
     },
     tournamentAthlete: {
       findUnique: async ({ where }: { where: { id: string } }) =>
-        athletes.get(where.id) ?? null,
+        (await athletes.get(where.id)) ?? null,
     },
   } as unknown as ProgressionDb;
 
@@ -127,7 +126,6 @@ describe('bracket score progression integration', () => {
       round: m.round,
       matchIndex: m.matchIndex,
       status: 'pending',
-      bestOf: 3,
       redWins: 0,
       blueWins: 0,
       redTournamentAthleteId: null,

@@ -24,7 +24,7 @@ This document captures the technical direction and phased delivery plan for the 
     - `notes` (optional)
     - Snapshot fields: `gender`, `beltLevel`, `weight`, `affiliation`
 - Extend Group with constraints and third-place toggle.
-- Extend Match with bracket metadata: round, matchIndex, status, bestOf (3), and references to TournamentAthlete IDs.
+- Extend Match with bracket metadata: round, matchIndex, status, and references to TournamentAthlete IDs.
 - Add TournamentActivity for audit log events.
 
 Reference: current schema in [prisma/schema.prisma](prisma/schema.prisma).

@@ -1,6 +1,8 @@
 import { MATCH_STATUS_RANK, MatchStatusSchema } from './match-status';
 import type { MatchStatus } from './match-status';
 
+const WIN_NEEDED = 2;
+
 export type MatchTransitionData = {
   redWins?: number;
   blueWins?: number;
@@ -11,7 +13,6 @@ export type MatchTransitionData = {
 
 export type ScoreTransitionMatch = {
   status: string;
-  bestOf: number;
   redWins: number;
   blueWins: number;
   redAthleteId: string | null;
@@ -55,17 +56,16 @@ export function getScoreTransition(input: {
   clearAdvancement: boolean;
   advancedWinnerId: string | null;
 } {
-  const winsNeeded = Math.ceil(input.match.bestOf / 2);
   const hadCompleted =
     input.match.status === 'complete' ||
-    input.match.redWins >= winsNeeded ||
-    input.match.blueWins >= winsNeeded;
+    input.match.redWins >= WIN_NEEDED ||
+    input.match.blueWins >= WIN_NEEDED;
 
   const winner = pickScoreWinner(
     input.match,
     input.redWins,
     input.blueWins,
-    winsNeeded
+    WIN_NEEDED
   );
 
   const status: MatchStatus = winner

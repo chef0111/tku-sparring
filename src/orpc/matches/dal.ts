@@ -251,7 +251,6 @@ export class MatchDAL {
         round: MATCH_CUSTOM_ROUND,
         matchIndex: nextMatchIndex,
         status: 'pending',
-        bestOf: input.bestOf ?? 3,
         redTournamentAthleteId: red.tournamentAthleteId,
         blueTournamentAthleteId: blue.tournamentAthleteId,
         redAthleteId: red.athleteProfileId,

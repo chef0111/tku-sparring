@@ -30,7 +30,6 @@ describe('loadMatchLabelContext', () => {
         matchIndex: 0,
         displayLabel: null,
         status: 'pending',
-        bestOf: 3,
         redTournamentAthleteId: 'ta1',
         blueTournamentAthleteId: 'ta2',
         redAthleteId: 'ap1',
