@@ -83,6 +83,14 @@ export function useSlotLabels(
     resolveTaName,
   ]);
 
+  const isRedWinner = React.useMemo(() => {
+    return match.winnerId != null && match.winnerId === match.redAthleteId;
+  }, [match.winnerId, match.redAthleteId]);
+
+  const isBlueWinner = React.useMemo(() => {
+    return match.winnerId != null && match.winnerId === match.blueAthleteId;
+  }, [match.winnerId, match.blueAthleteId]);
+
   return {
     redAthlete,
     blueAthlete,
@@ -90,9 +98,7 @@ export function useSlotLabels(
     blueAssignedName,
     redEmptyLabel,
     blueEmptyLabel,
-    isRedWinner:
-      match.winnerId != null && match.winnerId === match.redAthleteId,
-    isBlueWinner:
-      match.winnerId != null && match.winnerId === match.blueAthleteId,
+    isRedWinner,
+    isBlueWinner,
   };
 }

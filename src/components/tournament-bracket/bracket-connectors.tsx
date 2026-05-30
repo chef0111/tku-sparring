@@ -1,9 +1,7 @@
-import type {
-  BracketConnectorPath,
-  MatchPosition,
-} from '@/lib/tournament/bracket-layout';
+import type { BracketConnectorPath } from '@/lib/tournament/bracket-layout';
+import type { MatchStatus } from '@/features/dashboard/types';
 
-const statusStroke: Record<string, string> = {
+const statusStroke: Record<MatchStatus, string> = {
   pending: 'stroke-muted-foreground/40',
   active: 'stroke-blue-500',
   complete: 'stroke-emerald-500',
@@ -36,7 +34,7 @@ export function BracketConnectors({
           strokeLinejoin="miter"
           strokeMiterlimit={4}
           strokeWidth={1.5}
-          className={statusStroke.pending}
+          className={statusStroke[c.status] ?? statusStroke.pending}
         />
       ))}
     </svg>

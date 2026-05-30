@@ -1,4 +1,4 @@
-import type { MatchData } from '@/features/dashboard/types';
+import type { MatchData, MatchStatus } from '@/features/dashboard/types';
 
 export const MATCH_W = 220;
 export const MATCH_H = 70;
@@ -244,6 +244,7 @@ export function buildLayout(
 
 export interface BracketConnectorPath {
   d: string;
+  status: MatchStatus;
 }
 
 /** Child → stub (LTR wing): horizontal from child right, fillet, vertical to bus. */
@@ -346,6 +347,79 @@ export function buildConnectorTrunkRtl(
 
 const connectorStub = (ROUND_GAP - MATCH_W) / 2;
 
+type ConnectorDirection = 'ltr' | 'rtl';
+
+function pushConnector(
+  paths: Array<BracketConnectorPath>,
+  d: string,
+  status: MatchStatus
+) {
+  paths.push({ d, status });
+}
+
+function appendToParent(
+  paths: Array<BracketConnectorPath>,
+  parent: MatchPosition,
+  direction: ConnectorDirection,
+  children: Array<MatchPosition | undefined>
+) {
+  const parentMidY = parent.y + MATCH_H / 2;
+  const status = parent.match.status;
+
+  if (direction === 'ltr') {
+    const parentLeftX = parent.x;
+    const midX = parentLeftX - connectorStub;
+    let hasChild = false;
+    for (const child of children) {
+      if (!child) continue;
+      hasChild = true;
+      pushConnector(
+        paths,
+        buildConnectorChildLeg(
+          child.x + MATCH_W,
+          child.y + MATCH_H / 2,
+          midX,
+          parentMidY
+        ),
+        status
+      );
+    }
+    if (hasChild) {
+      pushConnector(
+        paths,
+        buildConnectorTrunk(midX, parentMidY, parentLeftX),
+        status
+      );
+    }
+    return;
+  }
+
+  const parentRightX = parent.x + MATCH_W;
+  const midX = parentRightX + connectorStub;
+  let hasChild = false;
+  for (const child of children) {
+    if (!child) continue;
+    hasChild = true;
+    pushConnector(
+      paths,
+      buildConnectorChildLegRtl(
+        child.x,
+        child.y + MATCH_H / 2,
+        midX,
+        parentMidY
+      ),
+      status
+    );
+  }
+  if (hasChild) {
+    pushConnector(
+      paths,
+      buildConnectorTrunkRtl(midX, parentMidY, parentRightX),
+      status
+    );
+  }
+}
+
 export function buildTwoSidedConnectors(
   positions: Array<MatchPosition>,
   layoutMaxRound: number
@@ -366,80 +440,19 @@ export function buildTwoSidedConnectors(
       `${pos.match.round - 1}-${pos.match.matchIndex * 2 + 1}`
     );
 
-    const parentMidY = pos.y + MATCH_H / 2;
-    const isFinal = isBracketFinal(pos.match, layoutMaxRound);
-
-    if (isFinal) {
-      let hasChild = false;
-      if (childA) {
-        hasChild = true;
-        const childMidY = childA.y + MATCH_H / 2;
-        const childRightX = childA.x + MATCH_W;
-        const parentLeftX = pos.x;
-        const midX = parentLeftX - connectorStub;
-        paths.push({
-          d: buildConnectorChildLeg(childRightX, childMidY, midX, parentMidY),
-        });
-        paths.push({
-          d: buildConnectorTrunk(midX, parentMidY, parentLeftX),
-        });
-      }
-      if (childB) {
-        hasChild = true;
-        const childMidY = childB.y + MATCH_H / 2;
-        const childLeftX = childB.x;
-        const parentRightX = pos.x + MATCH_W;
-        const midX = parentRightX + connectorStub;
-        paths.push({
-          d: buildConnectorChildLegRtl(childLeftX, childMidY, midX, parentMidY),
-        });
-        paths.push({
-          d: buildConnectorTrunkRtl(midX, parentMidY, parentRightX),
-        });
-      }
-      if (!hasChild) continue;
+    if (isBracketFinal(pos.match, layoutMaxRound)) {
+      appendToParent(paths, pos, 'ltr', [childA]);
+      appendToParent(paths, pos, 'rtl', [childB]);
       continue;
     }
 
     if (pos.wing === 'left') {
-      const parentLeftX = pos.x;
-      const midX = parentLeftX - connectorStub;
-      let hasChild = false;
-      for (const child of [childA, childB]) {
-        if (!child) continue;
-        hasChild = true;
-        const childMidY = child.y + MATCH_H / 2;
-        const childRightX = child.x + MATCH_W;
-        paths.push({
-          d: buildConnectorChildLeg(childRightX, childMidY, midX, parentMidY),
-        });
-      }
-      if (hasChild) {
-        paths.push({
-          d: buildConnectorTrunk(midX, parentMidY, parentLeftX),
-        });
-      }
+      appendToParent(paths, pos, 'ltr', [childA, childB]);
       continue;
     }
 
     if (pos.wing === 'right') {
-      const parentRightX = pos.x + MATCH_W;
-      const midX = parentRightX + connectorStub;
-      let hasChild = false;
-      for (const child of [childA, childB]) {
-        if (!child) continue;
-        hasChild = true;
-        const childMidY = child.y + MATCH_H / 2;
-        const childLeftX = child.x;
-        paths.push({
-          d: buildConnectorChildLegRtl(childLeftX, childMidY, midX, parentMidY),
-        });
-      }
-      if (hasChild) {
-        paths.push({
-          d: buildConnectorTrunkRtl(midX, parentMidY, parentRightX),
-        });
-      }
+      appendToParent(paths, pos, 'rtl', [childA, childB]);
     }
   }
 

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { BracketConnectors } from './bracket-connectors';
+import { BracketProvider } from './bracket-context';
 import { BracketFinalMatchNode } from './bracket-final-match-node';
 import { BracketMatchNode } from './bracket-match-node';
 import { BracketRoundLabels } from './bracket-round-labels';
@@ -76,52 +77,48 @@ export function Bracket({
     [positions, layoutMaxRound]
   );
 
+  const ctx = React.useMemo(
+    () => ({
+      matches,
+      athleteMap,
+      matchLabel,
+      readOnly,
+      onSlotClick,
+      onToggleLock,
+    }),
+    [matches, athleteMap, matchLabel, readOnly, onSlotClick, onToggleLock]
+  );
+
   if (positions.length === 0) return null;
 
   return (
-    <div className="relative select-none" style={{ width, height }}>
-      <BracketConnectors width={width} height={height} paths={connectors} />
-      <svg
-        width={width}
-        height={height}
-        className="pointer-events-none absolute inset-0 select-none"
-        aria-hidden
-      >
-        <BracketRoundLabels
-          positions={positions}
-          layoutMaxRound={layoutMaxRound}
-        />
-        <ThirdPlaceSvgLabel
-          positions={positions}
-          thirdPlaceId={thirdPlace?.id}
-        />
-      </svg>
+    <BracketProvider value={ctx}>
+      <div className="relative select-none" style={{ width, height }}>
+        <BracketConnectors width={width} height={height} paths={connectors} />
+        <svg
+          width={width}
+          height={height}
+          className="pointer-events-none absolute inset-0 select-none"
+          aria-hidden
+        >
+          <BracketRoundLabels
+            positions={positions}
+            layoutMaxRound={layoutMaxRound}
+          />
+          <ThirdPlaceSvgLabel
+            positions={positions}
+            thirdPlaceId={thirdPlace?.id}
+          />
+        </svg>
 
-      {positions.map((pos) =>
-        isBracketFinal(pos.match, layoutMaxRound) ? (
-          <BracketFinalMatchNode
-            key={pos.match.id}
-            pos={pos}
-            matches={matches}
-            athleteMap={athleteMap}
-            matchLabel={matchLabel}
-            readOnly={readOnly}
-            onSlotClick={onSlotClick}
-            onToggleLock={onToggleLock}
-          />
-        ) : (
-          <BracketMatchNode
-            key={pos.match.id}
-            pos={pos}
-            matches={matches}
-            athleteMap={athleteMap}
-            matchLabel={matchLabel}
-            readOnly={readOnly}
-            onSlotClick={onSlotClick}
-            onToggleLock={onToggleLock}
-          />
-        )
-      )}
-    </div>
+        {positions.map((pos) =>
+          isBracketFinal(pos.match, layoutMaxRound) ? (
+            <BracketFinalMatchNode key={pos.match.id} pos={pos} />
+          ) : (
+            <BracketMatchNode key={pos.match.id} pos={pos} />
+          )
+        )}
+      </div>
+    </BracketProvider>
   );
 }
