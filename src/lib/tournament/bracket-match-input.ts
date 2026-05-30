@@ -5,7 +5,6 @@ export type BracketMatchInput = {
   round: number;
   matchIndex: number;
   status: MatchStatus;
-  bestOf: number;
   redTournamentAthleteId: string | null;
   blueTournamentAthleteId: string | null;
   redAthleteId: string | null;

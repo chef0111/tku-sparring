@@ -32,7 +32,6 @@ function shellToMatches(
     round: m.round,
     matchIndex: m.matchIndex,
     status: 'pending' as const,
-    bestOf: 3,
     redAthleteId: null,
     blueAthleteId: null,
     redTournamentAthleteId: null,

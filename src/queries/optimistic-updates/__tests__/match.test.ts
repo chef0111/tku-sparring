@@ -11,7 +11,6 @@ function baseMatch(over: Partial<MatchData> = {}): MatchData {
     round: 0,
     matchIndex: 0,
     status: 'pending',
-    bestOf: 3,
     redAthleteId: 'ap-red',
     blueAthleteId: 'ap-blue',
     redTournamentAthleteId: 'ta-red',

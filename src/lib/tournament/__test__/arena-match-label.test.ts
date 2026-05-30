@@ -24,7 +24,6 @@ function m(
     round,
     matchIndex,
     status: 'pending',
-    bestOf: 3,
     redAthleteId: null,
     blueAthleteId: null,
     redTournamentAthleteId: null,
