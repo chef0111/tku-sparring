@@ -10,6 +10,7 @@ import type {
 } from '@/features/dashboard/types';
 import type { BracketLayoutResult } from '@/lib/tournament/bracket-layout';
 import {
+  MATCH_HEADER_ABOVE,
   MATCH_W,
   buildTwoSidedConnectors,
   buildTwoSidedLayout,
@@ -46,7 +47,7 @@ function ThirdPlaceSvgLabel({
   return (
     <text
       x={pos.x + MATCH_W / 2}
-      y={pos.y - 8}
+      y={pos.y - MATCH_HEADER_ABOVE}
       textAnchor="middle"
       className="fill-muted-foreground text-xs font-medium tracking-wider uppercase"
     >

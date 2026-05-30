@@ -88,19 +88,13 @@ export function BracketMatchNodeFrame({
 
       {labels.isRedWinner && (
         <div
-          className={cn(
-            'pointer-events-none absolute top-px rounded-t-[5px] bg-emerald-500/10',
-            isFinal ? 'right-1 left-1' : 'right-px left-px'
-          )}
+          className="pointer-events-none absolute inset-x-0 top-px rounded-t-[5px] bg-emerald-500/10"
           style={{ height: ATHLETE_ROW_H - 1 }}
         />
       )}
       {labels.isBlueWinner && (
         <div
-          className={cn(
-            'pointer-events-none absolute rounded-b-[5px] bg-emerald-500/10',
-            isFinal ? 'right-1 left-1' : 'right-px left-px'
-          )}
+          className="pointer-events-none absolute inset-x-0 rounded-b-[5px] bg-emerald-500/10"
           style={{
             top: ATHLETE_ROW_H,
             height: ATHLETE_ROW_H - 1,
@@ -108,12 +102,7 @@ export function BracketMatchNodeFrame({
         />
       )}
 
-      <div
-        className={cn(
-          'bg-border pointer-events-none absolute top-1/2 h-px -translate-y-1/2',
-          isFinal ? 'right-1 left-1' : 'right-0 left-0'
-        )}
-      />
+      <div className="bg-border pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2" />
 
       <BracketSlot
         match={match}
@@ -129,7 +118,7 @@ export function BracketMatchNodeFrame({
         onSlotClick={onSlotClick}
         onToggleLock={() => onToggleLock(match.id, 'red', !match.redLocked)}
         readOnly={readOnly}
-        showSideBar={!isFinal}
+        showIndicator={!isFinal}
       />
       <BracketSlot
         match={match}
@@ -145,7 +134,7 @@ export function BracketMatchNodeFrame({
         onSlotClick={onSlotClick}
         onToggleLock={() => onToggleLock(match.id, 'blue', !match.blueLocked)}
         readOnly={readOnly}
-        showSideBar={!isFinal}
+        showIndicator={!isFinal}
       />
     </div>
   );

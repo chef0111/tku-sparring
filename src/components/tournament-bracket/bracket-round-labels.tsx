@@ -1,11 +1,28 @@
 import * as React from 'react';
 import type { MatchPosition } from '@/lib/tournament/bracket-layout';
-import { MATCH_W, PADDING, ROUND_GAP } from '@/lib/tournament/bracket-layout';
+import {
+  ROUND_LABEL_Y,
+  roundLabelCenterX,
+} from '@/lib/tournament/bracket-layout';
 import { getBracketRoundLabel } from '@/lib/tournament/bracket-round-label';
 
 export interface BracketRoundLabelsProps {
   positions: Array<MatchPosition>;
   layoutMaxRound: number;
+}
+
+function hasWingInRound(
+  positions: Array<MatchPosition>,
+  round: number,
+  wing: MatchPosition['wing'],
+  layoutMaxRound: number
+): boolean {
+  return positions.some(
+    (p) =>
+      p.match.round === round &&
+      p.wing === wing &&
+      p.match.round <= layoutMaxRound
+  );
 }
 
 export function BracketRoundLabels({
@@ -22,39 +39,16 @@ export function BracketRoundLabels({
     ),
   ].sort((a, b) => a - b);
 
-  const centerX = PADDING + layoutMaxRound * ROUND_GAP + MATCH_W / 2;
-
-  const columns = new Map<
-    string,
-    { round: number; wing: 'left' | 'right' | 'center'; x: number }
-  >();
-
-  for (const pos of positions) {
-    if (pos.match.round > layoutMaxRound) continue;
-    const key = `${pos.match.round}-${pos.wing}`;
-    const midX = pos.x + MATCH_W / 2;
-    const existing = columns.get(key);
-    if (
-      !existing ||
-      Math.abs(midX - centerX) < Math.abs(existing.x - centerX)
-    ) {
-      columns.set(key, { round: pos.match.round, wing: pos.wing, x: midX });
-    }
-  }
-
   return roundNums.flatMap((round) => {
     const label = getBracketRoundLabel(round, layoutMaxRound);
-    const leftCol = columns.get(`${round}-left`);
-    const rightCol = columns.get(`${round}-right`);
-    const centerCol = columns.get(`${round}-center`);
     const nodes: Array<React.ReactElement> = [];
 
-    if (leftCol) {
+    if (hasWingInRound(positions, round, 'left', layoutMaxRound)) {
       nodes.push(
         <text
           key={`${round}-left`}
-          x={leftCol.x}
-          y={10}
+          x={roundLabelCenterX(round, 'left', layoutMaxRound)}
+          y={ROUND_LABEL_Y}
           textAnchor="middle"
           className="fill-muted-foreground text-sm font-semibold tracking-wider uppercase"
         >
@@ -62,12 +56,15 @@ export function BracketRoundLabels({
         </text>
       );
     }
-    if (centerCol && round === layoutMaxRound) {
+    if (
+      round === layoutMaxRound &&
+      hasWingInRound(positions, round, 'center', layoutMaxRound)
+    ) {
       nodes.push(
         <text
           key={`${round}-center`}
-          x={centerCol.x}
-          y={10}
+          x={roundLabelCenterX(round, 'center', layoutMaxRound)}
+          y={ROUND_LABEL_Y}
           textAnchor="middle"
           className="fill-muted-foreground text-sm font-semibold tracking-wider uppercase"
         >
@@ -75,12 +72,12 @@ export function BracketRoundLabels({
         </text>
       );
     }
-    if (rightCol) {
+    if (hasWingInRound(positions, round, 'right', layoutMaxRound)) {
       nodes.push(
         <text
           key={`${round}-right`}
-          x={rightCol.x}
-          y={10}
+          x={roundLabelCenterX(round, 'right', layoutMaxRound)}
+          y={ROUND_LABEL_Y}
           textAnchor="middle"
           className="fill-muted-foreground text-sm font-semibold tracking-wider uppercase"
         >

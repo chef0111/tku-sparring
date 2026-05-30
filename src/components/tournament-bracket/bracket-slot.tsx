@@ -25,7 +25,7 @@ export interface BracketSlotProps {
   onSlotClick: (match: MatchData) => void;
   onToggleLock: () => void;
   readOnly: boolean;
-  showSideBar?: boolean;
+  showIndicator?: boolean;
 }
 
 export function BracketSlot({
@@ -42,7 +42,7 @@ export function BracketSlot({
   onSlotClick,
   onToggleLock,
   readOnly,
-  showSideBar = true,
+  showIndicator = true,
 }: BracketSlotProps) {
   const id = `slot-${match.id}-${side}`;
   const slotLabel = athlete?.name ?? assignedName ?? emptyLabel;
@@ -85,7 +85,7 @@ export function BracketSlot({
     [setDragRef, setDropRef]
   );
 
-  const sideBar = side === 'red' ? 'bg-red-500' : 'bg-blue-500';
+  const sideBar = side === 'red' ? 'bg-red-500 mt-px' : 'bg-blue-500 mb-px';
   const rowTop = side === 'red' ? 0 : ATHLETE_ROW_H;
 
   return (
@@ -122,11 +122,11 @@ export function BracketSlot({
         if (e.key === 'Enter' || e.key === ' ') onSlotClick(match);
       }}
     >
-      {showSideBar && (
+      {showIndicator && (
         <div
           className={cn(
-            'w-1.5 shrink-0',
-            isRtl ? 'rounded-r-lg' : 'rounded-l-lg',
+            'w-2 shrink-0',
+            isRtl ? 'mr-px rounded-r-lg' : 'ml-px rounded-l-lg',
             sideBar
           )}
         />

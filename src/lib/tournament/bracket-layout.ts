@@ -4,6 +4,11 @@ export const MATCH_W = 220;
 export const MATCH_H = 70;
 export const ROUND_GAP = 280;
 export const PADDING = 24;
+/** Reserved SVG band above matches for round titles (keeps match headers clear). */
+export const ROUND_LABEL_BAND = 44;
+export const ROUND_LABEL_Y = 13;
+/** Gap between match box top edge and the "Match N" header line. */
+export const MATCH_HEADER_ABOVE = 16;
 export const ATHLETE_ROW_H = MATCH_H / 2;
 export const CONNECTOR_CORNER_RADIUS = 8;
 
@@ -96,6 +101,22 @@ export function isBracketFinal(
   return match.round === layoutMaxRound && match.matchIndex === 0;
 }
 
+export function layoutCenterX(maxRound: number): number {
+  return PADDING + maxRound * ROUND_GAP + MATCH_W / 2;
+}
+
+export function roundLabelCenterX(
+  round: number,
+  wing: BracketWing,
+  layoutMaxRound: number
+): number {
+  const centerX = layoutCenterX(layoutMaxRound);
+  const offset = (layoutMaxRound - round) * ROUND_GAP;
+  if (wing === 'center') return centerX;
+  if (wing === 'left') return centerX - offset;
+  return centerX + offset;
+}
+
 function matchX(
   round: number,
   matchIndex: number,
@@ -143,7 +164,8 @@ export function buildTwoSidedLayout(
   const r0Count = rounds.get(roundNums[0]!)?.length ?? 1;
   const totalMainHeight = r0Count * MATCH_H + (r0Count - 1) * MATCH_H;
 
-  const centerX = PADDING + maxRound * ROUND_GAP + MATCH_W / 2;
+  const centerX = layoutCenterX(maxRound);
+  const matchTop = PADDING + ROUND_LABEL_BAND;
   const yByKey = new Map<string, number>();
 
   function layoutWingTree(wing: 'left' | 'right') {
@@ -160,7 +182,7 @@ export function buildTwoSidedLayout(
       const match = r0InWing[i]!;
       yByKey.set(
         `${match.round}-${match.matchIndex}`,
-        PADDING + i * slotH + (slotH - MATCH_H) / 2
+        matchTop + i * slotH + (slotH - MATCH_H) / 2
       );
     }
 
@@ -173,9 +195,9 @@ export function buildTwoSidedLayout(
         const childA = yByKey.get(`${round - 1}-${match.matchIndex * 2}`);
         const childB = yByKey.get(`${round - 1}-${match.matchIndex * 2 + 1}`);
         const midA =
-          childA != null ? childA + MATCH_H / 2 : PADDING + wingHeight / 2;
+          childA != null ? childA + MATCH_H / 2 : matchTop + wingHeight / 2;
         const midB =
-          childB != null ? childB + MATCH_H / 2 : PADDING + wingHeight / 2;
+          childB != null ? childB + MATCH_H / 2 : matchTop + wingHeight / 2;
         yByKey.set(
           `${match.round}-${match.matchIndex}`,
           (midA + midB) / 2 - MATCH_H / 2
@@ -192,7 +214,7 @@ export function buildTwoSidedLayout(
   const finalY =
     leftSf != null && rightSf != null
       ? (leftSf + rightSf) / 2
-      : PADDING + totalMainHeight / 2 - MATCH_H / 2;
+      : matchTop + totalMainHeight / 2 - MATCH_H / 2;
   yByKey.set(`${maxRound}-0`, finalY);
 
   const positions: Array<MatchPosition> = [];
@@ -213,7 +235,7 @@ export function buildTwoSidedLayout(
       (p) => p.match.round === maxRound && p.match.matchIndex === 0
     );
     const x = finalPos?.x ?? centerX - MATCH_W / 2;
-    const y = totalMainHeight + PADDING + MATCH_H;
+    const y = matchTop + totalMainHeight + PADDING + MATCH_H;
     positions.push({
       x,
       y,
