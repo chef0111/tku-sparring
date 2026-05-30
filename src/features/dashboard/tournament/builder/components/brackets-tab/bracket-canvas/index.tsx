@@ -35,16 +35,13 @@ export function BracketCanvas() {
     return map;
   }, [athletes]);
 
-  const layoutSize = React.useMemo(
-    () =>
-      matchList.length === 0
-        ? { width: 0, height: 0 }
-        : buildTwoSidedLayout(matchList, thirdPlaceMatch),
+  const layout = React.useMemo(
+    () => buildTwoSidedLayout(matchList, thirdPlaceMatch),
     [matchList, thirdPlaceMatch]
   );
 
   const { containerRef, transform, handlers, reset, zoomIn, zoomOut } =
-    usePanZoom(layoutSize.width, layoutSize.height);
+    usePanZoom(layout.width, layout.height);
 
   const onToggleLock = React.useCallback(
     (matchId: string, side: 'red' | 'blue', locked: boolean) => {
@@ -65,14 +62,15 @@ export function BracketCanvas() {
         style={{
           transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
           transformOrigin: '0 0',
-          width: layoutSize.width,
-          height: layoutSize.height,
+          width: layout.width,
+          height: layout.height,
           position: 'relative',
         }}
       >
         <Bracket
           matches={matchList}
           thirdPlaceMatch={thirdPlaceMatch}
+          layout={layout}
           athleteMap={athleteMap}
           matchLabel={matchLabel}
           readOnly={readOnly}

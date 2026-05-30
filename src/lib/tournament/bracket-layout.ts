@@ -16,6 +16,14 @@ export interface MatchPosition {
   wing: BracketWing;
 }
 
+export type BracketLayoutResult = {
+  positions: Array<MatchPosition>;
+  width: number;
+  height: number;
+  layoutMaxRound: number;
+  thirdPlace: MatchData | null;
+};
+
 export function matchWing(
   round: number,
   matchIndex: number,
@@ -26,21 +34,25 @@ export function matchWing(
   return matchIndex < split ? 'left' : 'right';
 }
 
-function splitMainAndThird(
+export function resolveBracketLayout(
   matches: Array<MatchData>,
   thirdPlaceMatch: boolean
 ): {
   mainMatches: Array<MatchData>;
   thirdPlace: MatchData | null;
-  maxRound: number;
+  layoutMaxRound: number;
 } {
   if (matches.length === 0) {
-    return { mainMatches: [], thirdPlace: null, maxRound: 0 };
+    return { mainMatches: [], thirdPlace: null, layoutMaxRound: 0 };
   }
   const dataMaxRound = Math.max(...matches.map((m) => m.round));
 
   if (!thirdPlaceMatch) {
-    return { mainMatches: matches, thirdPlace: null, maxRound: dataMaxRound };
+    return {
+      mainMatches: matches,
+      thirdPlace: null,
+      layoutMaxRound: dataMaxRound,
+    };
   }
 
   const sameRoundThird = matches.find(
@@ -52,7 +64,7 @@ function splitMainAndThird(
         (m) => !(m.round === dataMaxRound && m.matchIndex === 1)
       ),
       thirdPlace: sameRoundThird,
-      maxRound: dataMaxRound,
+      layoutMaxRound: dataMaxRound,
     };
   }
 
@@ -66,11 +78,22 @@ function splitMainAndThird(
     return {
       mainMatches: matches.filter((m) => m.round !== dataMaxRound),
       thirdPlace: extraRoundThird,
-      maxRound: dataMaxRound - 1,
+      layoutMaxRound: dataMaxRound - 1,
     };
   }
 
-  return { mainMatches: matches, thirdPlace: null, maxRound: dataMaxRound };
+  return {
+    mainMatches: matches,
+    thirdPlace: null,
+    layoutMaxRound: dataMaxRound,
+  };
+}
+
+export function isBracketFinal(
+  match: MatchData,
+  layoutMaxRound: number
+): boolean {
+  return match.round === layoutMaxRound && match.matchIndex === 0;
 }
 
 function matchX(
@@ -90,13 +113,20 @@ export function buildTwoSidedLayout(
   matches: Array<MatchData>,
   thirdPlaceMatch: boolean
 ) {
-  const { mainMatches, thirdPlace, maxRound } = splitMainAndThird(
+  const { mainMatches, thirdPlace, layoutMaxRound } = resolveBracketLayout(
     matches,
     thirdPlaceMatch
   );
+  const maxRound = layoutMaxRound;
 
   if (mainMatches.length === 0) {
-    return { positions: [], width: 0, height: 0 };
+    return {
+      positions: [],
+      width: 0,
+      height: 0,
+      layoutMaxRound,
+      thirdPlace,
+    };
   }
 
   const rounds = new Map<number, Array<MatchData>>();
@@ -195,7 +225,13 @@ export function buildTwoSidedLayout(
   const maxX = Math.max(...positions.map((p) => p.x)) + MATCH_W + PADDING;
   const maxY = Math.max(...positions.map((p) => p.y)) + MATCH_H + PADDING;
 
-  return { positions, width: maxX, height: maxY };
+  return {
+    positions,
+    width: maxX,
+    height: maxY,
+    layoutMaxRound,
+    thirdPlace,
+  };
 }
 
 /** @deprecated Use buildTwoSidedLayout */
@@ -310,7 +346,10 @@ export function buildConnectorTrunkRtl(
 
 const connectorStub = (ROUND_GAP - MATCH_W) / 2;
 
-export function buildTwoSidedConnectors(positions: Array<MatchPosition>) {
+export function buildTwoSidedConnectors(
+  positions: Array<MatchPosition>,
+  layoutMaxRound: number
+) {
   const paths: Array<BracketConnectorPath> = [];
   const posMap = new Map<string, MatchPosition>();
   for (const p of positions) {
@@ -328,7 +367,7 @@ export function buildTwoSidedConnectors(positions: Array<MatchPosition>) {
     );
 
     const parentMidY = pos.y + MATCH_H / 2;
-    const isFinal = pos.wing === 'center' && pos.match.matchIndex === 0;
+    const isFinal = isBracketFinal(pos.match, layoutMaxRound);
 
     if (isFinal) {
       let hasChild = false;
@@ -408,6 +447,9 @@ export function buildTwoSidedConnectors(positions: Array<MatchPosition>) {
 }
 
 /** @deprecated Use buildTwoSidedConnectors */
-export function buildConnectors(positions: Array<MatchPosition>) {
-  return buildTwoSidedConnectors(positions);
+export function buildConnectors(
+  positions: Array<MatchPosition>,
+  layoutMaxRound: number = Math.max(0, ...positions.map((p) => p.match.round))
+) {
+  return buildTwoSidedConnectors(positions, layoutMaxRound);
 }

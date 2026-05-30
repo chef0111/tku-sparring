@@ -327,3 +327,8 @@
 @utility canvas-background {
   @apply flex h-auto w-auto bg-black/0.75 bg-[radial-gradient(var(--pattern-foreground)_1px,transparent_0)] bg-size-[10px_10px] bg-center text-black select-none [--pattern-foreground:var(--color-zinc-950)]/5 before:-top-px after:-bottom-px dark:bg-white/0.75 dark:text-white dark:[--pattern-foreground:var(--color-white)]/5;
 }
+
+@utility dashboard-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) var(--sidebar) !important;
+}

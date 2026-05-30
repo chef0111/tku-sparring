@@ -121,15 +121,39 @@ describe('buildTwoSidedLayout', () => {
       positions: [],
       width: 0,
       height: 0,
+      layoutMaxRound: 0,
+      thirdPlace: null,
     });
+  });
+
+  it('does not treat extra-round third place as final in connectors', () => {
+    const matches = shellToMatches(8, true);
+    const { positions, layoutMaxRound, thirdPlace } = buildTwoSidedLayout(
+      matches,
+      true
+    );
+    expect(thirdPlace).not.toBeNull();
+    const paths = buildTwoSidedConnectors(positions, layoutMaxRound);
+    const thirdPos = positions.find((p) => p.match.id === thirdPlace!.id)!;
+    const finalPos = positions.find(
+      (p) => p.match.round === layoutMaxRound && p.match.matchIndex === 0
+    )!;
+
+    expect(thirdPos.match.round).toBeGreaterThan(layoutMaxRound);
+    const pathsThroughThird = paths.filter((p) => {
+      const midX = thirdPos.x + MATCH_W / 2;
+      return p.d.includes(String(midX)) && p.d.includes(String(thirdPos.y));
+    });
+    expect(pathsThroughThird.length).toBe(0);
+    expect(finalPos.y).toBeLessThan(thirdPos.y);
   });
 });
 
 describe('buildTwoSidedConnectors', () => {
   it('emits paths for left wing, right wing, and final feeders', () => {
     const matches = shellToMatches(8, false);
-    const { positions } = buildTwoSidedLayout(matches, false);
-    const paths = buildTwoSidedConnectors(positions);
+    const { positions, layoutMaxRound } = buildTwoSidedLayout(matches, false);
+    const paths = buildTwoSidedConnectors(positions, layoutMaxRound);
     expect(paths.length).toBeGreaterThan(0);
   });
 });

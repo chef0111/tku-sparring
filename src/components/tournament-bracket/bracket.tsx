@@ -7,10 +7,12 @@ import type {
   MatchData,
   TournamentAthleteData,
 } from '@/features/dashboard/types';
+import type { BracketLayoutResult } from '@/lib/tournament/bracket-layout';
 import {
   MATCH_W,
   buildTwoSidedConnectors,
   buildTwoSidedLayout,
+  isBracketFinal,
 } from '@/lib/tournament/bracket-layout';
 
 export interface BracketProps {
@@ -25,48 +27,19 @@ export interface BracketProps {
     side: 'red' | 'blue',
     locked: boolean
   ) => void;
-}
-
-function layoutMaxRound(matches: Array<MatchData>, thirdPlaceMatch: boolean) {
-  if (matches.length === 0) return 0;
-  const dataMaxRound = Math.max(...matches.map((m) => m.round));
-  if (!thirdPlaceMatch) return dataMaxRound;
-  const sameRoundThird = matches.some(
-    (m) => m.round === dataMaxRound && m.matchIndex === 1
-  );
-  if (sameRoundThird) return dataMaxRound;
-  const extraRoundThird = matches.some(
-    (m) =>
-      m.round === dataMaxRound &&
-      m.matchIndex === 0 &&
-      !matches.some((x) => x.round === dataMaxRound && x.matchIndex === 1)
-  );
-  if (extraRoundThird) return dataMaxRound - 1;
-  return dataMaxRound;
-}
-
-function isFinalNode(
-  pos: { match: MatchData; wing: string },
-  maxRound: number
-) {
-  return (
-    pos.wing === 'center' &&
-    pos.match.matchIndex === 0 &&
-    pos.match.round === maxRound
-  );
+  /** When set, skips a second layout pass (e.g. from BracketCanvas pan/zoom). */
+  layout?: BracketLayoutResult;
 }
 
 function ThirdPlaceSvgLabel({
   positions,
-  thirdPlaceMatch,
+  thirdPlaceId,
 }: {
-  positions: ReturnType<typeof buildTwoSidedLayout>['positions'];
-  thirdPlaceMatch: boolean;
+  positions: BracketLayoutResult['positions'];
+  thirdPlaceId: string | undefined;
 }) {
-  if (!thirdPlaceMatch) return null;
-  const pos = positions.find(
-    (p) => p.wing === 'center' && p.match.matchIndex !== 0
-  );
+  if (!thirdPlaceId) return null;
+  const pos = positions.find((p) => p.match.id === thirdPlaceId);
   if (!pos) return null;
 
   return (
@@ -89,18 +62,19 @@ export function Bracket({
   readOnly,
   onSlotClick,
   onToggleLock,
+  layout: layoutProp,
 }: BracketProps) {
-  const { positions, width, height } = React.useMemo(
+  const computed = React.useMemo(
     () => buildTwoSidedLayout(matches, thirdPlaceMatch),
     [matches, thirdPlaceMatch]
   );
+  const layout = layoutProp ?? computed;
+  const { positions, width, height, layoutMaxRound, thirdPlace } = layout;
 
   const connectors = React.useMemo(
-    () => buildTwoSidedConnectors(positions),
-    [positions]
+    () => buildTwoSidedConnectors(positions, layoutMaxRound),
+    [positions, layoutMaxRound]
   );
-
-  const maxRound = layoutMaxRound(matches, thirdPlaceMatch);
 
   if (positions.length === 0) return null;
 
@@ -113,15 +87,18 @@ export function Bracket({
         className="pointer-events-none absolute inset-0 select-none"
         aria-hidden
       >
-        <BracketRoundLabels positions={positions} matches={matches} />
+        <BracketRoundLabels
+          positions={positions}
+          layoutMaxRound={layoutMaxRound}
+        />
         <ThirdPlaceSvgLabel
           positions={positions}
-          thirdPlaceMatch={thirdPlaceMatch}
+          thirdPlaceId={thirdPlace?.id}
         />
       </svg>
 
       {positions.map((pos) =>
-        isFinalNode(pos, maxRound) ? (
+        isBracketFinal(pos.match, layoutMaxRound) ? (
           <BracketFinalMatchNode
             key={pos.match.id}
             pos={pos}

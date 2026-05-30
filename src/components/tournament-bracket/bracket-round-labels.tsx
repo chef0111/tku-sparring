@@ -1,25 +1,28 @@
 import * as React from 'react';
-import type { MatchData } from '@/features/dashboard/types';
 import type { MatchPosition } from '@/lib/tournament/bracket-layout';
 import { MATCH_W, PADDING, ROUND_GAP } from '@/lib/tournament/bracket-layout';
 import { getBracketRoundLabel } from '@/lib/tournament/bracket-round-label';
 
 export interface BracketRoundLabelsProps {
   positions: Array<MatchPosition>;
-  matches: Array<MatchData>;
+  layoutMaxRound: number;
 }
 
 export function BracketRoundLabels({
   positions,
-  matches,
+  layoutMaxRound,
 }: BracketRoundLabelsProps) {
-  if (matches.length === 0) return null;
+  if (positions.length === 0) return null;
 
-  const maxRound = Math.max(...matches.map((m) => m.round));
-  const roundNums = [...new Set(matches.map((m) => m.round))].sort(
-    (a, b) => a - b
-  );
-  const centerX = PADDING + maxRound * ROUND_GAP + MATCH_W / 2;
+  const roundNums = [
+    ...new Set(
+      positions
+        .filter((p) => p.match.round <= layoutMaxRound)
+        .map((p) => p.match.round)
+    ),
+  ].sort((a, b) => a - b);
+
+  const centerX = PADDING + layoutMaxRound * ROUND_GAP + MATCH_W / 2;
 
   const columns = new Map<
     string,
@@ -27,13 +30,7 @@ export function BracketRoundLabels({
   >();
 
   for (const pos of positions) {
-    if (
-      pos.wing === 'center' &&
-      pos.match.matchIndex === 1 &&
-      pos.match.round === maxRound
-    ) {
-      continue;
-    }
+    if (pos.match.round > layoutMaxRound) continue;
     const key = `${pos.match.round}-${pos.wing}`;
     const midX = pos.x + MATCH_W / 2;
     const existing = columns.get(key);
@@ -46,7 +43,7 @@ export function BracketRoundLabels({
   }
 
   return roundNums.flatMap((round) => {
-    const label = getBracketRoundLabel(round, maxRound);
+    const label = getBracketRoundLabel(round, layoutMaxRound);
     const leftCol = columns.get(`${round}-left`);
     const rightCol = columns.get(`${round}-right`);
     const centerCol = columns.get(`${round}-center`);
@@ -65,7 +62,7 @@ export function BracketRoundLabels({
         </text>
       );
     }
-    if (centerCol && round === maxRound) {
+    if (centerCol && round === layoutMaxRound) {
       nodes.push(
         <text
           key={`${round}-center`}
