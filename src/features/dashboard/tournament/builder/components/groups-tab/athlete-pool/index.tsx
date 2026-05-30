@@ -110,7 +110,7 @@ export function AthletePool({
           </div>
           {!readOnly && onAddAthletes && (
             <SheetTrigger asChild>
-              <Button size="sm" variant="outline" onClick={onAddAthletes}>
+              <Button size="sm" variant="outline">
                 <UserPlus data-icon="inline-start" aria-hidden="true" />
                 Athletes
               </Button>
@@ -162,7 +162,7 @@ export function AthletePool({
                 </p>
                 {!readOnly && onAddAthletes && (
                   <SheetTrigger asChild>
-                    <Button size="sm" onClick={onAddAthletes}>
+                    <Button size="sm">
                       <UserPlus data-icon="inline-start" aria-hidden="true" />
                       Add from library
                     </Button>

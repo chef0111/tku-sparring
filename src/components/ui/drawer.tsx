@@ -10,9 +10,16 @@ function Drawer({
 }
 
 function DrawerTrigger({
+  asChild,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Trigger>) {
-  return <DrawerPrimitive.Trigger data-slot="drawer-trigger" {...props} />;
+  return (
+    <DrawerPrimitive.Trigger
+      data-slot={asChild ? undefined : 'drawer-trigger'}
+      asChild={asChild}
+      {...props}
+    />
+  );
 }
 
 function DrawerPortal({
