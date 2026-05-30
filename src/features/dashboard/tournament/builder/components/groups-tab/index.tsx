@@ -11,6 +11,7 @@ import { GroupsRail } from './groups-rail';
 import type { DragEndEvent } from '@dnd-kit/core';
 import type { GroupData } from '@/features/dashboard/types';
 import { useAssignAthlete } from '@/queries/group';
+import { Sheet } from '@/components/ui/sheet';
 
 interface GroupsTabProps {
   tournamentId: string;
@@ -46,17 +47,17 @@ export function GroupsTab({
   React.useEffect(() => {
     if (readOnly) {
       setShowAddGroup(false);
-      setAddAthletesOpen(false);
       setSettingsOpen(false);
+      setAddAthletesOpen(false);
     }
   }, [readOnly]);
 
   React.useEffect(() => {
     if (addAthletes && !readOnly) {
-      setAddAthletesOpen(true);
       void setAddAthletes(null);
+      setAddAthletesOpen(false);
     }
-  }, [addAthletes, readOnly, setAddAthletes]);
+  }, [addAthletes, readOnly, setAddAthletes, setAddAthletesOpen]);
 
   const selectedGroup = groups.find((g) => g.id === selectedGroupId) ?? null;
 
@@ -91,12 +92,21 @@ export function GroupsTab({
   return (
     <DndContext onDragEnd={handleDragEnd}>
       <div className="flex h-full min-h-0 w-full">
-        <AthletePool
-          tournamentId={tournamentId}
-          selectedGroupId={selectedGroupId}
-          readOnly={readOnly}
-          onOpenAddAthletes={() => setAddAthletesOpen(true)}
-        />
+        <Sheet open={addAthletesOpen} onOpenChange={setAddAthletesOpen}>
+          <AthletePool
+            tournamentId={tournamentId}
+            selectedGroupId={selectedGroupId}
+            readOnly={readOnly}
+            onAddAthletes={() => setAddAthletesOpen(true)}
+          />
+          <AddAthletesSheet
+            open={addAthletesOpen}
+            onOpenChange={setAddAthletesOpen}
+            tournamentId={tournamentId}
+            tournamentName={tournamentName}
+            readOnly={readOnly}
+          />
+        </Sheet>
         <GroupRosterTable
           group={selectedGroup}
           tournamentId={tournamentId}
@@ -114,13 +124,6 @@ export function GroupsTab({
         />
       </div>
 
-      <AddAthletesSheet
-        open={addAthletesOpen}
-        onOpenChange={setAddAthletesOpen}
-        tournamentId={tournamentId}
-        tournamentName={tournamentName}
-        readOnly={readOnly}
-      />
       <AddGroupDialog
         open={showAddGroup}
         onOpenChange={setShowAddGroup}

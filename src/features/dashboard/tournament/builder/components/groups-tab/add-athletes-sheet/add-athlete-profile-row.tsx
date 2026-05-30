@@ -18,7 +18,7 @@ export function AddAthleteProfileRow({
   return (
     <label
       className={cn(
-        'hover:bg-muted/40 flex cursor-pointer items-start gap-3 px-3 py-2 transition-colors',
+        'hover:bg-muted/40 smooth-hover flex cursor-pointer items-start gap-3 px-3 py-2',
         checked && 'bg-muted/30'
       )}
     >

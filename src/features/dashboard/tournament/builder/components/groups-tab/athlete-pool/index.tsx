@@ -18,12 +18,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTournamentAthletesInfinite } from '@/queries/tournament-athlete';
+import { SheetTrigger } from '@/components/ui/sheet';
 
 interface AthletePoolProps {
   tournamentId: string;
   selectedGroupId: string | null;
   readOnly: boolean;
-  onOpenAddAthletes?: () => void;
+  onAddAthletes?: () => void;
 }
 
 const POOL_FILTER_PARSERS = {
@@ -36,10 +37,10 @@ const POOL_FILTER_PARSERS = {
 };
 
 export function AthletePool({
+  onAddAthletes,
   tournamentId,
   selectedGroupId,
   readOnly,
-  onOpenAddAthletes,
 }: AthletePoolProps) {
   const {
     poolQuery,
@@ -107,11 +108,13 @@ export function AthletePool({
             <h3 className="text-sm font-semibold">Unassigned Athletes</h3>
             <Badge variant="secondary">{total}</Badge>
           </div>
-          {!readOnly && onOpenAddAthletes && (
-            <Button size="sm" variant="outline" onClick={onOpenAddAthletes}>
-              <UserPlus data-icon="inline-start" aria-hidden="true" />
-              Athletes
-            </Button>
+          {!readOnly && onAddAthletes && (
+            <SheetTrigger asChild>
+              <Button size="sm" variant="outline" onClick={onAddAthletes}>
+                <UserPlus data-icon="inline-start" aria-hidden="true" />
+                Athletes
+              </Button>
+            </SheetTrigger>
           )}
         </div>
 
@@ -157,16 +160,14 @@ export function AthletePool({
                 <p className="text-foreground text-sm font-medium">
                   No unassigned athletes
                 </p>
-                {!readOnly && onOpenAddAthletes ? (
-                  <Button
-                    size="sm"
-                    className="cursor-pointer"
-                    onClick={onOpenAddAthletes}
-                  >
-                    <UserPlus data-icon="inline-start" aria-hidden="true" />
-                    Add from library
-                  </Button>
-                ) : null}
+                {!readOnly && onAddAthletes && (
+                  <SheetTrigger asChild>
+                    <Button size="sm" onClick={onAddAthletes}>
+                      <UserPlus data-icon="inline-start" aria-hidden="true" />
+                      Add from library
+                    </Button>
+                  </SheetTrigger>
+                )}
               </>
             )}
           </div>
