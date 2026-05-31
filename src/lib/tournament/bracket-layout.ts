@@ -10,6 +10,8 @@ import {
   ROUND_LABEL_BAND,
 } from '@/config/bracket';
 
+export type BracketCanvasLayout = 'two-sided' | 'one-sided';
+
 export type BracketWing = 'left' | 'right' | 'center';
 
 export interface MatchPosition {
@@ -266,6 +268,115 @@ export function buildTwoSidedLayout(
   };
 }
 
+function oneSidedMatchX(round: number): number {
+  return PADDING + round * ROUND_GAP;
+}
+
+export function oneSidedRoundLabelX(round: number): number {
+  return oneSidedMatchX(round) + MATCH_W / 2;
+}
+
+export function buildOneSidedLayout(
+  matches: Array<MatchData>,
+  thirdPlaceMatch: boolean
+): BracketLayoutResult {
+  const { mainMatches, thirdPlace, layoutMaxRound } = resolveBracketLayout(
+    matches,
+    thirdPlaceMatch
+  );
+  const maxRound = layoutMaxRound;
+
+  if (mainMatches.length === 0) {
+    return {
+      positions: [],
+      width: 0,
+      height: 0,
+      layoutMaxRound,
+      thirdPlace,
+    };
+  }
+
+  const rounds = new Map<number, Array<MatchData>>();
+  for (const m of mainMatches) {
+    const arr = rounds.get(m.round) ?? [];
+    arr.push(m);
+    rounds.set(m.round, arr);
+  }
+  for (const arr of rounds.values()) {
+    arr.sort((a, b) => a.matchIndex - b.matchIndex);
+  }
+
+  const roundNums = Array.from(rounds.keys()).sort((a, b) => a - b);
+  const r0Matches = rounds.get(roundNums[0]!) ?? [];
+  const r0Count = r0Matches.length;
+  const totalMainHeight =
+    r0Count * MATCH_H + Math.max(0, r0Count - 1) * MATCH_ROW_GAP;
+
+  const matchTop = PADDING + ROUND_LABEL_BAND;
+  const yByKey = new Map<string, number>();
+  const slotH = r0Count > 0 ? totalMainHeight / r0Count : MATCH_H;
+
+  for (let i = 0; i < r0Matches.length; i++) {
+    const match = r0Matches[i]!;
+    yByKey.set(
+      `${match.round}-${match.matchIndex}`,
+      matchTop + i * slotH + (slotH - MATCH_H) / 2
+    );
+  }
+
+  for (const round of roundNums.slice(1)) {
+    for (const match of rounds.get(round) ?? []) {
+      const childA = yByKey.get(`${round - 1}-${match.matchIndex * 2}`);
+      const childB = yByKey.get(`${round - 1}-${match.matchIndex * 2 + 1}`);
+      const midA =
+        childA != null ? childA + MATCH_H / 2 : matchTop + totalMainHeight / 2;
+      const midB =
+        childB != null ? childB + MATCH_H / 2 : matchTop + totalMainHeight / 2;
+      yByKey.set(
+        `${match.round}-${match.matchIndex}`,
+        (midA + midB) / 2 - MATCH_H / 2
+      );
+    }
+  }
+
+  const positions: Array<MatchPosition> = [];
+  for (const round of roundNums) {
+    for (const match of rounds.get(round)!) {
+      positions.push({
+        x: oneSidedMatchX(match.round),
+        y: yByKey.get(`${match.round}-${match.matchIndex}`)!,
+        match,
+        wing: 'left',
+      });
+    }
+  }
+
+  if (thirdPlace) {
+    const finalPos = positions.find(
+      (p) => p.match.round === maxRound && p.match.matchIndex === 0
+    );
+    const x = finalPos?.x ?? oneSidedMatchX(maxRound);
+    const y = matchTop + totalMainHeight + PADDING + MATCH_H;
+    positions.push({
+      x,
+      y,
+      match: thirdPlace,
+      wing: 'center',
+    });
+  }
+
+  const maxX = Math.max(...positions.map((p) => p.x)) + MATCH_W + PADDING;
+  const maxY = Math.max(...positions.map((p) => p.y)) + MATCH_H + PADDING;
+
+  return {
+    positions,
+    width: maxX,
+    height: maxY,
+    layoutMaxRound,
+    thirdPlace,
+  };
+}
+
 export interface BracketConnectorPath {
   d: string;
   status: MatchStatus;
@@ -478,6 +589,58 @@ export function buildTwoSidedConnectors(
     if (pos.wing === 'right') {
       appendToParent(paths, pos, 'rtl', [childA, childB]);
     }
+  }
+
+  return paths;
+}
+
+export function buildOneSidedConnectors(
+  positions: Array<MatchPosition>,
+  _layoutMaxRound: number
+) {
+  const paths: Array<BracketConnectorPath> = [];
+  const posMap = new Map<string, MatchPosition>();
+  for (const p of positions) {
+    posMap.set(`${p.match.round}-${p.match.matchIndex}`, p);
+  }
+
+  for (const pos of positions) {
+    if (pos.match.round === 0) continue;
+
+    const childA = posMap.get(
+      `${pos.match.round - 1}-${pos.match.matchIndex * 2}`
+    );
+    const childB = posMap.get(
+      `${pos.match.round - 1}-${pos.match.matchIndex * 2 + 1}`
+    );
+
+    appendToParent(paths, pos, 'ltr', [childA, childB]);
+  }
+
+  return paths;
+}
+
+export function buildOneSidedConnectors(
+  positions: Array<MatchPosition>,
+  layoutMaxRound: number
+) {
+  const paths: Array<BracketConnectorPath> = [];
+  const posMap = new Map<string, MatchPosition>();
+  for (const p of positions) {
+    posMap.set(`${p.match.round}-${p.match.matchIndex}`, p);
+  }
+
+  for (const pos of positions) {
+    if (pos.match.round === 0) continue;
+
+    const childA = posMap.get(
+      `${pos.match.round - 1}-${pos.match.matchIndex * 2}`
+    );
+    const childB = posMap.get(
+      `${pos.match.round - 1}-${pos.match.matchIndex * 2 + 1}`
+    );
+
+    appendToParent(paths, pos, 'ltr', [childA, childB]);
   }
 
   return paths;
