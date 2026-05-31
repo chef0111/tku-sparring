@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { BracketLayoutToggle } from '../bracket-layout-toggle';
 import { BracketViewToolbar } from '../bracket-view-toolbar';
 import type {
   MatchData,
@@ -7,6 +8,7 @@ import type {
 import { Bracket } from '@/components/tournament-bracket/bracket';
 import { useBracketLayout } from '@/hooks/use-bracket-layout';
 import { useTournamentBracket } from '@/features/dashboard/tournament/builder/context/tournament-bracket/use-tournament-bracket';
+import { useBracketCanvasLayout } from '@/features/dashboard/tournament/builder/hooks/use-bracket-canvas-layout';
 import { usePanZoom } from '@/features/dashboard/tournament/builder/hooks/use-pan-zoom';
 import { useSetLock } from '@/queries/match';
 
@@ -35,10 +37,22 @@ export function BracketCanvas() {
     return map;
   }, [athletes]);
 
-  const { layout, connectors } = useBracketLayout(matchList, thirdPlaceMatch);
+  const [layoutMode, setLayoutMode] = useBracketCanvasLayout();
+
+  const { layout, connectors } = useBracketLayout(matchList, thirdPlaceMatch, {
+    layoutMode,
+  });
 
   const { containerRef, transform, handlers, reset, zoomIn, zoomOut } =
     usePanZoom(layout.width, layout.height);
+
+  const handleLayoutModeChange = React.useCallback(
+    (next: typeof layoutMode) => {
+      setLayoutMode(next);
+      reset();
+    },
+    [setLayoutMode, reset]
+  );
 
   const onToggleLock = React.useCallback(
     (matchId: string, side: 'red' | 'blue', locked: boolean) => {
@@ -69,6 +83,7 @@ export function BracketCanvas() {
           thirdPlaceMatch={thirdPlaceMatch}
           layout={layout}
           connectors={connectors}
+          layoutMode={layoutMode}
           athleteMap={athleteMap}
           matchLabel={matchLabel}
           readOnly={readOnly}
@@ -76,6 +91,10 @@ export function BracketCanvas() {
           onToggleLock={onToggleLock}
         />
       </div>
+      <BracketLayoutToggle
+        value={layoutMode}
+        onChange={handleLayoutModeChange}
+      />
       <BracketViewToolbar
         onFit={reset}
         onZoomIn={zoomIn}

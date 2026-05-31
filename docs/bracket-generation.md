@@ -55,12 +55,20 @@ Example: Groups **A** and **B** on Arena 1, same structure, group order `[A, B]`
 
 ## Canvas layout (builder)
 
+Admins can switch **Canvas layout** per device (see [CONTEXT.md](../CONTEXT.md)); the choice is client-only and does not affect match data.
+
+### Two-sided (default)
+
 The brackets tab renders a **two-sided** tree (see **Bracket canvas** / **Wing** in [CONTEXT.md](../CONTEXT.md)):
 
 - **Left wing**: matches whose `matchIndex` is below `2^(maxRound - 1 - round)` for that round; connectors flow left-to-right toward the center.
 - **Right wing**: remaining matches in the round; connectors flow right-to-left (mirrored).
 - **Final**: `matchIndex === 0` on the main bracket’s last round, horizontally centered; left and right semifinals share its vertical band.
 - **Third-Place Match**: centered under the final (same `x`); excluded from wing connector logic.
+
+### One-sided (optional)
+
+Classic left-to-right single tree: round 0 on the left, **Final** on the right; all connectors flow LTR. Round headers appear once per column. **Third-Place Match** sits below the final.
 
 Layout geometry lives in [`src/lib/tournament/bracket-layout.ts`](../src/lib/tournament/bracket-layout.ts). React surfaces should use [`useBracketLayout`](../src/hooks/use-bracket-layout.ts) so layout + connector paths stay in sync. UI lives under [`src/components/tournament-bracket/`](../src/components/tournament-bracket/).
 

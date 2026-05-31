@@ -1,20 +1,26 @@
 import { describe, expect, it } from 'vitest';
 import { planBracketShell } from '../bracket-shape';
 import {
+  buildConnectorChildLeg,
+  buildConnectorChildLegRtl,
+  buildConnectorTrunk,
+  buildConnectorTrunkRtl,
+  buildOneSidedConnectors,
+  buildOneSidedLayout,
+  buildTwoSidedConnectors,
+  buildTwoSidedLayout,
+  matchWing,
+  roundLabelPlacements,
+  twoSidedMatchRowGap,
+} from '../bracket-layout';
+import type { MatchData } from '@/features/dashboard/types';
+import {
   FINAL_FEEDER_EXTRA,
   MATCH_H,
   MATCH_W,
   PADDING,
   ROUND_GAP,
-  buildConnectorChildLeg,
-  buildConnectorChildLegRtl,
-  buildConnectorTrunk,
-  buildConnectorTrunkRtl,
-  buildTwoSidedConnectors,
-  buildTwoSidedLayout,
-  matchWing,
-} from '../bracket-layout';
-import type { MatchData } from '@/features/dashboard/types';
+} from '@/config/bracket';
 
 function shellToMatches(
   athleteCount: number,
@@ -48,6 +54,27 @@ function shellToMatches(
     tournamentId: 't1',
   }));
 }
+
+describe('roundLabelPlacements', () => {
+  it('returns one label per round in one-sided mode', () => {
+    const matches = shellToMatches(8, false);
+    const { positions, layoutMaxRound } = buildOneSidedLayout(matches, false);
+    const placements = roundLabelPlacements(
+      positions,
+      layoutMaxRound,
+      'one-sided'
+    );
+    expect(placements.length).toBe(layoutMaxRound + 1);
+    expect(new Set(placements.map((p) => p.key)).size).toBe(placements.length);
+  });
+});
+
+describe('twoSidedMatchRowGap', () => {
+  it('uses 56px for ≤3 rounds and 40px for larger brackets', () => {
+    expect(twoSidedMatchRowGap(2)).toBe(64);
+    expect(twoSidedMatchRowGap(3)).toBe(40);
+  });
+});
 
 describe('matchWing', () => {
   it('partitions an 8-player bracket', () => {
@@ -162,6 +189,100 @@ describe('buildTwoSidedConnectors', () => {
     const { positions, layoutMaxRound } = buildTwoSidedLayout(matches, false);
     const paths = buildTwoSidedConnectors(positions, layoutMaxRound);
     expect(paths.length).toBeGreaterThan(0);
+  });
+});
+
+describe('buildOneSidedLayout', () => {
+  it('places round-0 matches in the leftmost column', () => {
+    const matches = shellToMatches(8, false);
+    const { positions } = buildOneSidedLayout(matches, false);
+    const r0X = PADDING;
+    for (const p of positions.filter((x) => x.match.round === 0)) {
+      expect(p.x).toBe(r0X);
+      expect(p.wing).toBe('left');
+    }
+  });
+
+  it('increases x with round toward the final', () => {
+    const matches = shellToMatches(8, false);
+    const { positions, layoutMaxRound } = buildOneSidedLayout(matches, false);
+    const byRound = new Map<number, number>();
+    for (const p of positions.filter((m) => m.match.round <= layoutMaxRound)) {
+      byRound.set(p.match.round, p.x);
+    }
+    const xs = [...byRound.entries()]
+      .sort((a, b) => a[0] - b[0])
+      .map((e) => e[1]);
+    for (let i = 1; i < xs.length; i++) {
+      expect(xs[i]).toBeGreaterThan(xs[i - 1]!);
+    }
+  });
+
+  it('centers parent y between feeder mids', () => {
+    const matches = shellToMatches(8, false);
+    const { positions, layoutMaxRound } = buildOneSidedLayout(matches, false);
+    const sf = positions.find(
+      (p) => p.match.round === layoutMaxRound - 1 && p.match.matchIndex === 0
+    )!;
+    const qfA = positions.find(
+      (p) => p.match.round === 0 && p.match.matchIndex === 0
+    )!;
+    const qfB = positions.find(
+      (p) => p.match.round === 0 && p.match.matchIndex === 1
+    )!;
+    const expectedMid =
+      (qfA.y + MATCH_H / 2 + (qfB.y + MATCH_H / 2)) / 2 - MATCH_H / 2;
+    expect(sf.y).toBeCloseTo(expectedMid, 0);
+  });
+
+  it('places third-place below final when enabled', () => {
+    const matches = shellToMatches(8, true);
+    const { positions, layoutMaxRound } = buildOneSidedLayout(matches, true);
+    const final = positions.find(
+      (p) => p.match.round === layoutMaxRound && p.match.matchIndex === 0
+    )!;
+    const third = positions.find((p) => p.match.id === 'm-7')!;
+
+    expect(third.x).toBe(final.x);
+    expect(third.y).toBeGreaterThan(final.y + MATCH_H);
+    expect(third.wing).toBe('center');
+  });
+
+  it('returns empty layout for no matches', () => {
+    expect(buildOneSidedLayout([], false)).toEqual({
+      positions: [],
+      width: 0,
+      height: 0,
+      layoutMaxRound: 0,
+      thirdPlace: null,
+    });
+  });
+});
+
+describe('buildOneSidedConnectors', () => {
+  it('emits LTR connector paths including final feeders', () => {
+    const matches = shellToMatches(8, false);
+    const { positions, layoutMaxRound } = buildOneSidedLayout(matches, false);
+    const paths = buildOneSidedConnectors(positions, layoutMaxRound);
+    expect(paths.length).toBeGreaterThan(0);
+  });
+
+  it('draws a long horizontal trunk into the scaled final', () => {
+    const matches = shellToMatches(8, false);
+    const { positions, layoutMaxRound } = buildOneSidedLayout(matches, false);
+    const final = positions.find(
+      (p) => p.match.round === layoutMaxRound && p.match.matchIndex === 0
+    )!;
+    const sf = positions.find(
+      (p) => p.match.round === layoutMaxRound - 1 && p.match.matchIndex === 0
+    )!;
+    const paths = buildOneSidedConnectors(positions, layoutMaxRound);
+    const attachX = final.x - (MATCH_W * (1.2 - 1)) / 2;
+    const trunk = paths.find((p) => p.d.includes(`L ${attachX} `));
+    expect(trunk).toBeDefined();
+    const trunkStart = Number(trunk!.d.match(/M (\d+(?:\.\d+)?) /)?.[1]);
+    expect(attachX - trunkStart).toBeGreaterThanOrEqual(24);
+    expect(final.x).toBeGreaterThan(sf.x + MATCH_W);
   });
 });
 

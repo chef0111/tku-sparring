@@ -15,7 +15,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Card } from '@/components/ui/card';
-import { bracketHasResettableMatchActivity } from '@/lib/tournament/bracket-progression';
+import { isResettableMatch } from '@/lib/tournament/bracket-progression';
 
 export function BracketToolbar() {
   const {
@@ -46,8 +46,7 @@ export function BracketToolbar() {
         ? 'Generate a bracket first'
         : undefined;
 
-  const resetHasWork =
-    groupId != null && bracketHasResettableMatchActivity(matches);
+  const resetHasWork = groupId != null && isResettableMatch(matches);
   const resetDisabledForCleanBracket =
     blocked || reset.isPending || !resetHasWork;
   const resetTooltip =

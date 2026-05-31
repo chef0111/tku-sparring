@@ -60,8 +60,12 @@ The builder visualization of a **Group** single-elimination tree: two **wings** 
 _Avoid_: Bracket panel, tree view
 
 **Wing** (bracket canvas):
-The left or right half of the canvas subtree that feeds one semifinal side. Left-wing nodes read left-to-right; right-wing nodes read right-to-left.
+The left or right half of the canvas subtree that feeds one semifinal side. Left-wing nodes read left-to-right; right-wing nodes read right-to-left. Applies only when **Canvas layout** is `two-sided`.
 _Avoid_: Side, hemisphere
+
+**Canvas layout**:
+Admin view setting for the **Bracket canvas**: `two-sided` (default) or `one-sided` (classic left-to-right tree). Stored per device in the browser only — not on **Tournament** or **Group**.
+_Avoid_: Bracket mode, layout toggle
 
 **Advance Settings**:
 The client-side selection flow for tournament, group, and match used before a bout starts.
