@@ -46,13 +46,13 @@ export function BracketCanvas() {
   const { containerRef, transform, handlers, reset, zoomIn, zoomOut } =
     usePanZoom(layout.width, layout.height);
 
-  const prevLayoutMode = React.useRef(layoutMode);
-  React.useEffect(() => {
-    if (prevLayoutMode.current !== layoutMode) {
-      prevLayoutMode.current = layoutMode;
+  const handleLayoutModeChange = React.useCallback(
+    (next: typeof layoutMode) => {
+      setLayoutMode(next);
       reset();
-    }
-  }, [layoutMode, reset]);
+    },
+    [setLayoutMode, reset]
+  );
 
   const onToggleLock = React.useCallback(
     (matchId: string, side: 'red' | 'blue', locked: boolean) => {
@@ -91,7 +91,10 @@ export function BracketCanvas() {
           onToggleLock={onToggleLock}
         />
       </div>
-      <BracketLayoutToggle value={layoutMode} onChange={setLayoutMode} />
+      <BracketLayoutToggle
+        value={layoutMode}
+        onChange={handleLayoutModeChange}
+      />
       <BracketViewToolbar
         onFit={reset}
         onZoomIn={zoomIn}

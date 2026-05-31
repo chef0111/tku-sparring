@@ -596,7 +596,7 @@ export function buildTwoSidedConnectors(
 
 export function buildOneSidedConnectors(
   positions: Array<MatchPosition>,
-  layoutMaxRound: number
+  _layoutMaxRound: number
 ) {
   const paths: Array<BracketConnectorPath> = [];
   const posMap = new Map<string, MatchPosition>();
