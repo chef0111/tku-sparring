@@ -5,7 +5,7 @@ import type {
   MatchData,
   TournamentAthleteData,
 } from '@/features/dashboard/types';
-import { ATHLETE_ROW_H, MATCH_W } from '@/lib/tournament/bracket-layout';
+import { ATHLETE_ROW_H, MATCH_W } from '@/config/bracket';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 

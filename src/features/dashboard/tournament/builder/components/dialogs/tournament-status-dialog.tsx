@@ -2,7 +2,7 @@ import type { TournamentStatus } from '@/features/dashboard/types';
 import {
   TOURNAMENT_STATUS_LABEL,
   tournamentStatusRiskNotes,
-} from '@/features/dashboard/tournament/lib/tournament-status';
+} from '@/lib/tournament/tournament-status';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

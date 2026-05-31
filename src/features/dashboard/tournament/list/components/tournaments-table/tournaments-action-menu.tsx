@@ -21,7 +21,7 @@ import {
   forceSetTournamentStatus,
   isBackwardStatusTransition,
   tournamentStatusRiskNotes,
-} from '@/features/dashboard/tournament/lib/tournament-status';
+} from '@/lib/tournament/tournament-status';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,

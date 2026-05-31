@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  bracketHasResettableMatchActivity,
   getSuccessorSlot,
   isAutoRound0ByeCompleteMatch,
+  isResettableMatch,
   isRound0ByeMatch,
 } from '../bracket-progression';
 import type { MatchData } from '@/features/dashboard/types';
@@ -114,10 +114,10 @@ describe('isAutoRound0ByeCompleteMatch', () => {
   });
 });
 
-describe('bracketHasResettableMatchActivity', () => {
+describe('isResettableMatch', () => {
   it('is false when only auto bye completes exist', () => {
     expect(
-      bracketHasResettableMatchActivity([
+      isResettableMatch([
         baseBracket({
           redTournamentAthleteId: 'ta1',
           blueTournamentAthleteId: null,
@@ -138,7 +138,7 @@ describe('bracketHasResettableMatchActivity', () => {
 
   it('is true for any custom match', () => {
     expect(
-      bracketHasResettableMatchActivity([
+      isResettableMatch([
         baseBracket(),
         baseBracket({
           id: 'c1',
@@ -151,13 +151,9 @@ describe('bracketHasResettableMatchActivity', () => {
   });
 
   it('is true for active or scored bracket rows', () => {
-    expect(
-      bracketHasResettableMatchActivity([baseBracket({ status: 'active' })])
-    ).toBe(true);
-    expect(
-      bracketHasResettableMatchActivity([
-        baseBracket({ redWins: 1, blueWins: 0 }),
-      ])
-    ).toBe(true);
+    expect(isResettableMatch([baseBracket({ status: 'active' })])).toBe(true);
+    expect(isResettableMatch([baseBracket({ redWins: 1, blueWins: 0 })])).toBe(
+      true
+    );
   });
 });
