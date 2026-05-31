@@ -49,7 +49,7 @@ export function BracketRoundLabels({
     return roundNums.map((round) => (
       <text
         key={round}
-        x={oneSidedRoundLabelX(round)}
+        x={oneSidedRoundLabelX(round, layoutMaxRound)}
         y={ROUND_LABEL_Y}
         textAnchor="middle"
         className="fill-muted-foreground text-sm font-semibold tracking-wider uppercase"

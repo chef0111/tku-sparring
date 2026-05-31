@@ -10,6 +10,7 @@ import {
   buildTwoSidedConnectors,
   buildTwoSidedLayout,
   matchWing,
+  twoSidedMatchRowGap,
 } from '../bracket-layout';
 import type { MatchData } from '@/features/dashboard/types';
 import {
@@ -52,6 +53,13 @@ function shellToMatches(
     tournamentId: 't1',
   }));
 }
+
+describe('twoSidedMatchRowGap', () => {
+  it('uses 56px for ≤3 rounds and 40px for larger brackets', () => {
+    expect(twoSidedMatchRowGap(2)).toBe(64);
+    expect(twoSidedMatchRowGap(3)).toBe(40);
+  });
+});
 
 describe('matchWing', () => {
   it('partitions an 8-player bracket', () => {
@@ -242,6 +250,24 @@ describe('buildOneSidedConnectors', () => {
     const { positions, layoutMaxRound } = buildOneSidedLayout(matches, false);
     const paths = buildOneSidedConnectors(positions, layoutMaxRound);
     expect(paths.length).toBeGreaterThan(0);
+  });
+
+  it('draws a long horizontal trunk into the scaled final', () => {
+    const matches = shellToMatches(8, false);
+    const { positions, layoutMaxRound } = buildOneSidedLayout(matches, false);
+    const final = positions.find(
+      (p) => p.match.round === layoutMaxRound && p.match.matchIndex === 0
+    )!;
+    const sf = positions.find(
+      (p) => p.match.round === layoutMaxRound - 1 && p.match.matchIndex === 0
+    )!;
+    const paths = buildOneSidedConnectors(positions, layoutMaxRound);
+    const attachX = final.x - (MATCH_W * (1.2 - 1)) / 2;
+    const trunk = paths.find((p) => p.d.includes(`L ${attachX} `));
+    expect(trunk).toBeDefined();
+    const trunkStart = Number(trunk!.d.match(/M (\d+(?:\.\d+)?) /)?.[1]);
+    expect(attachX - trunkStart).toBeGreaterThanOrEqual(24);
+    expect(final.x).toBeGreaterThan(sf.x + MATCH_W);
   });
 });
 

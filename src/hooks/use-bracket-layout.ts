@@ -13,7 +13,6 @@ import {
 } from '@/lib/tournament/bracket-layout';
 
 export type UseBracketLayoutOptions = {
-  /** Skip layout recompute when the parent already ran the hook (e.g. pan/zoom shell). */
   layout?: BracketLayoutResult;
   connectors?: Array<BracketConnectorPath>;
   layoutMode?: BracketCanvasLayout;

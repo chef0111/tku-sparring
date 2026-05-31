@@ -1,9 +1,12 @@
 import type { MatchData, MatchStatus } from '@/features/dashboard/types';
 import {
   CONNECTOR_CORNER_RADIUS,
+  FINALE_LTR_COLUMN_EXTRA,
   FINAL_FEEDER_EXTRA,
   MATCH_H,
   MATCH_ROW_GAP,
+  MATCH_ROW_GAP_COMPACT,
+  MATCH_ROW_GAP_SPACIOUS,
   MATCH_W,
   PADDING,
   ROUND_GAP,
@@ -105,6 +108,14 @@ export function layoutCenterX(maxRound: number): number {
   return PADDING + maxRound * ROUND_GAP + MATCH_W / 2;
 }
 
+/** Two-sided wing vertical gap: tighter when bracket has more than three rounds. */
+export function twoSidedMatchRowGap(layoutMaxRound: number): number {
+  return layoutMaxRound > 2 ? MATCH_ROW_GAP_SPACIOUS : MATCH_ROW_GAP_COMPACT;
+}
+
+/** Layout left edge sits inside the scaled final box (`scale-120`, center origin). */
+const FINAL_SCALE_OVERHANG = (MATCH_W * (1.2 - 1)) / 2;
+
 function roundColumnOffset(
   round: number,
   wing: BracketWing,
@@ -174,7 +185,8 @@ export function buildTwoSidedLayout(
 
   const roundNums = Array.from(rounds.keys()).sort((a, b) => a - b);
   const r0Count = rounds.get(roundNums[0]!)?.length ?? 1;
-  const totalMainHeight = r0Count * MATCH_H + (r0Count - 1) * MATCH_ROW_GAP;
+  const rowGap = twoSidedMatchRowGap(maxRound);
+  const totalMainHeight = r0Count * MATCH_H + (r0Count - 1) * rowGap;
 
   const centerX = layoutCenterX(maxRound);
   const matchTop = PADDING + ROUND_LABEL_BAND;
@@ -187,7 +199,7 @@ export function buildTwoSidedLayout(
     if (r0InWing.length === 0) return;
 
     const wingHeight =
-      r0InWing.length * MATCH_H + (r0InWing.length - 1) * MATCH_ROW_GAP;
+      r0InWing.length * MATCH_H + (r0InWing.length - 1) * rowGap;
     const slotH = wingHeight / r0InWing.length;
 
     for (let i = 0; i < r0InWing.length; i++) {
@@ -268,12 +280,19 @@ export function buildTwoSidedLayout(
   };
 }
 
-function oneSidedMatchX(round: number): number {
-  return PADDING + round * ROUND_GAP;
+function oneSidedMatchX(round: number, layoutMaxRound: number): number {
+  let x = PADDING + round * ROUND_GAP;
+  if (round === layoutMaxRound && layoutMaxRound > 0) {
+    x += FINALE_LTR_COLUMN_EXTRA;
+  }
+  return x;
 }
 
-export function oneSidedRoundLabelX(round: number): number {
-  return oneSidedMatchX(round) + MATCH_W / 2;
+export function oneSidedRoundLabelX(
+  round: number,
+  layoutMaxRound: number
+): number {
+  return oneSidedMatchX(round, layoutMaxRound) + MATCH_W / 2;
 }
 
 export function buildOneSidedLayout(
@@ -343,7 +362,7 @@ export function buildOneSidedLayout(
   for (const round of roundNums) {
     for (const match of rounds.get(round)!) {
       positions.push({
-        x: oneSidedMatchX(match.round),
+        x: oneSidedMatchX(match.round, maxRound),
         y: yByKey.get(`${match.round}-${match.matchIndex}`)!,
         match,
         wing: 'left',
@@ -355,7 +374,7 @@ export function buildOneSidedLayout(
     const finalPos = positions.find(
       (p) => p.match.round === maxRound && p.match.matchIndex === 0
     );
-    const x = finalPos?.x ?? oneSidedMatchX(maxRound);
+    const x = finalPos?.x ?? oneSidedMatchX(maxRound, maxRound);
     const y = matchTop + totalMainHeight + PADDING + MATCH_H;
     positions.push({
       x,
@@ -492,6 +511,68 @@ function pushConnector(
   paths.push({ d, status });
 }
 
+function appendLtrToParent(
+  paths: Array<BracketConnectorPath>,
+  parent: MatchPosition,
+  children: Array<MatchPosition | undefined>,
+  trunkEndX?: number
+) {
+  const parentMidY = parent.y + MATCH_H / 2;
+  const status = parent.match.status;
+  const parentLeftX = parent.x;
+  const midX = parentLeftX - connectorStub;
+  const trunkX = trunkEndX ?? parentLeftX;
+  let hasChild = false;
+  for (const child of children) {
+    if (!child) continue;
+    hasChild = true;
+    pushConnector(
+      paths,
+      buildConnectorChildLeg(
+        child.x + MATCH_W,
+        child.y + MATCH_H / 2,
+        midX,
+        parentMidY
+      ),
+      status
+    );
+  }
+  if (hasChild) {
+    pushConnector(paths, buildConnectorTrunk(midX, parentMidY, trunkX), status);
+  }
+}
+
+function appendOneSidedFinalFeeders(
+  paths: Array<BracketConnectorPath>,
+  parent: MatchPosition,
+  childA: MatchPosition | undefined,
+  childB: MatchPosition | undefined
+) {
+  const feeders = [childA, childB].filter((c): c is MatchPosition => c != null);
+  if (feeders.length === 0) return;
+
+  const parentMidY = parent.y + MATCH_H / 2;
+  const status = parent.match.status;
+  const attachX = parent.x - FINAL_SCALE_OVERHANG;
+  const maxChildRight = Math.max(...feeders.map((c) => c.x + MATCH_W));
+  const minTrunk = FINALE_LTR_COLUMN_EXTRA - FINAL_SCALE_OVERHANG;
+  const busX = Math.max(maxChildRight + connectorStub, attachX - minTrunk);
+
+  for (const child of feeders) {
+    pushConnector(
+      paths,
+      buildConnectorChildLeg(
+        child.x + MATCH_W,
+        child.y + MATCH_H / 2,
+        busX,
+        parentMidY
+      ),
+      status
+    );
+  }
+  pushConnector(paths, buildConnectorTrunk(busX, parentMidY, attachX), status);
+}
+
 function appendToParent(
   paths: Array<BracketConnectorPath>,
   parent: MatchPosition,
@@ -502,30 +583,7 @@ function appendToParent(
   const status = parent.match.status;
 
   if (direction === 'ltr') {
-    const parentLeftX = parent.x;
-    const midX = parentLeftX - connectorStub;
-    let hasChild = false;
-    for (const child of children) {
-      if (!child) continue;
-      hasChild = true;
-      pushConnector(
-        paths,
-        buildConnectorChildLeg(
-          child.x + MATCH_W,
-          child.y + MATCH_H / 2,
-          midX,
-          parentMidY
-        ),
-        status
-      );
-    }
-    if (hasChild) {
-      pushConnector(
-        paths,
-        buildConnectorTrunk(midX, parentMidY, parentLeftX),
-        status
-      );
-    }
+    appendLtrToParent(paths, parent, children);
     return;
   }
 
@@ -596,7 +654,7 @@ export function buildTwoSidedConnectors(
 
 export function buildOneSidedConnectors(
   positions: Array<MatchPosition>,
-  _layoutMaxRound: number
+  layoutMaxRound: number
 ) {
   const paths: Array<BracketConnectorPath> = [];
   const posMap = new Map<string, MatchPosition>();
@@ -614,7 +672,12 @@ export function buildOneSidedConnectors(
       `${pos.match.round - 1}-${pos.match.matchIndex * 2 + 1}`
     );
 
-    appendToParent(paths, pos, 'ltr', [childA, childB]);
+    if (isBracketFinal(pos.match, layoutMaxRound)) {
+      appendOneSidedFinalFeeders(paths, pos, childA, childB);
+      continue;
+    }
+
+    appendLtrToParent(paths, pos, [childA, childB]);
   }
 
   return paths;
