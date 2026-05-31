@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { planBracketShell } from '../bracket-shape';
 import {
+  FINAL_FEEDER_EXTRA,
   MATCH_H,
   MATCH_W,
   PADDING,
@@ -87,6 +88,13 @@ describe('buildTwoSidedLayout', () => {
     expect(sfLeft.y).toBeCloseTo(sfRight.y, 0);
     expect(sfLeft.x + MATCH_W).toBeLessThan(final.x);
     expect(sfRight.x).toBeGreaterThan(final.x + MATCH_W);
+
+    const qfLeft = positions.find(
+      (p) => p.match.round === 0 && p.match.matchIndex === 0
+    )!;
+    const qfToSfGap = sfLeft.x - (qfLeft.x + MATCH_W);
+    const sfToFinalGap = final.x - (sfLeft.x + MATCH_W);
+    expect(sfToFinalGap).toBe(qfToSfGap + FINAL_FEEDER_EXTRA);
   });
 
   it('places round-0 matches on correct wings', () => {

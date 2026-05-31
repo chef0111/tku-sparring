@@ -62,7 +62,7 @@ The brackets tab renders a **two-sided** tree (see **Bracket canvas** / **Wing**
 - **Final**: `matchIndex === 0` on the main bracket’s last round, horizontally centered; left and right semifinals share its vertical band.
 - **Third-Place Match**: centered under the final (same `x`); excluded from wing connector logic.
 
-Layout and connectors are computed in [`src/lib/tournament/bracket-layout.ts`](../src/lib/tournament/bracket-layout.ts); UI lives under [`src/components/tournament-bracket/`](../src/components/tournament-bracket/).
+Layout geometry lives in [`src/lib/tournament/bracket-layout.ts`](../src/lib/tournament/bracket-layout.ts). React surfaces should use [`useBracketLayout`](../src/hooks/use-bracket-layout.ts) so layout + connector paths stay in sync. UI lives under [`src/components/tournament-bracket/`](../src/components/tournament-bracket/).
 
 ## Builder UI labels
 

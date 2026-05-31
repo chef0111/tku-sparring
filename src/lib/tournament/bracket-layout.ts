@@ -2,7 +2,12 @@ import type { MatchData, MatchStatus } from '@/features/dashboard/types';
 
 export const MATCH_W = 220;
 export const MATCH_H = 70;
-export const ROUND_GAP = 280;
+/** Horizontal step between round columns (smaller = tighter bracket + shorter connector stubs). */
+export const ROUND_GAP = 248;
+/** Vertical gap between first-round matches within a wing. */
+export const MATCH_ROW_GAP = 48;
+/** Extra space between semifinal column and final (longer feeder connectors). */
+export const FINAL_FEEDER_EXTRA = 20;
 export const PADDING = 24;
 /** Reserved SVG band above matches for round titles (keeps match headers clear). */
 export const ROUND_LABEL_BAND = 44;
@@ -10,7 +15,8 @@ export const ROUND_LABEL_Y = 13;
 /** Gap between match box top edge and the "Match N" header line. */
 export const MATCH_HEADER_ABOVE = 16;
 export const ATHLETE_ROW_H = MATCH_H / 2;
-export const CONNECTOR_CORNER_RADIUS = 8;
+/** Fillet on connector elbows; capped smaller when ROUND_GAP is tight. */
+export const CONNECTOR_CORNER_RADIUS = 6;
 
 export type BracketWing = 'left' | 'right' | 'center';
 
@@ -105,13 +111,25 @@ export function layoutCenterX(maxRound: number): number {
   return PADDING + maxRound * ROUND_GAP + MATCH_W / 2;
 }
 
+function roundColumnOffset(
+  round: number,
+  wing: BracketWing,
+  layoutMaxRound: number
+): number {
+  let offset = (layoutMaxRound - round) * ROUND_GAP;
+  if (wing !== 'center' && round < layoutMaxRound) {
+    offset += FINAL_FEEDER_EXTRA;
+  }
+  return offset;
+}
+
 export function roundLabelCenterX(
   round: number,
   wing: BracketWing,
   layoutMaxRound: number
 ): number {
   const centerX = layoutCenterX(layoutMaxRound);
-  const offset = (layoutMaxRound - round) * ROUND_GAP;
+  const offset = roundColumnOffset(round, wing, layoutMaxRound);
   if (wing === 'center') return centerX;
   if (wing === 'left') return centerX - offset;
   return centerX + offset;
@@ -124,7 +142,7 @@ function matchX(
   centerX: number
 ): number {
   const wing = matchWing(round, matchIndex, maxRound);
-  const offset = (maxRound - round) * ROUND_GAP;
+  const offset = roundColumnOffset(round, wing, maxRound);
   if (wing === 'center') return centerX - MATCH_W / 2;
   if (wing === 'left') return centerX - MATCH_W / 2 - offset;
   return centerX + MATCH_W / 2 + offset - MATCH_W;
@@ -162,7 +180,7 @@ export function buildTwoSidedLayout(
 
   const roundNums = Array.from(rounds.keys()).sort((a, b) => a - b);
   const r0Count = rounds.get(roundNums[0]!)?.length ?? 1;
-  const totalMainHeight = r0Count * MATCH_H + (r0Count - 1) * MATCH_H;
+  const totalMainHeight = r0Count * MATCH_H + (r0Count - 1) * MATCH_ROW_GAP;
 
   const centerX = layoutCenterX(maxRound);
   const matchTop = PADDING + ROUND_LABEL_BAND;
@@ -175,7 +193,7 @@ export function buildTwoSidedLayout(
     if (r0InWing.length === 0) return;
 
     const wingHeight =
-      r0InWing.length * MATCH_H + (r0InWing.length - 1) * MATCH_H;
+      r0InWing.length * MATCH_H + (r0InWing.length - 1) * MATCH_ROW_GAP;
     const slotH = wingHeight / r0InWing.length;
 
     for (let i = 0; i < r0InWing.length; i++) {
@@ -254,14 +272,6 @@ export function buildTwoSidedLayout(
     layoutMaxRound,
     thirdPlace,
   };
-}
-
-/** @deprecated Use buildTwoSidedLayout */
-export function buildLayout(
-  matches: Array<MatchData>,
-  thirdPlaceMatch: boolean
-) {
-  return buildTwoSidedLayout(matches, thirdPlaceMatch);
 }
 
 export interface BracketConnectorPath {
@@ -479,12 +489,4 @@ export function buildTwoSidedConnectors(
   }
 
   return paths;
-}
-
-/** @deprecated Use buildTwoSidedConnectors */
-export function buildConnectors(
-  positions: Array<MatchPosition>,
-  layoutMaxRound: number = Math.max(0, ...positions.map((p) => p.match.round))
-) {
-  return buildTwoSidedConnectors(positions, layoutMaxRound);
 }

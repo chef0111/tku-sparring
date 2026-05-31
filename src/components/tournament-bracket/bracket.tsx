@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { BracketConnectors } from './bracket-connectors';
-import { BracketProvider } from './bracket-context';
 import { BracketFinalMatchNode } from './bracket-final-match-node';
 import { BracketMatchNode } from './bracket-match-node';
 import { BracketRoundLabels } from './bracket-round-labels';
@@ -8,12 +7,15 @@ import type {
   MatchData,
   TournamentAthleteData,
 } from '@/features/dashboard/types';
-import type { BracketLayoutResult } from '@/lib/tournament/bracket-layout';
+import type {
+  BracketConnectorPath,
+  BracketLayoutResult,
+} from '@/lib/tournament/bracket-layout';
+import { BracketProvider } from '@/contexts/bracket';
+import { useBracketLayout } from '@/hooks/use-bracket-layout';
 import {
   MATCH_HEADER_ABOVE,
   MATCH_W,
-  buildTwoSidedConnectors,
-  buildTwoSidedLayout,
   isBracketFinal,
 } from '@/lib/tournament/bracket-layout';
 
@@ -31,6 +33,8 @@ export interface BracketProps {
   ) => void;
   /** When set, skips a second layout pass (e.g. from BracketCanvas pan/zoom). */
   layout?: BracketLayoutResult;
+  /** When set with `layout`, skips connector recompute in the hook. */
+  connectors?: Array<BracketConnectorPath>;
 }
 
 function ThirdPlaceSvgLabel({
@@ -65,18 +69,13 @@ export function Bracket({
   onSlotClick,
   onToggleLock,
   layout: layoutProp,
+  connectors: connectorsProp,
 }: BracketProps) {
-  const computed = React.useMemo(
-    () => buildTwoSidedLayout(matches, thirdPlaceMatch),
-    [matches, thirdPlaceMatch]
-  );
-  const layout = layoutProp ?? computed;
+  const { layout, connectors } = useBracketLayout(matches, thirdPlaceMatch, {
+    layout: layoutProp,
+    connectors: connectorsProp,
+  });
   const { positions, width, height, layoutMaxRound, thirdPlace } = layout;
-
-  const connectors = React.useMemo(
-    () => buildTwoSidedConnectors(positions, layoutMaxRound),
-    [positions, layoutMaxRound]
-  );
 
   const ctx = React.useMemo(
     () => ({

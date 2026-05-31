@@ -5,9 +5,9 @@ import type {
   TournamentAthleteData,
 } from '@/features/dashboard/types';
 import { Bracket } from '@/components/tournament-bracket/bracket';
+import { useBracketLayout } from '@/hooks/use-bracket-layout';
 import { useTournamentBracket } from '@/features/dashboard/tournament/builder/context/tournament-bracket/use-tournament-bracket';
 import { usePanZoom } from '@/features/dashboard/tournament/builder/hooks/use-pan-zoom';
-import { buildTwoSidedLayout } from '@/lib/tournament/bracket-layout';
 import { useSetLock } from '@/queries/match';
 
 export function BracketCanvas() {
@@ -35,10 +35,7 @@ export function BracketCanvas() {
     return map;
   }, [athletes]);
 
-  const layout = React.useMemo(
-    () => buildTwoSidedLayout(matchList, thirdPlaceMatch),
-    [matchList, thirdPlaceMatch]
-  );
+  const { layout, connectors } = useBracketLayout(matchList, thirdPlaceMatch);
 
   const { containerRef, transform, handlers, reset, zoomIn, zoomOut } =
     usePanZoom(layout.width, layout.height);
@@ -71,6 +68,7 @@ export function BracketCanvas() {
           matches={matchList}
           thirdPlaceMatch={thirdPlaceMatch}
           layout={layout}
+          connectors={connectors}
           athleteMap={athleteMap}
           matchLabel={matchLabel}
           readOnly={readOnly}
