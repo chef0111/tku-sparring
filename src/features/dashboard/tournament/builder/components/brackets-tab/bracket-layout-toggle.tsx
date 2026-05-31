@@ -1,8 +1,11 @@
-import { ArrowRightFromLine, Columns2 } from 'lucide-react';
-
 import type { BracketCanvasLayout } from '@/lib/tournament/bracket-layout';
-import { Card } from '@/components/ui/card';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { bracketConfig } from '@/config/bracket';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 type BracketLayoutToggleProps = {
   value: BracketCanvasLayout;
@@ -14,30 +17,43 @@ export function BracketLayoutToggle({
   onChange,
 }: BracketLayoutToggleProps) {
   return (
-    <Card
-      className="bg-popover absolute top-2.5 left-2.5 z-10 rounded-md border p-1 shadow-md ring-0"
+    <Tabs
+      value={value}
+      onValueChange={(next) => {
+        if (next === 'two-sided' || next === 'one-sided') onChange(next);
+      }}
+      className="absolute top-2.5 left-2.5 z-10"
       onPointerDown={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
-      <ToggleGroup
-        type="single"
-        variant="outline"
-        size="sm"
-        value={value}
-        onValueChange={(next) => {
-          if (next === 'two-sided' || next === 'one-sided') onChange(next);
-        }}
-        aria-label="Bracket canvas layout"
-      >
-        <ToggleGroupItem value="two-sided" aria-label="Two-sided layout">
-          <Columns2 className="size-4" />
-          <span className="sr-only">Two-sided layout</span>
-        </ToggleGroupItem>
-        <ToggleGroupItem value="one-sided" aria-label="One-sided layout">
-          <ArrowRightFromLine className="size-4" />
-          <span className="sr-only">One-sided layout</span>
-        </ToggleGroupItem>
-      </ToggleGroup>
-    </Card>
+      <TabsList aria-label="Bracket canvas layout" className="h-10! gap-1 p-1">
+        {bracketConfig.map((layout) => (
+          <Tooltip key={layout.value} delayDuration={300}>
+            <TooltipTrigger>
+              <TabsTrigger
+                key={layout.value}
+                value={layout.value}
+                aria-label={layout.label}
+                className="size-8"
+              >
+                <layout.icon className="size-4" />
+                <span className="sr-only">{layout.label}</span>
+              </TabsTrigger>
+            </TooltipTrigger>
+            <TooltipContent
+              align="start"
+              side="bottom"
+              sideOffset={6}
+              className="bg-background text-foreground flex max-w-64 flex-col gap-1 border py-2 font-semibold [&>span]:hidden"
+            >
+              <div className="w-full text-left">{layout.label}</div>
+              <p className="text-muted-foreground text-xs text-pretty">
+                {layout.description}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        ))}
+      </TabsList>
+    </Tabs>
   );
 }

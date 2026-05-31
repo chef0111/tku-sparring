@@ -1,3 +1,8 @@
+import {
+  AlignHorizontalJustifyStart,
+  SquareSplitHorizontal,
+} from 'lucide-react';
+
 export const MATCH_W = 220;
 export const MATCH_H = 70;
 /** Horizontal step between round columns (smaller = tighter bracket + shorter connector stubs). */
@@ -21,3 +26,20 @@ export const MATCH_HEADER_ABOVE = 16;
 export const ATHLETE_ROW_H = MATCH_H / 2;
 /** Fillet on connector elbows; capped smaller when ROUND_GAP is tight. */
 export const CONNECTOR_CORNER_RADIUS = 6;
+
+export const bracketConfig = [
+  {
+    value: 'two-sided',
+    label: 'Two-sided layout',
+    icon: SquareSplitHorizontal,
+    description:
+      'Default layout, suitable for brackets with more than 3 rounds.',
+  },
+  {
+    value: 'one-sided',
+    label: 'One-sided layout',
+    icon: AlignHorizontalJustifyStart,
+    description:
+      'Alternative layout, suitable for brackets with 3 rounds or less.',
+  },
+];
