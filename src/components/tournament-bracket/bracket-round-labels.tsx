@@ -1,9 +1,7 @@
 import * as React from 'react';
 import type { MatchPosition } from '@/lib/tournament/bracket-layout';
-import {
-  ROUND_LABEL_Y,
-  roundLabelCenterX,
-} from '@/lib/tournament/bracket-layout';
+import { roundLabelCenterX } from '@/lib/tournament/bracket-layout';
+import { ROUND_LABEL_Y } from '@/config/bracket';
 import { getBracketRoundLabel } from '@/lib/tournament/bracket-round-label';
 
 export interface BracketRoundLabelsProps {

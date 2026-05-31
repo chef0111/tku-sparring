@@ -2,7 +2,7 @@ import { BracketMatchNodeFrame } from './bracket-match-node-frame';
 import type { MatchPosition } from '@/lib/tournament/bracket-layout';
 import { useBracket } from '@/contexts/bracket';
 import { formatMatchHeaderLine } from '@/lib/tournament/arena-match-label';
-import { MATCH_HEADER_ABOVE } from '@/lib/tournament/bracket-layout';
+import { MATCH_HEADER_ABOVE } from '@/config/bracket';
 
 export interface BracketMatchNodeProps {
   pos: MatchPosition;

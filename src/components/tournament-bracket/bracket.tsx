@@ -13,11 +13,8 @@ import type {
 } from '@/lib/tournament/bracket-layout';
 import { BracketProvider } from '@/contexts/bracket';
 import { useBracketLayout } from '@/hooks/use-bracket-layout';
-import {
-  MATCH_HEADER_ABOVE,
-  MATCH_W,
-  isBracketFinal,
-} from '@/lib/tournament/bracket-layout';
+import { isBracketFinal } from '@/lib/tournament/bracket-layout';
+import { MATCH_HEADER_ABOVE, MATCH_W } from '@/config/bracket';
 
 export interface BracketProps {
   matches: Array<MatchData>;

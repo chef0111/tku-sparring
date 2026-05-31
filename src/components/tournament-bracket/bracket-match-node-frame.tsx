@@ -6,11 +6,7 @@ import type { BracketSlotDirection } from './bracket-slot';
 import type { MatchPosition } from '@/lib/tournament/bracket-layout';
 import { useBracket } from '@/contexts/bracket';
 import { useSlotLabels } from '@/hooks/use-slot-labels';
-import {
-  ATHLETE_ROW_H,
-  MATCH_H,
-  MATCH_W,
-} from '@/lib/tournament/bracket-layout';
+import { ATHLETE_ROW_H, MATCH_H, MATCH_W } from '@/config/bracket';
 import { cn } from '@/lib/utils';
 
 export const matchStatusBorder: Record<string, string> = {
