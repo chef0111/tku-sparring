@@ -596,32 +596,6 @@ export function buildTwoSidedConnectors(
 
 export function buildOneSidedConnectors(
   positions: Array<MatchPosition>,
-  _layoutMaxRound: number
-) {
-  const paths: Array<BracketConnectorPath> = [];
-  const posMap = new Map<string, MatchPosition>();
-  for (const p of positions) {
-    posMap.set(`${p.match.round}-${p.match.matchIndex}`, p);
-  }
-
-  for (const pos of positions) {
-    if (pos.match.round === 0) continue;
-
-    const childA = posMap.get(
-      `${pos.match.round - 1}-${pos.match.matchIndex * 2}`
-    );
-    const childB = posMap.get(
-      `${pos.match.round - 1}-${pos.match.matchIndex * 2 + 1}`
-    );
-
-    appendToParent(paths, pos, 'ltr', [childA, childB]);
-  }
-
-  return paths;
-}
-
-export function buildOneSidedConnectors(
-  positions: Array<MatchPosition>,
   layoutMaxRound: number
 ) {
   const paths: Array<BracketConnectorPath> = [];
