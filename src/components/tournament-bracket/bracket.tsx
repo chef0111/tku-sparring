@@ -8,6 +8,7 @@ import type {
   TournamentAthleteData,
 } from '@/features/dashboard/types';
 import type {
+  BracketCanvasLayout,
   BracketConnectorPath,
   BracketLayoutResult,
 } from '@/lib/tournament/bracket-layout';
@@ -32,6 +33,7 @@ export interface BracketProps {
   layout?: BracketLayoutResult;
   /** When set with `layout`, skips connector recompute in the hook. */
   connectors?: Array<BracketConnectorPath>;
+  layoutMode?: BracketCanvasLayout;
 }
 
 function ThirdPlaceSvgLabel({
@@ -67,10 +69,12 @@ export function Bracket({
   onToggleLock,
   layout: layoutProp,
   connectors: connectorsProp,
+  layoutMode = 'two-sided',
 }: BracketProps) {
   const { layout, connectors } = useBracketLayout(matches, thirdPlaceMatch, {
     layout: layoutProp,
     connectors: connectorsProp,
+    layoutMode,
   });
   const { positions, width, height, layoutMaxRound, thirdPlace } = layout;
 
@@ -101,6 +105,7 @@ export function Bracket({
           <BracketRoundLabels
             positions={positions}
             layoutMaxRound={layoutMaxRound}
+            layoutMode={layoutMode}
           />
           <ThirdPlaceSvgLabel
             positions={positions}

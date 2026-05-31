@@ -1,12 +1,19 @@
 import * as React from 'react';
-import type { MatchPosition } from '@/lib/tournament/bracket-layout';
-import { roundLabelCenterX } from '@/lib/tournament/bracket-layout';
+import type {
+  BracketCanvasLayout,
+  MatchPosition,
+} from '@/lib/tournament/bracket-layout';
+import {
+  oneSidedRoundLabelX,
+  roundLabelCenterX,
+} from '@/lib/tournament/bracket-layout';
 import { ROUND_LABEL_Y } from '@/config/bracket';
 import { getBracketRoundLabel } from '@/lib/tournament/bracket-round-label';
 
 export interface BracketRoundLabelsProps {
   positions: Array<MatchPosition>;
   layoutMaxRound: number;
+  layoutMode?: BracketCanvasLayout;
 }
 
 function hasWingInRound(
@@ -26,6 +33,7 @@ function hasWingInRound(
 export function BracketRoundLabels({
   positions,
   layoutMaxRound,
+  layoutMode = 'two-sided',
 }: BracketRoundLabelsProps) {
   if (positions.length === 0) return null;
 
@@ -36,6 +44,20 @@ export function BracketRoundLabels({
         .map((p) => p.match.round)
     ),
   ].sort((a, b) => a - b);
+
+  if (layoutMode === 'one-sided') {
+    return roundNums.map((round) => (
+      <text
+        key={round}
+        x={oneSidedRoundLabelX(round)}
+        y={ROUND_LABEL_Y}
+        textAnchor="middle"
+        className="fill-muted-foreground text-sm font-semibold tracking-wider uppercase"
+      >
+        {getBracketRoundLabel(round, layoutMaxRound)}
+      </text>
+    ));
+  }
 
   return roundNums.flatMap((round) => {
     const label = getBracketRoundLabel(round, layoutMaxRound);

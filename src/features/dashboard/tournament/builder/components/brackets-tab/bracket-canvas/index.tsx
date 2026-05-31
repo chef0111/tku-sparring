@@ -83,6 +83,7 @@ export function BracketCanvas() {
           thirdPlaceMatch={thirdPlaceMatch}
           layout={layout}
           connectors={connectors}
+          layoutMode={layoutMode}
           athleteMap={athleteMap}
           matchLabel={matchLabel}
           readOnly={readOnly}
