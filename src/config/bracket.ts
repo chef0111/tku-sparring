@@ -10,7 +10,7 @@ export const ROUND_GAP = 248;
 /** Default vertical gap between first-round matches (two-sided uses dynamic gap). */
 export const MATCH_ROW_GAP = 48;
 /** Two-sided wing row gap when bracket has ≤3 rounds (≤8 athletes). */
-export const MATCH_ROW_GAP_COMPACT = 64;
+export const MATCH_ROW_GAP_COMPACT = 80;
 /** Two-sided wing row gap when bracket has >3 rounds (>8 athletes). */
 export const MATCH_ROW_GAP_SPACIOUS = 40;
 /** Extra space between semifinal column and final (longer feeder connectors). */

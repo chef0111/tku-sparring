@@ -98,7 +98,8 @@ export function isBracketFinal(
 
 /** Two-sided wing vertical gap: tighter when bracket has more than three rounds. */
 export function twoSidedMatchRowGap(layoutMaxRound: number): number {
-  return layoutMaxRound > 2 ? MATCH_ROW_GAP_SPACIOUS : MATCH_ROW_GAP_COMPACT;
+  if (layoutMaxRound < 3) return MATCH_ROW_GAP_COMPACT;
+  return layoutMaxRound === 3 ? MATCH_ROW_GAP : MATCH_ROW_GAP_SPACIOUS;
 }
 
 type RoundsMap = Map<number, Array<MatchData>>;
