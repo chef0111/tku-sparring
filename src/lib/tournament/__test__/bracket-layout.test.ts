@@ -10,6 +10,7 @@ import {
   buildTwoSidedConnectors,
   buildTwoSidedLayout,
   matchWing,
+  roundLabelPlacements,
   twoSidedMatchRowGap,
 } from '../bracket-layout';
 import type { MatchData } from '@/features/dashboard/types';
@@ -53,6 +54,20 @@ function shellToMatches(
     tournamentId: 't1',
   }));
 }
+
+describe('roundLabelPlacements', () => {
+  it('returns one label per round in one-sided mode', () => {
+    const matches = shellToMatches(8, false);
+    const { positions, layoutMaxRound } = buildOneSidedLayout(matches, false);
+    const placements = roundLabelPlacements(
+      positions,
+      layoutMaxRound,
+      'one-sided'
+    );
+    expect(placements.length).toBe(layoutMaxRound + 1);
+    expect(new Set(placements.map((p) => p.key)).size).toBe(placements.length);
+  });
+});
 
 describe('twoSidedMatchRowGap', () => {
   it('uses 56px for ≤3 rounds and 40px for larger brackets', () => {

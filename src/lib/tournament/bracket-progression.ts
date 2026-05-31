@@ -58,7 +58,7 @@ export function isAutoRound0ByeCompleteMatch(
  * shuffle/regenerate. Auto round-0 bye completes (0–0) are ignored so the
  * reset control stays off until real edits.
  */
-export function bracketHasResettableMatchActivity(
+export function isResettableMatch(
   matches: ReadonlyArray<BracketMatchResetActivityRow>
 ): boolean {
   for (const m of matches) {

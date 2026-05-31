@@ -5,12 +5,7 @@ import type {
   BracketConnectorPath,
   BracketLayoutResult,
 } from '@/lib/tournament/bracket-layout';
-import {
-  buildOneSidedConnectors,
-  buildOneSidedLayout,
-  buildTwoSidedConnectors,
-  buildTwoSidedLayout,
-} from '@/lib/tournament/bracket-layout';
+import { canvasBuilders } from '@/lib/tournament/bracket-layout';
 
 export type UseBracketLayoutOptions = {
   layout?: BracketLayoutResult;
@@ -36,16 +31,15 @@ export function useBracketLayout(
 
   const layout = React.useMemo(() => {
     if (options?.layout) return options.layout;
-    return layoutMode === 'one-sided'
-      ? buildOneSidedLayout(matches, thirdPlaceMatch)
-      : buildTwoSidedLayout(matches, thirdPlaceMatch);
+    return canvasBuilders[layoutMode].layout(matches, thirdPlaceMatch);
   }, [matches, thirdPlaceMatch, options?.layout, layoutMode]);
 
   const connectors = React.useMemo(() => {
     if (options?.connectors) return options.connectors;
-    return layoutMode === 'one-sided'
-      ? buildOneSidedConnectors(layout.positions, layout.layoutMaxRound)
-      : buildTwoSidedConnectors(layout.positions, layout.layoutMaxRound);
+    return canvasBuilders[layoutMode].connectors(
+      layout.positions,
+      layout.layoutMaxRound
+    );
   }, [
     layout.positions,
     layout.layoutMaxRound,
