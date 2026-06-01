@@ -250,7 +250,7 @@
   }
   * {
     scrollbar-width: thin;
-    scrollbar-color: oklch(0.274 0.006 286.033) transparent;
+    scrollbar-color: var(--border) transparent;
   }
 }
 

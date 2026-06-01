@@ -33,8 +33,8 @@ export function TournamentCard({
   const row = adaptToRow(tournament);
 
   return (
-    <Card className="group bg-popover/70 relative gap-0 rounded-lg border-none p-0 ring-0">
-      {onRowAction ? (
+    <Card className="group bg-muted dark:bg-popover/70 relative gap-0 rounded-lg border-none p-0 ring-0">
+      {onRowAction && (
         <div className="absolute top-1 right-1 z-20 p-0">
           <TournamentsActionMenu
             options={{ onRowAction }}
@@ -42,13 +42,13 @@ export function TournamentCard({
             tournament={tournament}
           />
         </div>
-      ) : null}
+      )}
       <Link
         to="/dashboard/tournaments/$id"
         params={{ id: tournament.id }}
         aria-label={`Open ${tournament.name}`}
       >
-        <CardContent className="hover:border-primary/30 bg-card hover:bg-muted/50 flex flex-col justify-between gap-0 rounded-lg border p-4 transition-colors max-sm:space-y-4 sm:aspect-21/9">
+        <CardContent className="hover:border-primary/30 bg-card dark:hover:bg-muted/50 hover:bg-card/50 flex flex-col justify-between gap-0 rounded-lg border p-4 shadow-sm transition-colors max-sm:space-y-4 sm:aspect-21/9">
           <CardHeader className="gap-1 p-0">
             <CardTitle className="truncate font-semibold">
               {tournament.name}

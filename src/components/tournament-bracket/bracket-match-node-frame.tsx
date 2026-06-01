@@ -58,7 +58,7 @@ export function BracketMatchNodeFrame({
       <div
         aria-hidden={isFinal ? true : undefined}
         className={cn(
-          'bg-card pointer-events-none absolute inset-0 rounded-md border',
+          'dark:bg-card bg-accent/50 pointer-events-none absolute inset-0 rounded-md border',
           statusClass,
           isFinal && 'ring-ring/50 shadow-md ring-2',
           isFinal &&
@@ -74,7 +74,7 @@ export function BracketMatchNodeFrame({
           </div>
           <Separator
             orientation="horizontal"
-            className="absolute top-1/2 z-50 h-1! -translate-y-1/2 bg-zinc-300 px-1 dark:bg-zinc-700"
+            className="bg-muted absolute top-1/2 z-50 h-1! -translate-y-1/2 px-1"
           />
           <div className={cn(finalDecorIcon, '-right-1.25')}>
             <Circle aria-hidden="true" />
@@ -84,7 +84,7 @@ export function BracketMatchNodeFrame({
 
       {labels.isRedWinner && (
         <div
-          className="pointer-events-none absolute inset-x-0 top-px rounded-t-[5px] bg-emerald-500/10"
+          className="pointer-events-none absolute inset-x-0 top-px z-10 rounded-t-[5px] bg-emerald-500/10"
           style={{ height: ATHLETE_ROW_H - 1 }}
         />
       )}
@@ -98,7 +98,9 @@ export function BracketMatchNodeFrame({
         />
       )}
 
-      <div className="bg-border pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2" />
+      {!isFinal && (
+        <div className="bg-border pointer-events-none absolute inset-x-0 top-1/2 z-50 h-px -translate-y-1/2" />
+      )}
 
       <BracketSlot
         match={match}

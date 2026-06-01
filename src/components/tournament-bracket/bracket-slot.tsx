@@ -85,7 +85,8 @@ export function BracketSlot({
     [setDragRef, setDropRef]
   );
 
-  const sideBar = side === 'red' ? 'bg-red-500 mt-px' : 'bg-blue-500 mb-px';
+  const sideBar =
+    side === 'red' ? 'bg-red-500 mt-[0.05rem]' : 'bg-blue-500 mb-[0.05rem]';
   const rowTop = side === 'red' ? 0 : ATHLETE_ROW_H;
 
   return (
@@ -100,7 +101,7 @@ export function BracketSlot({
         height: ATHLETE_ROW_H,
       }}
       className={cn(
-        'relative z-2 flex touch-none items-stretch rounded-md bg-transparent active:cursor-grabbing',
+        'relative z-2 flex touch-none items-stretch rounded-md active:cursor-grabbing',
         athlete || assignedName ? 'cursor-grab' : 'cursor-pointer',
         locked && 'opacity-50',
         isFinal &&
@@ -134,7 +135,7 @@ export function BracketSlot({
 
       <div
         className={cn(
-          'flex min-w-0 flex-1 flex-col justify-center px-1.5 py-0.5',
+          'z-50 flex min-w-0 flex-1 flex-col justify-center px-1.5 py-0.5',
           isRtl ? 'pr-2 pl-1.5' : 'pl-2'
         )}
       >
@@ -180,7 +181,7 @@ export function BracketSlot({
 
       <div
         className={cn(
-          'flex shrink-0 items-center text-xs font-semibold tabular-nums select-none!',
+          'z-50 flex shrink-0 items-center text-xs font-semibold tabular-nums select-none!',
           isWinner ? 'font-semibold text-emerald-600' : 'text-muted-foreground',
           isRtl ? 'pl-2' : 'pr-2'
         )}

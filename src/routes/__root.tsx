@@ -2,6 +2,7 @@ import {
   HeadContent,
   Scripts,
   createRootRouteWithContext,
+  useRouterState,
 } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { TanStackDevtools } from '@tanstack/react-devtools';
@@ -14,7 +15,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { NotFound } from '@/components/not-found';
 import { cn } from '@/lib/utils';
 import { SettingsProvider } from '@/contexts/settings';
-import { ThemeProvider } from '@/contexts/themes';
+import { useResolvedTheme } from '@/contexts/themes/use-theme';
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -68,23 +69,30 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const isDashboard = useRouterState({
+    select: (state) => {
+      const path = state.location.pathname;
+      return path === '/dashboard' || path.startsWith('/dashboard/');
+    },
+  });
+  const resolved = useResolvedTheme();
+  const themeClass = isDashboard ? resolved : 'dark';
+
   return (
     <html
       lang="en"
-      className={cn('font-sans antialiased')}
+      className={cn('font-sans antialiased', themeClass)}
       suppressHydrationWarning
     >
       <head>
         <HeadContent />
       </head>
-      <body className="h-dvh">
-        <ThemeProvider defaultTheme="dark" storageKey="start-theme">
-          <NuqsAdapter>
-            <TooltipProvider>
-              <SettingsProvider>{children}</SettingsProvider>
-            </TooltipProvider>
-          </NuqsAdapter>
-        </ThemeProvider>
+      <body className={cn('h-dvh', themeClass)} suppressHydrationWarning>
+        <NuqsAdapter>
+          <TooltipProvider>
+            <SettingsProvider>{children}</SettingsProvider>
+          </TooltipProvider>
+        </NuqsAdapter>
         <Toaster richColors closeButton />
         <TanStackDevtools
           config={{

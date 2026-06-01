@@ -170,7 +170,7 @@ function QueueRow({
           }
         }}
         className={cn(
-          'group bg-popover relative min-w-0 flex-1 gap-0 rounded-md border-none p-0 ring-0',
+          'group bg-muted dark:bg-popover relative min-w-0 flex-1 gap-0 rounded-md border-none p-0 ring-0',
           'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
         )}
       >
@@ -181,7 +181,7 @@ function QueueRow({
         </div>
         <CardContent
           onClick={() => onOpen(match)}
-          className="hover:border-primary/30 bg-muted/30 hover:bg-muted/50 cursor-pointer space-y-2 rounded-md border p-2 transition-colors"
+          className="hover:border-primary/30 bg-card dark:bg-muted/30 hover:bg-card/50 dark:hover:bg-muted/50 cursor-pointer space-y-2 rounded-md border p-2 shadow-sm transition-colors"
         >
           <CardHeader className="gap-1 p-0">
             <CardTitle className="truncate text-sm font-semibold">

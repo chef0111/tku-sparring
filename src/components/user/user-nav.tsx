@@ -2,9 +2,12 @@ import {
   ChevronsUpDown,
   Home,
   LogOutIcon,
+  Monitor,
   Moon,
+  MoonStar,
   Shield,
   Sun,
+  SunMedium,
 } from 'lucide-react';
 
 import { toast } from 'sonner';
@@ -157,14 +160,27 @@ function ThemeToggleItem() {
         <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
         <span>Appearance</span>
       </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent>
+      <DropdownMenuSubContent
+        alignOffset={-72}
+        sideOffset={8}
+        className="min-w-28"
+      >
         <DropdownMenuRadioGroup
           value={theme}
-          onValueChange={(value) => setTheme(value as string as Theme)}
+          onValueChange={(value) => setTheme(value as Theme)}
         >
-          <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem
+            value="light"
+            className="text-mu justify-between"
+          >
+            Light <MoonStar className="text-muted-foreground" />
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="dark" className="justify-between">
+            Dark <SunMedium className="text-muted-foreground" />
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="system" className="justify-between">
+            System <Monitor className="text-muted-foreground ml-4" />
+          </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuSubContent>
     </DropdownMenuSub>

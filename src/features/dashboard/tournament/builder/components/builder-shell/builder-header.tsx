@@ -24,7 +24,7 @@ export function BuilderHeader({
     <header className="bg-sidebar/70 supports-backdrop-filter:bg-sidebar/50 sticky top-0 z-10 flex h-14 items-center gap-2 border-b px-4">
       <div className="flex items-center gap-2">
         <div className="bg-sidebar-foreground text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-md">
-          <LogoIcon className="size-4 invert" />
+          <LogoIcon className="size-4 invert-0 dark:invert" />
         </div>
         <h1 className="text-lg font-semibold">{tournament.name}</h1>
         <Badge className="bg-primary/10 text-primary rounded text-xs font-medium">

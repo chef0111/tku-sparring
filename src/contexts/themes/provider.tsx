@@ -1,5 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useSyncExternalStore } from 'react';
 import { ScriptOnce } from '@tanstack/react-router';
+import {
+  getTheme,
+  getThemeScript,
+  initThemeStore,
+  setTheme,
+  subscribeTheme,
+} from './theme-store';
 import { ThemeProviderContext } from './context';
 import type { Theme } from './context';
 
@@ -9,64 +16,29 @@ type ThemeProviderProps = {
   storageKey?: string;
 };
 
-function getThemeScript(storageKey: string, defaultTheme: Theme) {
-  const key = JSON.stringify(storageKey);
-  const fallback = JSON.stringify(defaultTheme);
-
-  return `(function(){try{var t=localStorage.getItem(${key});if(t!=='light'&&t!=='dark'&&t!=='system'){t=${fallback}}var d=matchMedia('(prefers-color-scheme: dark)').matches;var r=t==='system'?(d?'dark':'light'):t;var e=document.documentElement;e.classList.add(r);e.style.colorScheme=r}catch(e){}})();`;
-}
-
-function applyTheme(theme: Theme) {
-  const root = document.documentElement;
-  root.classList.remove('light', 'dark');
-
-  const resolved =
-    theme === 'system'
-      ? window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
-      : theme;
-
-  root.classList.add(resolved);
-  root.style.colorScheme = resolved;
-}
-
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
   storageKey = 'theme',
 }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(defaultTheme);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    const stored = localStorage.getItem(storageKey);
-    setThemeState(
-      stored === 'light' || stored === 'dark' || stored === 'system'
-        ? stored
-        : defaultTheme
-    );
-    setMounted(true);
+  useLayoutEffect(() => {
+    initThemeStore(storageKey, defaultTheme);
   }, [defaultTheme, storageKey]);
 
-  useEffect(() => {
-    if (!mounted) return;
-    applyTheme(theme);
-  }, [theme, mounted]);
+  const theme = useSyncExternalStore(
+    subscribeTheme,
+    getTheme,
+    () => defaultTheme
+  );
 
-  useEffect(() => {
-    if (!mounted || theme !== 'system') return;
+  useLayoutEffect(() => {
+    if (theme !== 'system') return;
 
     const media = window.matchMedia('(prefers-color-scheme: dark)');
-    const onChange = () => applyTheme('system');
+    const onChange = () => setTheme('system');
     media.addEventListener('change', onChange);
     return () => media.removeEventListener('change', onChange);
-  }, [theme, mounted]);
-
-  const setTheme = (next: Theme) => {
-    localStorage.setItem(storageKey, next);
-    setThemeState(next);
-  };
+  }, [theme]);
 
   return (
     <ThemeProviderContext value={{ theme, setTheme }}>
