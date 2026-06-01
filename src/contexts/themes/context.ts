@@ -7,10 +7,7 @@ type ThemeProviderState = {
   setTheme: (theme: Theme) => void;
 };
 
-const initialState: ThemeProviderState = {
+export const ThemeProviderContext = createContext<ThemeProviderState>({
   theme: 'system',
-  setTheme: () => null,
-};
-
-export const ThemeProviderContext =
-  createContext<ThemeProviderState>(initialState);
+  setTheme: () => {},
+});

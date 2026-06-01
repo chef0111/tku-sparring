@@ -74,7 +74,7 @@ export function BracketMatchNodeFrame({
           </div>
           <Separator
             orientation="horizontal"
-            className="absolute top-1/2 z-50 h-1! -translate-y-1/2 bg-zinc-700 px-1"
+            className="absolute top-1/2 z-50 h-1! -translate-y-1/2 bg-zinc-300 px-1 dark:bg-zinc-700"
           />
           <div className={cn(finalDecorIcon, '-right-1.25')}>
             <Circle aria-hidden="true" />

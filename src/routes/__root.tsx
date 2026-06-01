@@ -14,6 +14,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { NotFound } from '@/components/not-found';
 import { cn } from '@/lib/utils';
 import { SettingsProvider } from '@/contexts/settings';
+import { ThemeProvider } from '@/contexts/themes';
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -68,16 +69,22 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn('font-sans antialiased')}>
+    <html
+      lang="en"
+      className={cn('font-sans antialiased')}
+      suppressHydrationWarning
+    >
       <head>
         <HeadContent />
       </head>
-      <body className="dark h-dvh">
-        <NuqsAdapter>
-          <TooltipProvider>
-            <SettingsProvider>{children}</SettingsProvider>
-          </TooltipProvider>
-        </NuqsAdapter>
+      <body className="h-dvh">
+        <ThemeProvider defaultTheme="dark" storageKey="start-theme">
+          <NuqsAdapter>
+            <TooltipProvider>
+              <SettingsProvider>{children}</SettingsProvider>
+            </TooltipProvider>
+          </NuqsAdapter>
+        </ThemeProvider>
         <Toaster richColors closeButton />
         <TanStackDevtools
           config={{

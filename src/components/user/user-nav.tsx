@@ -1,8 +1,17 @@
-import { ChevronsUpDown, Home, LogOutIcon, Shield } from 'lucide-react';
+import {
+  ChevronsUpDown,
+  Home,
+  LogOutIcon,
+  Moon,
+  Shield,
+  Sun,
+} from 'lucide-react';
 
 import { toast } from 'sonner';
 import { Link, useRouter } from '@tanstack/react-router';
+import { IconBrandGithub } from '@tabler/icons-react';
 import UserAvatar from './user-avatar';
+import type { Theme } from '@/contexts/themes';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -11,7 +20,12 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -21,6 +35,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { authClient } from '@/lib/auth-client';
+import { useTheme } from '@/contexts/themes';
 
 export function UserNav() {
   const { data, isPending } = authClient.useSession();
@@ -92,6 +107,17 @@ export function UserNav() {
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
+            <ThemeToggleItem />
+            <DropdownMenuItem asChild>
+              <a
+                href="https://github.com/chef0111/tku-sparring"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <IconBrandGithub className="size-4" />
+                GitHub
+              </a>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <LogoutItem />
           </DropdownMenuContent>
@@ -118,5 +144,29 @@ function LogoutItem() {
     <DropdownMenuItem onClick={handleSignOut}>
       <LogOutIcon className="size-4" /> <span>Sign out</span>
     </DropdownMenuItem>
+  );
+}
+
+function ThemeToggleItem() {
+  const { theme, setTheme } = useTheme();
+
+  return (
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger>
+        <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+        <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+        <span>Appearance</span>
+      </DropdownMenuSubTrigger>
+      <DropdownMenuSubContent>
+        <DropdownMenuRadioGroup
+          value={theme}
+          onValueChange={(value) => setTheme(value as string as Theme)}
+        >
+          <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuSubContent>
+    </DropdownMenuSub>
   );
 }
