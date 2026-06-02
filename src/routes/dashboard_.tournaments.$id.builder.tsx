@@ -20,8 +20,8 @@ function TournamentBuilder() {
   const { id } = Route.useParams();
 
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="start-theme">
-      <TournamentBuilderPage id={id} />;
+    <ThemeProvider defaultTheme="system" storageKey="start-theme">
+      <TournamentBuilderPage id={id} />
     </ThemeProvider>
   );
 }

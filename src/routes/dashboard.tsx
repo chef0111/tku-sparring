@@ -20,7 +20,7 @@ export const Route = createFileRoute('/dashboard')({
 
 function DashboardLayout() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="start-theme">
+    <ThemeProvider defaultTheme="system" storageKey="start-theme">
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>

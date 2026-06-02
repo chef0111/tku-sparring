@@ -25,6 +25,20 @@ function centerForScale(
   };
 }
 
+function zoomAtPoint(
+  t: { x: number; y: number; scale: number },
+  focalX: number,
+  focalY: number,
+  nextScale: number
+): { x: number; y: number; scale: number } {
+  const k = nextScale / t.scale;
+  return {
+    x: focalX - (focalX - t.x) * k,
+    y: focalY - (focalY - t.y) * k,
+    scale: nextScale,
+  };
+}
+
 /**
  * @param contentWidth - Bracket layout width (px)
  * @param contentHeight - Bracket layout height (px)
@@ -96,19 +110,32 @@ export function usePanZoom(contentWidth: number, contentHeight: number) {
     applyFitTransform();
   }, [applyFitTransform]);
 
+  const zoomAtViewportCenter = React.useCallback(
+    (scaleFn: (scale: number) => number) => {
+      const node = containerRef.current;
+      if (!node) return;
+      const rect = node.getBoundingClientRect();
+      const cx = rect.width / 2;
+      const cy = rect.height / 2;
+      setTransform((t) => {
+        const nextScale = Math.min(
+          SCALE_MAX,
+          Math.max(SCALE_MIN, scaleFn(t.scale))
+        );
+        if (nextScale === t.scale) return t;
+        return zoomAtPoint(t, cx, cy, nextScale);
+      });
+    },
+    []
+  );
+
   const zoomIn = React.useCallback(() => {
-    setTransform((t) => ({
-      ...t,
-      scale: Math.min(SCALE_MAX, t.scale * 1.15),
-    }));
-  }, []);
+    zoomAtViewportCenter((s) => s * 1.15);
+  }, [zoomAtViewportCenter]);
 
   const zoomOut = React.useCallback(() => {
-    setTransform((t) => ({
-      ...t,
-      scale: Math.max(SCALE_MIN, t.scale / 1.15),
-    }));
-  }, []);
+    zoomAtViewportCenter((s) => s / 1.15);
+  }, [zoomAtViewportCenter]);
 
   const onWheel = React.useCallback((e: WheelEvent) => {
     const el = containerRef.current;
@@ -123,10 +150,8 @@ export function usePanZoom(contentWidth: number, contentHeight: number) {
         SCALE_MAX,
         Math.max(SCALE_MIN, prev.scale * (1 + delta))
       );
-      const k = nextScale / prev.scale;
-      const nextX = mx - (mx - prev.x) * k;
-      const nextY = my - (my - prev.y) * k;
-      return { x: nextX, y: nextY, scale: nextScale };
+      if (nextScale === prev.scale) return prev;
+      return zoomAtPoint(prev, mx, my, nextScale);
     });
   }, []);
 

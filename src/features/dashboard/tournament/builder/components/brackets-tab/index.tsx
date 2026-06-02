@@ -1,4 +1,4 @@
-import { TournamentBracketProvider } from '../../context/tournament-bracket/provider';
+import { TournamentBracketProvider } from '../../context/tournament-bracket';
 import { EmptyGroupsPlaceholder } from './empty-groups-placeholder';
 import type { GroupData } from '@/features/dashboard/types';
 

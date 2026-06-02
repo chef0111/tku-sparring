@@ -72,7 +72,7 @@ export function GroupsTabsHeader({
       </Tabs>
 
       <div className="bg-sidebar absolute inset-y-0 top-0 right-0 flex w-10 items-stretch justify-end border-l">
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button
               type="button"
