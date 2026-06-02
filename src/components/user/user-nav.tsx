@@ -12,9 +12,9 @@ import {
 
 import { toast } from 'sonner';
 import { Link, useRouter } from '@tanstack/react-router';
-import { IconBrandGithub } from '@tabler/icons-react';
 import UserAvatar from './user-avatar';
 import type { Theme } from '@/contexts/themes';
+import { GithubIcon } from '@/components/icons/github';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -117,7 +117,7 @@ export function UserNav() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <IconBrandGithub className="size-4" />
+                <GithubIcon className="size-4" />
                 GitHub
               </a>
             </DropdownMenuItem>
