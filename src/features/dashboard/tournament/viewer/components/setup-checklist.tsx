@@ -129,7 +129,7 @@ function SetupStepRow({
 
       <article
         className={cn(
-          'border-border/60 bg-card/40 flex min-w-0 flex-1 flex-col gap-3 rounded-lg border p-3 transition-colors',
+          'border-border/60 bg-card/40 flex min-w-0 flex-1 flex-col gap-3 rounded-lg border p-3 shadow-sm transition-colors',
           isCurrent && 'border-primary/25 bg-muted/30 shadow-sm',
           step.complete && 'opacity-90'
         )}

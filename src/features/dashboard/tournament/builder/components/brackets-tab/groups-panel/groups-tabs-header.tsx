@@ -50,7 +50,7 @@ export function GroupsTabsHeader({
           scrollIdIntoView(v);
         }}
       >
-        <div className="scrollbar-thin overflow-x-auto overflow-y-hidden pr-10">
+        <div className="scrollbar-none overflow-x-auto overflow-y-hidden pr-10">
           <TabsList variant="line" className="h-auto min-w-min flex-nowrap">
             {groups.map((g) => (
               <TabsTrigger
@@ -59,7 +59,7 @@ export function GroupsTabsHeader({
                   register(g.id, el);
                 }}
                 value={g.id}
-                className="shrink-0 select-none!"
+                className="no-focus shrink-0 select-none!"
               >
                 {g.name}
               </TabsTrigger>
@@ -72,7 +72,7 @@ export function GroupsTabsHeader({
       </Tabs>
 
       <div className="bg-sidebar absolute inset-y-0 top-0 right-0 flex w-10 items-stretch justify-end border-l">
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button
               type="button"

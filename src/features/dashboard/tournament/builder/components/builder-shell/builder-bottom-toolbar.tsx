@@ -159,7 +159,7 @@ export function BuilderBottomToolbar({
               size="sm"
               disabled={readOnly}
               onClick={onDeleteTournament}
-              className="text-destructive hover:text-destructive gap-2"
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive gap-2"
             >
               <Trash2 className="size-4" />
               <span>Delete</span>

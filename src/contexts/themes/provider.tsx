@@ -1,4 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useSyncExternalStore } from 'react';
+import { ScriptOnce } from '@tanstack/react-router';
+import {
+  getTheme,
+  getThemeScript,
+  initThemeStore,
+  setTheme,
+  subscribeTheme,
+} from './theme-store';
 import { ThemeProviderContext } from './context';
 import type { Theme } from './context';
 
@@ -11,42 +19,31 @@ type ThemeProviderProps = {
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
-  storageKey = 'vite-ui-theme',
-  ...props
+  storageKey = 'theme',
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+  useLayoutEffect(() => {
+    initThemeStore(storageKey, defaultTheme);
+  }, [defaultTheme, storageKey]);
+
+  const theme = useSyncExternalStore(
+    subscribeTheme,
+    getTheme,
+    () => defaultTheme
   );
 
-  useEffect(() => {
-    const root = window.document.documentElement;
+  useLayoutEffect(() => {
+    if (theme !== 'system') return;
 
-    root.classList.remove('light', 'dark');
-
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
-        .matches
-        ? 'dark'
-        : 'light';
-
-      root.classList.add(systemTheme);
-      return;
-    }
-
-    root.classList.add(theme);
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => setTheme('system');
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
   }, [theme]);
 
-  const value = {
-    theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
-    },
-  };
-
   return (
-    <ThemeProviderContext.Provider {...props} value={value}>
+    <ThemeProviderContext value={{ theme, setTheme }}>
+      <ScriptOnce>{getThemeScript(storageKey, defaultTheme)}</ScriptOnce>
       {children}
-    </ThemeProviderContext.Provider>
+    </ThemeProviderContext>
   );
 }

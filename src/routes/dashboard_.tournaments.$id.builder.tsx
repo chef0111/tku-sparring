@@ -3,6 +3,7 @@ import { TournamentBuilderPage } from '@/features/dashboard/tournament/builder';
 import LoadingScreen from '@/components/navigation/loading';
 import { groupListQueryOptions } from '@/queries/group/group-list-query-options';
 import { tournamentQueryOptions } from '@/queries/tournament';
+import { ThemeProvider } from '@/contexts/themes';
 
 export const Route = createFileRoute('/dashboard_/tournaments/$id/builder')({
   loader: async ({ params, context: { queryClient } }) => {
@@ -17,5 +18,10 @@ export const Route = createFileRoute('/dashboard_/tournaments/$id/builder')({
 
 function TournamentBuilder() {
   const { id } = Route.useParams();
-  return <TournamentBuilderPage id={id} />;
+
+  return (
+    <ThemeProvider defaultTheme="system" storageKey="start-theme">
+      <TournamentBuilderPage id={id} />
+    </ThemeProvider>
+  );
 }

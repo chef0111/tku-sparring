@@ -6,7 +6,7 @@ import { Status, StatusIndicator, StatusLabel } from '@/components/ui/status';
 import { cn } from '@/lib/utils';
 
 const hubPanelShellClassName =
-  'group bg-card border-border/80 relative gap-0 overflow-visible border border-b-0 p-0 ring-0';
+  'group bg-muted dark:bg-card border-border/80 relative gap-0 overflow-visible border border-b-0 p-0 ring-0';
 
 const hubPanelInnerClassName =
   "bg-background border-border ring-border relative z-10 -mx-0.75 mt-auto flex w-[calc(100%+0.375rem)] max-w-none flex-col overflow-hidden rounded-xl shadow-sm ring before:pointer-events-none before:absolute before:inset-0 before:rounded-lg before:bg-[radial-gradient(ellipse_90%_70%_at_0%_0%,rgb(255_255_255/0.12),transparent_58%)] before:content-['']";
@@ -29,11 +29,11 @@ function HubPanelHeader({
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="min-w-0 truncate text-sm font-medium">{label}</span>
-        {description ? (
+        {description && (
           <span className="text-muted-foreground truncate text-xs">
             {description}
           </span>
-        ) : null}
+        )}
       </div>
     </CardHeader>
   );
