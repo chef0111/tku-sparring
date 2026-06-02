@@ -67,6 +67,14 @@ _Avoid_: Side, hemisphere
 Admin view setting for the **Bracket canvas**: `two-sided` (default) or `one-sided` (classic left-to-right tree). Stored per device in the browser only — not on **Tournament** or **Group**.
 _Avoid_: Bracket mode, layout toggle
 
+**Bracket screenshot**:
+Exports the full **Group** tree from the **Bracket canvas** as a PNG at fit-to-content scale (not the current pan/zoom viewport). Preview supports light and dark renders independent of the app theme; copy or save without closing the preview dialog.
+_Avoid_: Canvas export, bracket image
+
+**Bracket fullscreen**:
+Immersive **Bracket canvas** view that hides builder chrome until the admin hovers the top (header), bottom (footer), or left edge (**Groups** panel). Esc exits unless a dialog or sheet is open.
+_Avoid_: Presentation mode, zen mode
+
 **Advance Settings**:
 The client-side selection flow for tournament, group, and match used before a bout starts.
 _Avoid_: Setup wizard
