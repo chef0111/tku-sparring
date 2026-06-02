@@ -49,10 +49,10 @@ export function BracketViewToolbar({
             onClick={() => setScreenshotOpen(true)}
           >
             <Camera data-icon="inline-start" />
-            <span className="sr-only">Screenshot bracket</span>
+            <span className="sr-only">Screenshot</span>
           </Button>
         </TooltipTrigger>
-        <TooltipContent side="left">Screenshot bracket</TooltipContent>
+        <TooltipContent side="left">Screenshot</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>

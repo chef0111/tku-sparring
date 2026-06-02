@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Copy, Download } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTournamentBracket } from '../../context/tournament-bracket/use-tournament-bracket';
 import { useBracketChrome } from '../../context/bracket-chrome';
@@ -8,6 +8,7 @@ import {
   captureBracketPng,
 } from '../../lib/capture-bracket-png';
 import { useTournament } from '@/queries/tournament';
+import { CopyButton } from '@/components/ncdai/copy-button';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -80,17 +81,6 @@ export function BracketScreenshotDialog() {
 
   const actionsDisabled = isCapturing || !blob;
 
-  const handleCopy = async () => {
-    if (!blob) return;
-    try {
-      await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': blob }),
-      ]);
-    } catch {
-      toast.error('Could not copy to clipboard');
-    }
-  };
-
   const handleSave = () => {
     if (!blob) return;
     const url = URL.createObjectURL(blob);
@@ -105,7 +95,7 @@ export function BracketScreenshotDialog() {
     <Dialog open={screenshotOpen} onOpenChange={setScreenshotOpen}>
       <DialogContent className="gap-4 sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Bracket screenshot</DialogTitle>
+          <DialogTitle className="text-lg">Bracket screenshot</DialogTitle>
           <DialogDescription>
             Screenshot export for {selectedGroup?.name ?? 'this group'}. Copy or
             save without closing this preview.
@@ -114,8 +104,8 @@ export function BracketScreenshotDialog() {
 
         <div className="border-border max-h-[70vh] overflow-auto rounded-lg border bg-white">
           {isCapturing ? (
-            <div className="flex min-h-48 items-center justify-center gap-2 p-8">
-              <Spinner className="size-5" />
+            <div className="flex min-h-49 items-center justify-center gap-2 p-8">
+              <Spinner className="text-muted size-5" />
               <span className="text-muted-foreground text-sm">
                 Capturing bracket…
               </span>
@@ -134,15 +124,16 @@ export function BracketScreenshotDialog() {
         </div>
 
         <DialogFooter>
-          <Button
+          <CopyButton
+            className="scale-100!"
             type="button"
             variant="outline"
+            size="default"
             disabled={actionsDisabled}
-            onClick={() => void handleCopy()}
+            blob={() => blob!}
           >
-            <Copy />
             Copy
-          </Button>
+          </CopyButton>
           <Button type="button" disabled={actionsDisabled} onClick={handleSave}>
             <Download />
             Save
