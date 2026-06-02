@@ -9,7 +9,9 @@ import { AutoAssignAllDialog } from './components/dialogs/auto-assign-all-dialog
 import { TournamentStatusDialog } from './components/dialogs/tournament-status-dialog';
 import { GroupsTab } from './components/groups-tab';
 import { BracketsTab } from './components/brackets-tab';
+import { BuilderWorkspaceProvider } from './context/builder-workspace';
 import { useTournamentBuilder } from './hooks/use-tournament-builder';
+import { TournamentBracketProvider } from './context/tournament-bracket';
 import type { GroupData, TournamentData } from '@/features/dashboard/types';
 import { TournamentActivitySheet } from '@/features/dashboard/tournament/tournament-activity-sheet';
 import LoadingScreen from '@/components/navigation/loading';
@@ -106,23 +108,27 @@ function TournamentBuilderActive({
         />
       }
     >
-      <div className="relative flex-1 overflow-hidden">
-        {b.tab === 'groups' ? (
-          <GroupsTab
-            tournamentId={tournamentId}
-            tournamentName={tournament.name}
-            groups={groups}
-            readOnly={b.isReadOnly}
-          />
-        ) : (
-          <BracketsTab
-            tournamentId={tournamentId}
-            groups={groups}
-            readOnly={b.isReadOnly}
-            tournamentStatus={tournament.status}
-          />
-        )}
-      </div>
+      <BuilderWorkspaceProvider
+        tournamentId={tournamentId}
+        groups={groups}
+        readOnly={b.isReadOnly}
+        tournamentStatus={tournament.status}
+      >
+        <div className="relative flex-1 overflow-hidden">
+          {b.tab === 'groups' ? (
+            <GroupsTab
+              tournamentId={tournamentId}
+              tournamentName={tournament.name}
+              groups={groups}
+              readOnly={b.isReadOnly}
+            />
+          ) : (
+            <TournamentBracketProvider>
+              <BracketsTab />
+            </TournamentBracketProvider>
+          )}
+        </div>
+      </BuilderWorkspaceProvider>
 
       <TournamentActivitySheet
         open={b.activityOpen}

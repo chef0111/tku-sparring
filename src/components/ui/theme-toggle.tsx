@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
 import type { VariantProps } from 'class-variance-authority';
 import type { buttonVariants } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/themes';
 import { cn } from '@/lib/utils';
@@ -29,7 +30,7 @@ export function ThemeToggle({
   };
 
   if (!isMounted) {
-    return <div className="flex h-8 w-8" />;
+    return <Skeleton className="size-9 rounded-md" />;
   }
 
   return (

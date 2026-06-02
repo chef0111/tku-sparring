@@ -1,6 +1,6 @@
-import { ThemeToggle } from './theme-toggle';
 import type { TournamentData } from '@/features/dashboard/types';
 import type { User } from '@/lib/auth';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { TournamentStatusPill } from '@/features/dashboard/tournament/list/components/tournament-status-pill';
 import { UserDropdown } from '@/components/user/user-dropdown';
 import { LogoIcon } from '@/components/ui/logo';
@@ -34,7 +34,7 @@ export function BuilderHeader({
 
       <Tabs
         value={tab}
-        onValueChange={(v) => onTabChange(v as 'groups' | 'brackets')}
+        onValueChange={(t) => onTabChange(t as typeof tab)}
         className="absolute top-2.5 left-1/2 h-10 -translate-x-1/2"
       >
         <TabsList className="bg-sidebar border-2 p-0">
