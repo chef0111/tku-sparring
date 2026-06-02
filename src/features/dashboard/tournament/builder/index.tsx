@@ -2,13 +2,14 @@ import { Link } from '@tanstack/react-router';
 import { ArrowLeft, Trophy } from 'lucide-react';
 import { BuilderShell } from './components/builder-shell';
 import { BuilderHeader } from './components/builder-shell/builder-header';
-import { BuilderBottomToolbar } from './components/builder-shell/builder-bottom-toolbar';
+import { BuilderFooter } from './components/builder-shell/builder-footer';
 import { EditTournamentDialog } from './components/dialogs/edit-tournament-dialog';
 import { DeleteTournamentDialog } from './components/dialogs/delete-tournament-dialog';
 import { AutoAssignAllDialog } from './components/dialogs/auto-assign-all-dialog';
 import { TournamentStatusDialog } from './components/dialogs/tournament-status-dialog';
 import { GroupsTab } from './components/groups-tab';
 import { BracketsTab } from './components/brackets-tab';
+import { BracketChromeProvider } from './context/bracket-chrome';
 import { BuilderWorkspaceProvider } from './context/builder-workspace';
 import { useTournamentBuilder } from './hooks/use-tournament-builder';
 import { TournamentBracketProvider } from './context/tournament-bracket';
@@ -79,98 +80,100 @@ function TournamentBuilderActive({
   });
 
   return (
-    <BuilderShell
-      readOnly={b.isReadOnly}
-      header={
-        <BuilderHeader
-          tournament={tournament}
-          tab={b.tab}
-          onTabChange={(v) => void b.setTab(v)}
-          user={b.user}
-        />
-      }
-      footer={
-        <BuilderBottomToolbar
-          tournament={tournament}
-          readOnly={b.isReadOnly}
-          isRefreshing={b.isRefreshing}
-          isSettingTournamentStatus={setTournamentStatusMutation.isPending}
-          onRefresh={b.handleRefresh}
-          onAutoAssignAll={() => b.setShowAutoAssignAll(true)}
-          onAdminStatusIntent={b.handleAdminStatusIntent}
-          onEditTournament={() => {
-            if (!b.isReadOnly) b.setShowEditTournament(true);
-          }}
-          onDeleteTournament={() => {
-            if (!b.isReadOnly) b.setShowDeleteTournament(true);
-          }}
-          onActivity={() => b.setActivityOpen(true)}
-        />
-      }
-    >
-      <BuilderWorkspaceProvider
-        tournamentId={tournamentId}
-        groups={groups}
+    <BracketChromeProvider>
+      <BuilderShell
         readOnly={b.isReadOnly}
-        tournamentStatus={tournament.status}
+        header={
+          <BuilderHeader
+            tournament={tournament}
+            tab={b.tab}
+            onTabChange={(v) => void b.setTab(v)}
+            user={b.user}
+          />
+        }
+        footer={
+          <BuilderFooter
+            tournament={tournament}
+            readOnly={b.isReadOnly}
+            isRefreshing={b.isRefreshing}
+            isSettingTournamentStatus={setTournamentStatusMutation.isPending}
+            onRefresh={b.handleRefresh}
+            onAutoAssignAll={() => b.setShowAutoAssignAll(true)}
+            onAdminStatusIntent={b.handleAdminStatusIntent}
+            onEditTournament={() => {
+              if (!b.isReadOnly) b.setShowEditTournament(true);
+            }}
+            onDeleteTournament={() => {
+              if (!b.isReadOnly) b.setShowDeleteTournament(true);
+            }}
+            onActivity={() => b.setActivityOpen(true)}
+          />
+        }
       >
-        <div className="relative flex-1 overflow-hidden">
-          {b.tab === 'groups' ? (
-            <GroupsTab
-              tournamentId={tournamentId}
-              tournamentName={tournament.name}
-              groups={groups}
-              readOnly={b.isReadOnly}
-            />
-          ) : (
-            <TournamentBracketProvider>
-              <BracketsTab />
-            </TournamentBracketProvider>
-          )}
-        </div>
-      </BuilderWorkspaceProvider>
+        <BuilderWorkspaceProvider
+          tournamentId={tournamentId}
+          groups={groups}
+          readOnly={b.isReadOnly}
+          tournamentStatus={tournament.status}
+        >
+          <div className="relative flex-1 overflow-hidden">
+            {b.tab === 'groups' ? (
+              <GroupsTab
+                tournamentId={tournamentId}
+                tournamentName={tournament.name}
+                groups={groups}
+                readOnly={b.isReadOnly}
+              />
+            ) : (
+              <TournamentBracketProvider>
+                <BracketsTab />
+              </TournamentBracketProvider>
+            )}
+          </div>
+        </BuilderWorkspaceProvider>
 
-      <TournamentActivitySheet
-        open={b.activityOpen}
-        onOpenChange={b.setActivityOpen}
-        tournamentId={tournamentId}
-      />
-      <EditTournamentDialog
-        open={b.showEditTournament}
-        onOpenChange={b.setShowEditTournament}
-        tournamentId={tournamentId}
-        currentName={tournament.name}
-      />
-      <DeleteTournamentDialog
-        open={b.showDeleteTournament}
-        onOpenChange={b.setShowDeleteTournament}
-        tournamentId={tournamentId}
-        tournamentName={tournament.name}
-      />
-      <AutoAssignAllDialog
-        open={b.showAutoAssignAll}
-        onOpenChange={b.setShowAutoAssignAll}
-        tournamentId={tournamentId}
-        groups={groups}
-      />
-      <TournamentStatusDialog
-        open={b.pendingAdminStatus !== null}
-        onOpenChange={(open) => {
-          if (!open) b.setPendingAdminStatus(null);
-        }}
-        tournamentName={tournament.name}
-        fromStatus={tournament.status}
-        toStatus={b.pendingAdminStatus}
-        isPending={setTournamentStatusMutation.isPending}
-        onConfirm={() => {
-          if (!b.pendingAdminStatus) return;
-          setTournamentStatusMutation.mutate({
-            id: tournamentId,
-            status: b.pendingAdminStatus,
-            force: true,
-          });
-        }}
-      />
-    </BuilderShell>
+        <TournamentActivitySheet
+          open={b.activityOpen}
+          onOpenChange={b.setActivityOpen}
+          tournamentId={tournamentId}
+        />
+        <EditTournamentDialog
+          open={b.showEditTournament}
+          onOpenChange={b.setShowEditTournament}
+          tournamentId={tournamentId}
+          currentName={tournament.name}
+        />
+        <DeleteTournamentDialog
+          open={b.showDeleteTournament}
+          onOpenChange={b.setShowDeleteTournament}
+          tournamentId={tournamentId}
+          tournamentName={tournament.name}
+        />
+        <AutoAssignAllDialog
+          open={b.showAutoAssignAll}
+          onOpenChange={b.setShowAutoAssignAll}
+          tournamentId={tournamentId}
+          groups={groups}
+        />
+        <TournamentStatusDialog
+          open={b.pendingAdminStatus !== null}
+          onOpenChange={(open) => {
+            if (!open) b.setPendingAdminStatus(null);
+          }}
+          tournamentName={tournament.name}
+          fromStatus={tournament.status}
+          toStatus={b.pendingAdminStatus}
+          isPending={setTournamentStatusMutation.isPending}
+          onConfirm={() => {
+            if (!b.pendingAdminStatus) return;
+            setTournamentStatusMutation.mutate({
+              id: tournamentId,
+              status: b.pendingAdminStatus,
+              force: true,
+            });
+          }}
+        />
+      </BuilderShell>
+    </BracketChromeProvider>
   );
 }
