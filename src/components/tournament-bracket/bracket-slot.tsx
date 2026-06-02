@@ -166,7 +166,7 @@ export function BracketSlot({
           )}
           <span
             className={cn(
-              'min-w-0 text-xs select-none!',
+              'min-w-0 truncate text-xs select-none!',
               athlete || assignedName
                 ? 'text-foreground'
                 : 'text-muted-foreground italic',

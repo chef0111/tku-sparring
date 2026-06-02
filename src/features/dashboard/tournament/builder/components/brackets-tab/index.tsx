@@ -2,7 +2,10 @@ import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { GripVertical, LockOpen } from 'lucide-react';
 import { useTournamentBracket } from '../../context/tournament-bracket';
 import { useBuilderWorkspace } from '../../context/builder-workspace';
+import { useBracketChrome } from '../../context/bracket-chrome';
+import { EdgeReveal } from '../builder-shell/edge-reveal';
 import { BracketCanvas } from './bracket-canvas';
+import { BracketScreenshotDialog } from './bracket-screenshot-dialog';
 import { BracketToolbar } from './bracket-toolbar';
 import { EmptyBracketState } from './empty-bracket-state';
 import { ArenaGroupOrderSheet } from './groups-panel/arena-group-order-sheet';
@@ -31,6 +34,7 @@ export function BracketsTab() {
   } = useTournamentBracket();
 
   const { groups: builderGroups } = useBuilderWorkspace();
+  const { isFullscreen } = useBracketChrome();
 
   if (builderGroups.length === 0) {
     return <EmptyGroupsPlaceholder />;
@@ -59,7 +63,13 @@ export function BracketsTab() {
           <BracketToolbar />
         </div>
 
-        <GroupsPanel />
+        {isFullscreen ? (
+          <EdgeReveal edge="right">
+            <GroupsPanel />
+          </EdgeReveal>
+        ) : (
+          <GroupsPanel />
+        )}
       </div>
 
       <DragOverlay dropAnimation={null}>
@@ -88,15 +98,19 @@ export function BracketsTab() {
         )}
       </DragOverlay>
 
-      <MatchDetailPanel />
+      {!isFullscreen && <MatchDetailPanel />}
 
-      <ArenaGroupOrderSheet
-        open={arenaOrderSheetOpen}
-        onOpenChange={setArenaOrderSheetOpen}
-        tournamentId={tournamentId}
-        groups={groups}
-        readOnly={readOnly}
-      />
+      <BracketScreenshotDialog />
+
+      {!isFullscreen && (
+        <ArenaGroupOrderSheet
+          open={arenaOrderSheetOpen}
+          onOpenChange={setArenaOrderSheetOpen}
+          tournamentId={tournamentId}
+          groups={groups}
+          readOnly={readOnly}
+        />
+      )}
     </DndContext>
   );
 }

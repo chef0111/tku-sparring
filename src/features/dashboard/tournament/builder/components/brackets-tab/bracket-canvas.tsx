@@ -7,6 +7,7 @@ import type {
 } from '@/features/dashboard/types';
 import { Bracket } from '@/components/tournament-bracket/bracket';
 import { useBracketLayout } from '@/hooks/use-bracket-layout';
+import { useBracketChrome } from '@/features/dashboard/tournament/builder/context/bracket-chrome';
 import { useTournamentBracket } from '@/features/dashboard/tournament/builder/context/tournament-bracket/use-tournament-bracket';
 import { useBracketCanvasLayout } from '@/features/dashboard/tournament/builder/hooks/use-bracket-canvas-layout';
 import { usePanZoom } from '@/features/dashboard/tournament/builder/hooks/use-pan-zoom';
@@ -42,6 +43,30 @@ export function BracketCanvas() {
   const { containerRef, transform, handlers, reset, zoomIn, zoomOut } =
     usePanZoom(layout.width, layout.height);
 
+  const { setCaptureTarget } = useBracketChrome();
+  const captureRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const root = captureRef.current;
+    if (!root || matchList.length === 0) {
+      setCaptureTarget(null);
+      return;
+    }
+    setCaptureTarget({
+      root,
+      width: layout.width,
+      height: layout.height,
+    });
+    return () => setCaptureTarget(null);
+  }, [
+    layout.width,
+    layout.height,
+    layoutMode,
+    matchList.length,
+    selectedGroup?.id,
+    setCaptureTarget,
+  ]);
+
   const handleLayoutModeChange = React.useCallback(
     (next: typeof layoutMode) => {
       setLayoutMode(next);
@@ -66,6 +91,8 @@ export function BracketCanvas() {
       {...handlers}
     >
       <div
+        ref={captureRef}
+        data-bracket-capture-root
         style={{
           transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
           transformOrigin: '0 0',

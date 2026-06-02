@@ -1,14 +1,19 @@
 import { Link } from '@tanstack/react-router';
+import * as React from 'react';
 import { ArrowLeft, Trophy } from 'lucide-react';
 import { BuilderShell } from './components/builder-shell';
 import { BuilderHeader } from './components/builder-shell/builder-header';
-import { BuilderBottomToolbar } from './components/builder-shell/builder-bottom-toolbar';
+import { BuilderFooter } from './components/builder-shell/builder-footer';
 import { EditTournamentDialog } from './components/dialogs/edit-tournament-dialog';
 import { DeleteTournamentDialog } from './components/dialogs/delete-tournament-dialog';
 import { AutoAssignAllDialog } from './components/dialogs/auto-assign-all-dialog';
 import { TournamentStatusDialog } from './components/dialogs/tournament-status-dialog';
 import { GroupsTab } from './components/groups-tab';
 import { BracketsTab } from './components/brackets-tab';
+import {
+  BracketChromeProvider,
+  useBracketChrome,
+} from './context/bracket-chrome';
 import { BuilderWorkspaceProvider } from './context/builder-workspace';
 import { useTournamentBuilder } from './hooks/use-tournament-builder';
 import { TournamentBracketProvider } from './context/tournament-bracket';
@@ -72,7 +77,28 @@ function TournamentBuilderActive({
   groups,
   tournamentId,
 }: TournamentBuilderActiveProps) {
+  return (
+    <BracketChromeProvider>
+      <TournamentBuilderActiveBody
+        tournament={tournament}
+        groups={groups}
+        tournamentId={tournamentId}
+      />
+    </BracketChromeProvider>
+  );
+}
+
+function TournamentBuilderActiveBody({
+  tournament,
+  groups,
+  tournamentId,
+}: TournamentBuilderActiveProps) {
   const b = useTournamentBuilder({ tournament, groups, tournamentId });
+  const { exitFullscreen } = useBracketChrome();
+
+  React.useEffect(() => {
+    if (b.tab !== 'brackets') exitFullscreen();
+  }, [b.tab, exitFullscreen]);
 
   const setTournamentStatusMutation = useSetTournamentStatus({
     onSuccess: () => b.setPendingAdminStatus(null),
@@ -85,12 +111,15 @@ function TournamentBuilderActive({
         <BuilderHeader
           tournament={tournament}
           tab={b.tab}
-          onTabChange={(v) => void b.setTab(v)}
+          onTabChange={(v) => {
+            if (v === 'groups') exitFullscreen();
+            void b.setTab(v);
+          }}
           user={b.user}
         />
       }
       footer={
-        <BuilderBottomToolbar
+        <BuilderFooter
           tournament={tournament}
           readOnly={b.isReadOnly}
           isRefreshing={b.isRefreshing}
