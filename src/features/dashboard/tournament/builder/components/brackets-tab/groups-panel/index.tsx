@@ -42,7 +42,7 @@ export function GroupsPanel() {
   });
 
   return (
-    <aside className="bg-sidebar/50 flex h-full min-h-0 w-xs shrink-0 flex-col border-l">
+    <aside className="bg-card dark:bg-drawer flex h-full min-h-0 w-xs shrink-0 flex-col border-l shadow-sm">
       <GroupsTabsHeader
         groups={groups}
         selectedGroupId={selectedGroupId}

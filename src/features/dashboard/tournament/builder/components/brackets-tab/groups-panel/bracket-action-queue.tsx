@@ -170,7 +170,7 @@ function QueueRow({
           }
         }}
         className={cn(
-          'group bg-muted dark:bg-popover relative min-w-0 flex-1 gap-0 rounded-md border-none p-0 ring-0',
+          'group bg-muted dark:bg-muted/50 relative min-w-0 flex-1 gap-0 rounded-md border-none p-0 ring-0',
           'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
         )}
       >

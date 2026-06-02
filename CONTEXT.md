@@ -68,7 +68,7 @@ Admin view setting for the **Bracket canvas**: `two-sided` (default) or `one-sid
 _Avoid_: Bracket mode, layout toggle
 
 **Bracket screenshot**:
-Exports the full **Group** tree from the **Bracket canvas** as a PNG at fit-to-content scale (not the current pan/zoom viewport). Preview supports light and dark renders independent of the app theme; copy or save without closing the preview dialog.
+Exports the full **Group** tree from the **Bracket canvas** as a light-mode PNG at fit-to-content scale (not the current pan/zoom viewport), on a plain white background. Copy or save without closing the preview dialog.
 _Avoid_: Canvas export, bracket image
 
 **Bracket fullscreen**:

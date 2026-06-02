@@ -1,15 +1,13 @@
 import * as React from 'react';
-import { Copy, Download, Moon, Sun } from 'lucide-react';
+import { Copy, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTournamentBracket } from '../../context/tournament-bracket/use-tournament-bracket';
 import { useBracketChrome } from '../../context/bracket-chrome';
 import {
   bracketScreenshotFilename,
-  captureBracketBothThemes,
+  captureBracketPng,
 } from '../../lib/capture-bracket-png';
-import type { BracketScreenshotTheme } from '../../lib/capture-bracket-png';
 import { useTournament } from '@/queries/tournament';
-import { useResolvedTheme } from '@/contexts/themes/use-theme';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -20,47 +18,34 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 export function BracketScreenshotDialog() {
   const { screenshotOpen, setScreenshotOpen, captureTarget } =
     useBracketChrome();
   const { tournamentId, selectedGroup } = useTournamentBracket();
   const tournamentQuery = useTournament(tournamentId);
-  const resolvedTheme = useResolvedTheme();
 
-  const [previewTheme, setPreviewTheme] =
-    React.useState<BracketScreenshotTheme>(resolvedTheme);
-  const [blobs, setBlobs] = React.useState<Record<
-    BracketScreenshotTheme,
-    Blob
-  > | null>(null);
+  const [blob, setBlob] = React.useState<Blob | null>(null);
   const [isCapturing, setIsCapturing] = React.useState(false);
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if (screenshotOpen) {
-      setPreviewTheme(resolvedTheme);
-    }
-  }, [screenshotOpen, resolvedTheme]);
-
-  React.useEffect(() => {
     if (!screenshotOpen || !captureTarget) {
-      setBlobs(null);
+      setBlob(null);
       return;
     }
 
     let cancelled = false;
     setIsCapturing(true);
-    setBlobs(null);
+    setBlob(null);
 
-    void captureBracketBothThemes(
-      captureTarget.root,
-      captureTarget.width,
-      captureTarget.height
-    )
+    void captureBracketPng({
+      root: captureTarget.root,
+      width: captureTarget.width,
+      height: captureTarget.height,
+    })
       .then((result) => {
-        if (!cancelled) setBlobs(result);
+        if (!cancelled) setBlob(result);
       })
       .catch((err) => {
         if (!cancelled) {
@@ -79,44 +64,41 @@ export function BracketScreenshotDialog() {
   }, [screenshotOpen, captureTarget]);
 
   React.useEffect(() => {
-    if (!blobs) {
+    if (!blob) {
       setPreviewUrl(null);
       return;
     }
-    const url = URL.createObjectURL(blobs[previewTheme]);
+    const url = URL.createObjectURL(blob);
     setPreviewUrl(url);
     return () => URL.revokeObjectURL(url);
-  }, [blobs, previewTheme]);
+  }, [blob]);
 
   const filename = bracketScreenshotFilename(
     tournamentQuery.data?.name ?? 'tournament',
     selectedGroup?.name ?? 'group'
   );
 
-  const activeBlob = blobs?.[previewTheme] ?? null;
-  const actionsDisabled = isCapturing || !activeBlob;
+  const actionsDisabled = isCapturing || !blob;
 
   const handleCopy = async () => {
-    if (!activeBlob) return;
+    if (!blob) return;
     try {
       await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': activeBlob }),
+        new ClipboardItem({ 'image/png': blob }),
       ]);
-      toast.success('Copied to clipboard');
     } catch {
       toast.error('Could not copy to clipboard');
     }
   };
 
   const handleSave = () => {
-    if (!activeBlob) return;
-    const url = URL.createObjectURL(activeBlob);
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
     anchor.download = filename;
     anchor.click();
     URL.revokeObjectURL(url);
-    toast.success('Screenshot saved');
   };
 
   return (
@@ -125,51 +107,30 @@ export function BracketScreenshotDialog() {
         <DialogHeader>
           <DialogTitle>Bracket screenshot</DialogTitle>
           <DialogDescription>
-            Full bracket export for {selectedGroup?.name ?? 'this group'}. Copy
-            or save without closing this preview.
+            Screenshot export for {selectedGroup?.name ?? 'this group'}. Copy or
+            save without closing this preview.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="relative">
-          <div className="border-border bg-muted/30 max-h-[70vh] overflow-auto rounded-lg border">
-            {isCapturing ? (
-              <div className="flex min-h-48 items-center justify-center gap-2 p-8">
-                <Spinner className="size-5" />
-                <span className="text-muted-foreground text-sm">
-                  Capturing bracket…
-                </span>
-              </div>
-            ) : previewUrl ? (
-              <img
-                src={previewUrl}
-                alt="Bracket preview"
-                className="mx-auto block max-w-full"
-              />
-            ) : (
-              <div className="text-muted-foreground flex min-h-48 items-center justify-center p-8 text-sm">
-                No bracket to preview
-              </div>
-            )}
-          </div>
-
-          <ToggleGroup
-            type="single"
-            value={previewTheme}
-            onValueChange={(value) => {
-              if (value === 'light' || value === 'dark') setPreviewTheme(value);
-            }}
-            variant="outline"
-            size="sm"
-            className="bg-background absolute top-2 right-2 shadow-sm"
-            aria-label="Screenshot theme"
-          >
-            <ToggleGroupItem value="light" aria-label="Light theme">
-              <Sun className="size-4" />
-            </ToggleGroupItem>
-            <ToggleGroupItem value="dark" aria-label="Dark theme">
-              <Moon className="size-4" />
-            </ToggleGroupItem>
-          </ToggleGroup>
+        <div className="border-border max-h-[70vh] overflow-auto rounded-lg border bg-white">
+          {isCapturing ? (
+            <div className="flex min-h-48 items-center justify-center gap-2 p-8">
+              <Spinner className="size-5" />
+              <span className="text-muted-foreground text-sm">
+                Capturing bracket…
+              </span>
+            </div>
+          ) : previewUrl ? (
+            <img
+              src={previewUrl}
+              alt="Bracket preview"
+              className="mx-auto block max-w-full"
+            />
+          ) : (
+            <div className="text-muted-foreground flex min-h-48 items-center justify-center p-8 text-sm">
+              No bracket to preview
+            </div>
+          )}
         </div>
 
         <DialogFooter>
