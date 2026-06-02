@@ -64,7 +64,7 @@ export function BracketsTab() {
         </div>
 
         {isFullscreen ? (
-          <EdgeReveal edge="left">
+          <EdgeReveal edge="right">
             <GroupsPanel />
           </EdgeReveal>
         ) : (

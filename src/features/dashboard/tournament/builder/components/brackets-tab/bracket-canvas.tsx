@@ -58,7 +58,14 @@ export function BracketCanvas() {
       height: layout.height,
     });
     return () => setCaptureTarget(null);
-  }, [layout.width, layout.height, matchList.length, setCaptureTarget]);
+  }, [
+    layout.width,
+    layout.height,
+    layoutMode,
+    matchList.length,
+    selectedGroup?.id,
+    setCaptureTarget,
+  ]);
 
   const handleLayoutModeChange = React.useCallback(
     (next: typeof layoutMode) => {

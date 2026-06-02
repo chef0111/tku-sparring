@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { hasBlockingOverlay } from '../lib/has-blocking-overlay';
+import { hasBlockingOverlay } from '../../lib/has-blocking-overlay';
 import { BracketChromeContext } from './context';
 import type { BracketCaptureTarget } from './context';
 
@@ -30,13 +30,13 @@ export function BracketChromeProvider({
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
-      if (hasBlockingOverlay()) return;
+      if (screenshotOpen || hasBlockingOverlay()) return;
       exitFullscreen();
     };
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isFullscreen, exitFullscreen]);
+  }, [isFullscreen, screenshotOpen, exitFullscreen]);
 
   const value = React.useMemo(
     () => ({

@@ -20,19 +20,17 @@ type BracketViewToolbarProps = {
   onFit: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
-  screenshotDisabled?: boolean;
 };
 
 export function BracketViewToolbar({
   onFit,
   onZoomIn,
   onZoomOut,
-  screenshotDisabled = false,
 }: BracketViewToolbarProps) {
   const { isFullscreen, toggleFullscreen, setScreenshotOpen, captureTarget } =
     useBracketChrome();
 
-  const canScreenshot = !screenshotDisabled && captureTarget != null;
+  const canScreenshot = captureTarget != null;
 
   return (
     <Card

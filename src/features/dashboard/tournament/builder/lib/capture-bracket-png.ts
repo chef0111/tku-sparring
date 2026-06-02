@@ -9,15 +9,9 @@ export type CaptureBracketPngOptions = {
   theme: BracketScreenshotTheme;
 };
 
-function dataUrlToBlob(dataUrl: string): Blob {
-  const [header, base64] = dataUrl.split(',');
-  const mime = header.match(/:(.*?);/)?.[1] ?? 'image/png';
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return new Blob([bytes], { type: mime });
+async function dataUrlToBlob(dataUrl: string): Promise<Blob> {
+  const res = await fetch(dataUrl);
+  return res.blob();
 }
 
 export async function captureBracketPng({
@@ -33,14 +27,19 @@ export async function captureBracketPng({
   host.style.pointerEvents = 'none';
   host.style.zIndex = '-1';
 
+  host.classList.remove('light', 'dark');
+  host.classList.add(theme);
+
   const frame = document.createElement('div');
-  frame.className = `canvas-background ${theme}`;
+  frame.className = 'canvas-background';
   frame.style.width = `${width}px`;
   frame.style.height = `${height}px`;
   frame.style.position = 'relative';
   frame.style.overflow = 'hidden';
 
   const clone = root.cloneNode(true) as HTMLElement;
+  clone.classList.remove('light', 'dark');
+  clone.classList.add(theme);
   clone.style.transform = 'none';
   clone.style.width = `${width}px`;
   clone.style.height = `${height}px`;
@@ -57,7 +56,7 @@ export async function captureBracketPng({
       pixelRatio: 2,
       cacheBust: true,
     });
-    return dataUrlToBlob(dataUrl);
+    return await dataUrlToBlob(dataUrl);
   } finally {
     host.remove();
   }
