@@ -30,7 +30,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-interface BuilderBottomToolbarProps {
+interface BuilderFooterProps {
   tournament: TournamentData;
   readOnly: boolean;
   isRefreshing?: boolean;
@@ -67,7 +67,7 @@ const STATUS_LABEL: Record<TournamentStatus, string> = {
   completed: 'Completed',
 };
 
-export function BuilderBottomToolbar({
+export function BuilderFooter({
   tournament,
   readOnly,
   isRefreshing,
@@ -78,7 +78,7 @@ export function BuilderBottomToolbar({
   onEditTournament,
   onDeleteTournament,
   onActivity,
-}: BuilderBottomToolbarProps) {
+}: BuilderFooterProps) {
   const status = tournament.status;
 
   return (

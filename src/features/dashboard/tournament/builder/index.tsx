@@ -9,7 +9,10 @@ import { AutoAssignAllDialog } from './components/dialogs/auto-assign-all-dialog
 import { TournamentStatusDialog } from './components/dialogs/tournament-status-dialog';
 import { GroupsTab } from './components/groups-tab';
 import { BracketsTab } from './components/brackets-tab';
-import { BracketChromeProvider } from './context/bracket-chrome';
+import {
+  BracketChromeProvider,
+  useBracketChrome,
+} from './context/bracket-chrome';
 import { BuilderWorkspaceProvider } from './context/builder-workspace';
 import { useTournamentBuilder } from './hooks/use-tournament-builder';
 import { TournamentBracketProvider } from './context/tournament-bracket';
@@ -74,6 +77,7 @@ function TournamentBuilderActive({
   tournamentId,
 }: TournamentBuilderActiveProps) {
   const b = useTournamentBuilder({ tournament, groups, tournamentId });
+  const { exitFullscreen } = useBracketChrome();
 
   const setTournamentStatusMutation = useSetTournamentStatus({
     onSuccess: () => b.setPendingAdminStatus(null),
@@ -87,7 +91,10 @@ function TournamentBuilderActive({
           <BuilderHeader
             tournament={tournament}
             tab={b.tab}
-            onTabChange={(v) => void b.setTab(v)}
+            onTabChange={(v) => {
+              if (v === 'groups') exitFullscreen();
+              void b.setTab(v);
+            }}
             user={b.user}
           />
         }
