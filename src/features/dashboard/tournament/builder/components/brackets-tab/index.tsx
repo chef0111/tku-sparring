@@ -3,6 +3,7 @@ import { GripVertical, LockOpen } from 'lucide-react';
 import { useTournamentBracket } from '../../context/tournament-bracket';
 import { useBuilderWorkspace } from '../../context/builder-workspace';
 import { BracketCanvas } from './bracket-canvas';
+import { BracketScreenshotDialog } from './bracket-screenshot-dialog';
 import { BracketToolbar } from './bracket-toolbar';
 import { EmptyBracketState } from './empty-bracket-state';
 import { ArenaGroupOrderSheet } from './groups-panel/arena-group-order-sheet';
@@ -89,6 +90,8 @@ export function BracketsTab() {
       </DragOverlay>
 
       <MatchDetailPanel />
+
+      <BracketScreenshotDialog />
 
       <ArenaGroupOrderSheet
         open={arenaOrderSheetOpen}
