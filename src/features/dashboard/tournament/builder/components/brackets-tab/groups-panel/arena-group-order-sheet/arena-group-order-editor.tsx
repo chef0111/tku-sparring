@@ -106,7 +106,7 @@ function SortableArenaGroupRow({
         isDragging && 'shadow-md'
       )}
     >
-      <span className="truncate text-sm">{label}</span>
+      <span className="ml-2 truncate text-sm">{label}</span>
       <Button
         type="button"
         variant="ghost"

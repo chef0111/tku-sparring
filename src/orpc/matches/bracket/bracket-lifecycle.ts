@@ -9,7 +9,7 @@ import {
 import { buildRound0Baseline, parseRound0Baseline } from './round0-baseline';
 import type { Round0Baseline } from './round0-baseline';
 import type { GenerateBracketDTO } from '../dto';
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@/generated/prisma/client';
 import {
   nextPowerOfTwo,
   planBracketShell,

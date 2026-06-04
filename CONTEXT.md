@@ -87,6 +87,10 @@ _Avoid_: Home dashboard, admin home
 `/dashboard/tournaments/$id` — per-tournament monitoring, setup checklist (draft), lifecycle actions; editing stays on **Builder**.
 _Avoid_: Tournament detail, viewer
 
+## Persistence
+
+The system stores data in **PostgreSQL** (Neon). Entity primary keys are **UUIDs**. Prisma migrations live under `prisma/migrations/`.
+
 ## Naming conventions (code)
 
 Prefer **short imperative** names for APIs and modules, but keep **semantics** aligned with the domain terms above — a reader should still see what concept is acted on (e.g. a **Match**, a **round**), not only that something runs. See `.cursor/rules/concise-naming.mdc` for project-wide rules (functions, variables, constants, types).
@@ -111,5 +115,4 @@ Prefer **short imperative** names for APIs and modules, but keep **semantics** a
 
 ## Flagged ambiguities
 
-- Historic docs referred to **Group Control Lease** and a **Takeover Queue**; **superseded** by per-match **`ArenaMatchClaim`** + tournament realtime (`docs/sse-group-control-lease.md`, `docs/tournament-realtime.md`, `PRD.md` §MVP / arena flow).
 - UI label for the holder row: **Reserved** (this device); **In use** (other device)—see Advance Settings combobox `Status`.

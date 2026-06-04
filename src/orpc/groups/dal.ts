@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '@/generated/prisma/client';
 import type {
   AssignAthleteDTO,
   AutoAssignDTO,
@@ -12,7 +12,7 @@ import { publishSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus'
 
 export class GroupDAL {
   private static readonly UNASSIGNED_GROUP_FILTER = {
-    OR: [{ groupId: null }, { groupId: { isSet: false } }],
+    groupId: null,
   } satisfies Prisma.TournamentAthleteWhereInput;
 
   static async findByTournamentId(tournamentId: string) {
