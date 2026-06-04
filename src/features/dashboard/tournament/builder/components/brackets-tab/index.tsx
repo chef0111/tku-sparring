@@ -98,19 +98,17 @@ export function BracketsTab() {
         )}
       </DragOverlay>
 
-      {!isFullscreen && <MatchDetailPanel />}
+      <MatchDetailPanel />
 
       <BracketScreenshotDialog />
 
-      {!isFullscreen && (
-        <ArenaGroupOrderSheet
-          open={arenaOrderSheetOpen}
-          onOpenChange={setArenaOrderSheetOpen}
-          tournamentId={tournamentId}
-          groups={groups}
-          readOnly={readOnly}
-        />
-      )}
+      <ArenaGroupOrderSheet
+        open={arenaOrderSheetOpen}
+        onOpenChange={setArenaOrderSheetOpen}
+        tournamentId={tournamentId}
+        groups={groups}
+        readOnly={readOnly}
+      />
     </DndContext>
   );
 }
