@@ -171,3 +171,15 @@ Use the same origin you use in the browser (`BETTER_AUTH_URL` in `.env.local` sh
 ```bash
 bun run start
 ```
+
+## Production cutover (Mongo → Neon)
+
+Use a short maintenance window. All users must sign in again after cutover.
+
+1. Announce downtime; freeze writes on production Mongo.
+2. Ensure production Neon has migrations applied: `bun run db:migrate:deploy` (uses `DIRECT_DATABASE_URL` locally or in CI).
+3. Run data import against production Mongo (read-only): `bun run db:migrate:data -- --force` with production `MONGO_DATABASE_URL` and Neon `DIRECT_DATABASE_URL` in `.env` or CI secrets.
+4. In Vercel, set `DATABASE_URL` (pooled) and `DIRECT_DATABASE_URL` (direct); remove the Mongo URL.
+5. Deploy the app build (runs `db:generate` before Vite build).
+6. Smoke-test: auth sign-in, athletes table filters, one tournament bracket, arena claim.
+7. Keep Mongo Atlas read-only for 7–14 days; retain `scripts/migration-id-map.json` from the ETL run for support lookups.
