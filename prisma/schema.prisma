@@ -1,24 +1,24 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "mongodb"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"
 }
 
 model User {
-  id              String    @id @map("_id") @db.String
-  name            String
-  email           String
-  emailVerified   Boolean   @default(false)
-  image           String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  username        String?
-  displayUsername String?
-  sessions        Session[]
-  accounts        Account[]
+  id                   String                @id @default(uuid()) @db.Uuid
+  name                 String
+  email                String
+  emailVerified        Boolean               @default(false)
+  image                String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  username             String?
+  displayUsername      String?
+  sessions             Session[]
+  accounts             Account[]
   deviceLastSelections DeviceLastSelection[]
 
   @@unique([email])
@@ -27,14 +27,14 @@ model User {
 }
 
 model Session {
-  id        String   @id @map("_id") @db.String
+  id        String   @id @default(uuid()) @db.Uuid
   expiresAt DateTime
   token     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
-  userId    String   @db.String
+  userId    String   @db.Uuid
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
@@ -43,10 +43,10 @@ model Session {
 }
 
 model Account {
-  id                    String    @id @map("_id") @db.String
+  id                    String    @id @default(uuid()) @db.Uuid
   accountId             String
   providerId            String
-  userId                String    @db.String
+  userId                String    @db.Uuid
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
@@ -63,7 +63,7 @@ model Account {
 }
 
 model Verification {
-  id         String   @id @map("_id") @db.String
+  id         String   @id @default(uuid()) @db.Uuid
   identifier String
   value      String
   expiresAt  DateTime
@@ -75,13 +75,13 @@ model Verification {
 }
 
 model Tournament {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  name         String
-  nameSortKey  String   @default("")
-  status       String   @default("draft")
+  id              String   @id @default(uuid()) @db.Uuid
+  name            String
+  nameSortKey     String   @default("")
+  status          String   @default("draft")
   arenaGroupOrder Json?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   groups             Group[]
   matches            Match[]
@@ -92,9 +92,9 @@ model Tournament {
 }
 
 model Group {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  id              String   @id @default(uuid()) @db.Uuid
   name            String
-  tournamentId    String   @db.ObjectId
+  tournamentId    String   @db.Uuid
   gender          String?
   beltMin         Int?
   beltMax         Int?
@@ -102,11 +102,11 @@ model Group {
   weightMax       Float?
   thirdPlaceMatch Boolean  @default(false)
   arenaIndex      Int      @default(1)
-  round0Baseline    Json?
+  round0Baseline  Json?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  tournament         Tournament         @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  tournament         Tournament          @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   matches            Match[]
   tournamentAthletes TournamentAthlete[]
 
@@ -115,12 +115,12 @@ model Group {
 }
 
 model ArenaMatchClaim {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  matchId      String   @unique @db.ObjectId
-  groupId      String   @db.ObjectId
-  tournamentId String   @db.ObjectId
+  id           String   @id @default(uuid()) @db.Uuid
+  matchId      String   @unique @db.Uuid
+  groupId      String   @db.Uuid
+  tournamentId String   @db.Uuid
   deviceId     String
-  userId       String   @db.String
+  userId       String   @db.Uuid
   expiresAt    DateTime
   updatedAt    DateTime @updatedAt
 
@@ -133,30 +133,30 @@ model ArenaMatchClaim {
 }
 
 model Match {
-  id                       String   @id @default(auto()) @map("_id") @db.ObjectId
-  kind                     String   @default("bracket")
-  displayLabel             String?
-  round                    Int      @default(0)
-  matchIndex               Int      @default(0)
-  status                   String   @default("pending")
-  redAthleteId             String?  @db.ObjectId
-  blueAthleteId            String?  @db.ObjectId
-  redTournamentAthleteId   String?  @db.ObjectId
-  blueTournamentAthleteId  String?  @db.ObjectId
-  redWins                  Int      @default(0)
-  blueWins                 Int      @default(0)
-  winnerId                 String?  @db.ObjectId
-  tournamentWinnerId String? @db.ObjectId
-  redLocked                Boolean  @default(false)
-  blueLocked               Boolean  @default(false)
-  groupId                  String   @db.ObjectId
-  tournamentId             String   @db.ObjectId
-  createdAt                DateTime @default(now())
-  updatedAt                DateTime @updatedAt
+  id                      String   @id @default(uuid()) @db.Uuid
+  kind                    String   @default("bracket")
+  displayLabel            String?
+  round                   Int      @default(0)
+  matchIndex              Int      @default(0)
+  status                  String   @default("pending")
+  redAthleteId            String?  @db.Uuid
+  blueAthleteId           String?  @db.Uuid
+  redTournamentAthleteId  String?  @db.Uuid
+  blueTournamentAthleteId String?  @db.Uuid
+  redWins                 Int      @default(0)
+  blueWins                Int      @default(0)
+  winnerId                String?  @db.Uuid
+  tournamentWinnerId      String?  @db.Uuid
+  redLocked               Boolean  @default(false)
+  blueLocked              Boolean  @default(false)
+  groupId                 String   @db.Uuid
+  tournamentId            String   @db.Uuid
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 
-  group             Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  tournament        Tournament       @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
-  arenaMatchClaim   ArenaMatchClaim?
+  group           Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  tournament      Tournament       @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  arenaMatchClaim ArenaMatchClaim?
 
   @@index([groupId])
   @@index([tournamentId])
@@ -165,7 +165,7 @@ model Match {
 }
 
 model AthleteProfile {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(uuid()) @db.Uuid
   athleteCode String?
   name        String
   nameSortKey String   @default("")
@@ -185,18 +185,18 @@ model AthleteProfile {
 }
 
 model TournamentAthlete {
-  id               String  @id @default(auto()) @map("_id") @db.ObjectId
-  tournamentId     String  @db.ObjectId
-  athleteProfileId String  @db.ObjectId
-  groupId          String? @db.ObjectId
+  id               String  @id @default(uuid()) @db.Uuid
+  tournamentId     String  @db.Uuid
+  athleteProfileId String  @db.Uuid
+  groupId          String? @db.Uuid
   seed             Int?
   locked           Boolean @default(false)
   status           String  @default("selected")
   notes            String?
 
-  name         String
-  nameSortKey  String   @default("")
-  gender       String
+  name        String
+  nameSortKey String  @default("")
+  gender      String
   beltLevel   Int
   weight      Float
   affiliation String
@@ -216,9 +216,9 @@ model TournamentAthlete {
 }
 
 model TournamentActivity {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  tournamentId String   @db.ObjectId
-  adminId      String   @db.String
+  id           String   @id @default(uuid()) @db.Uuid
+  tournamentId String   @db.Uuid
+  adminId      String   @db.Uuid
   eventType    String
   entityType   String
   entityId     String
@@ -233,12 +233,12 @@ model TournamentActivity {
 }
 
 model DeviceLastSelection {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId       String   @db.String
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
   deviceId     String
-  tournamentId String?  @db.ObjectId
-  groupId      String?  @db.ObjectId
-  matchId      String?  @db.ObjectId
+  tournamentId String?  @db.Uuid
+  groupId      String?  @db.Uuid
+  matchId      String?  @db.Uuid
   updatedAt    DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
