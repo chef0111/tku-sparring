@@ -22,6 +22,5 @@
   },
   "files.readonlyInclude": {
     "**/routeTree.gen.ts": true
-  },
-  "prisma.pinToPrisma6": true
+  }
 }
