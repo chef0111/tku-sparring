@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '@/generated/prisma/client';
 import type { ListTournamentActivityDTO } from './dto';
 import { prisma } from '@/lib/db';
 

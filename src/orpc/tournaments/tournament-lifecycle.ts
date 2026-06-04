@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client';
 import { recordTournamentActivity } from '../activity/dal';
 import { TournamentStatusSchema } from './dto';
 import type {
@@ -7,6 +6,7 @@ import type {
   TournamentStatusDTO,
   UpdateTournamentDTO,
 } from './dto';
+import { Prisma } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
 import { getNameSortKey } from '@/lib/sort/name-sort-key';
 import { publishSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';

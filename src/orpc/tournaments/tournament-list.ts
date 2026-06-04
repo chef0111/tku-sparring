@@ -1,5 +1,5 @@
 import { TournamentStatusSchema } from './dto';
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '@/generated/prisma/client';
 import type { ListTournamentsDTO, TournamentListPageDTO } from './dto';
 import { countActionableMatchesByTournamentId } from '@/lib/tournament/bracket-action-queue';
 import {
