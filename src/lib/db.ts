@@ -1,6 +1,10 @@
+import { config as loadEnv } from 'dotenv';
 import { PrismaNeon } from '@prisma/adapter-neon';
-import { Pool } from '@neondatabase/serverless';
 import { PrismaClient } from '../../generated/prisma/client';
+
+if (typeof window === 'undefined' && !process.env.DATABASE_URL) {
+  loadEnv();
+}
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -11,8 +15,7 @@ function createPrismaClient() {
   if (!connectionString) {
     throw new Error('DATABASE_URL is not set');
   }
-  const pool = new Pool({ connectionString });
-  const adapter = new PrismaNeon(pool);
+  const adapter = new PrismaNeon({ connectionString });
   return new PrismaClient({ adapter });
 }
 
