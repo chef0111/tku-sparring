@@ -111,5 +111,4 @@ Prefer **short imperative** names for APIs and modules, but keep **semantics** a
 
 ## Flagged ambiguities
 
-- Historic docs referred to **Group Control Lease** and a **Takeover Queue**; **superseded** by per-match **`ArenaMatchClaim`** + tournament realtime (`docs/sse-group-control-lease.md`, `docs/tournament-realtime.md`, `PRD.md` §MVP / arena flow).
 - UI label for the holder row: **Reserved** (this device); **In use** (other device)—see Advance Settings combobox `Status`.
