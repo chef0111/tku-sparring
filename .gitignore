@@ -17,5 +17,7 @@ todos.json
 /generated/prisma
 /generated
 
+scripts/migration-id-map.json
+
 # Local Netlify folder
 .netlify

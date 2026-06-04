@@ -268,7 +268,7 @@ UAC:
 - Active tournaments allow score edits but no shuffle; bracket changes require explicit unlock.
 - Completed tournaments are read-only.
 - Applying Advance Settings succeeds only after `**arenaMatchClaim.claim`\*\* for the chosen match; another device holding a non-expired claim blocks Apply for that row.
-- **Arena match claims** use a ~60s TTL; the arena sends **heartbeats** on the configured interval while a Mongo ObjectId-shaped match id is active.
+- **Arena match claims** use a ~60s TTL; the arena sends **heartbeats** on the configured interval while a match id is active.
 - **SSE** broadcasts `**invalidate`\*\* for a tournament so all clients refresh Advance selection queries (`selectionCatalog`, `selectionMatches`) and bracket `match` queries.
 - Coordinating identity uses a persistent **device UUID** in `localStorage`.
 - **Finish Match** releases the claim and clears the advance form match field; explicit release on unload is best-effort; TTL remains the safety net.

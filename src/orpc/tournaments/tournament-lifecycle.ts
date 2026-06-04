@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client';
 import { recordTournamentActivity } from '../activity/dal';
 import { TournamentStatusSchema } from './dto';
 import type {
@@ -7,25 +6,25 @@ import type {
   TournamentStatusDTO,
   UpdateTournamentDTO,
 } from './dto';
+import type { Prisma } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
 import { getNameSortKey } from '@/lib/sort/name-sort-key';
 import { publishSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
 
 type TournamentLookupDatabase = Pick<typeof prisma, 'match' | 'tournament'>;
 
-export const findTournamentWithLifecycleArgs =
-  Prisma.validator<Prisma.TournamentDefaultArgs>()({
-    include: {
-      groups: {
-        include: {
-          _count: { select: { tournamentAthletes: true, matches: true } },
-        },
-      },
-      _count: {
-        select: { groups: true, matches: true, tournamentAthletes: true },
+export const findTournamentWithLifecycleArgs = {
+  include: {
+    groups: {
+      include: {
+        _count: { select: { tournamentAthletes: true, matches: true } },
       },
     },
-  });
+    _count: {
+      select: { groups: true, matches: true, tournamentAthletes: true },
+    },
+  },
+} as const satisfies Prisma.TournamentDefaultArgs;
 
 export type TournamentWithLifecyclePayload = Prisma.TournamentGetPayload<
   typeof findTournamentWithLifecycleArgs

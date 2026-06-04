@@ -84,7 +84,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       className={cn('font-sans antialiased', themeClass)}
       suppressHydrationWarning
     >
-      <head>
+      <head suppressHydrationWarning>
         <HeadContent />
       </head>
       <body className={cn('h-dvh', themeClass)} suppressHydrationWarning>

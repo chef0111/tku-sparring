@@ -302,7 +302,7 @@ export function ArenaGroupOrdersPanel({
         <DragOverlay dropAnimation={null}>
           {activeArenaOrderLabel ? (
             <div className="bg-accent dark:bg-background/80 text-foreground flex max-w-[min(100vw,20rem)] cursor-grabbing items-center justify-between gap-2 rounded-md border px-2 py-1 shadow-lg ring-1 ring-black/5 dark:ring-white/10">
-              <span className="truncate text-sm font-medium">
+              <span className="ml-2 truncate text-sm font-medium">
                 {activeArenaOrderLabel}
               </span>
               <span className="text-muted-foreground inline-flex size-7 shrink-0 items-center justify-center">

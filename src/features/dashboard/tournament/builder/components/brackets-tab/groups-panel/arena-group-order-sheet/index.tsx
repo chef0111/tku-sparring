@@ -1,5 +1,6 @@
 import { ArenaGroupOrdersPanel } from './arena-group-orders-panel';
 import type { GroupData } from '@/features/dashboard/types';
+import { useBracketChrome } from '@/features/dashboard/tournament/builder/context/bracket-chrome';
 import {
   Sheet,
   SheetContent,
@@ -7,6 +8,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
 
 interface ArenaGroupOrderSheetProps {
   open: boolean;
@@ -23,11 +25,16 @@ export function ArenaGroupOrderSheet({
   groups,
   readOnly,
 }: ArenaGroupOrderSheetProps) {
+  const { isFullscreen } = useBracketChrome();
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange} modal={false}>
       <SheetContent
         side="right"
-        className="flex w-full flex-col gap-0 overflow-hidden sm:max-w-md"
+        className={cn(
+          'flex w-full flex-col gap-0 overflow-hidden sm:max-w-md',
+          isFullscreen && 'z-[70]'
+        )}
         showCloseButton
       >
         <SheetHeader className="border-border shrink-0 border-b">

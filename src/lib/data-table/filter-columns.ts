@@ -41,7 +41,6 @@ export interface FilterFieldMapping {
   dataType: FieldDataType;
   operators?: Array<FilterOperator>;
   parse?: (value: FilterValue) => Primitive | Array<Primitive> | null;
-  allowUnset?: boolean;
 }
 
 export type FilterFieldMap = Record<string, FilterFieldMapping>;
@@ -153,10 +152,6 @@ function buildEmptyCondition(field: FilterFieldMapping): Condition | undefined {
     conditions.push(buildPathCondition(field.path, { equals: null }));
   } else {
     conditions.push(buildPathCondition(field.path, { equals: null }));
-  }
-
-  if (field.allowUnset) {
-    conditions.push(buildPathCondition(field.path, { isSet: false }));
   }
 
   if (conditions.length === 1) return conditions[0];

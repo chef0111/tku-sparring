@@ -11,7 +11,6 @@ export const athleteProfileFilterMap: FilterFieldMap = {
     path: ['athleteCode'],
     variant: 'text',
     dataType: 'string',
-    allowUnset: true,
   },
   name: {
     path: ['name'],

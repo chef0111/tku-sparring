@@ -8,8 +8,13 @@ import { PasswordSchema } from './validations';
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
-    provider: 'mongodb',
+    provider: 'postgresql',
   }),
+  advanced: {
+    database: {
+      generateId: 'uuid',
+    },
+  },
   emailAndPassword: {
     enabled: true,
   },

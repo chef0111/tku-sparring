@@ -6,7 +6,7 @@ This guide outlines the steps required to set up and run the project in a local 
 
 - [Node.js](https://nodejs.org/) (Latest LTS version recommended)
 - [bun](https://bun.sh/)
-- [MongoDB Atlas](https://cloud.mongodb.com/)
+- [Neon](https://neon.tech/) PostgreSQL project
 - [Git](https://git-scm.com/)
 
 ## Setup
@@ -34,12 +34,17 @@ bun install
 
 ### 4. Configure environment variables:
 
-- Copy `.env.example` to `.env.local`:
-  ```bash
-  cp .env.example .env.local
-  ```
-- Update the environment variables with your actual credentials. You can obtain these credentials by signing up on the respective websites.
-- For **tournament realtime**, keep the local dev block from `.env.example` (or use the same custom secrets in `realtime/.env` — see step 5).
+Create a **`.env`** file at the repo root (gitignored). Required keys:
+
+| Variable              | Purpose                                             |
+| --------------------- | --------------------------------------------------- |
+| `DATABASE_URL`        | Neon **pooled** connection string                   |
+| `DIRECT_DATABASE_URL` | Neon **direct** connection (Prisma migrations)      |
+| `MONGO_DATABASE_URL`  | Legacy Mongo Atlas URL (data migration script only) |
+| `BETTER_AUTH_URL`     | App origin (e.g. `https://tss.localhost`)           |
+| `BETTER_AUTH_SECRET`  | Auth encryption secret                              |
+
+For **tournament realtime**, configure the realtime block in `.env` (see step 5).
 
 ### 5. Tournament realtime service
 
@@ -99,9 +104,18 @@ More detail: `[docs/tournament-realtime.md](docs/tournament-realtime.md)`.
 ### 6. Set up the database:
 
 ```bash
-npx prisma generate
-npx prisma db push
+bun install
+bun run db:generate
+bun run db:migrate:deploy
 ```
+
+To import data from MongoDB (one-time):
+
+```bash
+bun run db:migrate:data
+```
+
+Optional flags: `--force` to run when Postgres already has rows.
 
 ### 7. Start the development server:
 
@@ -157,3 +171,15 @@ Use the same origin you use in the browser (`BETTER_AUTH_URL` in `.env.local` sh
 ```bash
 bun run start
 ```
+
+## Production cutover (Mongo → Neon)
+
+Use a short maintenance window. All users must sign in again after cutover.
+
+1. Announce downtime; freeze writes on production Mongo.
+2. Ensure production Neon has migrations applied: `bun run db:migrate:deploy` (uses `DIRECT_DATABASE_URL` locally or in CI).
+3. Run data import against production Mongo (read-only): `bun run db:migrate:data -- --force` with production `MONGO_DATABASE_URL` and Neon `DIRECT_DATABASE_URL` in `.env` or CI secrets.
+4. In Vercel, set `DATABASE_URL` (pooled) and `DIRECT_DATABASE_URL` (direct); remove the Mongo URL.
+5. Deploy the app build (runs `db:generate` before Vite build).
+6. Smoke-test: auth sign-in, athletes table filters, one tournament bracket, arena claim.
+7. Keep Mongo Atlas read-only for 7–14 days; retain `scripts/migration-id-map.json` from the ETL run for support lookups.
