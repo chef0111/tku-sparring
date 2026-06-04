@@ -163,7 +163,7 @@ describe('findByTournamentId', () => {
       tournamentId: 'tournament-1',
       AND: [
         {
-          OR: [{ groupId: null }, { groupId: { isSet: false } }],
+          groupId: null,
         },
       ],
     });
@@ -195,7 +195,7 @@ describe('findByTournamentId', () => {
     expect(args?.where).toMatchObject({
       AND: [
         {
-          OR: [{ groupId: null }, { groupId: { isSet: false } }],
+          groupId: null,
         },
       ],
     });
@@ -215,7 +215,7 @@ describe('findByTournamentId', () => {
     if (!Array.isArray(andClauses)) throw new Error('expected AND array');
     expect(andClauses).toHaveLength(2);
     expect(andClauses[0]).toMatchObject({
-      OR: [{ groupId: null }, { groupId: { isSet: false } }],
+      groupId: null,
     });
     expect(andClauses[1]).toMatchObject({
       OR: [

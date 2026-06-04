@@ -10,9 +10,8 @@ import {
 } from '@/lib/sort/name-sort-key';
 
 export class TournamentAthleteDAL {
-  /** MongoDB: `field: null` does not match documents where the field is omitted. */
   private static readonly UNASSIGNED_GROUP_FILTER = {
-    OR: [{ groupId: null }, { groupId: { isSet: false } }],
+    groupId: null,
   } satisfies Prisma.TournamentAthleteWhereInput;
 
   static async findByTournamentId(input: ListTournamentAthletesDTO) {
