@@ -1,6 +1,6 @@
 {
   "name": "tku-sparring",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "type": "module",
   "description": "A modern, user-friendly web application for managing Taekwondo sparring matches.",
@@ -22,7 +22,6 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:status": "prisma migrate status",
-    "db:migrate:data": "bun run scripts/migrate-mongo-to-postgres.ts",
     "preview": "portless tss vite preview",
     "start": "vite build && portless tss vite preview",
     "test": "vitest run",
