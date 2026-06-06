@@ -1,4 +1,4 @@
-import type { TournamentActivityEventType } from '@/orpc/activity/event-types';
+import type { TournamentActivityEventType } from '@/orpc/activity/types';
 import { client } from '@/orpc/client';
 
 export function listTournamentActivity(input: {

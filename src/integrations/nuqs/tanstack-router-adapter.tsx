@@ -1,5 +1,3 @@
-'use client';
-
 /**
  * TanStack Router nuqs adapter with correct serialization for array search values.
  *

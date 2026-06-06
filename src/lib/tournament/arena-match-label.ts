@@ -161,7 +161,7 @@ export function resolveArenaGroupOrder(
   return out;
 }
 
-export function buildManualRankMapFromMatches(
+export function buildManualRankMap(
   matches: ReadonlyArray<MatchData>
 ): Map<string, number> {
   const m = new Map<string, number>();

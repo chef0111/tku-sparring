@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { GroupData, MatchData } from '@/features/dashboard/types';
 import {
   buildArenaMatchNumberById,
-  buildManualRankMapFromMatches,
+  buildManualRankMap,
   buildMatchNumber,
   resolveArenaGroupOrder,
 } from '@/lib/tournament/arena-match-label';
@@ -71,7 +71,7 @@ export function useBracketsTabQueries({
       }
       return new Map<string, number | null>();
     }
-    const manual = buildManualRankMapFromMatches(arenaMatches);
+    const manual = buildManualRankMap(arenaMatches);
     const groupAthleteCountById = new Map(
       groupsOnArena.map(
         (g) => [g.id, g._count.tournamentAthletes] as [string, number]
