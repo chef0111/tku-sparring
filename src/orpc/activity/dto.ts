@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TournamentActivityEventTypeSchema } from './event-types';
+import { TournamentActivityEventTypeSchema } from './types';
 
 export const ListTournamentActivitySchema = z.object({
   tournamentId: z.string(),

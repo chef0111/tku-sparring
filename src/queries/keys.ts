@@ -1,4 +1,4 @@
-import type { TournamentActivityEventType } from '@/orpc/activity/event-types';
+import type { TournamentActivityEventType } from '@/orpc/activity/types';
 import type { AthleteProfilesDTO } from '@/orpc/athlete-profiles/dto';
 import type { ListTournamentAthletesDTO } from '@/orpc/tournament-athletes/dto';
 import type { ListTournamentsDTO } from '@/orpc/tournaments/dto';

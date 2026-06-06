@@ -1,20 +1,10 @@
+import type { ActivityDatabase, ActivityInput } from './types';
 import type { Prisma } from '@/generated/prisma/client';
 import type { ListTournamentActivityDTO } from './dto';
 import { prisma } from '@/lib/db';
 
-type RecordTournamentActivityInput = {
-  tournamentId: string;
-  adminId: string;
-  eventType: string;
-  entityType: string;
-  entityId: string;
-  payload?: Prisma.InputJsonValue;
-};
-
-type ActivityDatabase = Pick<typeof prisma, 'tournamentActivity'>;
-
 export async function recordTournamentActivity(
-  input: RecordTournamentActivityInput,
+  input: ActivityInput,
   db: ActivityDatabase = prisma
 ) {
   const { payload = {}, ...data } = input;

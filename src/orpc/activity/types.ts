@@ -1,4 +1,17 @@
 import { z } from 'zod';
+import type { Prisma } from '@/generated/prisma/client';
+import type { prisma } from '@/lib/db';
+
+export type ActivityInput = {
+  tournamentId: string;
+  adminId: string;
+  eventType: string;
+  entityType: string;
+  entityId: string;
+  payload?: Prisma.InputJsonValue;
+};
+
+export type ActivityDatabase = Pick<typeof prisma, 'tournamentActivity'>;
 
 export const TOURNAMENT_ACTIVITY_EVENT_TYPES = [
   'tournament.status_change',

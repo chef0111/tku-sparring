@@ -1,5 +1,5 @@
 import {
-  buildManualRankMapFromMatches,
+  buildManualRankMap,
   buildMatchNumber,
   formatArenaMatchTitle,
   resolveArenaGroupOrder,
@@ -17,7 +17,7 @@ export type MatchLabelContext = {
   arenaIndex: number;
   groupIdsOnArena: Array<string>;
   allMatches: Array<MatchData>;
-  numbers: Map<string, number>;
+  numbers: Map<string, number | null>;
   assignedBracketTitleKeys: Set<string>;
 };
 
@@ -81,7 +81,7 @@ export async function loadMatchLabelContext(input: {
     matches: allMatches,
     groupOrder,
     groupAthleteCountById,
-    manualRankByMatchId: buildManualRankMapFromMatches(allMatches),
+    manualRankByMatchId: buildManualRankMap(allMatches),
   });
 
   const assignedBracketTitleKeys = new Set<string>();

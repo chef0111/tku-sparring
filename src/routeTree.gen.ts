@@ -98,7 +98,7 @@ const DashboardTournamentsIdBuilderRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardTournamentsRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof AuthLoginRoute
   '/api/$': typeof ApiSplatRoute
   '/dashboard/': typeof DashboardIndexRoute

@@ -1,6 +1,7 @@
 import { advanceWinner, clearWinnerAdvancement } from './match-progression';
 import { coalesceMatchRead } from './match-read';
 import type { MatchTransitionPlan } from '@/lib/tournament/match-transition';
+import type { ActivityInput } from '@/orpc/activity/types';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { publishMatchInvalidateEvent } from '@/lib/tournament/tournament-sse-bus';
 import { prisma } from '@/lib/db';
@@ -9,7 +10,10 @@ export async function applyMatchTransition(input: {
   matchId: string;
   plan: MatchTransitionPlan;
   adminId: string;
-  activity: { eventType: string; payload: Record<string, unknown> };
+  activity: {
+    eventType: ActivityInput['eventType'];
+    payload?: ActivityInput['payload'];
+  };
 }) {
   const result = await prisma.$transaction(async (tx) => {
     const match = await tx.match.findUnique({ where: { id: input.matchId } });
