@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, SaveIcon } from 'lucide-react';
 import type z from 'zod';
 import type { AthleteProfileData } from '@/features/dashboard/types';
 import { EditAthleteSchema } from '@/lib/validations';
@@ -288,7 +288,17 @@ export function AthleteEditSheet({
                         disabled={updateMutation.isPending}
                         onClick={onConfirmDuplicate}
                       >
-                        {updateMutation.isPending ? 'Saving...' : 'Save Anyway'}
+                        {updateMutation.isPending ? (
+                          <>
+                            <Spinner />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <SaveIcon />
+                            Save Anyway
+                          </>
+                        )}
                       </Button>
                     </div>
                   </AlertDescription>
@@ -298,15 +308,24 @@ export function AthleteEditSheet({
           </div>
 
           <SheetFooter className="border-t px-6 py-4">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
             <Button
               type="submit"
               disabled={isPending || possibleDuplicates.length > 0}
             >
-              {isPending && <Spinner className="text-primary-foreground" />}
-              {isPending ? 'Saving...' : 'Save Changes'}
+              {isPending ? (
+                <>
+                  <Spinner />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <SaveIcon />
+                  Save changes
+                </>
+              )}
+            </Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
             </Button>
           </SheetFooter>
         </form>

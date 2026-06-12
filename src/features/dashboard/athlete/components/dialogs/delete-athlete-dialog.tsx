@@ -1,3 +1,4 @@
+import { Trash2 } from 'lucide-react';
 import type { AthleteProfileData } from '@/features/dashboard/types';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,6 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useDeleteAthleteProfile } from '@/queries/athlete-profile';
+import { Spinner } from '@/components/ui/spinner';
 
 interface DeleteAthleteDialogProps {
   athlete: AthleteProfileData | null;
@@ -25,7 +27,7 @@ export function DeleteAthleteDialog({
     <Dialog open={!!athlete} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Athlete</DialogTitle>
+          <DialogTitle className="text-lg">Delete Athlete</DialogTitle>
           <DialogDescription>
             Are you sure you want to delete{' '}
             <span className="font-semibold">{athlete?.name}</span>? This will
@@ -43,7 +45,17 @@ export function DeleteAthleteDialog({
               if (athlete) mutation.mutate({ id: athlete.id });
             }}
           >
-            {mutation.isPending ? 'Deleting...' : 'Delete'}
+            {mutation.isPending ? (
+              <>
+                <Spinner />
+                Deleting...
+              </>
+            ) : (
+              <>
+                <Trash2 />
+                Delete
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

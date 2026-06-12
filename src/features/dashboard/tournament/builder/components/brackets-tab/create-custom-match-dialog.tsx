@@ -347,7 +347,7 @@ export function CreateCustomMatchDialog({
                 >
                   {isSubmitting || mutation.isPending ? (
                     <>
-                      <Spinner className="text-primary-foreground" />
+                      <Spinner />
                       <span>Creating…</span>
                     </>
                   ) : (

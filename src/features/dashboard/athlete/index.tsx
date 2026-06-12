@@ -83,6 +83,7 @@ export default function AthletesManager() {
 
       <AthleteDrawer
         open={drawerOpen}
+        setOpen={setDrawerOpen}
         onOpenChange={handleDrawerOpenChange}
         mode={drawerMode}
         seedRows={drawerSeedRows}

@@ -1,4 +1,4 @@
-import { LockIcon } from 'lucide-react';
+import { LockIcon, LogInIcon } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import {
   Empty,
@@ -21,8 +21,10 @@ export const Unauthorized = () => {
           Sign in to access tournament settings and athlete information.
         </EmptyDescription>
       </EmptyHeader>
-      <Button variant="primary" asChild>
-        <Link to="/login">Login to Continue</Link>
+      <Button asChild>
+        <Link to="/login">
+          <LogInIcon /> Login to Continue
+        </Link>
       </Button>
     </Empty>
   );

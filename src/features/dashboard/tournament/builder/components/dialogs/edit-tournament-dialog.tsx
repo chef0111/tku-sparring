@@ -71,7 +71,7 @@ export function EditTournamentDialog({
             <Button type="submit" disabled={!name.trim() || mutation.isPending}>
               {mutation.isPending ? (
                 <>
-                  <Spinner className="text-primary-foreground" />
+                  <Spinner />
                   <span>Saving...</span>
                 </>
               ) : (

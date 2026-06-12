@@ -103,7 +103,7 @@ export function BracketSlot({
       className={cn(
         'relative z-2 flex touch-none items-stretch rounded-md active:cursor-grabbing',
         athlete || assignedName ? 'cursor-grab' : 'cursor-pointer',
-        locked && 'opacity-50',
+        locked && 'cursor-default active:cursor-default',
         isFinal &&
           side === 'red' &&
           'rounded-b-none border-2 border-b-0 border-red-500',
@@ -156,6 +156,7 @@ export function BracketSlot({
                 onToggleLock();
               }}
               aria-label={locked ? 'Unlock slot' : 'Lock slot'}
+              className={cn(locked && 'hover:bg-amber-500/10!')}
             >
               {locked ? (
                 <Lock data-icon="inline-start" className="text-amber-500" />
@@ -171,6 +172,7 @@ export function BracketSlot({
                 ? 'text-foreground'
                 : 'text-muted-foreground italic',
               isWinner && 'font-semibold text-emerald-600',
+              locked && 'text-amber-500!',
               isRtl && 'text-right'
             )}
           >
@@ -183,6 +185,7 @@ export function BracketSlot({
         className={cn(
           'z-50 flex shrink-0 items-center text-xs font-semibold tabular-nums select-none!',
           isWinner ? 'font-semibold text-emerald-600' : 'text-muted-foreground',
+          locked && 'text-amber-500!',
           isRtl ? 'pl-2' : 'pr-2'
         )}
       >

@@ -230,6 +230,28 @@
     --btn-radius: var(--radius-lg);
   }
 
+  [data-slot='button'][data-variant='default'] {
+    isolation: isolate;
+  }
+
+  [data-slot='button'][data-variant='default']::before {
+    content: '';
+    position: absolute;
+    inset: 1.5px;
+    z-index: -1;
+    border-radius: calc(var(--btn-radius) - 1.5px);
+    background: linear-gradient(
+      to bottom,
+      var(--primary),
+      var(--primary-accent)
+    );
+    transition: all;
+  }
+
+  .dark [data-slot='button'][data-variant='default']::before {
+    background: var(--primary);
+  }
+
   ::-webkit-scrollbar {
     width: 5px;
   }

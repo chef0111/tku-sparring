@@ -142,7 +142,7 @@ export function BulkAddAthletesDialog({
           >
             {bulkAdd.isPending ? (
               <>
-                <Spinner className="text-primary-foreground" />
+                <Spinner />
                 <span>Adding...</span>
               </>
             ) : (

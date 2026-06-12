@@ -115,7 +115,7 @@ export const AppSettings = () => {
         >
           {applySettingsPending ? (
             <>
-              <Spinner className="text-primary-foreground" />
+              <Spinner />
               Applying…
             </>
           ) : (
