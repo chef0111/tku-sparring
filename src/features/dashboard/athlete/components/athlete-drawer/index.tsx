@@ -29,6 +29,7 @@ export type AthleteDrawerMode = 'create' | 'bulk-edit';
 
 interface AthleteDrawerProps {
   open: boolean;
+  setOpen: (open: boolean) => void;
   onOpenChange: (open: boolean) => void;
   mode?: AthleteDrawerMode;
   /** Prefill when `mode` is `bulk-edit` (row `id` = athlete profile id). */
@@ -60,6 +61,7 @@ function seedKey(rows: Array<AthleteRow> | null | undefined) {
 
 export function AthleteDrawer({
   open,
+  setOpen,
   onOpenChange,
   mode = 'create',
   seedRows = null,
@@ -144,13 +146,16 @@ export function AthleteDrawer({
             });
           })
         );
+
         const successCount = results.filter(
           (r) => r.status === 'fulfilled'
         ).length;
         const failCount = results.length - successCount;
+
         await queryClient.invalidateQueries({ queryKey: ['athleteProfile'] });
         onBulkEditSaved?.();
         handleOpenChange(false);
+
         if (failCount === 0) {
           toast.success(
             `${successCount} ${successCount === 1 ? 'Athlete' : 'Athletes'} updated`
@@ -176,12 +181,15 @@ export function AthleteDrawer({
             });
           })
         );
+
         const successCount = results.filter(
           (r) => r.status === 'fulfilled'
         ).length;
         const failCount = results.length - successCount;
+
         await queryClient.invalidateQueries({ queryKey: ['athleteProfile'] });
         handleOpenChange(false);
+
         if (failCount === 0) {
           toast.success(
             `${successCount} ${successCount === 1 ? 'Athlete' : 'Athletes'} created successfully`
@@ -293,30 +301,65 @@ export function AthleteDrawer({
           ) : (
             <div />
           )}
-          <Button onClick={onSubmit} disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <Spinner className="text-primary-foreground" />
-                <span>{isBulkEdit ? 'Saving…' : 'Creating…'}</span>
-              </>
-            ) : isBulkEdit ? (
-              <>
-                <SaveIcon />
-                {`Save ${rows.length} ${
-                  rows.length === 1 ? 'Athlete' : 'Athletes'
-                }`}
-              </>
-            ) : (
-              <>
-                <PlusIcon />
-                {`Create ${rows.length} ${
-                  rows.length === 1 ? 'Athlete' : 'Athletes'
-                }`}
-              </>
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <SubmitButton
+              onSubmit={onSubmit}
+              state={{ isSubmitting, isBulkEdit }}
+              rows={rows}
+            />
+          </div>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
+  );
+}
+
+function SubmitButton({
+  onSubmit,
+  state,
+  rows,
+}: {
+  onSubmit: () => void;
+  state: { isSubmitting: boolean; isBulkEdit: boolean };
+  rows: Array<AthleteRow>;
+}) {
+  type ButtonState = 'submitting' | 'bulkEdit' | 'create';
+
+  const buttonState: ButtonState = state.isSubmitting
+    ? 'submitting'
+    : state.isBulkEdit
+      ? 'bulkEdit'
+      : 'create';
+
+  const athleteLabel = `${rows.length} ${rows.length === 1 ? 'Athlete' : 'Athletes'}`;
+
+  const buttonContent: Record<
+    ButtonState,
+    { icon: React.ReactNode; label: string }
+  > = {
+    submitting: {
+      icon: <Spinner className="text-primary-foreground" />,
+      label: state.isBulkEdit ? 'Saving…' : 'Creating…',
+    },
+    bulkEdit: {
+      icon: <SaveIcon />,
+      label: `Save ${athleteLabel}`,
+    },
+    create: {
+      icon: <PlusIcon />,
+      label: `Create ${athleteLabel}`,
+    },
+  };
+
+  const { icon, label } = buttonContent[buttonState];
+
+  return (
+    <Button onClick={onSubmit} disabled={state.isSubmitting}>
+      {icon}
+      <span>{label}</span>
+    </Button>
   );
 }
