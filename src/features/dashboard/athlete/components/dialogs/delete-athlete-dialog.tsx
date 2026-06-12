@@ -47,12 +47,12 @@ export function DeleteAthleteDialog({
           >
             {mutation.isPending ? (
               <>
-                <Spinner className="text-destructive" />
+                <Spinner className="text-current" />
                 Deleting...
               </>
             ) : (
               <>
-                <Trash2 className="text-destructive" />
+                <Trash2 />
                 Delete
               </>
             )}
