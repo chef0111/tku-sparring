@@ -76,7 +76,7 @@ export function RenameTournamentDialog({
             >
               {mutation.isPending ? (
                 <>
-                  <Spinner className="text-primary-foreground" />
+                  <Spinner />
                   Saving...
                 </>
               ) : (

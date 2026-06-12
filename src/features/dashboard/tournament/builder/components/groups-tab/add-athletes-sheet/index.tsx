@@ -141,7 +141,7 @@ export function AddAthletesSheet({
             >
               {submit.isPending ? (
                 <>
-                  <Spinner className="text-primary-foreground" />
+                  <Spinner />
                   <span>Adding…</span>
                 </>
               ) : (

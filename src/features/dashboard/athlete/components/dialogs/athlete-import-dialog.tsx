@@ -138,7 +138,7 @@ export function AthleteImportDialog({
           >
             {isImporting ? (
               <>
-                <Spinner className="text-primary-foreground" />
+                <Spinner />
                 <span>Importing...</span>
               </>
             ) : (

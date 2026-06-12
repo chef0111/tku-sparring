@@ -268,7 +268,7 @@ export function MatchDetailPanel() {
               >
                 {position.updateScore.isPending ? (
                   <>
-                    <Spinner className="text-primary-foreground" />
+                    <Spinner />
                     Saving…
                   </>
                 ) : (

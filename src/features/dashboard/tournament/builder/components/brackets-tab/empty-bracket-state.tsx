@@ -71,7 +71,7 @@ export function EmptyBracketState({
         >
           {generate.isPending ? (
             <>
-              <Spinner className="text-primary-foreground" />
+              <Spinner />
               Generating…
             </>
           ) : (

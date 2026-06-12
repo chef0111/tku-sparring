@@ -58,7 +58,7 @@ export function AddGroupDialog({
           <Button type="submit" disabled={!name.trim() || mutation.isPending}>
             {mutation.isPending ? (
               <>
-                <Spinner className="text-primary-foreground" />
+                <Spinner />
                 <span>Creating...</span>
               </>
             ) : (

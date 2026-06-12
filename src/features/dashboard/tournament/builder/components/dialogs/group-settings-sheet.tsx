@@ -215,7 +215,7 @@ function GroupSettingsForm({ group, onClose }: GroupSettingsFormProps) {
         <Button type="submit" size="sm" disabled={updateGroup.isPending}>
           {updateGroup.isPending ? (
             <>
-              <Spinner className="text-primary-foreground" />
+              <Spinner />
               <span>Saving...</span>
             </>
           ) : (

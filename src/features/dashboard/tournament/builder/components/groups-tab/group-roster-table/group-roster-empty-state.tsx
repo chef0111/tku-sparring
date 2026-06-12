@@ -50,7 +50,7 @@ export function GroupRosterEmptyState({
       >
         {autoAssign.isPending ? (
           <>
-            <Spinner className="text-primary-foreground" />
+            <Spinner />
             Assigning…
           </>
         ) : (

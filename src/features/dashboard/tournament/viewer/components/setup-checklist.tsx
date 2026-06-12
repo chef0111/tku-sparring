@@ -167,7 +167,7 @@ function SetupStepRow({
         {!step.complete ? (
           <div className="flex justify-end">
             <Button
-              variant={isCurrent ? 'primary' : 'outline'}
+              variant={isCurrent ? 'default' : 'outline'}
               size="sm"
               className="h-8 cursor-pointer"
               asChild

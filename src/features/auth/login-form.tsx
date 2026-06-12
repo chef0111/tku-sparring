@@ -99,7 +99,7 @@ const LoginForm = () => {
             >
               {isSubmitting ? (
                 <>
-                  <Spinner className="text-primary-foreground" />
+                  <Spinner />
                   Signing in...
                 </>
               ) : (

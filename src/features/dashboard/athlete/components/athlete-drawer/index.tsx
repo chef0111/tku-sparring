@@ -341,7 +341,7 @@ function SubmitButton({
     { icon: React.ReactNode; label: string }
   > = {
     submitting: {
-      icon: <Spinner className="text-primary-foreground" />,
+      icon: <Spinner />,
       label: state.isBulkEdit ? 'Saving…' : 'Creating…',
     },
     bulkEdit: {

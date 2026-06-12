@@ -77,7 +77,7 @@ export function TournamentStatusDialog({
           >
             {setStatusMutation.isPending ? (
               <>
-                <Spinner className="text-primary-foreground" />
+                <Spinner />
                 <span>Saving…</span>
               </>
             ) : (

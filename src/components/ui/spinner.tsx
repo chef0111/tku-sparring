@@ -7,7 +7,7 @@ function Spinner({ className, ...props }: SpinnerProps) {
     <>
       <span
         role="status"
-        className={cn('text-primary box-border inline-block size-5', className)}
+        className={cn('box-border inline-block size-5 text-current', className)}
         {...props}
       >
         <span

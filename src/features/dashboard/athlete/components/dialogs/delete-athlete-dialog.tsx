@@ -47,7 +47,7 @@ export function DeleteAthleteDialog({
           >
             {mutation.isPending ? (
               <>
-                <Spinner className="text-current" />
+                <Spinner />
                 Deleting...
               </>
             ) : (
