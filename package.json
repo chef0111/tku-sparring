@@ -51,7 +51,7 @@
     "@orpc/openapi": "^1.14.3",
     "@orpc/server": "^1.14.3",
     "@orpc/tanstack-query": "^1.14.3",
-    "@orpc/zod": "^1.14.3",
+    "@orpc/zod": "^1.14.6",
     "@prisma/adapter-neon": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@radix-ui/react-direction": "^1.1.1",
