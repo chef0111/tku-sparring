@@ -30,8 +30,7 @@ export function NavMain({
             <SidebarMenuButton
               tooltip="Quick Create"
               className={cn(
-                'ring-primary dark:ring-ring text-primary-foreground! isolate min-w-8 border-none ring-1',
-                'bg-[linear-gradient(to_bottom,color-mix(in_srgb,var(--accent-foreground)_80%,transparent),var(--primary-accent))] active:scale-100 dark:bg-[linear-gradient(to_top,var(--primary),var(--primary-accent))]'
+                'ring-primary dark:ring-ring text-primary-foreground! min-w-8 border-none bg-[linear-gradient(to_bottom,color-mix(in_srgb,var(--accent-foreground)_80%,transparent),var(--primary-accent))] shadow-none ring-1 dark:bg-[linear-gradient(to_top,var(--primary),var(--primary-accent))]'
               )}
             >
               <span
