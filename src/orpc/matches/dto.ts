@@ -25,6 +25,7 @@ export const MatchSchema = z.object({
   tournamentWinnerId: z.string().nullable(),
   redLocked: z.boolean(),
   blueLocked: z.boolean(),
+  cornersSwapped: z.boolean(),
   groupId: z.string(),
   tournamentId: z.string(),
   createdAt: z.date(),
