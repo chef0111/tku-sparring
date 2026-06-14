@@ -7,11 +7,9 @@ export async function setRound0SlotLock(input: SetLockDTO) {
       ? { redLocked: input.locked }
       : { blueLocked: input.locked };
 
-  return prisma.$transaction(async (tx) => {
-    await tx.match.update({
-      where: { id: input.matchId },
-      data,
-    });
+  return prisma.match.update({
+    where: { id: input.matchId },
+    data,
   });
 }
 
@@ -47,12 +45,7 @@ export async function assignRound0Slot(input: AssignSlotDTO, _adminId: string) {
             blueTournamentAthleteId: null,
             blueAthleteId: null,
           };
-    return prisma.$transaction(async (tx) => {
-      await tx.match.update({
-        where: { id: input.matchId },
-        data,
-      });
-    });
+    return prisma.match.update({ where: { id: input.matchId }, data });
   }
 
   const ta = await prisma.tournamentAthlete.findUnique({
@@ -74,12 +67,7 @@ export async function assignRound0Slot(input: AssignSlotDTO, _adminId: string) {
           blueAthleteId: ta.athleteProfileId,
         };
 
-  return prisma.$transaction(async (tx) => {
-    await tx.match.update({
-      where: { id: input.matchId },
-      data,
-    });
-  });
+  return prisma.match.update({ where: { id: input.matchId }, data });
 }
 
 export async function swapRound0Slots(input: SwapSlotsDTO, _adminId: string) {
@@ -117,16 +105,14 @@ export async function swapRound0Slots(input: SwapSlotsDTO, _adminId: string) {
     if (input.sideA === input.sideB) {
       throw new Error('Invalid swap');
     }
-    return prisma.$transaction(async (tx) => {
-      await tx.match.update({
-        where: { id: a.id },
-        data: {
-          redTournamentAthleteId: a.blueTournamentAthleteId,
-          blueTournamentAthleteId: a.redTournamentAthleteId,
-          redAthleteId: a.blueAthleteId,
-          blueAthleteId: a.redAthleteId,
-        },
-      });
+    return prisma.match.update({
+      where: { id: a.id },
+      data: {
+        redTournamentAthleteId: a.blueTournamentAthleteId,
+        blueTournamentAthleteId: a.redTournamentAthleteId,
+        redAthleteId: a.blueAthleteId,
+        blueAthleteId: a.redAthleteId,
+      },
     });
   }
 

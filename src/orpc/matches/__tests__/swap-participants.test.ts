@@ -158,4 +158,19 @@ describe('swapParticipants', () => {
       )
     ).rejects.toThrow(/third-place/);
   });
+
+  it('rejects non-transpose payloads', async () => {
+    vi.mocked(prisma.match.findUnique).mockResolvedValue(upperMatch() as never);
+
+    await expect(
+      MatchDAL.swapParticipants(
+        {
+          matchId: 'm1',
+          redTournamentAthleteId: 'ta-red',
+          blueTournamentAthleteId: null,
+        },
+        'admin'
+      )
+    ).rejects.toThrow(/transpose/);
+  });
 });

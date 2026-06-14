@@ -164,6 +164,13 @@ export class MatchDAL {
         throw new Error('Cannot swap corners on the third-place match');
       }
 
+      if (
+        input.redTournamentAthleteId !== match.blueTournamentAthleteId ||
+        input.blueTournamentAthleteId !== match.redTournamentAthleteId
+      ) {
+        throw new Error('Swap must transpose red and blue corners');
+      }
+
       const redAthlete = input.redTournamentAthleteId
         ? await tx.tournamentAthlete.findUnique({
             where: { id: input.redTournamentAthleteId },

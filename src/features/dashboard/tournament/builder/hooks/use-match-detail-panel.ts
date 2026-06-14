@@ -125,6 +125,8 @@ export function useMatchDetailPanel() {
     match.status !== 'complete' &&
     match.round > 0 &&
     match.kind === 'bracket' &&
+    !match.redLocked &&
+    !match.blueLocked &&
     !isThirdPlace &&
     (tournamentStatus === 'draft' || tournamentStatus === 'active');
   const canToggleLocks =
