@@ -55,6 +55,10 @@ _Avoid_: Match code
 A dedicated match between the semifinal losers to determine third place in a group. It is only materialized when the group has **at least four athletes** and the per-group toggle is on.
 _Avoid_: Consolation bout
 
+**Corner swap**:
+An admin inverts red/blue corners on an upper-round **Match** (round > 0) without changing which athletes compete. Stored as `cornersSwapped` on the **Match**; when true, feeder placeholders and winner advancement use the inverted corner mapping so **`Winner {n}`** labels and advancers land on the correct side.
+_Avoid_: Side flip, mirror match
+
 **Bracket canvas**:
 The builder visualization of a **Group** single-elimination tree: two **wings** (left and right) converge on a centered **Final**; optional **Third-Place Match** sits below the final. Wings are a display partition only — progression still follows `(round, matchIndex)` on the server.
 _Avoid_: Bracket panel, tree view
