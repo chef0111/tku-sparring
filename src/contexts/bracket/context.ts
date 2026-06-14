@@ -9,6 +9,7 @@ export interface BracketContextValue {
   athleteMap: Map<string, TournamentAthleteData>;
   matchLabel: ReadonlyMap<string, number | null>;
   readOnly: boolean;
+  thirdPlaceId: string | undefined;
   onSlotClick: (match: MatchData) => void;
   onToggleLock: (
     matchId: string,

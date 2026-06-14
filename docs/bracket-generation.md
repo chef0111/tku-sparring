@@ -77,3 +77,10 @@ Layout geometry lives in [`src/lib/tournament/bracket-layout.ts`](../src/lib/tou
 - **Round 0**, empty athlete slot: show **Open** (not a “winner” placeholder).
 - **Round ≥ 1**, empty athlete slot: when the feeder has an arena display number, show **`Winner {n}`** where **`n`** is that feeder’s number from the shared arena map. When the feeder has **no** display number, show the **advancing athlete’s name** if the feeder is already complete, otherwise **Open**.
 - Full match titles use **`Match {n}`** when **`n`** is present. When **`n`** is null: **Advanced** for a real advanced (one athlete) row; **blank** when both slots are still open on that match.
+
+## Corner swap (builder)
+
+- **Round 0** uses cross-match drag-and-drop for seed placement (`assignSlot` / `swapSlots`). **Complete** round-0 matches are not editable via DnD.
+- **Round ≥ 1** supports **intra-match** corner swap only: drag one filled corner onto the opposite corner of the **same** match (or use **Swap** in the match detail panel). Both call `swapParticipants`, which toggles `cornersSwapped` and swaps stored athlete ids.
+- Allowed in **Draft** and **Active**; partial fill (one athlete + one feeder placeholder) is OK. Rejected when either corner is **locked**, the match is **complete**, or the row is the **Third-Place Match**.
+- When `cornersSwapped` is true, empty-slot labels resolve feeders with inverted topology; when a feeder completes, the advancer is written to the corner that matches the (possibly inverted) feeder side.

@@ -39,6 +39,8 @@ export function useSlotLabels(
     return resolveTaName(match.blueTournamentAthleteId) ?? null;
   }, [match.blueTournamentAthleteId, blueAthlete, resolveTaName]);
 
+  const cornersSwapped = match.round > 0 && match.cornersSwapped;
+
   const redEmptyLabel = React.useMemo(() => {
     if (redAssignedName) return '';
     if (match.round === 0) return 'Open';
@@ -47,7 +49,8 @@ export function useSlotLabels(
       match.groupId,
       match.round,
       match.matchIndex,
-      'red'
+      'red',
+      cornersSwapped
     );
     if (!feeder) return 'Winner pending';
     return formatFeederWinnerPlaceholder(feeder, matchLabel, resolveTaName);
@@ -59,6 +62,7 @@ export function useSlotLabels(
     matches,
     redAssignedName,
     resolveTaName,
+    cornersSwapped,
   ]);
 
   const blueEmptyLabel = React.useMemo(() => {
@@ -69,7 +73,8 @@ export function useSlotLabels(
       match.groupId,
       match.round,
       match.matchIndex,
-      'blue'
+      'blue',
+      cornersSwapped
     );
     if (!feeder) return 'Winner pending';
     return formatFeederWinnerPlaceholder(feeder, matchLabel, resolveTaName);
@@ -81,6 +86,7 @@ export function useSlotLabels(
     matches,
     blueAssignedName,
     resolveTaName,
+    cornersSwapped,
   ]);
 
   const isRedWinner = React.useMemo(() => {

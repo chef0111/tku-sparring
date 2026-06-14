@@ -25,6 +25,9 @@ export async function assignRound0Slot(input: AssignSlotDTO, _adminId: string) {
   if (match.round !== 0) {
     throw new Error('Athletes can only be assigned to opening-round slots');
   }
+  if (match.status === 'complete') {
+    throw new Error('Cannot assign to a complete match');
+  }
 
   const locked = input.side === 'red' ? match.redLocked : match.blueLocked;
   if (locked) {
@@ -87,6 +90,9 @@ export async function swapRound0Slots(input: SwapSlotsDTO, _adminId: string) {
   }
   if (a.round !== 0 || b.round !== 0) {
     throw new Error('Can only swap opening-round slots');
+  }
+  if (a.status === 'complete' || b.status === 'complete') {
+    throw new Error('Cannot swap slots on a complete match');
   }
 
   const lockA = input.sideA === 'red' ? a.redLocked : a.blueLocked;

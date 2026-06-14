@@ -50,6 +50,7 @@ export interface MatchData {
   tournamentWinnerId: string | null;
   redLocked: boolean;
   blueLocked: boolean;
+  cornersSwapped: boolean;
   updatedAt: Date;
   groupId: string;
   tournamentId: string;

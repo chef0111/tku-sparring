@@ -149,6 +149,7 @@ model Match {
   tournamentWinnerId      String?  @db.Uuid
   redLocked               Boolean  @default(false)
   blueLocked              Boolean  @default(false)
+  cornersSwapped          Boolean  @default(false)
   groupId                 String   @db.Uuid
   tournamentId            String   @db.Uuid
   createdAt               DateTime @default(now())

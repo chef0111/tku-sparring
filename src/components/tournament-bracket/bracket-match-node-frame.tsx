@@ -36,12 +36,15 @@ export function BracketMatchNodeFrame({
     athleteMap,
     matchLabel,
     readOnly,
+    thirdPlaceId,
     onSlotClick,
     onToggleLock,
   } = useBracket();
   const labels = useSlotLabels(match, matches, athleteMap, matchLabel);
 
   const isFinal = variant === 'final';
+  const cornerSwapEnabled =
+    match.kind === 'bracket' && match.id !== thirdPlaceId;
   const statusClass =
     matchStatusBorder[match.status] ?? matchStatusBorder.pending;
 
@@ -113,6 +116,7 @@ export function BracketMatchNodeFrame({
         wins={match.redWins}
         isWinner={labels.isRedWinner}
         isFinal={isFinal}
+        cornerSwapEnabled={cornerSwapEnabled}
         onSlotClick={onSlotClick}
         onToggleLock={() => onToggleLock(match.id, 'red', !match.redLocked)}
         readOnly={readOnly}
@@ -129,6 +133,7 @@ export function BracketMatchNodeFrame({
         wins={match.blueWins}
         isWinner={labels.isBlueWinner}
         isFinal={isFinal}
+        cornerSwapEnabled={cornerSwapEnabled}
         onSlotClick={onSlotClick}
         onToggleLock={() => onToggleLock(match.id, 'blue', !match.blueLocked)}
         readOnly={readOnly}

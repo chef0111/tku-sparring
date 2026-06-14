@@ -22,6 +22,7 @@ export interface BracketSlotProps {
   wins: number;
   isWinner: boolean;
   isFinal?: boolean;
+  cornerSwapEnabled?: boolean;
   onSlotClick: (match: MatchData) => void;
   onToggleLock: () => void;
   readOnly: boolean;
@@ -39,6 +40,7 @@ export function BracketSlot({
   wins,
   isWinner,
   isFinal = false,
+  cornerSwapEnabled = false,
   onSlotClick,
   onToggleLock,
   readOnly,
@@ -46,9 +48,37 @@ export function BracketSlot({
 }: BracketSlotProps) {
   const id = `slot-${match.id}-${side}`;
   const slotLabel = athlete?.name ?? assignedName ?? emptyLabel;
-  const canDrag = !locked && !!athlete && match.round === 0 && !readOnly;
-  const canDrop = match.round === 0 && !locked;
+  const isEditable = !readOnly && match.status !== 'complete';
+  const hasCornerContent = athlete != null || assignedName != null;
+
+  const canDragRound0 = isEditable && match.round === 0 && !locked && !!athlete;
+  const canDragUpper =
+    isEditable &&
+    match.round > 0 &&
+    cornerSwapEnabled &&
+    !locked &&
+    hasCornerContent;
+  const canDrag = canDragRound0 || canDragUpper;
+
+  const canDropRound0 = isEditable && match.round === 0 && !locked;
+  const canDropUpper =
+    isEditable && match.round > 0 && cornerSwapEnabled && !locked;
+  const canDrop = canDropRound0 || canDropUpper;
+
   const isRtl = direction === 'rtl';
+
+  const slotDnDData = {
+    from: 'slot' as const,
+    matchId: match.id,
+    side,
+    groupId: match.groupId,
+    round: match.round,
+    redTournamentAthleteId: match.redTournamentAthleteId,
+    blueTournamentAthleteId: match.blueTournamentAthleteId,
+    redLocked: match.redLocked,
+    blueLocked: match.blueLocked,
+    tournamentAthleteId: athlete?.id ?? null,
+  };
 
   const {
     attributes,
@@ -58,21 +88,14 @@ export function BracketSlot({
   } = useDraggable({
     id,
     disabled: !canDrag,
-    data: {
-      from: 'slot' as const,
-      matchId: match.id,
-      side,
-      groupId: match.groupId,
-      tournamentAthleteId: athlete?.id ?? null,
-    },
+    data: slotDnDData,
   });
 
   const { setNodeRef: setDropRef, isOver } = useDroppable({
     id,
     disabled: !canDrop,
     data: {
-      matchId: match.id,
-      side,
+      ...slotDnDData,
       locked,
     },
   });
@@ -102,7 +125,7 @@ export function BracketSlot({
       }}
       className={cn(
         'relative z-2 flex touch-none items-stretch rounded-md active:cursor-grabbing',
-        athlete || assignedName ? 'cursor-grab' : 'cursor-pointer',
+        hasCornerContent ? 'cursor-grab' : 'cursor-pointer',
         locked && 'cursor-default active:cursor-default',
         isFinal &&
           side === 'red' &&
@@ -167,8 +190,8 @@ export function BracketSlot({
           )}
           <span
             className={cn(
-              'min-w-0 truncate text-xs select-none!',
-              athlete || assignedName
+              'w-full min-w-0 truncate text-xs select-none!',
+              hasCornerContent
                 ? 'text-foreground'
                 : 'text-muted-foreground italic',
               isWinner && 'font-semibold text-emerald-600',

@@ -84,10 +84,19 @@ export function Bracket({
       athleteMap,
       matchLabel,
       readOnly,
+      thirdPlaceId: thirdPlace?.id,
       onSlotClick,
       onToggleLock,
     }),
-    [matches, athleteMap, matchLabel, readOnly, onSlotClick, onToggleLock]
+    [
+      matches,
+      athleteMap,
+      matchLabel,
+      readOnly,
+      thirdPlace?.id,
+      onSlotClick,
+      onToggleLock,
+    ]
   );
 
   if (positions.length === 0) return null;

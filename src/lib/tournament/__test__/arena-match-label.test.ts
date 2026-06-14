@@ -34,6 +34,7 @@ function m(
     tournamentWinnerId: null,
     redLocked: false,
     blueLocked: false,
+    cornersSwapped: false,
     updatedAt: new Date(0),
     groupId: 'g',
     tournamentId: 't',
@@ -493,5 +494,11 @@ describe('getFeederMatch', () => {
     ];
     expect(getFeederMatch(matches, 'g1', 1, 0, 'red')?.id).toBe('g1-r0');
     expect(getFeederMatch(matches, 'g1', 1, 0, 'blue')).toBeUndefined();
+  });
+
+  it('inverts feeder side when corners are swapped', () => {
+    const matches = [m('c0', 0, 0), m('c1', 0, 1), m('p', 1, 0)];
+    expect(getFeederMatch(matches, 'g', 1, 0, 'red', true)?.id).toBe('c1');
+    expect(getFeederMatch(matches, 'g', 1, 0, 'blue', true)?.id).toBe('c0');
   });
 });
