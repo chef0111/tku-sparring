@@ -28,15 +28,13 @@ export function NavMain({
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
+              data-slot="button"
+              data-variant="default"
               tooltip="Quick Create"
               className={cn(
-                'ring-primary dark:ring-ring text-primary-foreground! min-w-8 border-none bg-[linear-gradient(to_bottom,color-mix(in_srgb,var(--accent-foreground)_80%,transparent),var(--primary-accent))] shadow-none ring-1 dark:bg-[linear-gradient(to_top,var(--primary),var(--primary-accent))]'
+                'ring-primary dark:ring-ring text-primary-foreground! h-7.5 min-w-8 border-none bg-[linear-gradient(to_bottom,color-mix(in_srgb,var(--accent-foreground)_80%,transparent),var(--primary-accent))] shadow-none ring-1 dark:bg-[linear-gradient(to_top,var(--primary),var(--primary-accent))]'
               )}
             >
-              <span
-                data-slot="button-bg"
-                className="dark:bg-primary absolute inset-[1.5px] -z-10 flex rounded-[calc(var(--radius-md)-1.5px)] bg-[linear-gradient(to_bottom,var(--primary),var(--primary-accent))]"
-              />
               <CirclePlusIcon />
               <span>Quick Create</span>
             </SidebarMenuButton>
