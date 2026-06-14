@@ -21,6 +21,7 @@ function baseMatch(over: Partial<MatchData> = {}): MatchData {
     tournamentWinnerId: null,
     redLocked: false,
     blueLocked: false,
+    cornersSwapped: false,
     updatedAt: new Date(0),
     groupId: 'g1',
     tournamentId: 't1',

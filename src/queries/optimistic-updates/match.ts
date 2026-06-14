@@ -7,7 +7,10 @@ import type {
   UpdateScoreDTO,
 } from '@/orpc/matches/dto';
 import type { MatchData } from '@/features/dashboard/types';
-import { getSuccessorSlot } from '@/lib/tournament/bracket-progression';
+import {
+  getSuccessorSlot,
+  resolveAdvanceSide,
+} from '@/lib/tournament/bracket-progression';
 import { getScoreTransition } from '@/lib/tournament/match-transition';
 import { matchKeys } from '@/queries/keys';
 
@@ -157,6 +160,10 @@ export function applyOptimisticSwapParticipants(
   m.redTournamentAthleteId = input.redTournamentAthleteId;
   m.blueTournamentAthleteId = input.blueTournamentAthleteId;
 
+  if (m.round > 0) {
+    m.cornersSwapped = !m.cornersSwapped;
+  }
+
   m.redAthleteId =
     input.redTournamentAthleteId === prevBlueTa
       ? prevBlueProf
@@ -213,7 +220,8 @@ export function applyOptimisticUpdateScore(
 
   const wta = transition.advancedWinnerId;
   const profileId = findProfileId(matches, wta);
-  if (successor.side === 'red') {
+  const side = resolveAdvanceSide(successor.side, next.cornersSwapped);
+  if (side === 'red') {
     next.redTournamentAthleteId = wta;
     next.redAthleteId = profileId;
   } else {

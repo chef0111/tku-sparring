@@ -3,7 +3,11 @@ import { MouseSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { toast } from 'sonner';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type { TournamentAthleteData } from '@/features/dashboard/types';
-import { useAssignSlot, useSwapSlots } from '@/queries/match';
+import {
+  useAssignSlot,
+  useSwapParticipants,
+  useSwapSlots,
+} from '@/queries/match';
 
 type DragLabel =
   | { kind: 'panel'; name: string; beltLevel: number; weight: number }
@@ -19,6 +23,7 @@ export function useBracketsTabDnd(athletes: Array<TournamentAthleteData>) {
 
   const assignSlot = useAssignSlot();
   const swapSlots = useSwapSlots();
+  const swapParticipants = useSwapParticipants();
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 4 } })
@@ -68,6 +73,11 @@ export function useBracketsTabDnd(athletes: Array<TournamentAthleteData>) {
             groupId?: string;
             matchId?: string;
             side?: 'red' | 'blue';
+            round?: number;
+            redTournamentAthleteId?: string | null;
+            blueTournamentAthleteId?: string | null;
+            redLocked?: boolean;
+            blueLocked?: boolean;
           }
         | undefined;
       const dst = e.over?.data.current as
@@ -77,6 +87,9 @@ export function useBracketsTabDnd(athletes: Array<TournamentAthleteData>) {
             matchId?: string;
             side?: 'red' | 'blue';
             locked?: boolean;
+            round?: number;
+            redLocked?: boolean;
+            blueLocked?: boolean;
           }
         | undefined;
 
@@ -133,6 +146,35 @@ export function useBracketsTabDnd(athletes: Array<TournamentAthleteData>) {
         src.side &&
         dst?.matchId &&
         dst.side &&
+        src.matchId === dst.matchId &&
+        src.side !== dst.side &&
+        (src.round ?? 0) > 0 &&
+        !src.redLocked &&
+        !src.blueLocked &&
+        !dst.redLocked &&
+        !dst.blueLocked &&
+        !dst.locked
+      ) {
+        swapParticipants.mutate(
+          {
+            matchId: src.matchId,
+            redTournamentAthleteId: src.blueTournamentAthleteId ?? null,
+            blueTournamentAthleteId: src.redTournamentAthleteId ?? null,
+          },
+          {
+            onError: (err) =>
+              toast.error(dndErrorMessage(err, 'Corner swap failed')),
+          }
+        );
+        return;
+      }
+
+      if (
+        src.from === 'slot' &&
+        src.matchId &&
+        src.side &&
+        dst?.matchId &&
+        dst.side &&
         !dst.locked
       ) {
         swapSlots.mutate(
@@ -148,7 +190,7 @@ export function useBracketsTabDnd(athletes: Array<TournamentAthleteData>) {
         );
       }
     },
-    [assignSlot, swapSlots]
+    [assignSlot, swapParticipants, swapSlots]
   );
 
   return { sensors, dragLabel, onDragStart, onDragEnd };

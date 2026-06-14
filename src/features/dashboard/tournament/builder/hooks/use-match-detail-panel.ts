@@ -14,6 +14,7 @@ import {
   useUpdateScore,
 } from '@/queries/match';
 import { getBracketRoundLabel } from '@/lib/tournament/bracket-round-label';
+import { isThirdPlaceMatch } from '@/lib/tournament/bracket-layout';
 
 const MATCH_STATUS_RANK: Record<MatchStatus, number> = {
   pending: 0,
@@ -36,6 +37,8 @@ export function useMatchDetailPanel() {
     readOnly,
     tournamentStatus,
     maxBracketRound,
+    matches,
+    selectedGroup,
   } = useTournamentBracket();
 
   const [redWins, setRedWins] = React.useState(0);
@@ -98,6 +101,15 @@ export function useMatchDetailPanel() {
     ? athleteMap.get(match.blueTournamentAthleteId)
     : null;
 
+  const isThirdPlace = React.useMemo(() => {
+    if (!match || !selectedGroup) return false;
+    return isThirdPlaceMatch(
+      match,
+      matches.filter((m) => m.kind === 'bracket'),
+      selectedGroup.thirdPlaceMatch
+    );
+  }, [match, matches, selectedGroup]);
+
   const canEdit = !!match && !readOnly && match.status !== 'complete';
   const canResetMatch =
     !!match &&
@@ -110,6 +122,10 @@ export function useMatchDetailPanel() {
   const canSwap =
     !!match &&
     !readOnly &&
+    match.status !== 'complete' &&
+    match.round > 0 &&
+    match.kind === 'bracket' &&
+    !isThirdPlace &&
     (tournamentStatus === 'draft' || tournamentStatus === 'active');
   const canToggleLocks =
     !!match &&
