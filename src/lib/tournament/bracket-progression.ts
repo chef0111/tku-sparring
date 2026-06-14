@@ -26,6 +26,17 @@ export function getSuccessorSlot(input: {
   };
 }
 
+export function resolveAdvanceSide(
+  topologySide: BracketSide,
+  cornersSwapped: boolean
+): BracketSide {
+  return cornersSwapped
+    ? topologySide === 'red'
+      ? 'blue'
+      : 'red'
+    : topologySide;
+}
+
 export function isRound0ByeMatch(input: {
   round: number;
   redTournamentAthleteId: string | null;

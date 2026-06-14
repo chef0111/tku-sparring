@@ -2,6 +2,7 @@ import type { PrismaClient } from '@/generated/prisma/client';
 import {
   getSuccessorSlot,
   isRound0ByeMatch,
+  resolveAdvanceSide,
 } from '@/lib/tournament/bracket-progression';
 import { prisma } from '@/lib/db';
 
@@ -34,10 +35,12 @@ export async function advanceWinner(
   });
   if (!nextMatch) return;
 
+  const side = resolveAdvanceSide(successor.side, nextMatch.cornersSwapped);
+
   await db.match.update({
     where: { id: nextMatch.id },
     data:
-      successor.side === 'red'
+      side === 'red'
         ? {
             redTournamentAthleteId: tournamentWinnerId,
             redAthleteId: winner?.athleteProfileId ?? null,
@@ -80,15 +83,14 @@ export async function clearWinnerAdvancement(
 
   if (!nextMatch) return;
 
-  if (successor.side === 'red' && nextMatch.redTournamentAthleteId === wta) {
+  const side = resolveAdvanceSide(successor.side, nextMatch.cornersSwapped);
+
+  if (side === 'red' && nextMatch.redTournamentAthleteId === wta) {
     await db.match.update({
       where: { id: nextMatch.id },
       data: { redTournamentAthleteId: null, redAthleteId: null },
     });
-  } else if (
-    successor.side === 'blue' &&
-    nextMatch.blueTournamentAthleteId === wta
-  ) {
+  } else if (side === 'blue' && nextMatch.blueTournamentAthleteId === wta) {
     await db.match.update({
       where: { id: nextMatch.id },
       data: { blueTournamentAthleteId: null, blueAthleteId: null },

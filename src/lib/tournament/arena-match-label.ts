@@ -311,10 +311,17 @@ export function getFeederMatch(
   groupId: string,
   round: number,
   matchIndex: number,
-  side: 'red' | 'blue'
+  side: 'red' | 'blue',
+  cornersSwapped = false
 ): MatchData | undefined {
   if (round <= 0) return undefined;
-  const childIndex = side === 'red' ? matchIndex * 2 : matchIndex * 2 + 1;
+  const effectiveSide = cornersSwapped
+    ? side === 'red'
+      ? 'blue'
+      : 'red'
+    : side;
+  const childIndex =
+    effectiveSide === 'red' ? matchIndex * 2 : matchIndex * 2 + 1;
   return matches.find(
     (m) =>
       m.groupId === groupId &&
