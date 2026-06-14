@@ -21,6 +21,7 @@ import type {
   UpdateMatchDTO,
   UpdateScoreDTO,
 } from './dto';
+import { isThirdPlaceMatch } from '@/lib/tournament/bracket-layout';
 import {
   buildAdminStatusPlan,
   buildScoreTransitionPlan,
@@ -142,6 +143,26 @@ export class MatchDAL {
       if (status === 'completed') {
         throw new Error('Cannot swap participants in a completed tournament');
       }
+      if (match.status === 'complete') {
+        throw new Error('Cannot swap participants on a complete match');
+      }
+      if (match.round === 0) {
+        throw new Error('Use slot swap for opening-round matches');
+      }
+      if (match.redLocked || match.blueLocked) {
+        throw new Error('Cannot swap a locked corner');
+      }
+      if (match.kind === 'custom') {
+        throw new Error('Cannot swap corners on custom matches');
+      }
+
+      const bracketRows = await tx.match.findMany({
+        where: { groupId: match.groupId, kind: 'bracket' },
+        select: { id: true, round: true, matchIndex: true, kind: true },
+      });
+      if (isThirdPlaceMatch(match, bracketRows, match.group.thirdPlaceMatch)) {
+        throw new Error('Cannot swap corners on the third-place match');
+      }
 
       const redAthlete = input.redTournamentAthleteId
         ? await tx.tournamentAthlete.findUnique({
@@ -161,6 +182,7 @@ export class MatchDAL {
           blueTournamentAthleteId: input.blueTournamentAthleteId,
           redAthleteId: redAthlete?.athleteProfileId ?? null,
           blueAthleteId: blueAthlete?.athleteProfileId ?? null,
+          cornersSwapped: !match.cornersSwapped,
         },
       });
 

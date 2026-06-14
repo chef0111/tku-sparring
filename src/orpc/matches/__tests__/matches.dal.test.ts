@@ -283,6 +283,25 @@ describe('assignSlot', () => {
       )
     ).rejects.toThrow(/does not belong/);
   });
+
+  it('throws when match is complete', async () => {
+    vi.mocked(prisma.match.findUnique).mockResolvedValue({
+      id: 'm1',
+      round: 0,
+      status: 'complete',
+      groupId: 'group-1',
+      redLocked: false,
+      blueLocked: false,
+      group: { tournament: { status: 'draft' } },
+    } as never);
+
+    await expect(
+      MatchDAL.assignSlot(
+        { matchId: 'm1', side: 'red', tournamentAthleteId: 'ta1' },
+        'admin'
+      )
+    ).rejects.toThrow(/complete match/);
+  });
 });
 
 describe('swapSlots', () => {
@@ -326,6 +345,50 @@ describe('swapSlots', () => {
         'admin'
       )
     ).rejects.toThrow(/locked/);
+  });
+
+  it('throws when either match is complete', async () => {
+    const a = {
+      id: 'ma',
+      round: 0,
+      status: 'complete',
+      groupId: 'g1',
+      redLocked: false,
+      blueLocked: false,
+      redTournamentAthleteId: 'ta1',
+      blueTournamentAthleteId: null,
+      redAthleteId: 'ap1',
+      blueAthleteId: null,
+      group: { tournament: { status: 'draft' } },
+    };
+    const b = {
+      id: 'mb',
+      round: 0,
+      status: 'pending',
+      groupId: 'g1',
+      redLocked: false,
+      blueLocked: false,
+      redTournamentAthleteId: null,
+      blueTournamentAthleteId: 'ta2',
+      redAthleteId: null,
+      blueAthleteId: 'ap2',
+      group: { tournament: { status: 'draft' } },
+    };
+    vi.mocked(prisma.match.findUnique)
+      .mockResolvedValueOnce(a as never)
+      .mockResolvedValueOnce(b as never);
+
+    await expect(
+      MatchDAL.swapSlots(
+        {
+          matchAId: 'ma',
+          sideA: 'red',
+          matchBId: 'mb',
+          sideB: 'blue',
+        },
+        'admin'
+      )
+    ).rejects.toThrow(/complete match/);
   });
 });
 

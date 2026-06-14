@@ -89,6 +89,19 @@ export function resolveBracketLayout(
   };
 }
 
+export function isThirdPlaceMatch(
+  match: Pick<MatchData, 'id' | 'round' | 'matchIndex' | 'kind'>,
+  matches: ReadonlyArray<Pick<MatchData, 'id' | 'round' | 'matchIndex'>>,
+  thirdPlaceMatch: boolean
+): boolean {
+  if (!thirdPlaceMatch || match.kind !== 'bracket') return false;
+  const { thirdPlace } = resolveBracketLayout(
+    matches as Array<MatchData>,
+    thirdPlaceMatch
+  );
+  return thirdPlace?.id === match.id;
+}
+
 export function isBracketFinal(
   match: MatchData,
   layoutMaxRound: number
