@@ -47,6 +47,12 @@
       "skillPath": "skills/productivity/handoff/SKILL.md",
       "computedHash": "da4dbb91d4556dac70c27ad2a0de223ba3475bfe8919162edee6867b4056751a"
     },
+    "improve": {
+      "source": "shadcn/improve",
+      "sourceType": "github",
+      "skillPath": "skills/improve/SKILL.md",
+      "computedHash": "19d620a60ec3b9917621e8da3db49d4094de574d8b1e1527e5948a2588f74c07"
+    },
     "improve-codebase-architecture": {
       "source": "mattpocock/skills",
       "sourceType": "github",
