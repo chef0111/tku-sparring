@@ -1,9 +1,9 @@
-export interface TournamentSseInvalidateEvent {
+export interface TournamentInvalidateEvent {
   type: 'invalidate';
   tournamentId: string;
 }
 
-export type TournamentSseEvent = TournamentSseInvalidateEvent;
+export type TournamentRealtimeEvent = TournamentInvalidateEvent;
 
 let loggedMissingRealtime = false;
 
@@ -15,7 +15,7 @@ function getBroadcastConfig() {
 
 async function postInternalBroadcast(
   tournamentId: string,
-  event: TournamentSseEvent
+  event: TournamentRealtimeEvent
 ) {
   const cfg = getBroadcastConfig();
   if (!cfg) {
@@ -47,10 +47,6 @@ async function postInternalBroadcast(
 
 /** Notifies all browsers in `tournament:{id}` via the external realtime service. */
 export function publishSelectionInvalidate(tournamentId: string) {
-  const event: TournamentSseEvent = { type: 'invalidate', tournamentId };
+  const event: TournamentRealtimeEvent = { type: 'invalidate', tournamentId };
   void postInternalBroadcast(tournamentId, event);
-}
-
-export function publishMatchInvalidateEvent(tournamentId: string) {
-  publishSelectionInvalidate(tournamentId);
 }

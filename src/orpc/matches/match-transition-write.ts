@@ -3,7 +3,7 @@ import { coalesceMatchRead } from './match-read';
 import type { MatchTransitionPlan } from '@/lib/tournament/match-transition';
 import type { ActivityInput } from '@/orpc/activity/types';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
-import { publishMatchInvalidateEvent } from '@/lib/tournament/tournament-sse-bus';
+import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
 import { prisma } from '@/lib/db';
 
 export async function applyMatchTransition(input: {
@@ -47,6 +47,6 @@ export async function applyMatchTransition(input: {
     return { updated, tournamentId: match.tournamentId };
   });
 
-  publishMatchInvalidateEvent(result.tournamentId);
+  publishSelectionInvalidate(result.tournamentId);
   return coalesceMatchRead(result.updated);
 }

@@ -4,7 +4,7 @@ import { advanceWinner, clearWinnerAdvancement } from '../match-progression';
 import { applyMatchTransition } from '../match-transition-write';
 import { prisma } from '@/lib/db';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
-import { publishMatchInvalidateEvent } from '@/lib/tournament/tournament-sse-bus';
+import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
 
 const tx = {
   match: {
@@ -34,8 +34,8 @@ vi.mock('@/orpc/activity/dal', () => ({
   recordTournamentActivity: vi.fn(),
 }));
 
-vi.mock('@/lib/tournament/tournament-sse-bus', () => ({
-  publishMatchInvalidateEvent: vi.fn(),
+vi.mock('@/lib/tournament/tournament-realtime-broadcast', () => ({
+  publishSelectionInvalidate: vi.fn(),
 }));
 
 beforeEach(() => {
@@ -90,7 +90,7 @@ describe('applyMatchTransition', () => {
       }),
       tx
     );
-    expect(publishMatchInvalidateEvent).toHaveBeenCalledWith('t-1');
-    expect(publishMatchInvalidateEvent).toHaveBeenCalledTimes(1);
+    expect(publishSelectionInvalidate).toHaveBeenCalledWith('t-1');
+    expect(publishSelectionInvalidate).toHaveBeenCalledTimes(1);
   });
 });

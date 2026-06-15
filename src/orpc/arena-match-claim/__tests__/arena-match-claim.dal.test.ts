@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ArenaMatchClaimDAL } from '../dal';
 import { prisma } from '@/lib/db';
-import { publishSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
+import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
 
 const tx = {
   arenaMatchClaim: {
@@ -37,7 +37,7 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-vi.mock('@/lib/tournament/tournament-sse-bus', () => ({
+vi.mock('@/lib/tournament/tournament-realtime-broadcast', () => ({
   publishSelectionInvalidate: vi.fn(),
 }));
 

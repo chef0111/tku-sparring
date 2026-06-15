@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TournamentDAL } from '../dal';
 import { prisma } from '@/lib/db';
 
-vi.mock('@/lib/tournament/tournament-sse-bus', () => ({
+vi.mock('@/lib/tournament/tournament-realtime-broadcast', () => ({
   publishSelectionInvalidate: vi.fn(),
 }));
 
