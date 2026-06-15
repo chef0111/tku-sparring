@@ -8,7 +8,7 @@ import type {
 } from './dto';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { prisma } from '@/lib/db';
-import { publishSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
+import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
 
 export class GroupDAL {
   private static readonly UNASSIGNED_GROUP_FILTER = {

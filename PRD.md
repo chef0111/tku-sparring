@@ -49,7 +49,7 @@ In scope:
 - Custom SVG bracket canvas with DnD-kit interactions.
 - Match records created in Draft; bracket locked in Active.
 - Audit log for critical actions.
-- **Arena match claim** (per selectable match, TTL + heartbeat) so only one device can apply a match at a time; live updates via SSE.
+- **Arena match claim** (per selectable match, 30-minute TTL) so only one device can apply a match at a time; live updates via tournament realtime (Socket.io).
 - Arena client for match execution and scoring.
 - Arena-side selection flow (Advance Settings) with per-device restore.
 - Round-end score submission and match-end finalization.
@@ -234,7 +234,6 @@ Data / Inputs:
 UAC:
 
 - Each listed event captures who did it, when, and the affected entity (group/match/athlete).
-- Match-claim renewals are not logged as activity rows.
 - Activity list is filterable by event type (optional for MVP).
 
 ### 8) Arena Client (Match Execution)
@@ -255,7 +254,7 @@ UAC:
 - Arena devices restore the last selected tournament, group, and match per device.
 - Round-end results are submitted automatically.
 - "Finish Match" finalizes the match, then the operator opens the menu, chooses "Advance Settings", selects a match via combobox, and confirms.
-- Match execution keeps the active **Arena match claim** refreshed while a bout is mounted; expiry or conflicts surface when selecting/applying another match.
+- The active **Arena match claim** persists for the bout until the device Applies another match in the same group, releases it, or the TTL expires; conflicts surface when another device tries to Apply the same match.
 - If the device goes offline, scoring continues locally and syncs on reconnect.
 
 ## Functional Requirements
@@ -267,11 +266,11 @@ UAC:
 - Bracket generation is Draft-only and creates Match records; regeneration deletes and recreates Draft matches.
 - Active tournaments allow score edits but no shuffle; bracket changes require explicit unlock.
 - Completed tournaments are read-only.
-- Applying Advance Settings succeeds only after `**arenaMatchClaim.claim`\*\* for the chosen match; another device holding a non-expired claim blocks Apply for that row.
-- **Arena match claims** use a ~60s TTL; the arena sends **heartbeats** on the configured interval while a match id is active.
-- **SSE** broadcasts `**invalidate`\*\* for a tournament so all clients refresh Advance selection queries (`selectionCatalog`, `selectionMatches`) and bracket `match` queries.
+- Applying Advance Settings succeeds only after `arenaMatchClaim.claim` for the chosen match; another device holding a non-expired claim blocks Apply for that row.
+- **Arena match claims** use a 30-minute TTL. A new Apply in the same group releases the device’s prior claim; `arenaMatchClaim.release` is also available. Expired rows are cleaned up on subsequent claim operations.
+- **Tournament realtime** (Socket.io) delivers `invalidate` for a tournament so all clients refresh Advance selection queries (`selectionCatalog`, `selectionMatches`) and bracket `match` queries. See `docs/tournament-realtime.md`.
 - Coordinating identity uses a persistent **device UUID** in `localStorage`.
-- **Finish Match** releases the claim and clears the advance form match field; explicit release on unload is best-effort; TTL remains the safety net.
+- After **Finish Match**, the operator returns to Advance Settings to pick the next match; the prior claim remains until replaced or TTL expiry.
 - Performance targets: 256 athletes per tournament, 8 groups per tournament, 32 athletes per group.
 - Arena client is a separate experience from the admin CRM.
 - Arena selection uses Advance Settings as the primary flow for MVP.
@@ -296,7 +295,7 @@ UAC:
   - Bracket generation + audit log
 - Phase 2: Arena Client Integration
   - Advance Settings API integration
-  - Match claims + tournament SSE for selection sync
+  - Match claims + tournament realtime (Socket.io) for selection sync
   - Round-end submission + Finish Match flow
 - Phase 3: Hardening + Scale
   - Offline tolerance improvements

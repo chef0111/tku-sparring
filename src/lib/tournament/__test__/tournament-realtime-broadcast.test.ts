@@ -1,11 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  publishMatchInvalidateEvent,
-  publishSelectionInvalidate,
-} from '../tournament-sse-bus';
+import { publishSelectionInvalidate } from '../tournament-realtime-broadcast';
 
-describe('tournament realtime bus', () => {
+describe('tournament realtime broadcast', () => {
   const fetchMock = vi.fn();
 
   beforeEach(() => {
@@ -41,16 +38,6 @@ describe('tournament realtime bus', () => {
     expect(JSON.parse(String(init.body))).toEqual({
       tournamentId: 't-1',
       event: { type: 'invalidate', tournamentId: 't-1' },
-    });
-  });
-
-  it('aliases publishMatchInvalidateEvent to selection invalidate', async () => {
-    publishMatchInvalidateEvent('t-2');
-    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
-    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(JSON.parse(String(init.body))).toEqual({
-      tournamentId: 't-2',
-      event: { type: 'invalidate', tournamentId: 't-2' },
     });
   });
 });

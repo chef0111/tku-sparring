@@ -28,7 +28,7 @@ import {
   buildWinnerOverridePlan,
 } from '@/lib/tournament/match-transition';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
-import { publishMatchInvalidateEvent } from '@/lib/tournament/tournament-sse-bus';
+import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
 import { prisma } from '@/lib/db';
 
 const MATCH_CUSTOM_ROUND = 900;
@@ -300,7 +300,7 @@ export class MatchDAL {
       payload: { groupId: input.groupId, displayLabel },
     });
 
-    publishMatchInvalidateEvent(group.tournamentId);
+    publishSelectionInvalidate(group.tournamentId);
 
     return coalesceMatchRead(row);
   }

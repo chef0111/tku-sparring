@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db';
-import { publishSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
+import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
 
 const CLAIM_TTL_MS = 30 * 60 * 1000;
 

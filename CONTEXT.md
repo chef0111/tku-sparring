@@ -40,12 +40,12 @@ A per-tournament participation record that links an AthleteProfile to a tourname
 _Avoid_: Competitor
 
 **Arena match claim**:
-A short-lived server-side reservation tying one **Match** to one **deviceId** (and user) so Advance Settings cannot finalize the same bout on two devices at once. Enforced in `ArenaMatchClaim` with TTL and heartbeats; distinct from any group-wide lock.
-_Avoid_: Group lease, checkout, “group control”
+A server-side reservation tying one **Match** to one **deviceId** (and user) so Advance Settings cannot finalize the same bout on two devices at once. Created on Apply via `arenaMatchClaim.claim`; held until the device Applies another match in the same **Group** (prior claim released), calls `arenaMatchClaim.release`, or the row expires (30-minute TTL).
+_Avoid_: Group lease, checkout, “group control”, heartbeat
 
-**Tournament realtime (WebSocket)**:
+**Tournament realtime**:
 A per-tournament **Socket.io** room (`tournament:{id}`) on the external **realtime service**; clients refetch Advance selection and related match data after `invalidate` events. The main app notifies that service over **HTTPS** (`POST /internal/broadcast`); payloads are coarse invalidation hints, not authoritative state. See `docs/tournament-realtime.md`.
-_Avoid_: Lease stream, SSE (removed)
+_Avoid_: Lease stream, SSE
 
 **Match Label**:
 A human-readable match identifier that encodes arena and sequence (e.g., Match 101).

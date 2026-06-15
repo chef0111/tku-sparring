@@ -10,7 +10,7 @@ import {
   mergeArenaGroupOrderAfterRetireArena,
   patchArenaGroupOrderJson,
 } from '@/lib/tournament/arena-group-order';
-import { publishSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
+import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
 import { prisma } from '@/lib/db';
 
 async function loadTournament(tournamentId: string, draftMessage: string) {

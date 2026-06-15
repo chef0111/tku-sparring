@@ -38,8 +38,8 @@ vi.mock('@/orpc/activity/dal', () => ({
   recordTournamentActivity: vi.fn(),
 }));
 
-vi.mock('@/lib/tournament/tournament-sse-bus', () => ({
-  publishMatchInvalidateEvent: vi.fn(),
+vi.mock('@/lib/tournament/tournament-realtime-broadcast', () => ({
+  publishSelectionInvalidate: vi.fn(),
 }));
 
 vi.mock('@/orpc/matches/custom-match-label', () => ({
@@ -888,8 +888,8 @@ describe('adminSetMatchStatus', () => {
 
 describe('createCustom', () => {
   it('creates custom match with direct athletes and notifies realtime', async () => {
-    const { publishMatchInvalidateEvent } =
-      await import('@/lib/tournament/tournament-sse-bus');
+    const { publishSelectionInvalidate } =
+      await import('@/lib/tournament/tournament-realtime-broadcast');
     vi.mocked(prisma.group.findUnique).mockResolvedValue({
       id: 'group-1',
       tournamentId: 't-1',
@@ -942,6 +942,6 @@ describe('createCustom', () => {
         }),
       })
     );
-    expect(publishMatchInvalidateEvent).toHaveBeenCalledWith('t-1');
+    expect(publishSelectionInvalidate).toHaveBeenCalledWith('t-1');
   });
 });

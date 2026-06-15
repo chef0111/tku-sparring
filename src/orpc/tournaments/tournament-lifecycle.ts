@@ -9,7 +9,7 @@ import type {
 import type { Prisma } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
 import { getNameSortKey } from '@/lib/sort/name-sort-key';
-import { publishSelectionInvalidate } from '@/lib/tournament/tournament-sse-bus';
+import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
 
 type TournamentLookupDatabase = Pick<typeof prisma, 'match' | 'tournament'>;
 
