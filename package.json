@@ -25,6 +25,7 @@
     "preview": "portless tss vite preview",
     "start": "vite build && portless tss vite preview",
     "test": "vitest run",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint",
     "format": "prettier",
     "check": "prettier --write . && eslint --fix",

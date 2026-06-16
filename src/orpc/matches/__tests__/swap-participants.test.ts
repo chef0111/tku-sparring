@@ -54,7 +54,7 @@ beforeEach(() => {
     { id: 'm1', round: 1, matchIndex: 0, kind: 'bracket' },
   ] as never);
   vi.mocked(prisma.match.update).mockImplementation(
-    async ({ data }) => ({ ...upperMatch(), ...data }) as never
+    ({ data }) => ({ ...upperMatch(), ...data }) as never
   );
 });
 
@@ -77,6 +77,54 @@ describe('swapParticipants', () => {
       })
     );
     expect(recordTournamentActivity).toHaveBeenCalled();
+  });
+
+  it('rejects active tournaments', async () => {
+    vi.mocked(prisma.match.findUnique).mockResolvedValue(
+      upperMatch({
+        group: {
+          thirdPlaceMatch: false,
+          tournament: { status: 'active' },
+        },
+      }) as never
+    );
+
+    await expect(
+      MatchDAL.swapParticipants(
+        {
+          matchId: 'm1',
+          redTournamentAthleteId: null,
+          blueTournamentAthleteId: 'ta-red',
+        },
+        'admin'
+      )
+    ).rejects.toThrow(/Draft status/);
+
+    expect(prisma.match.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects completed tournaments', async () => {
+    vi.mocked(prisma.match.findUnique).mockResolvedValue(
+      upperMatch({
+        group: {
+          thirdPlaceMatch: false,
+          tournament: { status: 'completed' },
+        },
+      }) as never
+    );
+
+    await expect(
+      MatchDAL.swapParticipants(
+        {
+          matchId: 'm1',
+          redTournamentAthleteId: null,
+          blueTournamentAthleteId: 'ta-red',
+        },
+        'admin'
+      )
+    ).rejects.toThrow(/read-only/);
+
+    expect(prisma.match.update).not.toHaveBeenCalled();
   });
 
   it('rejects complete matches', async () => {
