@@ -21,6 +21,7 @@ import {
   resetBracket as runResetBracket,
   shuffleBracket as runShuffleBracket,
 } from './bracket/bracket-lifecycle';
+import { createCustomMatch as runCreateCustomMatch } from './create-custom-match';
 import { MatchDAL } from './dal';
 import { throwMatchBadRequest } from './match-domain-error';
 import { authedProcedure } from '@/orpc/middleware';
@@ -64,7 +65,7 @@ export const createMatch = authedProcedure
 export const createCustomMatch = authedProcedure
   .input(CreateCustomMatchSchema)
   .handler(async ({ input, context }) => {
-    return MatchDAL.createCustom(input, context.user.id);
+    return runCreateCustomMatch(input, context.user.id);
   });
 
 export const updateMatch = authedProcedure

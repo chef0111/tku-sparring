@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GroupDAL } from '../dal';
-import { recordTournamentActivity } from '@/orpc/activity/dal';
+import {
+  publishTournamentMutation,
+  recordMutationActivity,
+} from '@/orpc/mutation-effects';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
@@ -17,8 +20,9 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-vi.mock('@/orpc/activity/dal', () => ({
-  recordTournamentActivity: vi.fn(),
+vi.mock('@/orpc/mutation-effects', () => ({
+  recordMutationActivity: vi.fn(),
+  publishTournamentMutation: vi.fn(),
 }));
 
 beforeEach(() => {
@@ -56,8 +60,8 @@ describe('GroupDAL autoAssign', () => {
     });
 
     expect(result).toEqual({ assigned: 2 });
-    expect(recordTournamentActivity).toHaveBeenCalledTimes(1);
-    expect(recordTournamentActivity).toHaveBeenCalledWith(
+    expect(recordMutationActivity).toHaveBeenCalledTimes(1);
+    expect(recordMutationActivity).toHaveBeenCalledWith(
       expect.objectContaining({
         tournamentId: 't1',
         adminId: 'admin-1',
@@ -90,7 +94,7 @@ describe('GroupDAL autoAssign', () => {
     });
 
     expect(result).toEqual({ assigned: 0 });
-    expect(recordTournamentActivity).not.toHaveBeenCalled();
+    expect(recordMutationActivity).not.toHaveBeenCalled();
   });
 });
 
@@ -127,6 +131,16 @@ describe('GroupDAL autoAssignAllEligible', () => {
 
 describe('GroupDAL assignAthlete', () => {
   it('records group.athlete_assigned', async () => {
+    (prisma.group.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: 'g1',
+      tournamentId: 't1',
+    } as never);
+    (
+      prisma.tournamentAthlete.findUnique as ReturnType<typeof vi.fn>
+    ).mockResolvedValue({
+      id: 'ta1',
+      tournamentId: 't1',
+    } as never);
     (
       prisma.tournamentAthlete.update as ReturnType<typeof vi.fn>
     ).mockResolvedValue({
@@ -142,7 +156,7 @@ describe('GroupDAL assignAthlete', () => {
       adminId: 'admin-1',
     });
 
-    expect(recordTournamentActivity).toHaveBeenCalledWith(
+    expect(recordMutationActivity).toHaveBeenCalledWith(
       expect.objectContaining({
         eventType: 'group.athlete_assigned',
         entityType: 'tournament_athlete',
@@ -151,6 +165,30 @@ describe('GroupDAL assignAthlete', () => {
       }),
       prisma
     );
+    expect(publishTournamentMutation).toHaveBeenCalledWith('t1');
+  });
+
+  it('rejects assigning an athlete to a group in another tournament', async () => {
+    (prisma.group.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: 'g1',
+      tournamentId: 't1',
+    } as never);
+    (
+      prisma.tournamentAthlete.findUnique as ReturnType<typeof vi.fn>
+    ).mockResolvedValue({
+      id: 'ta1',
+      tournamentId: 't2',
+    } as never);
+
+    await expect(
+      GroupDAL.assignAthlete({
+        groupId: 'g1',
+        tournamentAthleteId: 'ta1',
+        adminId: 'admin-1',
+      })
+    ).rejects.toThrow(/does not belong/);
+
+    expect(prisma.tournamentAthlete.update).not.toHaveBeenCalled();
   });
 });
 
@@ -176,7 +214,7 @@ describe('GroupDAL unassignAthlete', () => {
       adminId: 'admin-1',
     });
 
-    expect(recordTournamentActivity).toHaveBeenCalledWith(
+    expect(recordMutationActivity).toHaveBeenCalledWith(
       expect.objectContaining({
         eventType: 'group.athlete_unassigned',
         payload: expect.objectContaining({
@@ -186,6 +224,7 @@ describe('GroupDAL unassignAthlete', () => {
       }),
       prisma
     );
+    expect(publishTournamentMutation).toHaveBeenCalledWith('t1');
   });
 
   it('throws when athlete is missing', async () => {

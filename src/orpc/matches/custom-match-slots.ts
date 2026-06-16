@@ -2,15 +2,18 @@ import { throwMatchBadRequest } from './match-domain-error';
 import type { CustomSlotDTO } from './dto';
 import { prisma } from '@/lib/db';
 
+export type CustomSlotDb = Pick<typeof prisma, 'match' | 'tournamentAthlete'>;
+
 export async function resolveCustomSlot(
   groupId: string,
-  slot: CustomSlotDTO
+  slot: CustomSlotDTO,
+  db: CustomSlotDb = prisma
 ): Promise<{
   tournamentAthleteId: string;
   athleteProfileId: string | null;
 }> {
   if (slot.mode === 'direct') {
-    const ta = await prisma.tournamentAthlete.findFirst({
+    const ta = await db.tournamentAthlete.findFirst({
       where: { id: slot.tournamentAthleteId, groupId },
     });
     if (!ta) throwMatchBadRequest('Tournament athlete not found in this group');
@@ -20,7 +23,7 @@ export async function resolveCustomSlot(
     };
   }
 
-  const feeder = await prisma.match.findFirst({
+  const feeder = await db.match.findFirst({
     where: { id: slot.feederMatchId, groupId },
   });
   if (!feeder) throwMatchBadRequest('Feeder match not found in this group');
@@ -45,7 +48,7 @@ export async function resolveCustomSlot(
         'Winner slot requires both athletes present in the feeder match'
       );
     }
-    const ta = await prisma.tournamentAthlete.findUnique({
+    const ta = await db.tournamentAthlete.findUnique({
       where: { id: feeder.tournamentWinnerId },
       select: { athleteProfileId: true },
     });
@@ -75,7 +78,7 @@ export async function resolveCustomSlot(
   }
   if (!loserTa) throwMatchBadRequest('Could not resolve loser');
 
-  const ta = await prisma.tournamentAthlete.findUnique({
+  const ta = await db.tournamentAthlete.findUnique({
     where: { id: loserTa },
     select: { athleteProfileId: true },
   });

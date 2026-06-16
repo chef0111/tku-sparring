@@ -6,8 +6,13 @@ import {
   resetBracket,
   shuffleBracket,
 } from '../bracket/bracket-lifecycle';
+import { createCustomMatch } from '../create-custom-match';
 import { MatchDAL } from '../dal';
 import { buildRound0Baseline } from '../bracket/round0-baseline';
+import {
+  publishTournamentMutation,
+  recordMutationActivity,
+} from '@/orpc/mutation-effects';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { prisma } from '@/lib/db';
 
@@ -34,12 +39,13 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-vi.mock('@/orpc/activity/dal', () => ({
-  recordTournamentActivity: vi.fn(),
+vi.mock('@/orpc/mutation-effects', () => ({
+  recordMutationActivity: vi.fn(),
+  publishTournamentMutation: vi.fn(),
 }));
 
-vi.mock('@/lib/tournament/tournament-realtime-broadcast', () => ({
-  publishSelectionInvalidate: vi.fn(),
+vi.mock('@/orpc/activity/dal', () => ({
+  recordTournamentActivity: vi.fn(),
 }));
 
 vi.mock('@/orpc/matches/custom-match-label', () => ({
@@ -655,7 +661,7 @@ describe('MatchDAL.adminSetMatchStatus', () => {
         tournamentWinnerId: null,
       },
     });
-    expect(vi.mocked(recordTournamentActivity)).toHaveBeenCalledWith(
+    expect(vi.mocked(recordMutationActivity)).toHaveBeenCalledWith(
       expect.objectContaining({
         eventType: 'match.status_admin',
         payload: expect.objectContaining({
@@ -886,10 +892,8 @@ describe('adminSetMatchStatus', () => {
   });
 });
 
-describe('createCustom', () => {
+describe('createCustomMatch', () => {
   it('creates custom match with direct athletes and notifies realtime', async () => {
-    const { publishSelectionInvalidate } =
-      await import('@/lib/tournament/tournament-realtime-broadcast');
     vi.mocked(prisma.group.findUnique).mockResolvedValue({
       id: 'group-1',
       tournamentId: 't-1',
@@ -921,7 +925,7 @@ describe('createCustom', () => {
       matchIndex: 0,
     } as never);
 
-    const row = await MatchDAL.createCustom(
+    const row = await createCustomMatch(
       {
         groupId: 'group-1',
         displayLabel: 'Exhibition',
@@ -932,6 +936,7 @@ describe('createCustom', () => {
     );
 
     expect(row.kind).toBe('custom');
+    expect(prisma.$transaction).toHaveBeenCalledTimes(1);
     expect(prisma.match.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -942,6 +947,63 @@ describe('createCustom', () => {
         }),
       })
     );
-    expect(publishSelectionInvalidate).toHaveBeenCalledWith('t-1');
+    expect(recordMutationActivity).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'match.create_custom',
+        entityType: 'match',
+      }),
+      prisma
+    );
+    expect(publishTournamentMutation).toHaveBeenCalledWith('t-1');
+  });
+
+  it('rejects duplicate red and blue athlete', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      id: 'group-1',
+      tournamentId: 't-1',
+      tournament: { id: 't-1', status: 'active' },
+    } as never);
+
+    vi.mocked(prisma.tournamentAthlete.findFirst).mockResolvedValue({
+      id: 'ta-red',
+      athleteProfileId: 'ap-r',
+      groupId: 'group-1',
+    } as never);
+
+    await expect(
+      createCustomMatch(
+        {
+          groupId: 'group-1',
+          displayLabel: 'Exhibition',
+          red: { mode: 'direct', tournamentAthleteId: 'ta-red' },
+          blue: { mode: 'direct', tournamentAthleteId: 'ta-red' },
+        },
+        'admin-1'
+      )
+    ).rejects.toThrow(/same athlete/);
+
+    expect(prisma.match.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects completed tournament', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      id: 'group-1',
+      tournamentId: 't-1',
+      tournament: { id: 't-1', status: 'completed' },
+    } as never);
+
+    await expect(
+      createCustomMatch(
+        {
+          groupId: 'group-1',
+          displayLabel: 'Exhibition',
+          red: { mode: 'direct', tournamentAthleteId: 'ta-red' },
+          blue: { mode: 'direct', tournamentAthleteId: 'ta-blue' },
+        },
+        'admin-1'
+      )
+    ).rejects.toThrow(/completed tournament/);
+
+    expect(prisma.match.create).not.toHaveBeenCalled();
   });
 });

@@ -8,7 +8,7 @@ import {
   captureBracketPng,
 } from '../../lib/capture-bracket-png';
 import { useTournament } from '@/queries/tournament';
-import { CopyButton } from '@/components/ncdai/copy-button';
+import { CopyButton } from '@/components/ui/copy-button';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
