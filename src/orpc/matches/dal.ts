@@ -4,15 +4,12 @@ import {
   setRound0SlotLock,
   swapRound0Slots,
 } from './bracket/round0-slot-editor';
-import { assertLabelAvailable } from './custom-match-label';
-import { resolveCustomSlot } from './custom-match-slots';
 import { throwMatchBadRequest } from './match-domain-error';
 import { coalesceMatchRead, findMatchesByGroupId } from './match-read';
 import { applyMatchTransition } from './match-transition-write';
 import type {
   AdminSetMatchStatusDTO,
   AssignSlotDTO,
-  CreateCustomMatchDTO,
   CreateMatchDTO,
   SetLockDTO,
   SetWinnerDTO,
@@ -28,10 +25,7 @@ import {
   buildWinnerOverridePlan,
 } from '@/lib/tournament/match-transition';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
-import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
 import { prisma } from '@/lib/db';
-
-const MATCH_CUSTOM_ROUND = 900;
 
 export class MatchDAL {
   static async findByGroupId(groupId: string) {
@@ -239,69 +233,5 @@ export class MatchDAL {
         },
       },
     });
-  }
-
-  static async createCustom(input: CreateCustomMatchDTO, adminId: string) {
-    const group = await prisma.group.findUnique({
-      where: { id: input.groupId },
-      include: { tournament: { select: { id: true, status: true } } },
-    });
-    if (!group) throwMatchBadRequest('Group not found');
-    if (group.tournament.status === 'completed') {
-      throwMatchBadRequest('Cannot add matches to a completed tournament');
-    }
-
-    const displayLabel = input.displayLabel.trim();
-    await assertLabelAvailable({
-      tournamentId: group.tournamentId,
-      groupId: input.groupId,
-      displayLabel,
-    });
-
-    const red = await resolveCustomSlot(input.groupId, input.red);
-    const blue = await resolveCustomSlot(input.groupId, input.blue);
-
-    if (red.tournamentAthleteId === blue.tournamentAthleteId) {
-      throwMatchBadRequest('Red and blue cannot be the same athlete');
-    }
-
-    const idxAgg = await prisma.match.aggregate({
-      where: { groupId: input.groupId, round: MATCH_CUSTOM_ROUND },
-      _max: { matchIndex: true },
-    });
-    const nextMatchIndex = (idxAgg._max.matchIndex ?? -1) + 1;
-
-    const row = await prisma.match.create({
-      data: {
-        kind: 'custom',
-        displayLabel,
-        groupId: input.groupId,
-        tournamentId: group.tournamentId,
-        round: MATCH_CUSTOM_ROUND,
-        matchIndex: nextMatchIndex,
-        status: 'pending',
-        redTournamentAthleteId: red.tournamentAthleteId,
-        blueTournamentAthleteId: blue.tournamentAthleteId,
-        redAthleteId: red.athleteProfileId,
-        blueAthleteId: blue.athleteProfileId,
-        redWins: 0,
-        blueWins: 0,
-        redLocked: false,
-        blueLocked: false,
-      },
-    });
-
-    await recordTournamentActivity({
-      tournamentId: group.tournamentId,
-      adminId,
-      eventType: 'match.create_custom',
-      entityType: 'match',
-      entityId: row.id,
-      payload: { groupId: input.groupId, displayLabel },
-    });
-
-    publishSelectionInvalidate(group.tournamentId);
-
-    return coalesceMatchRead(row);
   }
 }
