@@ -2,19 +2,30 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TournamentAthleteDAL } from '../dal';
 import { prisma } from '@/lib/db';
+import { publishTournamentMutation } from '@/orpc/mutation-effects';
 
 vi.mock('@/lib/db', () => ({
   prisma: {
     tournamentAthlete: {
       findMany: vi.fn(),
+      findUnique: vi.fn(),
       createMany: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
       deleteMany: vi.fn(),
       count: vi.fn(),
+    },
+    tournament: {
+      findUnique: vi.fn(),
     },
     athleteProfile: {
       findMany: vi.fn(),
     },
   },
+}));
+
+vi.mock('@/orpc/mutation-effects', () => ({
+  publishTournamentMutation: vi.fn(),
 }));
 
 const profile = (id: string, image: string | null = null) => ({
@@ -30,6 +41,9 @@ const profile = (id: string, image: string | null = null) => ({
 describe('bulkCreate', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(prisma.tournament.findUnique).mockResolvedValue({
+      status: 'draft',
+    } as never);
   });
 
   it('creates tournament athletes with snapshot fields', async () => {
@@ -62,6 +76,7 @@ describe('bulkCreate', () => {
     });
 
     expect(result).toHaveLength(2);
+    expect(publishTournamentMutation).toHaveBeenCalledWith('tournament-1');
   });
 
   it('copies profile image URL into snapshot', async () => {
@@ -120,6 +135,115 @@ describe('bulkCreate', () => {
 
     expect(prisma.tournamentAthlete.createMany).not.toHaveBeenCalled();
     expect(result).toHaveLength(0);
+    expect(publishTournamentMutation).not.toHaveBeenCalled();
+  });
+
+  it('rejects active tournaments', async () => {
+    vi.mocked(prisma.tournament.findUnique).mockResolvedValue({
+      status: 'active',
+    } as never);
+
+    await expect(
+      TournamentAthleteDAL.bulkCreate('tournament-1', [profile('p1')])
+    ).rejects.toThrow(/Draft status/);
+
+    expect(prisma.tournamentAthlete.createMany).not.toHaveBeenCalled();
+  });
+
+  it('rejects completed tournaments', async () => {
+    vi.mocked(prisma.tournament.findUnique).mockResolvedValue({
+      status: 'completed',
+    } as never);
+
+    await expect(
+      TournamentAthleteDAL.bulkCreate('tournament-1', [profile('p1')])
+    ).rejects.toThrow(/read-only/);
+
+    expect(prisma.tournamentAthlete.createMany).not.toHaveBeenCalled();
+  });
+});
+
+describe('tournament athlete writes', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('updates draft tournament athletes and publishes', async () => {
+    vi.mocked(prisma.tournamentAthlete.findUnique).mockResolvedValue({
+      id: 'ta1',
+      tournamentId: 't1',
+      tournament: { status: 'draft' },
+    } as never);
+    vi.mocked(prisma.tournamentAthlete.update).mockResolvedValue({
+      id: 'ta1',
+      tournamentId: 't1',
+      seed: 1,
+    } as never);
+
+    await TournamentAthleteDAL.updateTournamentAthlete('ta1', { seed: 1 });
+
+    expect(prisma.tournamentAthlete.update).toHaveBeenCalledWith({
+      where: { id: 'ta1' },
+      data: { seed: 1 },
+    });
+    expect(publishTournamentMutation).toHaveBeenCalledWith('t1');
+  });
+
+  it('rejects updates in active tournaments', async () => {
+    vi.mocked(prisma.tournamentAthlete.findUnique).mockResolvedValue({
+      id: 'ta1',
+      tournament: { status: 'active' },
+    } as never);
+
+    await expect(
+      TournamentAthleteDAL.updateTournamentAthlete('ta1', { seed: 1 })
+    ).rejects.toThrow(/Draft status/);
+
+    expect(prisma.tournamentAthlete.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects removes in completed tournaments', async () => {
+    vi.mocked(prisma.tournamentAthlete.findUnique).mockResolvedValue({
+      id: 'ta1',
+      tournament: { status: 'completed' },
+    } as never);
+
+    await expect(
+      TournamentAthleteDAL.removeTournamentAthlete('ta1')
+    ).rejects.toThrow(/read-only/);
+
+    expect(prisma.tournamentAthlete.delete).not.toHaveBeenCalled();
+  });
+
+  it('bulk removes draft tournament athletes and publishes once per tournament', async () => {
+    vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue([
+      { tournamentId: 't1', tournament: { status: 'draft' } },
+      { tournamentId: 't1', tournament: { status: 'draft' } },
+    ] as never);
+    vi.mocked(prisma.tournamentAthlete.deleteMany).mockResolvedValue({
+      count: 2,
+    } as never);
+
+    const result = await TournamentAthleteDAL.bulkRemoveTournamentAthletes([
+      'ta1',
+      'ta2',
+    ]);
+
+    expect(result).toEqual({ removed: 2 });
+    expect(publishTournamentMutation).toHaveBeenCalledTimes(1);
+    expect(publishTournamentMutation).toHaveBeenCalledWith('t1');
+  });
+
+  it('rejects bulk removes in active tournaments', async () => {
+    vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue([
+      { tournamentId: 't1', tournament: { status: 'active' } },
+    ] as never);
+
+    await expect(
+      TournamentAthleteDAL.bulkRemoveTournamentAthletes(['ta1'])
+    ).rejects.toThrow(/Draft status/);
+
+    expect(prisma.tournamentAthlete.deleteMany).not.toHaveBeenCalled();
   });
 });
 

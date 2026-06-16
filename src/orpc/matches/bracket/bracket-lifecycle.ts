@@ -17,6 +17,7 @@ import {
 } from '@/lib/tournament/bracket-shape';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { prisma } from '@/lib/db';
+import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
 
 type MatchBracketWriteDb = Pick<
   PrismaClient,
@@ -263,9 +264,7 @@ export async function generateBracket(
     include: { tournament: { select: { id: true, status: true } } },
   });
   if (!group) throw new Error('Group not found');
-  if (group.tournament.status !== 'draft') {
-    throw new Error('Brackets can only be generated in Draft status');
-  }
+  assertTournamentAction(group.tournament.status, 'bracket.generate');
 
   const existing = await prisma.match.count({
     where: { groupId: input.groupId, kind: 'bracket' },
@@ -318,9 +317,7 @@ export async function resetBracket(groupId: string, adminId: string) {
     include: { tournament: { select: { id: true, status: true } } },
   });
   if (!group) throw new Error('Group not found');
-  if (group.tournament.status !== 'draft') {
-    throw new Error('Reset only allowed in Draft status');
-  }
+  assertTournamentAction(group.tournament.status, 'bracket.reset');
 
   const baseline = parseRound0Baseline(
     (group as typeof group & GroupBaselineRow).round0Baseline
@@ -356,9 +353,7 @@ export async function shuffleBracket(groupId: string, adminId: string) {
     include: { tournament: { select: { id: true, status: true } } },
   });
   if (!group) throw new Error('Group not found');
-  if (group.tournament.status !== 'draft') {
-    throw new Error('Shuffle only allowed in Draft status');
-  }
+  assertTournamentAction(group.tournament.status, 'bracket.shuffle');
 
   await runBracketShufflePlacements(prisma, groupId, group.tournamentId);
 
@@ -380,9 +375,7 @@ export async function regenerateBracket(groupId: string, adminId: string) {
     include: { tournament: { select: { id: true, status: true } } },
   });
   if (!group) throw new Error('Group not found');
-  if (group.tournament.status !== 'draft') {
-    throw new Error('Regeneration only allowed in Draft status');
-  }
+  assertTournamentAction(group.tournament.status, 'bracket.regenerate');
 
   await prisma.$transaction(async (tx) => {
     await tx.match.updateMany({

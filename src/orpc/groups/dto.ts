@@ -33,7 +33,6 @@ export const UpdateGroupSchema = z
     id: z.string(),
     name: z.string().min(1, 'Group name is required').optional(),
     thirdPlaceMatch: z.boolean().optional(),
-    arenaIndex: z.number().int().min(1).optional(),
   })
   .merge(GroupConstraintsSchema);
 

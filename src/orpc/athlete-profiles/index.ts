@@ -9,6 +9,7 @@ import {
 import { AthleteProfileDAL } from './dal';
 import { runDedupCheck } from './dedup';
 import { authedProcedure } from '@/orpc/middleware';
+import { assertSystemAdmin } from '@/orpc/policies/auth';
 
 export const listAthleteProfiles = authedProcedure
   .input(AthleteProfilesSchema)
@@ -29,7 +30,8 @@ export const getAthleteProfile = authedProcedure
 
 export const createAthleteProfile = authedProcedure
   .input(CreateAthleteProfileSchema)
-  .handler(async ({ input }) => {
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
     const { confirmDuplicate, ...data } = input;
 
     if (!confirmDuplicate) {
@@ -73,7 +75,8 @@ export const checkDuplicate = authedProcedure
 
 export const updateAthleteProfile = authedProcedure
   .input(UpdateAthleteProfileSchema)
-  .handler(async ({ input }) => {
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
     const { id, ...data } = input;
     const profile = await AthleteProfileDAL.update(id, data);
     return profile;
@@ -81,14 +84,16 @@ export const updateAthleteProfile = authedProcedure
 
 export const removeAthleteProfile = authedProcedure
   .input(z.object({ id: z.string() }))
-  .handler(async ({ input }) => {
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
     const profile = await AthleteProfileDAL.deleteProfile(input.id);
     return profile;
   });
 
 export const bulkDeleteAthleteProfiles = authedProcedure
   .input(BulkDeleteAthleteProfilesSchema)
-  .handler(async ({ input }) => {
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
     const count = await AthleteProfileDAL.deleteProfiles(input.ids);
     return count;
   });

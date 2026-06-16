@@ -2,7 +2,6 @@ import {
   adminSetMatchStatus,
   assignSlot,
   createCustomMatch,
-  createMatch,
   generateBracket,
   getMatch,
   listMatches,
@@ -14,16 +13,13 @@ import {
   shuffleBracket,
   swapParticipants,
   swapSlots,
-  updateMatch,
   updateScore,
 } from './index';
 
 export const matchRouter = {
   list: listMatches,
   get: getMatch,
-  create: createMatch,
   createCustom: createCustomMatch,
-  update: updateMatch,
   adminSetMatchStatus,
   delete: removeMatch,
   updateScore,

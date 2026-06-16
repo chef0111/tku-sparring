@@ -10,7 +10,16 @@ import { prisma } from '@/lib/db';
 vi.mock('@/lib/db', () => ({
   prisma: {
     $transaction: vi.fn(),
-    group: { findUnique: vi.fn(), findMany: vi.fn() },
+    group: {
+      create: vi.fn(),
+      delete: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
+    },
+    tournament: {
+      findUnique: vi.fn(),
+    },
     tournamentAthlete: {
       findMany: vi.fn(),
       findUnique: vi.fn(),
@@ -34,6 +43,111 @@ beforeEach(() => {
   );
 });
 
+describe('GroupDAL writes', () => {
+  it('publishes once after create', async () => {
+    vi.mocked(prisma.tournament.findUnique).mockResolvedValue({
+      status: 'draft',
+    } as never);
+    vi.mocked(prisma.group.create).mockResolvedValue({
+      id: 'g1',
+      tournamentId: 't1',
+    } as never);
+
+    await GroupDAL.create({
+      name: 'Group A',
+      tournamentId: 't1',
+    } as never);
+
+    expect(publishTournamentMutation).toHaveBeenCalledTimes(1);
+    expect(publishTournamentMutation).toHaveBeenCalledWith('t1');
+  });
+
+  it('publishes once after update', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      id: 'g1',
+      tournamentId: 't1',
+      tournament: { status: 'draft' },
+    } as never);
+    vi.mocked(prisma.group.update).mockResolvedValue({
+      id: 'g1',
+      tournamentId: 't1',
+    } as never);
+
+    await GroupDAL.update('g1', { name: 'Group B' } as never);
+
+    expect(publishTournamentMutation).toHaveBeenCalledTimes(1);
+    expect(publishTournamentMutation).toHaveBeenCalledWith('t1');
+  });
+
+  it('rejects deleting a missing group', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue(null);
+
+    await expect(GroupDAL.deleteGroup('missing')).rejects.toThrow(
+      /Group not found/
+    );
+
+    expect(prisma.group.delete).not.toHaveBeenCalled();
+    expect(publishTournamentMutation).not.toHaveBeenCalled();
+  });
+
+  it('publishes once after delete', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      id: 'g1',
+      tournamentId: 't1',
+      tournament: { status: 'draft' },
+    } as never);
+    vi.mocked(prisma.group.delete).mockResolvedValue({
+      id: 'g1',
+      tournamentId: 't1',
+    } as never);
+
+    await GroupDAL.deleteGroup('g1');
+
+    expect(prisma.group.delete).toHaveBeenCalledWith({ where: { id: 'g1' } });
+    expect(publishTournamentMutation).toHaveBeenCalledTimes(1);
+    expect(publishTournamentMutation).toHaveBeenCalledWith('t1');
+  });
+
+  it('rejects create outside draft tournaments', async () => {
+    vi.mocked(prisma.tournament.findUnique).mockResolvedValue({
+      status: 'active',
+    } as never);
+
+    await expect(
+      GroupDAL.create({ name: 'Group A', tournamentId: 't1' } as never)
+    ).rejects.toThrow(/Draft status/);
+
+    expect(prisma.group.create).not.toHaveBeenCalled();
+    expect(publishTournamentMutation).not.toHaveBeenCalled();
+  });
+
+  it('rejects update on completed tournaments', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      id: 'g1',
+      tournamentId: 't1',
+      tournament: { status: 'completed' },
+    } as never);
+
+    await expect(GroupDAL.update('g1', { name: 'Group B' })).rejects.toThrow(
+      /read-only/
+    );
+
+    expect(prisma.group.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects delete outside draft tournaments', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      id: 'g1',
+      tournamentId: 't1',
+      tournament: { status: 'active' },
+    } as never);
+
+    await expect(GroupDAL.deleteGroup('g1')).rejects.toThrow(/Draft status/);
+
+    expect(prisma.group.delete).not.toHaveBeenCalled();
+  });
+});
+
 describe('GroupDAL autoAssign', () => {
   it('records a single summary activity when athletes are assigned', async () => {
     (prisma.group.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
@@ -43,6 +157,7 @@ describe('GroupDAL autoAssign', () => {
       beltMax: null,
       weightMin: null,
       weightMax: null,
+      tournament: { status: 'draft' },
     } as never);
     (
       prisma.tournamentAthlete.findMany as ReturnType<typeof vi.fn>
@@ -82,6 +197,7 @@ describe('GroupDAL autoAssign', () => {
       beltMax: null,
       weightMin: null,
       weightMax: null,
+      tournament: { status: 'draft' },
     } as never);
     (
       prisma.tournamentAthlete.findMany as ReturnType<typeof vi.fn>
@@ -100,6 +216,9 @@ describe('GroupDAL autoAssign', () => {
 
 describe('GroupDAL autoAssignAllEligible', () => {
   it('skips groups that already have matches', async () => {
+    vi.mocked(prisma.tournament.findUnique).mockResolvedValue({
+      status: 'draft',
+    } as never);
     (prisma.group.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([
       { id: 'g1', _count: { matches: 0 } },
       { id: 'g2', _count: { matches: 2 } },
@@ -111,6 +230,7 @@ describe('GroupDAL autoAssignAllEligible', () => {
       beltMax: null,
       weightMin: null,
       weightMax: null,
+      tournament: { status: 'draft' },
     });
     (
       prisma.tournamentAthlete.findMany as ReturnType<typeof vi.fn>
@@ -134,6 +254,7 @@ describe('GroupDAL assignAthlete', () => {
     (prisma.group.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
       id: 'g1',
       tournamentId: 't1',
+      tournament: { status: 'draft' },
     } as never);
     (
       prisma.tournamentAthlete.findUnique as ReturnType<typeof vi.fn>
@@ -172,6 +293,7 @@ describe('GroupDAL assignAthlete', () => {
     (prisma.group.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
       id: 'g1',
       tournamentId: 't1',
+      tournament: { status: 'draft' },
     } as never);
     (
       prisma.tournamentAthlete.findUnique as ReturnType<typeof vi.fn>
@@ -199,6 +321,7 @@ describe('GroupDAL unassignAthlete', () => {
     ).mockResolvedValue({
       id: 'ta1',
       groupId: 'g1',
+      tournament: { status: 'draft' },
     } as never);
     (
       prisma.tournamentAthlete.update as ReturnType<typeof vi.fn>

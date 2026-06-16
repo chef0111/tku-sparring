@@ -1,17 +1,18 @@
 import { os } from '@orpc/server';
 import { auth } from '@/lib/auth';
+import { unauthorized } from '@/orpc/errors';
 
 export const authed = os.middleware(async ({ context, next }) => {
   const headers = (context as { headers?: Headers }).headers;
 
   if (!headers) {
-    throw new Error('Unauthorized: No headers provided');
+    unauthorized('Unauthorized: No headers provided');
   }
 
   const session = await auth.api.getSession({ headers });
 
   if (!session) {
-    throw new Error('Unauthorized: Invalid session');
+    unauthorized('Unauthorized: Invalid session');
   }
 
   return next({

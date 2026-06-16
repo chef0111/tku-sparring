@@ -36,6 +36,8 @@ export function summarizeTournamentActivity(
       const forced = p.forced === true ? ' (admin override)' : '';
       return `Tournament status changed from ${String(p.fromStatus)} to ${String(p.toStatus)}${forced}`;
     }
+    case 'tournament.delete':
+      return 'Tournament deleted';
     case 'bracket.generate':
       return `Bracket generated (${String(p.mode ?? 'full')})`;
     case 'bracket.reset':
@@ -54,6 +56,8 @@ export function summarizeTournamentActivity(
       return 'Match participants swapped';
     case 'match.create_custom':
       return `Custom match created (${String(p.displayLabel ?? '')})`;
+    case 'match.delete_custom':
+      return `Custom match deleted (${String(p.displayLabel ?? '')})`;
     case 'group.athlete_assigned':
       return `Assigned ${String(p.name ?? 'athlete')} to a group`;
     case 'group.athlete_unassigned':

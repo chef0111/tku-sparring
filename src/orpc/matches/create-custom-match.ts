@@ -3,6 +3,7 @@ import { resolveCustomSlot } from './custom-match-slots';
 import { throwMatchBadRequest } from './match-domain-error';
 import { coalesceMatchRead } from './match-read';
 import type { CreateCustomMatchDTO } from './dto';
+import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
 import {
   publishTournamentMutation,
   recordMutationActivity,
@@ -21,9 +22,7 @@ export async function createCustomMatch(
       include: { tournament: { select: { id: true, status: true } } },
     });
     if (!group) throwMatchBadRequest('Group not found');
-    if (group.tournament.status === 'completed') {
-      throwMatchBadRequest('Cannot add matches to a completed tournament');
-    }
+    assertTournamentAction(group.tournament.status, 'match.custom.create');
 
     const displayLabel = input.displayLabel.trim();
     await assertLabelAvailable({

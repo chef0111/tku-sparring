@@ -58,6 +58,7 @@ describe('ArenaMatchClaimDAL.claim', () => {
       groupId: 'g1',
       tournamentId: 't1',
       status: 'pending',
+      tournament: { status: 'active' },
     } as never);
 
     vi.mocked(tx.arenaMatchClaim.findUnique).mockResolvedValue(null);
@@ -83,6 +84,30 @@ describe('ArenaMatchClaimDAL.claim', () => {
     });
     expect(publishSelectionInvalidate).toHaveBeenCalledWith('t1');
   });
+
+  it('rejects completed tournaments before claim writes', async () => {
+    vi.mocked(tx.match.findUnique).mockResolvedValue({
+      id: 'm1',
+      groupId: 'g1',
+      tournamentId: 't1',
+      status: 'pending',
+      tournament: { status: 'completed' },
+    } as never);
+
+    await expect(
+      ArenaMatchClaimDAL.claim({
+        matchId: 'm1',
+        groupId: 'g1',
+        tournamentId: 't1',
+        deviceId: 'd1',
+        userId: 'u1',
+      })
+    ).rejects.toThrow(/read-only/);
+
+    expect(tx.arenaMatchClaim.upsert).not.toHaveBeenCalled();
+    expect(tx.match.update).not.toHaveBeenCalled();
+    expect(publishSelectionInvalidate).not.toHaveBeenCalled();
+  });
 });
 
 describe('ArenaMatchClaimDAL.release', () => {
@@ -96,6 +121,7 @@ describe('ArenaMatchClaimDAL.release', () => {
       redWins: 1,
       blueWins: 0,
       status: 'active',
+      tournament: { status: 'active' },
     } as never);
     vi.mocked(tx.arenaMatchClaim.delete).mockResolvedValue({} as never);
     vi.mocked(tx.match.update).mockResolvedValue({ id: 'm1' } as never);
@@ -109,5 +135,31 @@ describe('ArenaMatchClaimDAL.release', () => {
     expect(prisma.$transaction).toHaveBeenCalledTimes(1);
     expect(tx.arenaMatchClaim.delete).toHaveBeenCalled();
     expect(publishSelectionInvalidate).toHaveBeenCalledWith('t1');
+  });
+
+  it('rejects completed tournaments before release writes', async () => {
+    vi.mocked(tx.arenaMatchClaim.findUnique).mockResolvedValue({
+      matchId: 'm1',
+      deviceId: 'd1',
+      tournamentId: 't1',
+    } as never);
+    vi.mocked(tx.match.findUnique).mockResolvedValue({
+      redWins: 1,
+      blueWins: 0,
+      status: 'active',
+      tournament: { status: 'completed' },
+    } as never);
+
+    await expect(
+      ArenaMatchClaimDAL.release({
+        matchId: 'm1',
+        deviceId: 'd1',
+        userId: 'u1',
+      })
+    ).rejects.toThrow(/read-only/);
+
+    expect(tx.arenaMatchClaim.delete).not.toHaveBeenCalled();
+    expect(tx.match.update).not.toHaveBeenCalled();
+    expect(publishSelectionInvalidate).not.toHaveBeenCalled();
   });
 });

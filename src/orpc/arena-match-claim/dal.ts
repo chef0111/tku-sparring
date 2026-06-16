@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db';
 import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
+import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
 
 const CLAIM_TTL_MS = 30 * 60 * 1000;
 
@@ -34,16 +35,29 @@ export class ArenaMatchClaimDAL {
     if (claims.length === 0) return;
 
     const matchIds = [...new Set(claims.map((c) => c.matchId))];
+    const matches = await Promise.all(
+      matchIds.map((mid) =>
+        db.match.findUnique({
+          where: { id: mid },
+          select: {
+            redWins: true,
+            blueWins: true,
+            status: true,
+            tournament: { select: { status: true } },
+          },
+        })
+      )
+    );
+    for (const match of matches) {
+      if (match) assertTournamentAction(match.tournament.status, 'match.claim');
+    }
 
     await db.arenaMatchClaim.deleteMany({
       where: { groupId: input.groupId, deviceId: input.deviceId },
     });
 
-    for (const mid of matchIds) {
-      const m = await db.match.findUnique({
-        where: { id: mid },
-        select: { redWins: true, blueWins: true, status: true },
-      });
+    for (const [index, mid] of matchIds.entries()) {
+      const m = matches[index];
       if (!m || m.status === 'complete') continue;
       const idle = m.redWins === 0 && m.blueWins === 0;
       await db.match.update({
@@ -67,7 +81,13 @@ export class ArenaMatchClaimDAL {
 
       const match = await tx.match.findUnique({
         where: { id: input.matchId },
-        select: { id: true, groupId: true, tournamentId: true, status: true },
+        select: {
+          id: true,
+          groupId: true,
+          tournamentId: true,
+          status: true,
+          tournament: { select: { status: true } },
+        },
       });
 
       if (!match || match.groupId !== input.groupId) {
@@ -76,6 +96,7 @@ export class ArenaMatchClaimDAL {
       if (match.tournamentId !== input.tournamentId) {
         throw new Error('Match does not belong to this tournament');
       }
+      assertTournamentAction(match.tournament.status, 'match.claim');
 
       const existing = await tx.arenaMatchClaim.findUnique({
         where: { matchId: input.matchId },
@@ -145,14 +166,21 @@ export class ArenaMatchClaimDAL {
 
       const tournamentId = row.tournamentId;
       const matchId = row.matchId;
+      const m = await tx.match.findUnique({
+        where: { id: matchId },
+        select: {
+          redWins: true,
+          blueWins: true,
+          status: true,
+          tournament: { select: { status: true } },
+        },
+      });
+      if (m) assertTournamentAction(m.tournament.status, 'match.claim');
+
       await tx.arenaMatchClaim.delete({
         where: { matchId: input.matchId },
       });
 
-      const m = await tx.match.findUnique({
-        where: { id: matchId },
-        select: { redWins: true, blueWins: true, status: true },
-      });
       if (m && m.status !== 'complete') {
         const idle = m.redWins === 0 && m.blueWins === 0;
         await tx.match.update({

@@ -60,7 +60,7 @@ export class TournamentDAL {
     return retireArena(input);
   }
 
-  static deleteTournament(id: string) {
-    return deleteTournament(id);
+  static deleteTournament(id: string, adminId: string) {
+    return deleteTournament(id, adminId);
   }
 }

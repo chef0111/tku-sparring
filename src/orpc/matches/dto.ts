@@ -32,39 +32,6 @@ export const MatchSchema = z.object({
   updatedAt: z.date(),
 });
 
-export const CreateMatchSchema = z.object({
-  kind: MatchKindSchema.default('bracket'),
-  displayLabel: z.string().nullable().optional(),
-  round: z.number().int().default(0),
-  matchIndex: z.number().int().default(0),
-  status: MatchStatusSchema.default('pending'),
-  redAthleteId: z.string().nullable().optional(),
-  blueAthleteId: z.string().nullable().optional(),
-  redTournamentAthleteId: z.string().nullable().optional(),
-  blueTournamentAthleteId: z.string().nullable().optional(),
-  redLocked: z.boolean().default(false),
-  blueLocked: z.boolean().default(false),
-  groupId: z.string(),
-  tournamentId: z.string(),
-});
-
-export const UpdateMatchSchema = z.object({
-  id: z.string(),
-  kind: MatchKindSchema.optional(),
-  displayLabel: z.string().nullable().optional(),
-  status: MatchStatusSchema.optional(),
-  redWins: z.number().int().optional(),
-  blueWins: z.number().int().optional(),
-  winnerId: z.string().nullable().optional(),
-  tournamentWinnerId: z.string().nullable().optional(),
-  redTournamentAthleteId: z.string().nullable().optional(),
-  blueTournamentAthleteId: z.string().nullable().optional(),
-  redAthleteId: z.string().nullable().optional(),
-  blueAthleteId: z.string().nullable().optional(),
-  redLocked: z.boolean().optional(),
-  blueLocked: z.boolean().optional(),
-});
-
 export const UpdateScoreSchema = z.object({
   matchId: z.string(),
   redWins: z.number().int().min(0).max(2),
@@ -140,8 +107,6 @@ export const CreateCustomMatchSchema = z.object({
 });
 
 export type MatchDTO = z.infer<typeof MatchSchema>;
-export type CreateMatchDTO = z.infer<typeof CreateMatchSchema>;
-export type UpdateMatchDTO = z.infer<typeof UpdateMatchSchema>;
 export type UpdateScoreDTO = z.infer<typeof UpdateScoreSchema>;
 export type SetWinnerDTO = z.infer<typeof SetWinnerSchema>;
 export type SwapParticipantsDTO = z.infer<typeof SwapParticipantsSchema>;

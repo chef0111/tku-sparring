@@ -1,7 +1,16 @@
 import type { AssignSlotDTO, SetLockDTO, SwapSlotsDTO } from '../dto';
+import { notFound } from '@/orpc/errors';
 import { prisma } from '@/lib/db';
+import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
 
 export async function setRound0SlotLock(input: SetLockDTO) {
+  const match = await prisma.match.findUnique({
+    where: { id: input.matchId },
+    include: { tournament: { select: { status: true } } },
+  });
+  if (!match) notFound('Match not found');
+  assertTournamentAction(match.tournament.status, 'match.slot.edit');
+
   const data =
     input.side === 'red'
       ? { redLocked: input.locked }
@@ -19,9 +28,7 @@ export async function assignRound0Slot(input: AssignSlotDTO, _adminId: string) {
     include: { group: { include: { tournament: true } } },
   });
   if (!match) throw new Error('Match not found');
-  if (match.group.tournament.status !== 'draft') {
-    throw new Error('Assign only allowed in Draft status');
-  }
+  assertTournamentAction(match.group.tournament.status, 'match.slot.edit');
   if (match.round !== 0) {
     throw new Error('Athletes can only be assigned to opening-round slots');
   }
@@ -85,9 +92,7 @@ export async function swapRound0Slots(input: SwapSlotsDTO, _adminId: string) {
   if (a.groupId !== b.groupId) {
     throw new Error('Both slots must be in the same group');
   }
-  if (a.group.tournament.status !== 'draft') {
-    throw new Error('Swap only allowed in Draft status');
-  }
+  assertTournamentAction(a.group.tournament.status, 'match.slot.edit');
   if (a.round !== 0 || b.round !== 0) {
     throw new Error('Can only swap opening-round slots');
   }

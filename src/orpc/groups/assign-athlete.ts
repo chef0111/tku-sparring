@@ -5,6 +5,7 @@ import {
 } from '@/orpc/mutation-effects';
 import { badRequest, notFound } from '@/orpc/errors';
 import { prisma } from '@/lib/db';
+import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
 
 export async function assignAthleteToGroup(
   input: AssignAthleteDTO & { adminId: string }
@@ -12,9 +13,14 @@ export async function assignAthleteToGroup(
   const updated = await prisma.$transaction(async (tx) => {
     const group = await tx.group.findUnique({
       where: { id: input.groupId },
-      select: { id: true, tournamentId: true },
+      select: {
+        id: true,
+        tournamentId: true,
+        tournament: { select: { status: true } },
+      },
     });
     if (!group) notFound('Group not found');
+    assertTournamentAction(group.tournament.status, 'group.assignAthlete');
 
     const current = await tx.tournamentAthlete.findUnique({
       where: { id: input.tournamentAthleteId },
@@ -58,8 +64,10 @@ export async function unassignAthleteFromGroup(
   const updated = await prisma.$transaction(async (tx) => {
     const current = await tx.tournamentAthlete.findUnique({
       where: { id: input.tournamentAthleteId },
+      include: { tournament: { select: { status: true } } },
     });
     if (!current) notFound('Tournament athlete not found');
+    assertTournamentAction(current.tournament.status, 'group.assignAthlete');
 
     const row = await tx.tournamentAthlete.update({
       where: { id: input.tournamentAthleteId },

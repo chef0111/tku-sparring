@@ -6,6 +6,7 @@ import {
 } from '@/orpc/mutation-effects';
 import { notFound } from '@/orpc/errors';
 import { prisma } from '@/lib/db';
+import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
 
 const UNASSIGNED_GROUP_FILTER = {
   groupId: null,
@@ -17,8 +18,10 @@ export async function autoAssignGroup(
   const result = await prisma.$transaction(async (tx) => {
     const group = await tx.group.findUnique({
       where: { id: input.groupId },
+      include: { tournament: { select: { status: true } } },
     });
     if (!group) notFound('Group not found');
+    assertTournamentAction(group.tournament.status, 'group.autoAssign');
 
     const where: Prisma.TournamentAthleteWhereInput = {
       tournamentId: input.tournamentId,
@@ -70,6 +73,13 @@ export async function autoAssignAllEligible(input: {
   tournamentId: string;
   adminId: string;
 }) {
+  const tournament = await prisma.tournament.findUnique({
+    where: { id: input.tournamentId },
+    select: { status: true },
+  });
+  if (!tournament) notFound('Tournament not found');
+  assertTournamentAction(tournament.status, 'group.autoAssign');
+
   const groups = await prisma.group.findMany({
     where: { tournamentId: input.tournamentId },
     include: { _count: { select: { matches: true } } },

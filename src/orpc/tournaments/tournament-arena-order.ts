@@ -12,8 +12,9 @@ import {
 } from '@/lib/tournament/arena-group-order';
 import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
 import { prisma } from '@/lib/db';
+import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
 
-async function loadTournament(tournamentId: string, draftMessage: string) {
+async function loadTournament(tournamentId: string) {
   const tournament = await prisma.tournament.findUnique({
     where: { id: tournamentId },
     select: {
@@ -24,7 +25,7 @@ async function loadTournament(tournamentId: string, draftMessage: string) {
     },
   });
   if (!tournament) throw new Error('Tournament not found');
-  if (tournament.status !== 'draft') throw new Error(draftMessage);
+  assertTournamentAction(tournament.status, 'arenaOrder.update');
   return tournament;
 }
 
@@ -36,10 +37,7 @@ async function finishArenaOrderMutation(tournamentId: string) {
 }
 
 export async function setArenaGroupOrder(input: SetArenaGroupOrderDTO) {
-  const tournament = await loadTournament(
-    input.tournamentId,
-    'Arena group order can only be changed in draft'
-  );
+  const tournament = await loadTournament(input.tournamentId);
 
   const onArena = tournament.groups.filter(
     (g) => g.arenaIndex === input.arenaIndex
@@ -78,10 +76,7 @@ export async function moveGroupBetweenArenas(input: MoveGroupArenaDTO) {
   if (input.fromArena === input.toArena)
     throw new Error('Same-arena reorder uses setArenaGroupOrder');
 
-  const tournament = await loadTournament(
-    input.tournamentId,
-    'Arena assignment can only be changed in draft'
-  );
+  const tournament = await loadTournament(input.tournamentId);
 
   const group = tournament.groups.find((g) => g.id === input.groupId);
   if (!group) throw new Error('Group not found on this tournament');
@@ -119,10 +114,7 @@ export async function moveGroupBetweenArenas(input: MoveGroupArenaDTO) {
 }
 
 export async function ensureArenaSlot(input: EnsureArenaSlotDTO) {
-  const tournament = await loadTournament(
-    input.tournamentId,
-    'Arena slots can only be changed in draft'
-  );
+  const tournament = await loadTournament(input.tournamentId);
 
   if (input.arenaIndex < 1 || input.arenaIndex > 3)
     throw new Error('Arena index must be between 1 and 3');
@@ -156,10 +148,7 @@ export async function retireArena(input: RetireArenaDTO) {
     throw new Error('Invalid target arena');
   }
 
-  const tournament = await loadTournament(
-    input.tournamentId,
-    'Arena assignment can only be changed in draft'
-  );
+  const tournament = await loadTournament(input.tournamentId);
 
   const nextJson = mergeArenaGroupOrderAfterRetireArena({
     arenaGroupOrder: tournament.arenaGroupOrder,

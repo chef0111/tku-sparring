@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TournamentDAL } from '../dal';
 import { prisma } from '@/lib/db';
+import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
 
 vi.mock('@/lib/tournament/tournament-realtime-broadcast', () => ({
   publishSelectionInvalidate: vi.fn(),
@@ -13,6 +14,7 @@ vi.mock('@/lib/db', () => ({
     tournament: {
       findUnique: vi.fn(),
       update: vi.fn(),
+      delete: vi.fn(),
     },
     match: {
       count: vi.fn(),
@@ -227,38 +229,58 @@ describe('tournaments DAL', () => {
     });
   });
 
-  it('allows any status transition when force is true', async () => {
+  it('allows forced status transition for non-completed tournaments', async () => {
     vi.mocked(prisma.tournament.findUnique).mockResolvedValue(
       tournamentRecord({
-        status: 'completed',
+        status: 'active',
       }) as never
     );
     vi.mocked(prisma.tournament.update).mockResolvedValue({
       id: 'tournament-1',
-      status: 'active',
+      status: 'draft',
     } as never);
 
     const result = await TournamentDAL.setStatus({
       id: 'tournament-1',
-      status: 'active',
+      status: 'draft',
       adminId: 'admin-1',
       force: true,
     });
 
     expect(prisma.tournament.update).toHaveBeenCalledWith({
       where: { id: 'tournament-1' },
-      data: { status: 'active' },
+      data: { status: 'draft' },
     });
     expect(prisma.tournamentActivity.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
         payload: expect.objectContaining({
-          fromStatus: 'completed',
-          toStatus: 'active',
+          fromStatus: 'active',
+          toStatus: 'draft',
           forced: true,
         }),
       }),
     });
-    expect(result).toEqual({ id: 'tournament-1', status: 'active' });
+    expect(result).toEqual({ id: 'tournament-1', status: 'draft' });
+  });
+
+  it('rejects forced status changes from completed tournaments', async () => {
+    vi.mocked(prisma.tournament.findUnique).mockResolvedValue(
+      tournamentRecord({
+        status: 'completed',
+      }) as never
+    );
+
+    await expect(
+      TournamentDAL.setStatus({
+        id: 'tournament-1',
+        status: 'active',
+        adminId: 'admin-1',
+        force: true,
+      })
+    ).rejects.toThrow(/read-only/);
+
+    expect(prisma.tournament.update).not.toHaveBeenCalled();
+    expect(prisma.tournamentActivity.create).not.toHaveBeenCalled();
   });
 
   it('rejects skipping directly from draft to completed', async () => {
@@ -310,5 +332,62 @@ describe('tournaments DAL', () => {
 
     expect(prisma.tournament.update).not.toHaveBeenCalled();
     expect(prisma.tournamentActivity.create).not.toHaveBeenCalled();
+  });
+
+  it('deletes draft tournaments with an audit row', async () => {
+    vi.mocked(prisma.tournament.findUnique).mockResolvedValue({
+      id: 'tournament-1',
+      status: 'draft',
+    } as never);
+    vi.mocked(prisma.tournament.delete).mockResolvedValue({
+      id: 'tournament-1',
+      status: 'draft',
+    } as never);
+
+    const result = await TournamentDAL.deleteTournament(
+      'tournament-1',
+      'admin-1'
+    );
+
+    expect(prisma.tournamentActivity.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        tournamentId: 'tournament-1',
+        adminId: 'admin-1',
+        eventType: 'tournament.delete',
+        entityType: 'tournament',
+        entityId: 'tournament-1',
+      }),
+    });
+    expect(prisma.tournament.delete).toHaveBeenCalledWith({
+      where: { id: 'tournament-1' },
+    });
+    expect(publishSelectionInvalidate).toHaveBeenCalledWith('tournament-1');
+    expect(result).toEqual({ id: 'tournament-1', status: 'draft' });
+  });
+
+  it('rejects deleting active tournaments', async () => {
+    vi.mocked(prisma.tournament.findUnique).mockResolvedValue({
+      id: 'tournament-1',
+      status: 'active',
+    } as never);
+
+    await expect(
+      TournamentDAL.deleteTournament('tournament-1', 'admin-1')
+    ).rejects.toThrow(/Draft status/);
+
+    expect(prisma.tournament.delete).not.toHaveBeenCalled();
+  });
+
+  it('rejects deleting completed tournaments', async () => {
+    vi.mocked(prisma.tournament.findUnique).mockResolvedValue({
+      id: 'tournament-1',
+      status: 'completed',
+    } as never);
+
+    await expect(
+      TournamentDAL.deleteTournament('tournament-1', 'admin-1')
+    ).rejects.toThrow(/read-only/);
+
+    expect(prisma.tournament.delete).not.toHaveBeenCalled();
   });
 });

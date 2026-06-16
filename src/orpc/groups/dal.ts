@@ -6,6 +6,7 @@ import {
   assignAthleteToGroup,
   unassignAthleteFromGroup,
 } from './assign-athlete';
+import { createGroup, deleteGroup, updateGroup } from './group-lifecycle';
 import type {
   AssignAthleteDTO,
   AutoAssignDTO,
@@ -14,7 +15,6 @@ import type {
   UpdateGroupDTO,
 } from './dto';
 import { prisma } from '@/lib/db';
-import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
 
 export class GroupDAL {
   static async findByTournamentId(tournamentId: string) {
@@ -43,28 +43,15 @@ export class GroupDAL {
   }
 
   static async create(data: CreateGroupDTO) {
-    const created = await prisma.group.create({ data });
-    publishSelectionInvalidate(created.tournamentId);
-    return created;
+    return createGroup(data);
   }
 
   static async update(id: string, data: Omit<UpdateGroupDTO, 'id'>) {
-    const updated = await prisma.group.update({ where: { id }, data });
-    publishSelectionInvalidate(updated.tournamentId);
-    return updated;
+    return updateGroup(id, data);
   }
 
   static async deleteGroup(id: string) {
-    const existing = await prisma.group.findUnique({
-      where: { id },
-      select: { tournamentId: true },
-    });
-    if (!existing) {
-      throw new Error('Group not found');
-    }
-    const deleted = await prisma.group.delete({ where: { id } });
-    publishSelectionInvalidate(existing.tournamentId);
-    return deleted;
+    return deleteGroup(id);
   }
 
   static async autoAssign(input: AutoAssignDTO & { adminId: string }) {

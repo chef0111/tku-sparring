@@ -10,6 +10,11 @@ import type { Prisma } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
 import { getNameSortKey } from '@/lib/sort/name-sort-key';
 import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
+import { badRequest, notFound } from '@/orpc/errors';
+import {
+  assertCanForceTournamentStatus,
+  assertTournamentAction,
+} from '@/orpc/policies/tournament-policy';
 
 type TournamentLookupDatabase = Pick<typeof prisma, 'match' | 'tournament'>;
 
@@ -92,7 +97,7 @@ function assertNextStatus(
   const expectedNextStatus = NEXT_TOURNAMENT_STATUS[currentStatus];
 
   if (expectedNextStatus !== nextStatus) {
-    throw new Error('Tournament status must advance one step at a time');
+    badRequest('Tournament status must advance one step at a time');
   }
 }
 
@@ -113,6 +118,13 @@ export async function updateTournament(
   id: string,
   data: Omit<UpdateTournamentDTO, 'id'>
 ) {
+  const existing = await prisma.tournament.findUnique({
+    where: { id },
+    select: { status: true },
+  });
+  if (!existing) notFound('Tournament not found');
+  assertTournamentAction(existing.status, 'tournament.update');
+
   return prisma.tournament.update({
     where: { id },
     data: {
@@ -131,17 +143,22 @@ export async function setTournamentStatus(
     const tournament = await findTournamentWithLifecycle(input.id, tx);
 
     if (!tournament) {
-      throw new Error('Tournament not found');
+      notFound('Tournament not found');
     }
 
     const currentStatus = TournamentStatusSchema.parse(tournament.status);
     const force = Boolean(input.force);
+    if (force) {
+      assertCanForceTournamentStatus(currentStatus);
+    } else {
+      assertTournamentAction(currentStatus, 'tournament.update');
+    }
 
     if (!force) {
       assertNextStatus(currentStatus, input.status);
 
       if (input.status === 'completed' && !tournament.lifecycle.canComplete) {
-        throw new Error(
+        badRequest(
           'Tournament cannot be completed until every group has winner results'
         );
       }
@@ -174,6 +191,30 @@ export async function setTournamentStatus(
   return updatedTournament;
 }
 
-export async function deleteTournament(id: string) {
-  return prisma.tournament.delete({ where: { id } });
+export async function deleteTournament(id: string, adminId: string) {
+  const deleted = await prisma.$transaction(async (tx) => {
+    const tournament = await tx.tournament.findUnique({
+      where: { id },
+      select: { id: true, status: true },
+    });
+    if (!tournament) notFound('Tournament not found');
+    assertTournamentAction(tournament.status, 'tournament.delete');
+
+    await recordTournamentActivity(
+      {
+        tournamentId: id,
+        adminId,
+        eventType: 'tournament.delete',
+        entityType: 'tournament',
+        entityId: id,
+        payload: {},
+      },
+      tx
+    );
+
+    return tx.tournament.delete({ where: { id } });
+  });
+
+  publishSelectionInvalidate(id);
+  return deleted;
 }

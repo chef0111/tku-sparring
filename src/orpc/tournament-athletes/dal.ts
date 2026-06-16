@@ -8,6 +8,9 @@ import {
   getNameSortKey,
   orderFieldForColumnId,
 } from '@/lib/sort/name-sort-key';
+import { notFound } from '@/orpc/errors';
+import { publishTournamentMutation } from '@/orpc/mutation-effects';
+import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
 
 export class TournamentAthleteDAL {
   private static readonly UNASSIGNED_GROUP_FILTER = {
@@ -109,6 +112,13 @@ export class TournamentAthleteDAL {
       image: string | null;
     }>
   ) {
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      select: { status: true },
+    });
+    if (!tournament) notFound('Tournament not found');
+    assertTournamentAction(tournament.status, 'roster.add');
+
     const existing = await prisma.tournamentAthlete.findMany({
       where: {
         tournamentId,
@@ -137,6 +147,7 @@ export class TournamentAthleteDAL {
       })),
     });
 
+    publishTournamentMutation(tournamentId);
     return toCreate;
   }
 
@@ -144,17 +155,52 @@ export class TournamentAthleteDAL {
     id: string,
     data: Omit<UpdateTournamentAthleteDTO, 'id'>
   ) {
-    return prisma.tournamentAthlete.update({ where: { id }, data });
+    const existing = await prisma.tournamentAthlete.findUnique({
+      where: { id },
+      include: { tournament: { select: { status: true } } },
+    });
+    if (!existing) notFound('Tournament athlete not found');
+    assertTournamentAction(existing.tournament.status, 'roster.update');
+
+    const updated = await prisma.tournamentAthlete.update({
+      where: { id },
+      data,
+    });
+    publishTournamentMutation(updated.tournamentId);
+    return updated;
   }
 
   static async removeTournamentAthlete(id: string) {
-    return prisma.tournamentAthlete.delete({ where: { id } });
+    const existing = await prisma.tournamentAthlete.findUnique({
+      where: { id },
+      include: { tournament: { select: { status: true } } },
+    });
+    if (!existing) notFound('Tournament athlete not found');
+    assertTournamentAction(existing.tournament.status, 'roster.delete');
+
+    const deleted = await prisma.tournamentAthlete.delete({ where: { id } });
+    publishTournamentMutation(deleted.tournamentId);
+    return deleted;
   }
 
   static async bulkRemoveTournamentAthletes(ids: Array<string>) {
+    const rows = await prisma.tournamentAthlete.findMany({
+      where: { id: { in: ids } },
+      select: {
+        tournamentId: true,
+        tournament: { select: { status: true } },
+      },
+    });
+    for (const row of rows) {
+      assertTournamentAction(row.tournament.status, 'roster.delete');
+    }
+
     const result = await prisma.tournamentAthlete.deleteMany({
       where: { id: { in: ids } },
     });
+    for (const tournamentId of new Set(rows.map((row) => row.tournamentId))) {
+      publishTournamentMutation(tournamentId);
+    }
     return { removed: result.count };
   }
 }
