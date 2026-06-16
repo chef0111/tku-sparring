@@ -1,3 +1,7 @@
+import {
+  assignAthleteToGroup,
+  unassignAthleteFromGroup,
+} from './assign-athlete';
 import type { Prisma } from '@/generated/prisma/client';
 import type {
   AssignAthleteDTO,
@@ -149,67 +153,12 @@ export class GroupDAL {
   }
 
   static async assignAthlete(input: AssignAthleteDTO & { adminId: string }) {
-    const updated = await prisma.$transaction(async (tx) => {
-      const row = await tx.tournamentAthlete.update({
-        where: { id: input.tournamentAthleteId },
-        data: { groupId: input.groupId, status: 'assigned' },
-      });
-
-      await recordTournamentActivity(
-        {
-          tournamentId: row.tournamentId,
-          adminId: input.adminId,
-          eventType: 'group.athlete_assigned',
-          entityType: 'tournament_athlete',
-          entityId: row.id,
-          payload: {
-            groupId: input.groupId,
-            name: row.name,
-          },
-        },
-        tx
-      );
-
-      return row;
-    });
-    publishSelectionInvalidate(updated.tournamentId);
-    return updated;
+    return assignAthleteToGroup(input);
   }
 
   static async unassignAthlete(
     input: UnassignAthleteDTO & { adminId: string }
   ) {
-    const updated = await prisma.$transaction(async (tx) => {
-      const current = await tx.tournamentAthlete.findUnique({
-        where: { id: input.tournamentAthleteId },
-      });
-      if (!current) {
-        throw new Error('Tournament athlete not found');
-      }
-
-      const row = await tx.tournamentAthlete.update({
-        where: { id: input.tournamentAthleteId },
-        data: { groupId: null, status: 'selected' },
-      });
-
-      await recordTournamentActivity(
-        {
-          tournamentId: row.tournamentId,
-          adminId: input.adminId,
-          eventType: 'group.athlete_unassigned',
-          entityType: 'tournament_athlete',
-          entityId: row.id,
-          payload: {
-            previousGroupId: current.groupId,
-            name: row.name,
-          },
-        },
-        tx
-      );
-
-      return row;
-    });
-    publishSelectionInvalidate(updated.tournamentId);
-    return updated;
+    return unassignAthleteFromGroup(input);
   }
 }
