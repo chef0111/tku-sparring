@@ -49,6 +49,7 @@ function shellToMatches(
     tournamentWinnerId: null,
     redLocked: false,
     blueLocked: false,
+    cornersSwapped: false,
     updatedAt: new Date(),
     groupId: 'g1',
     tournamentId: 't1',
@@ -70,9 +71,10 @@ describe('roundLabelPlacements', () => {
 });
 
 describe('twoSidedMatchRowGap', () => {
-  it('uses 56px for ≤3 rounds and 40px for larger brackets', () => {
-    expect(twoSidedMatchRowGap(2)).toBe(64);
-    expect(twoSidedMatchRowGap(3)).toBe(40);
+  it('uses compact, default, and spacious gaps by bracket size', () => {
+    expect(twoSidedMatchRowGap(2)).toBe(80);
+    expect(twoSidedMatchRowGap(3)).toBe(48);
+    expect(twoSidedMatchRowGap(4)).toBe(40);
   });
 });
 
