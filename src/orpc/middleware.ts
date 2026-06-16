@@ -1,10 +1,6 @@
-import { os } from '@orpc/server';
+import { base } from '@/orpc/base';
 import { auth } from '@/lib/auth';
 import { unauthorized } from '@/orpc/errors';
-
-export const base = os.$context<{
-  headers: Headers;
-}>();
 
 export const authed = base.middleware(async ({ context, next }) => {
   const headers = context.headers;

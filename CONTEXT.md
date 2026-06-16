@@ -101,6 +101,14 @@ Prefer **short imperative** names for APIs and modules, but keep **semantics** a
 
 **oRPC vs queries folders:** `src/orpc` often uses plural directory names (`groups/`, `matches/`); `src/queries` uses singular domain folders (`group/`, `match/`). Router keys (`client.group`, `client.tournament`, …) are stable — see `.cursor/rules/orpc.mdc` and `docs/specs/2026-05-28-orpc-layout-design.md`.
 
+**Backend domain style:** Tournament rules are **functional** — pure functions, schemas, and value types (e.g. match transition plans, bracket progression), not entity classes with methods. Rules live in `src/lib/tournament/**` during migration and move into `src/server/domain/**` only when a vertical slice naturally touches them. oRPC is the sole transport boundary; application use-cases orchestrate policy and call infrastructure through workflow-scoped repository ports. See `docs/adr/0002-strict-clean-architecture-for-orpc-backend.md`.
+
+**Backend slice layout:** Each domain under `src/server` uses vertical folders with `use-cases/` and `repositories/` subfolders (e.g. `application/matches/use-cases/`, `application/matches/repositories/`, `infrastructure/matches/repositories/`). Repository ports stay **workflow-scoped** (e.g. match transition, custom match) — not one aggregate repository per entity.
+
+**Backend composition:** Prisma is an app-scoped singleton (`src/lib/db.ts`). Repository adapters are stateless singletons built in infrastructure and wired on oRPC `context.repos` at the RPC handler — procedures pass ports into use-cases; they do not import infrastructure. Auth (`user`, `session`) is already request-scoped via oRPC middleware.
+
+**Error boundary:** Typed RPC errors are defined on `src/orpc/base` and thrown in oRPC handlers (`errors.NOT_FOUND`, etc.). Application use-cases throw small error classes (`NotFoundError`, `PolicyViolationError`); procedures map via `mapAppError`. Deprecate and delete `src/orpc/errors.ts` when imports reach zero.
+
 ## Relationships
 
 - A **Tournament** contains many **Groups**.
