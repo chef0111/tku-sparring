@@ -24,7 +24,7 @@ Client consumption stays in `src/queries/api/*-api.ts` → `@/orpc/client`. TanS
 | Layer           | Location                                   | Responsibility                                                    |
 | --------------- | ------------------------------------------ | ----------------------------------------------------------------- |
 | Router assembly | `src/orpc/router.ts`, `<domain>/router.ts` | Map `client.*` keys only; no business logic                       |
-| Procedures      | `<domain>/index.ts`                        | `authedProcedure` + input schema + delegate                       |
+| Procedures      | `<domain>/index.ts`                        | `authorized` + input schema + delegate                            |
 | DTOs            | `<domain>/dto.ts`                          | Zod schemas; imported by procedures and `queries/api`             |
 | DAL             | `<domain>/dal.ts`                          | Prisma / persistence                                              |
 | Use-cases       | `<domain>/*.ts` (e.g. `bulk-add.ts`)       | Multi-step / cross-DAL orchestration; procedures call in one line |

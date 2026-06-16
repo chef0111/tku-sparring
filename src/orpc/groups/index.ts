@@ -8,17 +8,17 @@ import {
   UpdateGroupSchema,
 } from './dto';
 import { GroupDAL } from './dal';
-import { authedProcedure } from '@/orpc/middleware';
+import { authorized } from '@/orpc/middleware';
 import { assertSystemAdmin } from '@/orpc/policies/auth';
 
-export const listGroups = authedProcedure
+export const listGroups = authorized
   .input(z.object({ tournamentId: z.string() }))
   .handler(async ({ input }) => {
     const groups = await GroupDAL.findByTournamentId(input.tournamentId);
     return groups;
   });
 
-export const getGroup = authedProcedure
+export const getGroup = authorized
   .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {
     const group = await GroupDAL.findById(input.id);
@@ -28,7 +28,7 @@ export const getGroup = authedProcedure
     return group;
   });
 
-export const createGroup = authedProcedure
+export const createGroup = authorized
   .input(CreateGroupSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -36,7 +36,7 @@ export const createGroup = authedProcedure
     return group;
   });
 
-export const updateGroup = authedProcedure
+export const updateGroup = authorized
   .input(UpdateGroupSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -45,7 +45,7 @@ export const updateGroup = authedProcedure
     return group;
   });
 
-export const removeGroup = authedProcedure
+export const removeGroup = authorized
   .input(z.object({ id: z.string() }))
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -53,7 +53,7 @@ export const removeGroup = authedProcedure
     return group;
   });
 
-export const autoAssignGroup = authedProcedure
+export const autoAssignGroup = authorized
   .input(AutoAssignSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -64,7 +64,7 @@ export const autoAssignGroup = authedProcedure
     return result;
   });
 
-export const autoAssignAllGroups = authedProcedure
+export const autoAssignAllGroups = authorized
   .input(AutoAssignAllSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -74,7 +74,7 @@ export const autoAssignAllGroups = authedProcedure
     });
   });
 
-export const assignAthleteToGroup = authedProcedure
+export const assignAthleteToGroup = authorized
   .input(AssignAthleteSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -85,7 +85,7 @@ export const assignAthleteToGroup = authedProcedure
     return athlete;
   });
 
-export const unassignAthleteFromGroup = authedProcedure
+export const unassignAthleteFromGroup = authorized
   .input(UnassignAthleteSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);

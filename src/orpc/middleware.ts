@@ -2,8 +2,12 @@ import { os } from '@orpc/server';
 import { auth } from '@/lib/auth';
 import { unauthorized } from '@/orpc/errors';
 
-export const authed = os.middleware(async ({ context, next }) => {
-  const headers = (context as { headers?: Headers }).headers;
+export const base = os.$context<{
+  headers: Headers;
+}>();
+
+export const authed = base.middleware(async ({ context, next }) => {
+  const headers = context.headers;
 
   if (!headers) {
     unauthorized('Unauthorized: No headers provided');
@@ -23,4 +27,4 @@ export const authed = os.middleware(async ({ context, next }) => {
   });
 });
 
-export const authedProcedure = os.use(authed);
+export const authorized = base.use(authed);

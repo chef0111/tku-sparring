@@ -7,17 +7,17 @@ import {
 } from './dto';
 import { TournamentAthleteDAL } from './dal';
 import { bulkAddAthletesToTournament } from './bulk-add';
-import { authedProcedure } from '@/orpc/middleware';
+import { authorized } from '@/orpc/middleware';
 import { assertSystemAdmin } from '@/orpc/policies/auth';
 
-export const listTournamentAthletes = authedProcedure
+export const listTournamentAthletes = authorized
   .input(ListTournamentAthletesSchema)
   .handler(async ({ input }) => {
     const athletes = await TournamentAthleteDAL.findByTournamentId(input);
     return athletes;
   });
 
-export const bulkAddAthletes = authedProcedure
+export const bulkAddAthletes = authorized
   .input(BulkAddAthletesSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -27,7 +27,7 @@ export const bulkAddAthletes = authedProcedure
     });
   });
 
-export const updateTournamentAthleteRecord = authedProcedure
+export const updateTournamentAthleteRecord = authorized
   .input(UpdateTournamentAthleteSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -39,7 +39,7 @@ export const updateTournamentAthleteRecord = authedProcedure
     return athlete;
   });
 
-export const removeTournamentAthleteRecord = authedProcedure
+export const removeTournamentAthleteRecord = authorized
   .input(z.object({ id: z.string() }))
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -49,7 +49,7 @@ export const removeTournamentAthleteRecord = authedProcedure
     return athlete;
   });
 
-export const bulkRemoveTournamentAthleteRecords = authedProcedure
+export const bulkRemoveTournamentAthleteRecords = authorized
   .input(BulkRemoveTournamentAthletesSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);

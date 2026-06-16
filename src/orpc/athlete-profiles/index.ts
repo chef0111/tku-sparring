@@ -8,17 +8,17 @@ import {
 } from './dto';
 import { AthleteProfileDAL } from './dal';
 import { runDedupCheck } from './dedup';
-import { authedProcedure } from '@/orpc/middleware';
+import { authorized } from '@/orpc/middleware';
 import { assertSystemAdmin } from '@/orpc/policies/auth';
 
-export const listAthleteProfiles = authedProcedure
+export const listAthleteProfiles = authorized
   .input(AthleteProfilesSchema)
   .handler(async ({ input }) => {
     const profiles = await AthleteProfileDAL.findMany(input);
     return profiles;
   });
 
-export const getAthleteProfile = authedProcedure
+export const getAthleteProfile = authorized
   .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {
     const profile = await AthleteProfileDAL.findById(input.id);
@@ -28,7 +28,7 @@ export const getAthleteProfile = authedProcedure
     return profile;
   });
 
-export const createAthleteProfile = authedProcedure
+export const createAthleteProfile = authorized
   .input(CreateAthleteProfileSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -60,7 +60,7 @@ export const createAthleteProfile = authedProcedure
     return profile;
   });
 
-export const checkDuplicate = authedProcedure
+export const checkDuplicate = authorized
   .input(CheckDuplicateSchema)
   .handler(async ({ input }) => {
     return runDedupCheck({
@@ -73,7 +73,7 @@ export const checkDuplicate = authedProcedure
     });
   });
 
-export const updateAthleteProfile = authedProcedure
+export const updateAthleteProfile = authorized
   .input(UpdateAthleteProfileSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -82,7 +82,7 @@ export const updateAthleteProfile = authedProcedure
     return profile;
   });
 
-export const removeAthleteProfile = authedProcedure
+export const removeAthleteProfile = authorized
   .input(z.object({ id: z.string() }))
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -90,7 +90,7 @@ export const removeAthleteProfile = authedProcedure
     return profile;
   });
 
-export const bulkDeleteAthleteProfiles = authedProcedure
+export const bulkDeleteAthleteProfiles = authorized
   .input(BulkDeleteAthleteProfilesSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);

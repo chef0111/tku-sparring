@@ -22,7 +22,7 @@ import {
 import { createCustomMatch as runCreateCustomMatch } from './create-custom-match';
 import { deleteCustomMatch as runDeleteCustomMatch } from './delete-custom-match';
 import { MatchDAL } from './dal';
-import { authedProcedure } from '@/orpc/middleware';
+import { authorized } from '@/orpc/middleware';
 import { assertSystemAdmin } from '@/orpc/policies/auth';
 import {
   adminSetMatchStatus as runAdminSetMatchStatus,
@@ -31,7 +31,7 @@ import {
 } from '@/server/application/matches/match-transition-use-cases';
 import { matchTransitionStore } from '@/server/infrastructure/matches';
 
-export const listMatches = authedProcedure
+export const listMatches = authorized
   .input(
     z.object({
       groupId: z.string().optional(),
@@ -50,7 +50,7 @@ export const listMatches = authedProcedure
     throw new Error('Either groupId or tournamentId is required');
   });
 
-export const getMatch = authedProcedure
+export const getMatch = authorized
   .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {
     const match = await MatchDAL.findById(input.id);
@@ -60,14 +60,14 @@ export const getMatch = authedProcedure
     return match;
   });
 
-export const createCustomMatch = authedProcedure
+export const createCustomMatch = authorized
   .input(CreateCustomMatchSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
     return runCreateCustomMatch(input, context.user.id);
   });
 
-export const adminSetMatchStatus = authedProcedure
+export const adminSetMatchStatus = authorized
   .input(AdminSetMatchStatusSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -77,14 +77,14 @@ export const adminSetMatchStatus = authedProcedure
     );
   });
 
-export const removeMatch = authedProcedure
+export const removeMatch = authorized
   .input(z.object({ id: z.string() }))
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
     return runDeleteCustomMatch(input.id, context.user.id);
   });
 
-export const generateBracket = authedProcedure
+export const generateBracket = authorized
   .input(GenerateBracketSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -92,7 +92,7 @@ export const generateBracket = authedProcedure
     return matches;
   });
 
-export const shuffleBracket = authedProcedure
+export const shuffleBracket = authorized
   .input(ShuffleBracketSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -100,7 +100,7 @@ export const shuffleBracket = authedProcedure
     return matches;
   });
 
-export const regenerateBracket = authedProcedure
+export const regenerateBracket = authorized
   .input(RegenerateBracketSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -108,7 +108,7 @@ export const regenerateBracket = authedProcedure
     return matches;
   });
 
-export const resetBracket = authedProcedure
+export const resetBracket = authorized
   .input(ResetBracketSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -116,7 +116,7 @@ export const resetBracket = authedProcedure
     return matches;
   });
 
-export const setLock = authedProcedure
+export const setLock = authorized
   .input(SetLockSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -124,7 +124,7 @@ export const setLock = authedProcedure
     return match;
   });
 
-export const updateScore = authedProcedure
+export const updateScore = authorized
   .input(UpdateScoreSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -135,7 +135,7 @@ export const updateScore = authedProcedure
     return score;
   });
 
-export const setWinner = authedProcedure
+export const setWinner = authorized
   .input(SetWinnerSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -146,7 +146,7 @@ export const setWinner = authedProcedure
     return winner;
   });
 
-export const swapParticipants = authedProcedure
+export const swapParticipants = authorized
   .input(SwapParticipantsSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -157,7 +157,7 @@ export const swapParticipants = authedProcedure
     return participants;
   });
 
-export const assignSlot = authedProcedure
+export const assignSlot = authorized
   .input(AssignSlotSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -165,7 +165,7 @@ export const assignSlot = authedProcedure
     return slot;
   });
 
-export const swapSlots = authedProcedure
+export const swapSlots = authorized
   .input(SwapSlotsSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);

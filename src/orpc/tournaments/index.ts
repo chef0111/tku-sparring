@@ -10,16 +10,16 @@ import {
   UpdateTournamentSchema,
 } from './dto';
 import { TournamentDAL } from './dal';
-import { authedProcedure } from '@/orpc/middleware';
+import { authorized } from '@/orpc/middleware';
 import { assertSystemAdmin } from '@/orpc/policies/auth';
 
-export const listTournaments = authedProcedure
+export const listTournaments = authorized
   .input(ListTournamentsSchema)
   .handler(async ({ input }) => {
     return TournamentDAL.findMany(input);
   });
 
-export const getTournament = authedProcedure
+export const getTournament = authorized
   .input(z.object({ id: z.string() }))
   .handler(async ({ input }) => {
     const tournament = await TournamentDAL.findById(input.id);
@@ -29,7 +29,7 @@ export const getTournament = authedProcedure
     return tournament;
   });
 
-export const createTournament = authedProcedure
+export const createTournament = authorized
   .input(CreateTournamentSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -37,7 +37,7 @@ export const createTournament = authedProcedure
     return tournament;
   });
 
-export const updateTournament = authedProcedure
+export const updateTournament = authorized
   .input(UpdateTournamentSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -46,7 +46,7 @@ export const updateTournament = authedProcedure
     return tournament;
   });
 
-export const setTournamentStatus = authedProcedure
+export const setTournamentStatus = authorized
   .input(SetTournamentStatusSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
@@ -57,35 +57,35 @@ export const setTournamentStatus = authedProcedure
     return tournament;
   });
 
-export const setArenaGroupOrder = authedProcedure
+export const setArenaGroupOrder = authorized
   .input(SetArenaGroupOrderSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
     return TournamentDAL.setArenaGroupOrder(input);
   });
 
-export const moveGroupArena = authedProcedure
+export const moveGroupArena = authorized
   .input(MoveGroupArenaSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
     return TournamentDAL.moveGroupBetweenArenas(input);
   });
 
-export const ensureArenaSlot = authedProcedure
+export const ensureArenaSlot = authorized
   .input(EnsureArenaSlotSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
     return TournamentDAL.ensureArenaSlot(input);
   });
 
-export const retireArena = authedProcedure
+export const retireArena = authorized
   .input(RetireArenaSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
     return TournamentDAL.retireArena(input);
   });
 
-export const removeTournament = authedProcedure
+export const removeTournament = authorized
   .input(z.object({ id: z.string() }))
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);

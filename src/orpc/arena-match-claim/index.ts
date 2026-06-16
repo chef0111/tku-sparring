@@ -1,9 +1,9 @@
 import { ArenaMatchClaimDAL } from './dal';
 import { ClaimMatchSchema, ReleaseMatchClaimSchema } from './dto';
-import { authedProcedure } from '@/orpc/middleware';
+import { authorized } from '@/orpc/middleware';
 import { assertSystemAdmin } from '@/orpc/policies/auth';
 
-export const claim = authedProcedure
+export const claim = authorized
   .input(ClaimMatchSchema)
   .handler(async ({ context, input }) => {
     assertSystemAdmin(context.user);
@@ -16,7 +16,7 @@ export const claim = authedProcedure
     });
   });
 
-export const release = authedProcedure
+export const release = authorized
   .input(ReleaseMatchClaimSchema)
   .handler(async ({ context, input }) => {
     assertSystemAdmin(context.user);

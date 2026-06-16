@@ -1,8 +1,8 @@
 import { ListTournamentActivitySchema } from './dto';
 import { listTournamentActivity } from './dal';
-import { authedProcedure } from '@/orpc/middleware';
+import { authorized } from '@/orpc/middleware';
 
-export const listForTournament = authedProcedure
+export const listForTournament = authorized
   .input(ListTournamentActivitySchema)
   .handler(async ({ input }) => {
     return listTournamentActivity(input);
