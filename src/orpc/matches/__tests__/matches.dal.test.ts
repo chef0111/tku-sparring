@@ -7,6 +7,7 @@ import {
   shuffleBracket,
 } from '../bracket/bracket-lifecycle';
 import { createCustomMatch } from '../create-custom-match';
+import { deleteCustomMatch } from '../delete-custom-match';
 import { MatchDAL } from '../dal';
 import { buildRound0Baseline } from '../bracket/round0-baseline';
 import {
@@ -27,6 +28,7 @@ vi.mock('@/lib/db', () => ({
       findFirst: vi.fn(),
       update: vi.fn(),
       updateMany: vi.fn(),
+      delete: vi.fn(),
       deleteMany: vi.fn(),
       aggregate: vi.fn(),
     },
@@ -621,89 +623,6 @@ describe('shuffleBracket', () => {
   });
 });
 
-describe('MatchDAL.adminSetMatchStatus', () => {
-  it('downgrades from complete to active and clears wins and winners', async () => {
-    const match = {
-      id: 'm1',
-      status: 'complete',
-      redWins: 2,
-      blueWins: 0,
-      winnerId: 'p-red',
-      tournamentWinnerId: 'ta-red',
-      tournamentId: 't-1',
-      groupId: 'g-1',
-      round: 0,
-      matchIndex: 0,
-    };
-    vi.mocked(prisma.match.findUnique).mockResolvedValue(match as never);
-    vi.mocked(prisma.match.findFirst).mockResolvedValue(null);
-    vi.mocked(prisma.match.update).mockResolvedValue({
-      ...match,
-      status: 'active',
-      redWins: 0,
-      blueWins: 0,
-      winnerId: null,
-      tournamentWinnerId: null,
-    } as never);
-
-    await MatchDAL.adminSetMatchStatus(
-      { matchId: 'm1', status: 'active' },
-      'admin-1'
-    );
-
-    expect(prisma.match.update).toHaveBeenCalledWith({
-      where: { id: 'm1' },
-      data: {
-        status: 'active',
-        redWins: 0,
-        blueWins: 0,
-        winnerId: null,
-        tournamentWinnerId: null,
-      },
-    });
-    expect(vi.mocked(recordMutationActivity)).toHaveBeenCalledWith(
-      expect.objectContaining({
-        eventType: 'match.status_admin',
-        payload: expect.objectContaining({
-          clearedScores: true,
-          toStatus: 'active',
-        }),
-      }),
-      expect.anything()
-    );
-  });
-
-  it('upgrade to complete does not clear scores', async () => {
-    const match = {
-      id: 'm1',
-      status: 'pending',
-      redWins: 0,
-      blueWins: 0,
-      winnerId: null,
-      tournamentWinnerId: null,
-      tournamentId: 't-1',
-      groupId: 'g-1',
-      round: 0,
-      matchIndex: 0,
-    };
-    vi.mocked(prisma.match.findUnique).mockResolvedValue(match as never);
-    vi.mocked(prisma.match.update).mockResolvedValue({
-      ...match,
-      status: 'complete',
-    } as never);
-
-    await MatchDAL.adminSetMatchStatus(
-      { matchId: 'm1', status: 'complete' },
-      'admin-1'
-    );
-
-    expect(prisma.match.update).toHaveBeenCalledWith({
-      where: { id: 'm1' },
-      data: { status: 'complete' },
-    });
-  });
-});
-
 describe('regenerateBracket', () => {
   it('clears all group matches, deletes every match row, then recreates the shell in a transaction', async () => {
     vi.mocked(prisma.group.findUnique).mockResolvedValue(draftGroup as never);
@@ -745,150 +664,6 @@ describe('regenerateBracket', () => {
     expect(recordTournamentActivity).toHaveBeenCalledWith(
       expect.objectContaining({ eventType: 'bracket.regenerate' })
     );
-  });
-});
-
-describe('updateScore', () => {
-  it('advances winner to the next-round slot when match completes 2-0', async () => {
-    const completedMatch = {
-      id: 'm-r0-0',
-      kind: 'bracket',
-      groupId: 'group-1',
-      tournamentId: 't-1',
-      round: 0,
-      matchIndex: 0,
-      status: 'pending',
-      redWins: 0,
-      blueWins: 0,
-      redTournamentAthleteId: 'ta-red',
-      blueTournamentAthleteId: 'ta-blue',
-      redAthleteId: 'ap-red',
-      blueAthleteId: 'ap-blue',
-      winnerId: null,
-      tournamentWinnerId: null,
-    };
-
-    vi.mocked(prisma.match.findUnique)
-      .mockResolvedValueOnce(completedMatch as never)
-      .mockResolvedValueOnce({
-        ...completedMatch,
-        status: 'complete',
-        redWins: 2,
-        blueWins: 0,
-        winnerId: 'ap-red',
-        tournamentWinnerId: 'ta-red',
-      } as never);
-
-    vi.mocked(prisma.match.update)
-      .mockResolvedValueOnce({
-        ...completedMatch,
-        status: 'complete',
-        redWins: 2,
-        blueWins: 0,
-        winnerId: 'ap-red',
-        tournamentWinnerId: 'ta-red',
-      } as never)
-      .mockResolvedValueOnce({ id: 'm-r1-0' } as never);
-
-    vi.mocked(prisma.match.findFirst).mockResolvedValue({
-      id: 'm-r1-0',
-      redTournamentAthleteId: null,
-      blueTournamentAthleteId: null,
-    } as never);
-
-    vi.mocked(prisma.tournamentAthlete.findUnique).mockResolvedValue({
-      id: 'ta-red',
-      athleteProfileId: 'ap-red',
-    } as never);
-
-    await MatchDAL.updateScore(
-      { matchId: 'm-r0-0', redWins: 2, blueWins: 0 },
-      'admin-1'
-    );
-
-    expect(prisma.match.update).toHaveBeenCalledTimes(2);
-    expect(prisma.match.update).toHaveBeenNthCalledWith(2, {
-      where: { id: 'm-r1-0' },
-      data: {
-        redTournamentAthleteId: 'ta-red',
-        redAthleteId: 'ap-red',
-      },
-    });
-  });
-});
-
-describe('adminSetMatchStatus', () => {
-  it('derives winner from existing scores and advances when marking complete', async () => {
-    const match = {
-      id: 'm-r0-0',
-      kind: 'bracket',
-      groupId: 'group-1',
-      tournamentId: 't-1',
-      round: 0,
-      matchIndex: 0,
-      status: 'active',
-      redWins: 2,
-      blueWins: 0,
-      redTournamentAthleteId: 'ta-red',
-      blueTournamentAthleteId: 'ta-blue',
-      redAthleteId: 'ap-red',
-      blueAthleteId: 'ap-blue',
-      winnerId: null,
-      tournamentWinnerId: null,
-    };
-
-    vi.mocked(prisma.match.findUnique)
-      .mockResolvedValueOnce(match as never)
-      .mockResolvedValueOnce({
-        ...match,
-        status: 'complete',
-        winnerId: 'ap-red',
-        tournamentWinnerId: 'ta-red',
-      } as never);
-
-    vi.mocked(prisma.match.update)
-      .mockResolvedValueOnce({
-        ...match,
-        status: 'complete',
-        winnerId: 'ap-red',
-        tournamentWinnerId: 'ta-red',
-      } as never)
-      .mockResolvedValueOnce({ id: 'm-r1-0' } as never);
-
-    vi.mocked(prisma.match.findFirst).mockResolvedValue({
-      id: 'm-r1-0',
-      redTournamentAthleteId: null,
-      blueTournamentAthleteId: null,
-    } as never);
-
-    vi.mocked(prisma.tournamentAthlete.findUnique).mockResolvedValue({
-      id: 'ta-red',
-      athleteProfileId: 'ap-red',
-    } as never);
-
-    await MatchDAL.adminSetMatchStatus(
-      { matchId: 'm-r0-0', status: 'complete' },
-      'admin-1'
-    );
-
-    expect(prisma.match.update).toHaveBeenCalledTimes(2);
-    expect(prisma.match.update).toHaveBeenNthCalledWith(1, {
-      where: { id: 'm-r0-0' },
-      data: {
-        redWins: 2,
-        blueWins: 0,
-        winnerId: 'ap-red',
-        tournamentWinnerId: 'ta-red',
-        status: 'complete',
-      },
-    });
-    expect(prisma.match.update).toHaveBeenNthCalledWith(2, {
-      where: { id: 'm-r1-0' },
-      data: {
-        redTournamentAthleteId: 'ta-red',
-        redAthleteId: 'ap-red',
-      },
-    });
   });
 });
 
@@ -1002,8 +777,77 @@ describe('createCustomMatch', () => {
         },
         'admin-1'
       )
-    ).rejects.toThrow(/completed tournament/);
+    ).rejects.toThrow(/read-only/);
 
     expect(prisma.match.create).not.toHaveBeenCalled();
+  });
+});
+
+describe('deleteCustomMatch', () => {
+  it('deletes custom matches with audit and realtime publication', async () => {
+    const match = {
+      id: 'custom-1',
+      kind: 'custom',
+      displayLabel: 'Exhibition',
+      tournamentId: 't-1',
+      groupId: 'group-1',
+      tournament: { status: 'active' },
+    };
+    vi.mocked(prisma.match.findUnique).mockResolvedValue(match as never);
+    vi.mocked(prisma.match.delete).mockResolvedValue(match as never);
+
+    const deleted = await deleteCustomMatch('custom-1', 'admin-1');
+
+    expect(deleted.kind).toBe('custom');
+    expect(prisma.match.delete).toHaveBeenCalledWith({
+      where: { id: 'custom-1' },
+    });
+    expect(recordMutationActivity).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tournamentId: 't-1',
+        adminId: 'admin-1',
+        eventType: 'match.delete_custom',
+        entityType: 'match',
+        entityId: 'custom-1',
+        payload: {
+          groupId: 'group-1',
+          displayLabel: 'Exhibition',
+        },
+      }),
+      prisma
+    );
+    expect(publishTournamentMutation).toHaveBeenCalledWith('t-1');
+  });
+
+  it('rejects non-custom matches', async () => {
+    vi.mocked(prisma.match.findUnique).mockResolvedValue({
+      id: 'match-1',
+      kind: 'bracket',
+      tournamentId: 't-1',
+      groupId: 'group-1',
+      tournament: { status: 'active' },
+    } as never);
+
+    await expect(deleteCustomMatch('match-1', 'admin-1')).rejects.toThrow(
+      /Only custom matches/
+    );
+
+    expect(prisma.match.delete).not.toHaveBeenCalled();
+  });
+
+  it('rejects completed tournaments', async () => {
+    vi.mocked(prisma.match.findUnique).mockResolvedValue({
+      id: 'custom-1',
+      kind: 'custom',
+      tournamentId: 't-1',
+      groupId: 'group-1',
+      tournament: { status: 'completed' },
+    } as never);
+
+    await expect(deleteCustomMatch('custom-1', 'admin-1')).rejects.toThrow(
+      /read-only/
+    );
+
+    expect(prisma.match.delete).not.toHaveBeenCalled();
   });
 });

@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { advanceWinner, clearWinnerAdvancement } from '../match-progression';
-import { applyMatchTransition } from '../match-transition-write';
+import { matchTransitionStore } from '../match-transition-store';
+import {
+  advanceWinner,
+  clearWinnerAdvancement,
+} from '@/orpc/matches/match-progression';
 import { prisma } from '@/lib/db';
 import {
   publishTournamentMutation,
@@ -27,7 +30,7 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-vi.mock('../match-progression', () => ({
+vi.mock('@/orpc/matches/match-progression', () => ({
   clearWinnerAdvancement: vi.fn(),
   advanceWinner: vi.fn(),
 }));
@@ -41,8 +44,8 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('applyMatchTransition', () => {
-  it('runs clear, update, advance, and activity inside one transaction', async () => {
+describe('matchTransitionStore', () => {
+  it('runs transition effects inside one transaction and publishes after success', async () => {
     const match = {
       id: 'm1',
       tournamentId: 't-1',
@@ -51,6 +54,7 @@ describe('applyMatchTransition', () => {
       matchIndex: 0,
       tournamentWinnerId: 'ta-red',
       kind: 'bracket',
+      displayLabel: null,
     };
 
     vi.mocked(tx.match.findUnique).mockResolvedValue(match as never);
@@ -61,7 +65,7 @@ describe('applyMatchTransition', () => {
     } as never);
     vi.mocked(tx.tournamentActivity.create).mockResolvedValue({} as never);
 
-    await applyMatchTransition({
+    await matchTransitionStore.applyTransition({
       matchId: 'm1',
       plan: {
         data: { status: 'complete', tournamentWinnerId: 'ta-red' },
@@ -91,5 +95,19 @@ describe('applyMatchTransition', () => {
     );
     expect(publishTournamentMutation).toHaveBeenCalledWith('t-1');
     expect(publishTournamentMutation).toHaveBeenCalledTimes(1);
+
+    const clearOrder = vi.mocked(clearWinnerAdvancement).mock
+      .invocationCallOrder[0];
+    const updateOrder = vi.mocked(tx.match.update).mock.invocationCallOrder[0];
+    const advanceOrder = vi.mocked(advanceWinner).mock.invocationCallOrder[0];
+    const activityOrder = vi.mocked(recordMutationActivity).mock
+      .invocationCallOrder[0];
+    const publishOrder = vi.mocked(publishTournamentMutation).mock
+      .invocationCallOrder[0];
+
+    expect(clearOrder).toBeLessThan(updateOrder);
+    expect(updateOrder).toBeLessThan(advanceOrder);
+    expect(advanceOrder).toBeLessThan(activityOrder);
+    expect(activityOrder).toBeLessThan(publishOrder);
   });
 });

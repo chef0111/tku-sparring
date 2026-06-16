@@ -1,31 +1,20 @@
-import { MatchStatusSchema } from './dto';
+import { MatchKindSchema } from './dto';
 import {
   assignRound0Slot,
   setRound0SlotLock,
   swapRound0Slots,
 } from './bracket/round0-slot-editor';
-import { throwMatchBadRequest } from './match-domain-error';
 import { coalesceMatchRead, findMatchesByGroupId } from './match-read';
-import { applyMatchTransition } from './match-transition-write';
 import type {
-  AdminSetMatchStatusDTO,
   AssignSlotDTO,
-  CreateMatchDTO,
   SetLockDTO,
-  SetWinnerDTO,
   SwapParticipantsDTO,
   SwapSlotsDTO,
-  UpdateMatchDTO,
-  UpdateScoreDTO,
 } from './dto';
 import { isThirdPlaceMatch } from '@/lib/tournament/bracket-layout';
-import {
-  buildAdminStatusPlan,
-  buildScoreTransitionPlan,
-  buildWinnerOverridePlan,
-} from '@/lib/tournament/match-transition';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { prisma } from '@/lib/db';
+import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
 
 export class MatchDAL {
   static async findByGroupId(groupId: string) {
@@ -46,21 +35,6 @@ export class MatchDAL {
     return coalesceMatchRead(m);
   }
 
-  static async create(data: CreateMatchDTO) {
-    const m = await prisma.match.create({ data });
-    return coalesceMatchRead(m);
-  }
-
-  static async update(id: string, data: Omit<UpdateMatchDTO, 'id'>) {
-    const m = await prisma.match.update({ where: { id }, data });
-    return coalesceMatchRead(m);
-  }
-
-  static async deleteMatch(id: string) {
-    const m = await prisma.match.delete({ where: { id } });
-    return coalesceMatchRead(m);
-  }
-
   static async setLock(input: SetLockDTO) {
     return setRound0SlotLock(input);
   }
@@ -73,58 +47,6 @@ export class MatchDAL {
     return swapRound0Slots(input, adminId);
   }
 
-  static async updateScore(input: UpdateScoreDTO, adminId: string) {
-    const match = await prisma.match.findUnique({
-      where: { id: input.matchId },
-    });
-    if (!match) throw new Error('Match not found');
-
-    const plan = buildScoreTransitionPlan({
-      match,
-      redWins: input.redWins,
-      blueWins: input.blueWins,
-    });
-
-    return applyMatchTransition({
-      matchId: input.matchId,
-      plan,
-      adminId,
-      activity: {
-        eventType: 'match.score_edit',
-        payload: {
-          redWins: input.redWins,
-          blueWins: input.blueWins,
-          status: plan.data.status,
-        },
-      },
-    });
-  }
-
-  static async setWinner(input: SetWinnerDTO, adminId: string) {
-    const match = await prisma.match.findUnique({
-      where: { id: input.matchId },
-    });
-    if (!match) throw new Error('Match not found');
-
-    const plan = buildWinnerOverridePlan({
-      match,
-      winnerSide: input.winnerSide,
-    });
-
-    return applyMatchTransition({
-      matchId: input.matchId,
-      plan,
-      adminId,
-      activity: {
-        eventType: 'match.winner_override',
-        payload: {
-          winnerSide: input.winnerSide,
-          reason: input.reason,
-        },
-      },
-    });
-  }
-
   static async swapParticipants(input: SwapParticipantsDTO, adminId: string) {
     return prisma.$transaction(async (tx) => {
       const match = await tx.match.findUnique({
@@ -133,10 +55,7 @@ export class MatchDAL {
       });
       if (!match) throw new Error('Match not found');
 
-      const status = match.group.tournament.status;
-      if (status === 'completed') {
-        throw new Error('Cannot swap participants in a completed tournament');
-      }
+      assertTournamentAction(match.group.tournament.status, 'match.slot.edit');
       if (match.status === 'complete') {
         throw new Error('Cannot swap participants on a complete match');
       }
@@ -154,7 +73,20 @@ export class MatchDAL {
         where: { groupId: match.groupId, kind: 'bracket' },
         select: { id: true, round: true, matchIndex: true, kind: true },
       });
-      if (isThirdPlaceMatch(match, bracketRows, match.group.thirdPlaceMatch)) {
+      const bracketMatch = {
+        id: match.id,
+        round: match.round,
+        matchIndex: match.matchIndex,
+        kind: MatchKindSchema.parse(match.kind),
+      };
+
+      if (
+        isThirdPlaceMatch(
+          bracketMatch,
+          bracketRows,
+          match.group.thirdPlaceMatch
+        )
+      ) {
         throw new Error('Cannot swap corners on the third-place match');
       }
 
@@ -205,33 +137,6 @@ export class MatchDAL {
       );
 
       return coalesceMatchRead(updated);
-    });
-  }
-
-  static async adminSetMatchStatus(
-    input: AdminSetMatchStatusDTO,
-    adminId: string
-  ) {
-    const match = await prisma.match.findUnique({
-      where: { id: input.matchId },
-    });
-    if (!match) throw new Error('Match not found');
-
-    const current = MatchStatusSchema.parse(match.status);
-    const plan = buildAdminStatusPlan({ match, status: input.status });
-
-    return applyMatchTransition({
-      matchId: input.matchId,
-      plan,
-      adminId,
-      activity: {
-        eventType: 'match.status_admin',
-        payload: {
-          fromStatus: current,
-          toStatus: input.status,
-          clearedScores: plan.clearedScores,
-        },
-      },
     });
   }
 }
