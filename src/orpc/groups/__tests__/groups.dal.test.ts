@@ -5,7 +5,6 @@ import {
   publishTournamentMutation,
   recordMutationActivity,
 } from '@/orpc/mutation-effects';
-import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
@@ -24,10 +23,6 @@ vi.mock('@/lib/db', () => ({
 vi.mock('@/orpc/mutation-effects', () => ({
   recordMutationActivity: vi.fn(),
   publishTournamentMutation: vi.fn(),
-}));
-
-vi.mock('@/orpc/activity/dal', () => ({
-  recordTournamentActivity: vi.fn(),
 }));
 
 beforeEach(() => {
@@ -65,8 +60,8 @@ describe('GroupDAL autoAssign', () => {
     });
 
     expect(result).toEqual({ assigned: 2 });
-    expect(recordTournamentActivity).toHaveBeenCalledTimes(1);
-    expect(recordTournamentActivity).toHaveBeenCalledWith(
+    expect(recordMutationActivity).toHaveBeenCalledTimes(1);
+    expect(recordMutationActivity).toHaveBeenCalledWith(
       expect.objectContaining({
         tournamentId: 't1',
         adminId: 'admin-1',
@@ -99,7 +94,7 @@ describe('GroupDAL autoAssign', () => {
     });
 
     expect(result).toEqual({ assigned: 0 });
-    expect(recordTournamentActivity).not.toHaveBeenCalled();
+    expect(recordMutationActivity).not.toHaveBeenCalled();
   });
 });
 
