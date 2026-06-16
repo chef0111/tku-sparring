@@ -2,8 +2,10 @@ import { advanceWinner, clearWinnerAdvancement } from './match-progression';
 import { coalesceMatchRead } from './match-read';
 import type { MatchTransitionPlan } from '@/lib/tournament/match-transition';
 import type { ActivityInput } from '@/orpc/activity/types';
-import { recordTournamentActivity } from '@/orpc/activity/dal';
-import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
+import {
+  publishTournamentMutation,
+  recordMutationActivity,
+} from '@/orpc/mutation-effects';
 import { prisma } from '@/lib/db';
 
 export async function applyMatchTransition(input: {
@@ -32,7 +34,7 @@ export async function applyMatchTransition(input: {
       await advanceWinner(input.matchId, input.plan.advancedWinnerId, tx);
     }
 
-    await recordTournamentActivity(
+    await recordMutationActivity(
       {
         tournamentId: match.tournamentId,
         adminId: input.adminId,
@@ -47,6 +49,6 @@ export async function applyMatchTransition(input: {
     return { updated, tournamentId: match.tournamentId };
   });
 
-  publishSelectionInvalidate(result.tournamentId);
+  publishTournamentMutation(result.tournamentId);
   return coalesceMatchRead(result.updated);
 }

@@ -3,8 +3,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { advanceWinner, clearWinnerAdvancement } from '../match-progression';
 import { applyMatchTransition } from '../match-transition-write';
 import { prisma } from '@/lib/db';
-import { recordTournamentActivity } from '@/orpc/activity/dal';
-import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
+import {
+  publishTournamentMutation,
+  recordMutationActivity,
+} from '@/orpc/mutation-effects';
 
 const tx = {
   match: {
@@ -30,12 +32,9 @@ vi.mock('../match-progression', () => ({
   advanceWinner: vi.fn(),
 }));
 
-vi.mock('@/orpc/activity/dal', () => ({
-  recordTournamentActivity: vi.fn(),
-}));
-
-vi.mock('@/lib/tournament/tournament-realtime-broadcast', () => ({
-  publishSelectionInvalidate: vi.fn(),
+vi.mock('@/orpc/mutation-effects', () => ({
+  recordMutationActivity: vi.fn(),
+  publishTournamentMutation: vi.fn(),
 }));
 
 beforeEach(() => {
@@ -83,14 +82,14 @@ describe('applyMatchTransition', () => {
       data: { status: 'complete', tournamentWinnerId: 'ta-red' },
     });
     expect(advanceWinner).toHaveBeenCalledWith('m1', 'ta-red', tx);
-    expect(recordTournamentActivity).toHaveBeenCalledWith(
+    expect(recordMutationActivity).toHaveBeenCalledWith(
       expect.objectContaining({
         tournamentId: 't-1',
         eventType: 'match.score_edit',
       }),
       tx
     );
-    expect(publishSelectionInvalidate).toHaveBeenCalledWith('t-1');
-    expect(publishSelectionInvalidate).toHaveBeenCalledTimes(1);
+    expect(publishTournamentMutation).toHaveBeenCalledWith('t-1');
+    expect(publishTournamentMutation).toHaveBeenCalledTimes(1);
   });
 });
