@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { AdvanceSettingsDAL, deriveGroupStatusForSelectionView } from '../dal';
+import { advanceSelectionStore } from '@/server/infrastructure/advance-settings';
 import { formatArenaMatchTitle } from '@/lib/tournament/arena/arena-match-label';
 import { loadMatchLabelContext } from '@/lib/tournament/arena/match-label-context';
-import { ArenaMatchClaimDAL } from '@/orpc/arena-match-claim/dal';
+import { loadActiveClaimsByMatchId } from '@/server/infrastructure/arena-match-claim/active-claims';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
@@ -28,41 +28,12 @@ vi.mock('@/lib/tournament/arena/match-label-context', () => ({
   loadMatchLabelContext: vi.fn(),
 }));
 
-vi.mock('@/orpc/arena-match-claim/dal', () => ({
-  ArenaMatchClaimDAL: {
-    activeClaimsByMatchId: vi.fn(),
-  },
+vi.mock('@/server/infrastructure/arena-match-claim/active-claims', () => ({
+  loadActiveClaimsByMatchId: vi.fn(),
 }));
 
 beforeEach(() => {
   vi.clearAllMocks();
-});
-
-describe('deriveGroupStatusForSelectionView', () => {
-  it('marks completed when tournament is completed', () => {
-    expect(deriveGroupStatusForSelectionView('completed', [])).toBe(
-      'completed'
-    );
-    expect(deriveGroupStatusForSelectionView('completed', ['pending'])).toBe(
-      'completed'
-    );
-  });
-
-  it('draft when tournament is draft and group has no matches', () => {
-    expect(deriveGroupStatusForSelectionView('draft', [])).toBe('draft');
-  });
-
-  it('completed when all matches are complete', () => {
-    expect(
-      deriveGroupStatusForSelectionView('active', ['complete', 'complete'])
-    ).toBe('completed');
-  });
-
-  it('active when tournament is active and matches remain', () => {
-    expect(
-      deriveGroupStatusForSelectionView('active', ['complete', 'pending'])
-    ).toBe('active');
-  });
 });
 
 describe('Advance Settings match labels', () => {
@@ -71,7 +42,7 @@ describe('Advance Settings match labels', () => {
   });
 });
 
-describe('AdvanceSettingsDAL.selectionCatalog', () => {
+describe('advanceSelectionStore.selectionCatalog', () => {
   it('includes tournament and group rows in expected order', async () => {
     vi.mocked(prisma.tournament.findMany).mockResolvedValue([
       { id: 't2', name: 'Second', status: 'active' },
@@ -103,8 +74,7 @@ describe('AdvanceSettingsDAL.selectionCatalog', () => {
       { groupId: 'g2', status: 'pending' },
     ] as never);
 
-    const result = await AdvanceSettingsDAL.selectionCatalog({
-      deviceId: 'd1',
+    const result = await advanceSelectionStore.selectionCatalog({
       tournamentId: 't1',
     });
 
@@ -125,7 +95,7 @@ describe('AdvanceSettingsDAL.selectionCatalog', () => {
   });
 });
 
-describe('AdvanceSettingsDAL.selectionMatches', () => {
+describe('advanceSelectionStore.selectionMatches', () => {
   it('includes claim status for this device and other devices', async () => {
     vi.mocked(prisma.group.findUnique).mockResolvedValue({
       tournamentId: 't1',
@@ -176,14 +146,14 @@ describe('AdvanceSettingsDAL.selectionMatches', () => {
       { id: 'ta-c', name: 'Custom Red', image: null },
       { id: 'ta-d', name: 'Custom Blue', image: null },
     ] as never);
-    vi.mocked(ArenaMatchClaimDAL.activeClaimsByMatchId).mockResolvedValue(
+    vi.mocked(loadActiveClaimsByMatchId).mockResolvedValue(
       new Map([
         ['m1', { deviceId: 'd1' }],
         ['m2', { deviceId: 'other-device' }],
       ])
     );
 
-    const result = await AdvanceSettingsDAL.selectionMatches({
+    const result = await advanceSelectionStore.selectionMatches({
       deviceId: 'd1',
       tournamentId: 't1',
       groupId: 'g1',

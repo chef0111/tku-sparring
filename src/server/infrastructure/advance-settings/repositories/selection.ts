@@ -1,36 +1,18 @@
-import type { SelectionCatalogDTO, SelectionMatchesDTO } from './dto';
+import type {
+  AdvanceSelectionStore,
+  SelectionGroupRow,
+  SelectionMatchRow,
+} from '@/server/application/advance-settings/repositories/selection';
+import type {
+  SelectionCatalogQuery,
+  SelectionMatchesQuery,
+} from '@/server/application/advance-settings/use-cases/selection-commands';
+import { deriveGroupStatusForSelectionView } from '@/server/domain/tournament/advance/selection-status';
 import { formatArenaMatchTitle } from '@/lib/tournament/arena/arena-match-label';
 import { loadMatchLabelContext } from '@/lib/tournament/arena/match-label-context';
+import { BadRequestError, NotFoundError } from '@/server/application/errors';
+import { loadActiveClaimsByMatchId } from '@/server/infrastructure/arena-match-claim/active-claims';
 import { prisma } from '@/lib/db';
-import { ArenaMatchClaimDAL } from '@/orpc/arena-match-claim/dal';
-
-/**
- * Group `status` for Advance Settings (no `Group.status` column in DB).
- * - Tournament `completed` ⇒ every group `completed`.
- * - No matches in group ⇒ `draft`.
- * - Every match `complete` ⇒ `completed`.
- * - Tournament `active` and not all complete ⇒ `active`.
- * - Otherwise `draft`.
- */
-export function deriveGroupStatusForSelectionView(
-  tournamentStatus: string,
-  matchStatuses: Array<string>
-): 'draft' | 'active' | 'completed' {
-  if (tournamentStatus === 'completed') {
-    return 'completed';
-  }
-  if (matchStatuses.length === 0) {
-    return 'draft';
-  }
-  const allComplete = matchStatuses.every((s) => s === 'complete');
-  if (allComplete) {
-    return 'completed';
-  }
-  if (tournamentStatus === 'active') {
-    return 'active';
-  }
-  return 'draft';
-}
 
 const tournamentForSelectionSelect = {
   id: true,
@@ -55,33 +37,8 @@ async function loadTournament(tournamentId: string) {
   });
 }
 
-export type SelectionGroupRow = {
-  id: string;
-  name: string;
-  tournamentId: string;
-  status: 'draft' | 'active' | 'completed';
-  arenaIndex: number;
-  arenaLabel: string;
-};
-
-export type MatchClaimStatus = 'none' | 'held_by_me' | 'held_by_other';
-
-export type SelectionMatchRow = {
-  id: string;
-  label: string;
-  groupId: string;
-  status: string;
-  redAthleteName: string | null;
-  blueAthleteName: string | null;
-  redAthleteImage: string | null;
-  blueAthleteImage: string | null;
-  /** Exclusive lock held by another device. */
-  disabled: boolean;
-  claimStatus: MatchClaimStatus;
-};
-
-export class AdvanceSettingsDAL {
-  static async selectionCatalog(input: SelectionCatalogDTO) {
+export const advanceSelectionStore: AdvanceSelectionStore = {
+  async selectionCatalog(input: SelectionCatalogQuery) {
     const tournaments = await prisma.tournament.findMany({
       where: { status: 'active' },
       select: { id: true, name: true, status: true },
@@ -129,12 +86,10 @@ export class AdvanceSettingsDAL {
     }
 
     return { tournaments, groups: groupsOut };
-  }
+  },
 
-  static async selectionMatches(input: SelectionMatchesDTO) {
+  async selectionMatches(input: SelectionMatchesQuery) {
     const now = new Date();
-    // Intentionally no cleanup here: this is a read path. Expired rows are ignored
-    // via `expiresAt > now` in activeClaimsByMatchId; claim() runs cleanupExpired.
 
     const { tournamentId, groupId } = input;
 
@@ -143,10 +98,12 @@ export class AdvanceSettingsDAL {
       select: { tournamentId: true },
     });
     if (!groupRow) {
-      throw new Error('Group not found');
+      throw new NotFoundError('Group not found');
     }
     if (groupRow.tournamentId !== tournamentId) {
-      throw new Error('Group does not belong to the selected tournament');
+      throw new BadRequestError(
+        'Group does not belong to the selected tournament'
+      );
     }
 
     const tournament = await loadTournament(tournamentId);
@@ -157,7 +114,7 @@ export class AdvanceSettingsDAL {
 
     const targetGroup = tournament.groups.find((x) => x.id === groupId);
     if (!targetGroup) {
-      throw new Error('Group not found on tournament');
+      throw new NotFoundError('Group not found on tournament');
     }
 
     const { numbers, allMatches } = await loadMatchLabelContext({
@@ -227,7 +184,7 @@ export class AdvanceSettingsDAL {
       });
     }
 
-    const claimByMatchId = await ArenaMatchClaimDAL.activeClaimsByMatchId(
+    const claimByMatchId = await loadActiveClaimsByMatchId(
       matchesOut.map((x) => x.id),
       now
     );
@@ -249,5 +206,5 @@ export class AdvanceSettingsDAL {
     }
 
     return { matches: matchesOut };
-  }
-}
+  },
+};

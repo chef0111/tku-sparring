@@ -14,6 +14,7 @@ import {
   tournamentLifecycleStore,
 } from '@/server/infrastructure/tournaments';
 import { tournamentAthleteStore } from '@/server/infrastructure/tournament-athletes';
+import { advanceSelectionStore } from '@/server/infrastructure/advance-settings';
 
 export const serverRepos = {
   matchTransition: matchTransitionStore,
@@ -26,6 +27,7 @@ export const serverRepos = {
   tournamentLifecycle: tournamentLifecycleStore,
   tournamentArenaOrder: tournamentArenaOrderStore,
   tournamentAthlete: tournamentAthleteStore,
+  advanceSelection: advanceSelectionStore,
 } as const;
 
 export type ServerRepos = typeof serverRepos;
