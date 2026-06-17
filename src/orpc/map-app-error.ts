@@ -1,6 +1,7 @@
 import { ORPCError } from '@orpc/server';
 
 import {
+  BadRequestError,
   NotFoundError,
   PolicyViolationError,
 } from '@/server/application/errors';
@@ -17,6 +18,9 @@ export function toOrpcError(e: unknown): unknown {
   if (e instanceof PolicyViolationError) {
     return new ORPCError('BAD_REQUEST', { message: e.message, defined: true });
   }
+  if (e instanceof BadRequestError) {
+    return new ORPCError('BAD_REQUEST', { message: e.message, defined: true });
+  }
   return e;
 }
 
@@ -25,6 +29,9 @@ export function mapAppError(errors: ProcedureErrors, e: unknown): never {
     throw errors.NOT_FOUND({ message: e.message });
   }
   if (e instanceof PolicyViolationError) {
+    throw errors.BAD_REQUEST({ message: e.message });
+  }
+  if (e instanceof BadRequestError) {
     throw errors.BAD_REQUEST({ message: e.message });
   }
   throw e;

@@ -1,10 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { GroupDAL } from '../dal';
+import {
+  assignAthleteToGroup,
+  autoAssignAllEligible,
+  autoAssignGroup,
+  unassignAthleteFromGroup,
+} from '@/server/application/groups/use-cases/assign';
+import {
+  createGroup,
+  deleteGroup,
+  updateGroup,
+} from '@/server/application/groups/use-cases/lifecycle';
+import { groupAssignmentStore } from '@/server/infrastructure/groups/repositories/assign';
+import { groupLifecycleStore } from '@/server/infrastructure/groups/repositories/lifecycle';
 import {
   publishTournamentMutation,
   recordMutationActivity,
-} from '@/orpc/mutation-effects';
+} from '@/server/infrastructure/mutation-effects';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
@@ -29,7 +41,7 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-vi.mock('@/orpc/mutation-effects', () => ({
+vi.mock('@/server/infrastructure/mutation-effects', () => ({
   recordMutationActivity: vi.fn(),
   publishTournamentMutation: vi.fn(),
 }));
@@ -43,7 +55,7 @@ beforeEach(() => {
   );
 });
 
-describe('GroupDAL writes', () => {
+describe('group lifecycle writes', () => {
   it('publishes once after create', async () => {
     vi.mocked(prisma.tournament.findUnique).mockResolvedValue({
       status: 'draft',
@@ -53,10 +65,13 @@ describe('GroupDAL writes', () => {
       tournamentId: 't1',
     } as never);
 
-    await GroupDAL.create({
-      name: 'Group A',
-      tournamentId: 't1',
-    } as never);
+    await createGroup(
+      {
+        name: 'Group A',
+        tournamentId: 't1',
+      },
+      groupLifecycleStore
+    );
 
     expect(publishTournamentMutation).toHaveBeenCalledTimes(1);
     expect(publishTournamentMutation).toHaveBeenCalledWith('t1');
@@ -73,7 +88,7 @@ describe('GroupDAL writes', () => {
       tournamentId: 't1',
     } as never);
 
-    await GroupDAL.update('g1', { name: 'Group B' } as never);
+    await updateGroup({ id: 'g1', name: 'Group B' }, groupLifecycleStore);
 
     expect(publishTournamentMutation).toHaveBeenCalledTimes(1);
     expect(publishTournamentMutation).toHaveBeenCalledWith('t1');
@@ -82,9 +97,9 @@ describe('GroupDAL writes', () => {
   it('rejects deleting a missing group', async () => {
     vi.mocked(prisma.group.findUnique).mockResolvedValue(null);
 
-    await expect(GroupDAL.deleteGroup('missing')).rejects.toThrow(
-      /Group not found/
-    );
+    await expect(
+      deleteGroup({ id: 'missing' }, groupLifecycleStore)
+    ).rejects.toThrow(/Group not found/);
 
     expect(prisma.group.delete).not.toHaveBeenCalled();
     expect(publishTournamentMutation).not.toHaveBeenCalled();
@@ -101,7 +116,7 @@ describe('GroupDAL writes', () => {
       tournamentId: 't1',
     } as never);
 
-    await GroupDAL.deleteGroup('g1');
+    await deleteGroup({ id: 'g1' }, groupLifecycleStore);
 
     expect(prisma.group.delete).toHaveBeenCalledWith({ where: { id: 'g1' } });
     expect(publishTournamentMutation).toHaveBeenCalledTimes(1);
@@ -114,7 +129,7 @@ describe('GroupDAL writes', () => {
     } as never);
 
     await expect(
-      GroupDAL.create({ name: 'Group A', tournamentId: 't1' } as never)
+      createGroup({ name: 'Group A', tournamentId: 't1' }, groupLifecycleStore)
     ).rejects.toThrow(/Draft status/);
 
     expect(prisma.group.create).not.toHaveBeenCalled();
@@ -128,9 +143,9 @@ describe('GroupDAL writes', () => {
       tournament: { status: 'completed' },
     } as never);
 
-    await expect(GroupDAL.update('g1', { name: 'Group B' })).rejects.toThrow(
-      /read-only/
-    );
+    await expect(
+      updateGroup({ id: 'g1', name: 'Group B' }, groupLifecycleStore)
+    ).rejects.toThrow(/read-only/);
 
     expect(prisma.group.update).not.toHaveBeenCalled();
   });
@@ -142,16 +157,19 @@ describe('GroupDAL writes', () => {
       tournament: { status: 'active' },
     } as never);
 
-    await expect(GroupDAL.deleteGroup('g1')).rejects.toThrow(/Draft status/);
+    await expect(
+      deleteGroup({ id: 'g1' }, groupLifecycleStore)
+    ).rejects.toThrow(/Draft status/);
 
     expect(prisma.group.delete).not.toHaveBeenCalled();
   });
 });
 
-describe('GroupDAL autoAssign', () => {
+describe('group autoAssign', () => {
   it('records a single summary activity when athletes are assigned', async () => {
     (prisma.group.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
       id: 'g1',
+      tournamentId: 't1',
       gender: null,
       beltMin: null,
       beltMax: null,
@@ -168,11 +186,14 @@ describe('GroupDAL autoAssign', () => {
       count: 2,
     } as never);
 
-    const result = await GroupDAL.autoAssign({
-      tournamentId: 't1',
-      groupId: 'g1',
-      adminId: 'admin-1',
-    });
+    const result = await autoAssignGroup(
+      {
+        tournamentId: 't1',
+        groupId: 'g1',
+        adminId: 'admin-1',
+      },
+      groupAssignmentStore
+    );
 
     expect(result).toEqual({ assigned: 2 });
     expect(recordMutationActivity).toHaveBeenCalledTimes(1);
@@ -192,6 +213,7 @@ describe('GroupDAL autoAssign', () => {
   it('does not record activity when nothing to assign', async () => {
     (prisma.group.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
       id: 'g1',
+      tournamentId: 't1',
       gender: null,
       beltMin: null,
       beltMax: null,
@@ -203,18 +225,21 @@ describe('GroupDAL autoAssign', () => {
       prisma.tournamentAthlete.findMany as ReturnType<typeof vi.fn>
     ).mockResolvedValue([]);
 
-    const result = await GroupDAL.autoAssign({
-      tournamentId: 't1',
-      groupId: 'g1',
-      adminId: 'admin-1',
-    });
+    const result = await autoAssignGroup(
+      {
+        tournamentId: 't1',
+        groupId: 'g1',
+        adminId: 'admin-1',
+      },
+      groupAssignmentStore
+    );
 
     expect(result).toEqual({ assigned: 0 });
     expect(recordMutationActivity).not.toHaveBeenCalled();
   });
 });
 
-describe('GroupDAL autoAssignAllEligible', () => {
+describe('autoAssignAllEligible', () => {
   it('skips groups that already have matches', async () => {
     vi.mocked(prisma.tournament.findUnique).mockResolvedValue({
       status: 'draft',
@@ -225,6 +250,7 @@ describe('GroupDAL autoAssignAllEligible', () => {
     ]);
     (prisma.group.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
       id: 'g1',
+      tournamentId: 't1',
       gender: null,
       beltMin: null,
       beltMax: null,
@@ -239,21 +265,29 @@ describe('GroupDAL autoAssignAllEligible', () => {
       prisma.tournamentAthlete.updateMany as ReturnType<typeof vi.fn>
     ).mockResolvedValue({ count: 3 });
 
-    const result = await GroupDAL.autoAssignAllEligible({
-      tournamentId: 't1',
-      adminId: 'admin-1',
-    });
+    const result = await autoAssignAllEligible(
+      {
+        tournamentId: 't1',
+        adminId: 'admin-1',
+      },
+      groupAssignmentStore
+    );
 
     expect(result).toEqual({ assigned: 3, groupsRun: 1, groupsSkipped: 1 });
-    expect(prisma.group.findUnique).toHaveBeenCalledTimes(1);
+    expect(prisma.group.findMany).toHaveBeenCalledTimes(1);
   });
 });
 
-describe('GroupDAL assignAthlete', () => {
+describe('assignAthleteToGroup', () => {
   it('records group.athlete_assigned', async () => {
     (prisma.group.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
       id: 'g1',
       tournamentId: 't1',
+      gender: null,
+      beltMin: null,
+      beltMax: null,
+      weightMin: null,
+      weightMax: null,
       tournament: { status: 'draft' },
     } as never);
     (
@@ -271,11 +305,14 @@ describe('GroupDAL assignAthlete', () => {
       groupId: 'g1',
     } as never);
 
-    await GroupDAL.assignAthlete({
-      groupId: 'g1',
-      tournamentAthleteId: 'ta1',
-      adminId: 'admin-1',
-    });
+    await assignAthleteToGroup(
+      {
+        groupId: 'g1',
+        tournamentAthleteId: 'ta1',
+        adminId: 'admin-1',
+      },
+      groupAssignmentStore
+    );
 
     expect(recordMutationActivity).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -293,6 +330,11 @@ describe('GroupDAL assignAthlete', () => {
     (prisma.group.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
       id: 'g1',
       tournamentId: 't1',
+      gender: null,
+      beltMin: null,
+      beltMax: null,
+      weightMin: null,
+      weightMax: null,
       tournament: { status: 'draft' },
     } as never);
     (
@@ -303,24 +345,29 @@ describe('GroupDAL assignAthlete', () => {
     } as never);
 
     await expect(
-      GroupDAL.assignAthlete({
-        groupId: 'g1',
-        tournamentAthleteId: 'ta1',
-        adminId: 'admin-1',
-      })
+      assignAthleteToGroup(
+        {
+          groupId: 'g1',
+          tournamentAthleteId: 'ta1',
+          adminId: 'admin-1',
+        },
+        groupAssignmentStore
+      )
     ).rejects.toThrow(/does not belong/);
 
     expect(prisma.tournamentAthlete.update).not.toHaveBeenCalled();
   });
 });
 
-describe('GroupDAL unassignAthlete', () => {
+describe('unassignAthleteFromGroup', () => {
   it('records group.athlete_unassigned with previous group', async () => {
     (
       prisma.tournamentAthlete.findUnique as ReturnType<typeof vi.fn>
     ).mockResolvedValue({
       id: 'ta1',
+      tournamentId: 't1',
       groupId: 'g1',
+      name: 'Ada',
       tournament: { status: 'draft' },
     } as never);
     (
@@ -332,10 +379,13 @@ describe('GroupDAL unassignAthlete', () => {
       groupId: null,
     } as never);
 
-    await GroupDAL.unassignAthlete({
-      tournamentAthleteId: 'ta1',
-      adminId: 'admin-1',
-    });
+    await unassignAthleteFromGroup(
+      {
+        tournamentAthleteId: 'ta1',
+        adminId: 'admin-1',
+      },
+      groupAssignmentStore
+    );
 
     expect(recordMutationActivity).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -356,10 +406,13 @@ describe('GroupDAL unassignAthlete', () => {
     ).mockResolvedValue(null);
 
     await expect(
-      GroupDAL.unassignAthlete({
-        tournamentAthleteId: 'missing',
-        adminId: 'admin-1',
-      })
+      unassignAthleteFromGroup(
+        {
+          tournamentAthleteId: 'missing',
+          adminId: 'admin-1',
+        },
+        groupAssignmentStore
+      )
     ).rejects.toThrow(/not found/);
   });
 });

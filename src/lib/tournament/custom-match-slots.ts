@@ -1,12 +1,16 @@
-import { throwMatchBadRequest } from './match-domain-error';
-import type { CustomSlotDTO } from './dto';
+import { CustomMatchValidationError } from '@/lib/tournament/custom-match-validation';
 import { prisma } from '@/lib/db';
+
+export type CustomSlotInput =
+  | { mode: 'direct'; tournamentAthleteId: string }
+  | { mode: 'winner'; feederMatchId: string }
+  | { mode: 'loser'; feederMatchId: string };
 
 export type CustomSlotDb = Pick<typeof prisma, 'match' | 'tournamentAthlete'>;
 
 export async function resolveCustomSlot(
   groupId: string,
-  slot: CustomSlotDTO,
+  slot: CustomSlotInput,
   db: CustomSlotDb = prisma
 ): Promise<{
   tournamentAthleteId: string;
@@ -16,7 +20,11 @@ export async function resolveCustomSlot(
     const ta = await db.tournamentAthlete.findFirst({
       where: { id: slot.tournamentAthleteId, groupId },
     });
-    if (!ta) throwMatchBadRequest('Tournament athlete not found in this group');
+    if (!ta) {
+      throw new CustomMatchValidationError(
+        'Tournament athlete not found in this group'
+      );
+    }
     return {
       tournamentAthleteId: ta.id,
       athleteProfileId: ta.athleteProfileId,
@@ -26,17 +34,21 @@ export async function resolveCustomSlot(
   const feeder = await db.match.findFirst({
     where: { id: slot.feederMatchId, groupId },
   });
-  if (!feeder) throwMatchBadRequest('Feeder match not found in this group');
+  if (!feeder) {
+    throw new CustomMatchValidationError(
+      'Feeder match not found in this group'
+    );
+  }
   if (feeder.kind === 'custom') {
-    throwMatchBadRequest(
+    throw new CustomMatchValidationError(
       'Bracket matches only — custom matches cannot be feeders'
     );
   }
   if (feeder.status !== 'complete') {
-    throwMatchBadRequest('Feeder match must be complete');
+    throw new CustomMatchValidationError('Feeder match must be complete');
   }
   if (!feeder.tournamentWinnerId) {
-    throwMatchBadRequest('Feeder match has no winner');
+    throw new CustomMatchValidationError('Feeder match has no winner');
   }
 
   if (slot.mode === 'winner') {
@@ -44,7 +56,7 @@ export async function resolveCustomSlot(
       feeder.redTournamentAthleteId == null ||
       feeder.blueTournamentAthleteId == null
     ) {
-      throwMatchBadRequest(
+      throw new CustomMatchValidationError(
         'Winner slot requires both athletes present in the feeder match'
       );
     }
@@ -52,7 +64,8 @@ export async function resolveCustomSlot(
       where: { id: feeder.tournamentWinnerId },
       select: { athleteProfileId: true },
     });
-    if (!ta) throwMatchBadRequest('Winner tournament athlete missing');
+    if (!ta)
+      throw new CustomMatchValidationError('Winner tournament athlete missing');
     return {
       tournamentAthleteId: feeder.tournamentWinnerId,
       athleteProfileId: ta.athleteProfileId,
@@ -63,7 +76,7 @@ export async function resolveCustomSlot(
     feeder.redTournamentAthleteId == null ||
     feeder.blueTournamentAthleteId == null
   ) {
-    throwMatchBadRequest(
+    throw new CustomMatchValidationError(
       'Loser slot requires both athletes in the feeder match'
     );
   }
@@ -74,15 +87,18 @@ export async function resolveCustomSlot(
   } else if (w === feeder.blueTournamentAthleteId) {
     loserTa = feeder.redTournamentAthleteId;
   } else {
-    throwMatchBadRequest('Winner does not match a feeder corner');
+    throw new CustomMatchValidationError(
+      'Winner does not match a feeder corner'
+    );
   }
-  if (!loserTa) throwMatchBadRequest('Could not resolve loser');
+  if (!loserTa) throw new CustomMatchValidationError('Could not resolve loser');
 
   const ta = await db.tournamentAthlete.findUnique({
     where: { id: loserTa },
     select: { athleteProfileId: true },
   });
-  if (!ta) throwMatchBadRequest('Loser tournament athlete missing');
+  if (!ta)
+    throw new CustomMatchValidationError('Loser tournament athlete missing');
 
   return {
     tournamentAthleteId: loserTa,

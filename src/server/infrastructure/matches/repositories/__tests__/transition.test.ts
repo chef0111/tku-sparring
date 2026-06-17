@@ -9,7 +9,7 @@ import { prisma } from '@/lib/db';
 import {
   publishTournamentMutation,
   recordMutationActivity,
-} from '@/orpc/mutation-effects';
+} from '@/server/infrastructure/mutation-effects';
 
 const tx = {
   match: {
@@ -35,7 +35,7 @@ vi.mock('@/orpc/matches/match-progression', () => ({
   advanceWinner: vi.fn(),
 }));
 
-vi.mock('@/orpc/mutation-effects', () => ({
+vi.mock('@/server/infrastructure/mutation-effects', () => ({
   recordMutationActivity: vi.fn(),
   publishTournamentMutation: vi.fn(),
 }));

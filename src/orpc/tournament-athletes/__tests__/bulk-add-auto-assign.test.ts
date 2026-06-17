@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { bulkAddAthletesToTournament } from '../bulk-add';
+import type { GroupAssignmentStore } from '@/server/application/groups/repositories/assign';
 import { prisma } from '@/lib/db';
 
 const bulkCreate = vi.fn();
@@ -12,11 +13,9 @@ vi.mock('../dal', () => ({
   },
 }));
 
-vi.mock('@/orpc/groups/dal', () => ({
-  GroupDAL: {
-    autoAssignAllEligible: (...args: Array<unknown>) =>
-      autoAssignAllEligible(...args),
-  },
+vi.mock('@/server/application/groups/use-cases/assign', () => ({
+  autoAssignAllEligible: (...args: Array<unknown>) =>
+    autoAssignAllEligible(...args),
 }));
 
 vi.mock('@/lib/db', () => ({
@@ -25,6 +24,8 @@ vi.mock('@/lib/db', () => ({
     tournamentAthlete: { findMany: vi.fn() },
   },
 }));
+
+const assignStore = {} as GroupAssignmentStore;
 
 const profile = (id: string) => ({
   id,
@@ -55,6 +56,7 @@ describe('bulkAddAthletesToTournament autoAssign', () => {
       athleteProfileIds: ['p1', 'p2'],
       autoAssign: false,
       adminId: 'admin-1',
+      assignStore,
     });
 
     expect(autoAssignAllEligible).not.toHaveBeenCalled();
@@ -80,12 +82,16 @@ describe('bulkAddAthletesToTournament autoAssign', () => {
       athleteProfileIds: ['p1', 'p2'],
       autoAssign: true,
       adminId: 'admin-1',
+      assignStore,
     });
 
-    expect(autoAssignAllEligible).toHaveBeenCalledWith({
-      tournamentId: 't1',
-      adminId: 'admin-1',
-    });
+    expect(autoAssignAllEligible).toHaveBeenCalledWith(
+      {
+        tournamentId: 't1',
+        adminId: 'admin-1',
+      },
+      assignStore
+    );
     expect(result).toEqual({ added: 2, assigned: 1, unassigned: 1 });
   });
 });

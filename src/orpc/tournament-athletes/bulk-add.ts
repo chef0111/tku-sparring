@@ -1,5 +1,6 @@
 import { TournamentAthleteDAL } from './dal';
-import { GroupDAL } from '@/orpc/groups/dal';
+import type { GroupAssignmentStore } from '@/server/application/groups/repositories/assign';
+import { autoAssignAllEligible } from '@/server/application/groups/use-cases/assign';
 import { prisma } from '@/lib/db';
 
 export async function bulkAddAthletesToTournament(input: {
@@ -7,8 +8,10 @@ export async function bulkAddAthletesToTournament(input: {
   athleteProfileIds: Array<string>;
   autoAssign: boolean;
   adminId: string;
+  assignStore: GroupAssignmentStore;
 }) {
-  const { tournamentId, athleteProfileIds, autoAssign, adminId } = input;
+  const { tournamentId, athleteProfileIds, autoAssign, adminId, assignStore } =
+    input;
 
   const profiles = await prisma.athleteProfile.findMany({
     where: { id: { in: athleteProfileIds } },
@@ -22,7 +25,7 @@ export async function bulkAddAthletesToTournament(input: {
   const createdProfileIds = createdProfiles.map((p) => p.id);
 
   if (autoAssign && added > 0) {
-    await GroupDAL.autoAssignAllEligible({ tournamentId, adminId });
+    await autoAssignAllEligible({ tournamentId, adminId }, assignStore);
   }
 
   let assigned = 0;

@@ -6,14 +6,17 @@ import {
   resetBracket,
   shuffleBracket,
 } from '../bracket/bracket-lifecycle';
-import { createCustomMatch } from '../create-custom-match';
-import { deleteCustomMatch } from '../delete-custom-match';
-import { MatchDAL } from '../dal';
 import { buildRound0Baseline } from '../bracket/round0-baseline';
+import { MatchDAL } from '../dal';
+import {
+  createCustomMatch,
+  deleteCustomMatch,
+} from '@/server/application/matches/use-cases/custom';
+import { customMatchStore } from '@/server/infrastructure/matches/repositories/custom';
 import {
   publishTournamentMutation,
   recordMutationActivity,
-} from '@/orpc/mutation-effects';
+} from '@/server/infrastructure/mutation-effects';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { prisma } from '@/lib/db';
 
@@ -41,7 +44,7 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-vi.mock('@/orpc/mutation-effects', () => ({
+vi.mock('@/server/infrastructure/mutation-effects', () => ({
   recordMutationActivity: vi.fn(),
   publishTournamentMutation: vi.fn(),
 }));
@@ -50,7 +53,7 @@ vi.mock('@/orpc/activity/dal', () => ({
   recordTournamentActivity: vi.fn(),
 }));
 
-vi.mock('@/orpc/matches/custom-match-label', () => ({
+vi.mock('@/lib/tournament/custom-match-label', () => ({
   assertLabelAvailable: vi.fn().mockResolvedValue(undefined),
 }));
 
@@ -706,8 +709,9 @@ describe('createCustomMatch', () => {
         displayLabel: 'Exhibition',
         red: { mode: 'direct', tournamentAthleteId: 'ta-red' },
         blue: { mode: 'direct', tournamentAthleteId: 'ta-blue' },
+        adminId: 'admin-1',
       },
-      'admin-1'
+      customMatchStore
     );
 
     expect(row.kind).toBe('custom');
@@ -752,8 +756,9 @@ describe('createCustomMatch', () => {
           displayLabel: 'Exhibition',
           red: { mode: 'direct', tournamentAthleteId: 'ta-red' },
           blue: { mode: 'direct', tournamentAthleteId: 'ta-red' },
+          adminId: 'admin-1',
         },
-        'admin-1'
+        customMatchStore
       )
     ).rejects.toThrow(/same athlete/);
 
@@ -774,8 +779,9 @@ describe('createCustomMatch', () => {
           displayLabel: 'Exhibition',
           red: { mode: 'direct', tournamentAthleteId: 'ta-red' },
           blue: { mode: 'direct', tournamentAthleteId: 'ta-blue' },
+          adminId: 'admin-1',
         },
-        'admin-1'
+        customMatchStore
       )
     ).rejects.toThrow(/read-only/);
 
@@ -796,7 +802,10 @@ describe('deleteCustomMatch', () => {
     vi.mocked(prisma.match.findUnique).mockResolvedValue(match as never);
     vi.mocked(prisma.match.delete).mockResolvedValue(match as never);
 
-    const deleted = await deleteCustomMatch('custom-1', 'admin-1');
+    const deleted = await deleteCustomMatch(
+      { matchId: 'custom-1', adminId: 'admin-1' },
+      customMatchStore
+    );
 
     expect(deleted.kind).toBe('custom');
     expect(prisma.match.delete).toHaveBeenCalledWith({
@@ -828,9 +837,12 @@ describe('deleteCustomMatch', () => {
       tournament: { status: 'active' },
     } as never);
 
-    await expect(deleteCustomMatch('match-1', 'admin-1')).rejects.toThrow(
-      /Only custom matches/
-    );
+    await expect(
+      deleteCustomMatch(
+        { matchId: 'match-1', adminId: 'admin-1' },
+        customMatchStore
+      )
+    ).rejects.toThrow(/Only custom matches/);
 
     expect(prisma.match.delete).not.toHaveBeenCalled();
   });
@@ -844,9 +856,12 @@ describe('deleteCustomMatch', () => {
       tournament: { status: 'completed' },
     } as never);
 
-    await expect(deleteCustomMatch('custom-1', 'admin-1')).rejects.toThrow(
-      /read-only/
-    );
+    await expect(
+      deleteCustomMatch(
+        { matchId: 'custom-1', adminId: 'admin-1' },
+        customMatchStore
+      )
+    ).rejects.toThrow(/read-only/);
 
     expect(prisma.match.delete).not.toHaveBeenCalled();
   });

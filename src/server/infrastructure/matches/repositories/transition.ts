@@ -4,11 +4,11 @@ import {
   advanceWinner,
   clearWinnerAdvancement,
 } from '@/orpc/matches/match-progression';
-import { coalesceMatchRead } from '@/orpc/matches/match-read';
+import { coalesceMatchRead } from '@/lib/tournament/match-read';
 import {
   publishTournamentMutation,
   recordMutationActivity,
-} from '@/orpc/mutation-effects';
+} from '@/server/infrastructure/mutation-effects';
 import { prisma } from '@/lib/db';
 
 export const matchTransitionStore: MatchTransitionStore = {

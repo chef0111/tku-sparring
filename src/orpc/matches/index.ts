@@ -19,9 +19,11 @@ import {
   resetBracket as runResetBracket,
   shuffleBracket as runShuffleBracket,
 } from './bracket/bracket-lifecycle';
-import { createCustomMatch as runCreateCustomMatch } from './create-custom-match';
-import { deleteCustomMatch as runDeleteCustomMatch } from './delete-custom-match';
 import { MatchDAL } from './dal';
+import {
+  createCustomMatch as runCreateCustomMatch,
+  deleteCustomMatch as runDeleteCustomMatch,
+} from '@/server/application/matches/use-cases/custom';
 import { authorized } from '@/orpc/middleware';
 import { assertSystemAdmin } from '@/orpc/policies/auth';
 import {
@@ -63,7 +65,10 @@ export const createCustomMatch = authorized
   .input(CreateCustomMatchSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
-    return runCreateCustomMatch(input, context.user.id);
+    return runCreateCustomMatch(
+      { ...input, adminId: context.user.id },
+      context.repos.customMatch
+    );
   });
 
 export const adminSetMatchStatus = authorized
@@ -80,7 +85,10 @@ export const removeMatch = authorized
   .input(z.object({ id: z.string() }))
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
-    return runDeleteCustomMatch(input.id, context.user.id);
+    return runDeleteCustomMatch(
+      { matchId: input.id, adminId: context.user.id },
+      context.repos.customMatch
+    );
   });
 
 export const generateBracket = authorized

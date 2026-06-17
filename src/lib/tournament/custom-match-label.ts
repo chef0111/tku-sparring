@@ -1,29 +1,34 @@
-import { throwMatchBadRequest } from './match-domain-error';
 import {
   loadMatchLabelContext,
   normalizeMatchLabelKey,
 } from '@/lib/tournament/match-label-context';
+import { CustomMatchValidationError } from '@/lib/tournament/custom-match-validation';
 import { prisma } from '@/lib/db';
 
 export { normalizeMatchLabelKey };
+
+type LabelDb = Pick<typeof prisma, 'match'>;
 
 /**
  * Ensures `displayLabel` does not collide with another custom label (tournament-wide)
  * or an arena-assigned `Match {n}` title for this group's arena (cross-group on same arena).
  */
-export async function assertLabelAvailable(input: {
-  tournamentId: string;
-  groupId: string;
-  displayLabel: string;
-  excludeMatchId?: string;
-}): Promise<void> {
+export async function assertLabelAvailable(
+  input: {
+    tournamentId: string;
+    groupId: string;
+    displayLabel: string;
+    excludeMatchId?: string;
+  },
+  db: LabelDb = prisma
+): Promise<void> {
   const trimmed = input.displayLabel.trim();
   if (!trimmed) {
-    throwMatchBadRequest('Match label is required');
+    throw new CustomMatchValidationError('Match label is required');
   }
   const key = normalizeMatchLabelKey(trimmed);
 
-  const customs = await prisma.match.findMany({
+  const customs = await db.match.findMany({
     where: {
       tournamentId: input.tournamentId,
       kind: 'custom',
@@ -34,7 +39,7 @@ export async function assertLabelAvailable(input: {
   for (const c of customs) {
     const d = c.displayLabel?.trim();
     if (d && normalizeMatchLabelKey(d) === key) {
-      throwMatchBadRequest(
+      throw new CustomMatchValidationError(
         'That label is already used by another custom match'
       );
     }
@@ -46,7 +51,9 @@ export async function assertLabelAvailable(input: {
   });
 
   if (assignedBracketTitleKeys.has(key)) {
-    throwMatchBadRequest('That label matches an existing arena match number');
+    throw new CustomMatchValidationError(
+      'That label matches an existing arena match number'
+    );
   }
 
   const matchKey = /^match\s+(.+)$/i.exec(trimmed);
@@ -56,7 +63,7 @@ export async function assertLabelAvailable(input: {
       if (m.kind === 'custom') continue;
       const suffix = m.id.slice(-6).toLowerCase();
       if (tail === suffix) {
-        throwMatchBadRequest(
+        throw new CustomMatchValidationError(
           'That label collides with an auto-generated match label'
         );
       }

@@ -1,21 +1,7 @@
-import {
-  matchDisplayLabelFromDb,
-  matchKindFromDb,
-} from '@/lib/tournament/match-kind';
+import { coalesceMatchRead } from '@/lib/tournament/match-read';
 import { prisma } from '@/lib/db';
 
-export function coalesceMatchRead<
-  T extends {
-    kind?: string | null;
-    displayLabel?: string | null;
-  },
->(m: T): T & { kind: 'bracket' | 'custom'; displayLabel: string | null } {
-  return {
-    ...m,
-    kind: matchKindFromDb(m.kind),
-    displayLabel: matchDisplayLabelFromDb(m.displayLabel),
-  };
-}
+export { coalesceMatchRead };
 
 export async function findMatchesByGroupId(groupId: string) {
   const rows = await prisma.match.findMany({

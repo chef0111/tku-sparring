@@ -24,6 +24,7 @@ export const bulkAddAthletes = authorized
     return bulkAddAthletesToTournament({
       ...input,
       adminId: context.user.id,
+      assignStore: context.repos.groupAssign,
     });
   });
 
