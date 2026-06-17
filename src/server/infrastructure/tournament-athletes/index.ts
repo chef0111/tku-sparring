@@ -1,1 +1,1 @@
-export { tournamentAthleteStore } from './repositories/roster';
+export * from './repositories/roster';

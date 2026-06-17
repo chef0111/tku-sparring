@@ -47,10 +47,12 @@ export const listMatches = authorized
   )
   .handler(async ({ input, context }) => {
     if (input.groupId) {
-      return context.repos.matchRead.findByGroupId(input.groupId);
+      return await context.repos.matchRead.findByGroupId(input.groupId);
     }
     if (input.tournamentId) {
-      return context.repos.matchRead.findByTournamentId(input.tournamentId);
+      return await context.repos.matchRead.findByTournamentId(
+        input.tournamentId
+      );
     }
     throw new NotFoundError('Either groupId or tournamentId is required');
   });

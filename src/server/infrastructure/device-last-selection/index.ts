@@ -1,1 +1,1 @@
-export { deviceLastSelectionStore } from './repositories/last-selection';
+export * from './repositories/last-selection';

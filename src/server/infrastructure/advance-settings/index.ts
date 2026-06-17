@@ -1,1 +1,1 @@
-export { advanceSelectionStore } from './repositories/selection';
+export * from './repositories/selection';
