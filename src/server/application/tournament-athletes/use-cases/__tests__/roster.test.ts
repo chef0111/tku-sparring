@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { bulkAddAthletes } from '../bulk-add';
 import type { GroupAssignmentStore } from '@/server/application/groups/repositories/assign';
-import type { TournamentAthleteStore } from '@/server/application/tournament-athletes/repositories/roster';
-import { bulkAddAthletes } from '@/server/application/tournament-athletes/use-cases/bulk-add';
+import type { TournamentAthleteStore } from '../../repositories/roster';
 
 const autoAssignAllEligible = vi.fn();
 
@@ -10,8 +10,6 @@ vi.mock('@/server/application/groups/use-cases/assign', () => ({
   autoAssignAllEligible: (...args: Array<unknown>) =>
     autoAssignAllEligible(...args),
 }));
-
-const assignStore = {} as GroupAssignmentStore;
 
 const profile = (id: string) => ({
   id,
@@ -37,7 +35,9 @@ function fakeStore(over: Partial<TournamentAthleteStore> = {}) {
   return store;
 }
 
-describe('bulkAddAthletes autoAssign', () => {
+const assignStore = {} as GroupAssignmentStore;
+
+describe('bulkAddAthletes', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

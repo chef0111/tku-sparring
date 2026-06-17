@@ -13,6 +13,7 @@ import {
   tournamentArenaOrderStore,
   tournamentLifecycleStore,
 } from '@/server/infrastructure/tournaments';
+import { tournamentAthleteStore } from '@/server/infrastructure/tournament-athletes';
 
 export const serverRepos = {
   matchTransition: matchTransitionStore,
@@ -24,6 +25,7 @@ export const serverRepos = {
   groupAssign: groupAssignmentStore,
   tournamentLifecycle: tournamentLifecycleStore,
   tournamentArenaOrder: tournamentArenaOrderStore,
+  tournamentAthlete: tournamentAthleteStore,
 } as const;
 
 export type ServerRepos = typeof serverRepos;

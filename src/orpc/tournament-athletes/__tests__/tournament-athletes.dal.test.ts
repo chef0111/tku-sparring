@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { TournamentAthleteDAL } from '../dal';
+import { tournamentAthleteStore } from '@/server/infrastructure/tournament-athletes';
 import { prisma } from '@/lib/db';
-import { publishTournamentMutation } from '@/orpc/mutation-effects';
+import { publishTournamentMutation } from '@/server/infrastructure/mutation-effects';
 
 vi.mock('@/lib/db', () => ({
   prisma: {
@@ -24,8 +24,9 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-vi.mock('@/orpc/mutation-effects', () => ({
+vi.mock('@/server/infrastructure/mutation-effects', () => ({
   publishTournamentMutation: vi.fn(),
+  recordMutationActivity: vi.fn(),
 }));
 
 const profile = (id: string, image: string | null = null) => ({
@@ -53,7 +54,7 @@ describe('bulkCreate', () => {
     });
 
     const profiles = [profile('p1'), profile('p2')];
-    const result = await TournamentAthleteDAL.bulkCreate(
+    const result = await tournamentAthleteStore.bulkCreate(
       'tournament-1',
       profiles
     );
@@ -87,7 +88,7 @@ describe('bulkCreate', () => {
 
     const url = 'https://example.com/a.png';
     const profiles = [profile('p1', url)];
-    await TournamentAthleteDAL.bulkCreate('tournament-1', profiles);
+    await tournamentAthleteStore.bulkCreate('tournament-1', profiles);
 
     expect(prisma.tournamentAthlete.createMany).toHaveBeenCalledWith({
       data: [
@@ -108,7 +109,7 @@ describe('bulkCreate', () => {
     });
 
     const profiles = [profile('p1'), profile('p2')];
-    const result = await TournamentAthleteDAL.bulkCreate(
+    const result = await tournamentAthleteStore.bulkCreate(
       'tournament-1',
       profiles
     );
@@ -128,7 +129,7 @@ describe('bulkCreate', () => {
     ]);
 
     const profiles = [profile('p1'), profile('p2')];
-    const result = await TournamentAthleteDAL.bulkCreate(
+    const result = await tournamentAthleteStore.bulkCreate(
       'tournament-1',
       profiles
     );
@@ -144,7 +145,7 @@ describe('bulkCreate', () => {
     } as never);
 
     await expect(
-      TournamentAthleteDAL.bulkCreate('tournament-1', [profile('p1')])
+      tournamentAthleteStore.bulkCreate('tournament-1', [profile('p1')])
     ).rejects.toThrow(/Draft status/);
 
     expect(prisma.tournamentAthlete.createMany).not.toHaveBeenCalled();
@@ -156,7 +157,7 @@ describe('bulkCreate', () => {
     } as never);
 
     await expect(
-      TournamentAthleteDAL.bulkCreate('tournament-1', [profile('p1')])
+      tournamentAthleteStore.bulkCreate('tournament-1', [profile('p1')])
     ).rejects.toThrow(/read-only/);
 
     expect(prisma.tournamentAthlete.createMany).not.toHaveBeenCalled();
@@ -178,13 +179,17 @@ describe('tournament athlete writes', () => {
       id: 'ta1',
       tournamentId: 't1',
       seed: 1,
+      athleteProfile: { id: 'p1', athleteCode: null },
     } as never);
 
-    await TournamentAthleteDAL.updateTournamentAthlete('ta1', { seed: 1 });
+    await tournamentAthleteStore.update({ id: 'ta1', seed: 1 });
 
     expect(prisma.tournamentAthlete.update).toHaveBeenCalledWith({
       where: { id: 'ta1' },
       data: { seed: 1 },
+      include: {
+        athleteProfile: { select: { id: true, athleteCode: true } },
+      },
     });
     expect(publishTournamentMutation).toHaveBeenCalledWith('t1');
   });
@@ -196,7 +201,7 @@ describe('tournament athlete writes', () => {
     } as never);
 
     await expect(
-      TournamentAthleteDAL.updateTournamentAthlete('ta1', { seed: 1 })
+      tournamentAthleteStore.update({ id: 'ta1', seed: 1 })
     ).rejects.toThrow(/Draft status/);
 
     expect(prisma.tournamentAthlete.update).not.toHaveBeenCalled();
@@ -208,9 +213,9 @@ describe('tournament athlete writes', () => {
       tournament: { status: 'completed' },
     } as never);
 
-    await expect(
-      TournamentAthleteDAL.removeTournamentAthlete('ta1')
-    ).rejects.toThrow(/read-only/);
+    await expect(tournamentAthleteStore.remove({ id: 'ta1' })).rejects.toThrow(
+      /read-only/
+    );
 
     expect(prisma.tournamentAthlete.delete).not.toHaveBeenCalled();
   });
@@ -224,10 +229,9 @@ describe('tournament athlete writes', () => {
       count: 2,
     } as never);
 
-    const result = await TournamentAthleteDAL.bulkRemoveTournamentAthletes([
-      'ta1',
-      'ta2',
-    ]);
+    const result = await tournamentAthleteStore.bulkRemove({
+      ids: ['ta1', 'ta2'],
+    });
 
     expect(result).toEqual({ removed: 2 });
     expect(publishTournamentMutation).toHaveBeenCalledTimes(1);
@@ -240,17 +244,15 @@ describe('tournament athlete writes', () => {
     ] as never);
 
     await expect(
-      TournamentAthleteDAL.bulkRemoveTournamentAthletes(['ta1'])
+      tournamentAthleteStore.bulkRemove({ ids: ['ta1'] })
     ).rejects.toThrow(/Draft status/);
 
     expect(prisma.tournamentAthlete.deleteMany).not.toHaveBeenCalled();
   });
 });
 
-describe('findByTournamentId', () => {
-  type ListInput = Parameters<
-    typeof TournamentAthleteDAL.findByTournamentId
-  >[0];
+describe('list', () => {
+  type ListInput = Parameters<typeof tournamentAthleteStore.list>[0];
 
   const baseInput: ListInput = {
     tournamentId: 'tournament-1',
@@ -277,7 +279,7 @@ describe('findByTournamentId', () => {
 
   it('filters unassigned athletes when unassignedOnly is true', async () => {
     mockResult([], 0);
-    await TournamentAthleteDAL.findByTournamentId({
+    await tournamentAthleteStore.list({
       ...baseInput,
       unassignedOnly: true,
     });
@@ -285,17 +287,13 @@ describe('findByTournamentId', () => {
     const args = getFindManyArgs();
     expect(args?.where).toMatchObject({
       tournamentId: 'tournament-1',
-      AND: [
-        {
-          groupId: null,
-        },
-      ],
+      AND: [{ groupId: null }],
     });
   });
 
   it('filters by groupId when provided and unassignedOnly is false', async () => {
     mockResult([], 0);
-    await TournamentAthleteDAL.findByTournamentId({
+    await tournamentAthleteStore.list({
       ...baseInput,
       groupId: 'group-1',
     });
@@ -309,7 +307,7 @@ describe('findByTournamentId', () => {
 
   it('prefers unassignedOnly over groupId when both are set', async () => {
     mockResult([], 0);
-    await TournamentAthleteDAL.findByTournamentId({
+    await tournamentAthleteStore.list({
       ...baseInput,
       unassignedOnly: true,
       groupId: 'group-1',
@@ -317,17 +315,13 @@ describe('findByTournamentId', () => {
 
     const args = getFindManyArgs();
     expect(args?.where).toMatchObject({
-      AND: [
-        {
-          groupId: null,
-        },
-      ],
+      AND: [{ groupId: null }],
     });
   });
 
   it('combines unassignedOnly with query filter (AND, not overwriting OR)', async () => {
     mockResult([], 0);
-    await TournamentAthleteDAL.findByTournamentId({
+    await tournamentAthleteStore.list({
       ...baseInput,
       unassignedOnly: true,
       query: 'lee',
@@ -338,9 +332,7 @@ describe('findByTournamentId', () => {
     expect(Array.isArray(andClauses)).toBe(true);
     if (!Array.isArray(andClauses)) throw new Error('expected AND array');
     expect(andClauses).toHaveLength(2);
-    expect(andClauses[0]).toMatchObject({
-      groupId: null,
-    });
+    expect(andClauses[0]).toMatchObject({ groupId: null });
     expect(andClauses[1]).toMatchObject({
       OR: [
         { name: { contains: 'lee', mode: 'insensitive' } },
@@ -351,7 +343,7 @@ describe('findByTournamentId', () => {
 
   it('builds case-insensitive OR query for name and affiliation', async () => {
     mockResult([], 0);
-    await TournamentAthleteDAL.findByTournamentId({
+    await tournamentAthleteStore.list({
       ...baseInput,
       query: 'john',
     });
@@ -372,7 +364,7 @@ describe('findByTournamentId', () => {
 
   it('filters by gender using `in`', async () => {
     mockResult([], 0);
-    await TournamentAthleteDAL.findByTournamentId({
+    await tournamentAthleteStore.list({
       ...baseInput,
       gender: ['M'],
     });
@@ -383,7 +375,7 @@ describe('findByTournamentId', () => {
 
   it('uses beltLevel `in` when beltLevels is provided', async () => {
     mockResult([], 0);
-    await TournamentAthleteDAL.findByTournamentId({
+    await tournamentAthleteStore.list({
       ...baseInput,
       beltLevels: [1, 3, 5],
       beltLevelMin: 0,
@@ -396,7 +388,7 @@ describe('findByTournamentId', () => {
 
   it('uses beltLevel gte/lte when only min/max are provided', async () => {
     mockResult([], 0);
-    await TournamentAthleteDAL.findByTournamentId({
+    await tournamentAthleteStore.list({
       ...baseInput,
       beltLevelMin: 2,
       beltLevelMax: 6,
@@ -408,7 +400,7 @@ describe('findByTournamentId', () => {
 
   it('filters weight by gte/lte when provided', async () => {
     mockResult([], 0);
-    await TournamentAthleteDAL.findByTournamentId({
+    await tournamentAthleteStore.list({
       ...baseInput,
       weightMin: 50,
       weightMax: 70,
@@ -420,7 +412,7 @@ describe('findByTournamentId', () => {
 
   it('honors sorting by mapping {id, desc} to prisma orderBy', async () => {
     mockResult([], 0);
-    await TournamentAthleteDAL.findByTournamentId({
+    await tournamentAthleteStore.list({
       ...baseInput,
       sorting: [
         { id: 'name', desc: false },
@@ -434,7 +426,7 @@ describe('findByTournamentId', () => {
 
   it('defaults to createdAt asc when sorting is empty', async () => {
     mockResult([], 0);
-    await TournamentAthleteDAL.findByTournamentId(baseInput);
+    await tournamentAthleteStore.list(baseInput);
 
     const args = getFindManyArgs();
     expect(args?.orderBy).toEqual([{ createdAt: 'asc' }]);
@@ -444,7 +436,7 @@ describe('findByTournamentId', () => {
     const items = [{ id: 'a1' }, { id: 'a2' }];
     mockResult(items, 42);
 
-    const result = await TournamentAthleteDAL.findByTournamentId({
+    const result = await tournamentAthleteStore.list({
       ...baseInput,
       page: 3,
       perPage: 10,

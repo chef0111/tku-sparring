@@ -1,79 +1,84 @@
 import type { Prisma } from '@/generated/prisma/client';
+import type { TournamentAthleteStore } from '@/server/application/tournament-athletes/repositories/roster';
 import type {
-  ListTournamentAthletesDTO,
-  UpdateTournamentAthleteDTO,
-} from './dto';
+  BulkRemoveTournamentAthletesCommand,
+  ListTournamentAthletesQuery,
+  RemoveTournamentAthleteCommand,
+  UpdateTournamentAthleteCommand,
+} from '@/server/application/tournament-athletes/use-cases/roster-commands';
 import { prisma } from '@/lib/db';
 import {
   getNameSortKey,
   orderFieldForColumnId,
 } from '@/lib/sort/name-sort-key';
 import { NotFoundError } from '@/server/application/errors';
-import { publishTournamentMutation } from '@/orpc/mutation-effects';
+import { publishTournamentMutation } from '@/server/infrastructure/mutation-effects';
 import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
 
-export class TournamentAthleteDAL {
-  private static readonly UNASSIGNED_GROUP_FILTER = {
-    groupId: null,
-  } satisfies Prisma.TournamentAthleteWhereInput;
+const UNASSIGNED_GROUP_FILTER = {
+  groupId: null,
+} satisfies Prisma.TournamentAthleteWhereInput;
 
-  static async findByTournamentId(input: ListTournamentAthletesDTO) {
-    const {
-      tournamentId,
-      groupId,
-      unassignedOnly,
-      status,
-      page,
-      perPage,
-      query,
-      gender,
-      beltLevels,
-      beltLevelMin,
-      beltLevelMax,
-      weightMin,
-      weightMax,
-      sorting,
-    } = input;
+function buildListWhere(input: ListTournamentAthletesQuery) {
+  const {
+    tournamentId,
+    groupId,
+    unassignedOnly,
+    status,
+    query,
+    gender,
+    beltLevels,
+    beltLevelMin,
+    beltLevelMax,
+    weightMin,
+    weightMax,
+  } = input;
 
-    const andBranches: Array<Prisma.TournamentAthleteWhereInput> = [];
-    if (unassignedOnly) {
-      andBranches.push(TournamentAthleteDAL.UNASSIGNED_GROUP_FILTER);
-    } else if (groupId) {
-      andBranches.push({ groupId });
-    }
-    if (query) {
-      andBranches.push({
-        OR: [
-          { name: { contains: query, mode: 'insensitive' as const } },
-          { affiliation: { contains: query, mode: 'insensitive' as const } },
-        ],
-      });
-    }
+  const andBranches: Array<Prisma.TournamentAthleteWhereInput> = [];
+  if (unassignedOnly) {
+    andBranches.push(UNASSIGNED_GROUP_FILTER);
+  } else if (groupId) {
+    andBranches.push({ groupId });
+  }
+  if (query) {
+    andBranches.push({
+      OR: [
+        { name: { contains: query, mode: 'insensitive' as const } },
+        { affiliation: { contains: query, mode: 'insensitive' as const } },
+      ],
+    });
+  }
 
-    const where: Prisma.TournamentAthleteWhereInput = {
-      tournamentId,
-      ...(andBranches.length > 0 ? { AND: andBranches } : {}),
-      ...(status ? { status } : {}),
-      ...(gender && gender.length > 0 ? { gender: { in: gender } } : {}),
-      ...(beltLevels && beltLevels.length > 0
-        ? { beltLevel: { in: beltLevels } }
-        : beltLevelMin !== undefined || beltLevelMax !== undefined
-          ? {
-              beltLevel: {
-                ...(beltLevelMin !== undefined ? { gte: beltLevelMin } : {}),
-                ...(beltLevelMax !== undefined ? { lte: beltLevelMax } : {}),
-              },
-            }
-          : {}),
-      ...(weightMin !== undefined || weightMax !== undefined
+  return {
+    tournamentId,
+    ...(andBranches.length > 0 ? { AND: andBranches } : {}),
+    ...(status ? { status } : {}),
+    ...(gender && gender.length > 0 ? { gender: { in: gender } } : {}),
+    ...(beltLevels && beltLevels.length > 0
+      ? { beltLevel: { in: beltLevels } }
+      : beltLevelMin !== undefined || beltLevelMax !== undefined
         ? {
-            weight: {
-              ...(weightMin !== undefined ? { gte: weightMin } : {}),
-              ...(weightMax !== undefined ? { lte: weightMax } : {}),
+            beltLevel: {
+              ...(beltLevelMin !== undefined ? { gte: beltLevelMin } : {}),
+              ...(beltLevelMax !== undefined ? { lte: beltLevelMax } : {}),
             },
           }
         : {}),
-    };
+    ...(weightMin !== undefined || weightMax !== undefined
+      ? {
+          weight: {
+            ...(weightMin !== undefined ? { gte: weightMin } : {}),
+            ...(weightMax !== undefined ? { lte: weightMax } : {}),
+          },
+        }
+      : {}),
+  } satisfies Prisma.TournamentAthleteWhereInput;
+}
+
+export const tournamentAthleteStore: TournamentAthleteStore = {
+  async list(input) {
+    const { page, perPage, sorting } = input;
+    const where = buildListWhere(input);
 
     const orderBy =
       sorting.length > 0
@@ -98,20 +103,15 @@ export class TournamentAthleteDAL {
     ]);
 
     return { items, total };
-  }
+  },
 
-  static async bulkCreate(
-    tournamentId: string,
-    profiles: Array<{
-      id: string;
-      name: string;
-      gender: string;
-      beltLevel: number;
-      weight: number;
-      affiliation: string;
-      image: string | null;
-    }>
-  ) {
+  async findProfilesByIds(ids) {
+    return prisma.athleteProfile.findMany({
+      where: { id: { in: ids } },
+    });
+  },
+
+  async bulkCreate(tournamentId, profiles) {
     const tournament = await prisma.tournament.findUnique({
       where: { id: tournamentId },
       select: { status: true },
@@ -149,12 +149,10 @@ export class TournamentAthleteDAL {
 
     publishTournamentMutation(tournamentId);
     return toCreate;
-  }
+  },
 
-  static async updateTournamentAthlete(
-    id: string,
-    data: Omit<UpdateTournamentAthleteDTO, 'id'>
-  ) {
+  async update(command: UpdateTournamentAthleteCommand) {
+    const { id, ...data } = command;
     const existing = await prisma.tournamentAthlete.findUnique({
       where: { id },
       include: { tournament: { select: { status: true } } },
@@ -165,27 +163,35 @@ export class TournamentAthleteDAL {
     const updated = await prisma.tournamentAthlete.update({
       where: { id },
       data,
+      include: {
+        athleteProfile: { select: { id: true, athleteCode: true } },
+      },
     });
     publishTournamentMutation(updated.tournamentId);
     return updated;
-  }
+  },
 
-  static async removeTournamentAthlete(id: string) {
+  async remove(command: RemoveTournamentAthleteCommand) {
     const existing = await prisma.tournamentAthlete.findUnique({
-      where: { id },
+      where: { id: command.id },
       include: { tournament: { select: { status: true } } },
     });
     if (!existing) throw new NotFoundError('Tournament athlete not found');
     assertTournamentAction(existing.tournament.status, 'roster.delete');
 
-    const deleted = await prisma.tournamentAthlete.delete({ where: { id } });
+    const deleted = await prisma.tournamentAthlete.delete({
+      where: { id: command.id },
+      include: {
+        athleteProfile: { select: { id: true, athleteCode: true } },
+      },
+    });
     publishTournamentMutation(deleted.tournamentId);
     return deleted;
-  }
+  },
 
-  static async bulkRemoveTournamentAthletes(ids: Array<string>) {
+  async bulkRemove(command: BulkRemoveTournamentAthletesCommand) {
     const rows = await prisma.tournamentAthlete.findMany({
-      where: { id: { in: ids } },
+      where: { id: { in: command.ids } },
       select: {
         tournamentId: true,
         tournament: { select: { status: true } },
@@ -196,11 +202,22 @@ export class TournamentAthleteDAL {
     }
 
     const result = await prisma.tournamentAthlete.deleteMany({
-      where: { id: { in: ids } },
+      where: { id: { in: command.ids } },
     });
     for (const tournamentId of new Set(rows.map((row) => row.tournamentId))) {
       publishTournamentMutation(tournamentId);
     }
     return { removed: result.count };
-  }
-}
+  },
+
+  async countAssigned(tournamentId, profileIds) {
+    const rows = await prisma.tournamentAthlete.findMany({
+      where: {
+        tournamentId,
+        athleteProfileId: { in: profileIds },
+      },
+      select: { groupId: true },
+    });
+    return rows.filter((r) => r.groupId != null).length;
+  },
+};
