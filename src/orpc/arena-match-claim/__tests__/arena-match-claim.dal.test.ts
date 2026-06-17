@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ArenaMatchClaimDAL } from '../dal';
+import { arenaMatchClaimStore } from '@/server/infrastructure/arena-match-claim';
 import { prisma } from '@/lib/db';
-import { publishTournamentMutation } from '@/orpc/mutation-effects';
+import { publishTournamentMutation } from '@/server/infrastructure/mutation-effects';
 
 const tx = {
   arenaMatchClaim: {
@@ -37,7 +37,7 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-vi.mock('@/orpc/mutation-effects', () => ({
+vi.mock('@/server/infrastructure/mutation-effects', () => ({
   publishTournamentMutation: vi.fn(),
   recordMutationActivity: vi.fn(),
 }));
@@ -48,7 +48,7 @@ beforeEach(() => {
   vi.mocked(tx.arenaMatchClaim.findMany).mockResolvedValue([]);
 });
 
-describe('ArenaMatchClaimDAL.claim', () => {
+describe('arenaMatchClaimStore.claim', () => {
   it('runs claim lifecycle in one transaction before publishing', async () => {
     vi.mocked(prisma.arenaMatchClaim.deleteMany).mockResolvedValue({
       count: 0,
@@ -69,7 +69,7 @@ describe('ArenaMatchClaimDAL.claim', () => {
     } as never);
     vi.mocked(tx.match.update).mockResolvedValue({ id: 'm1' } as never);
 
-    await ArenaMatchClaimDAL.claim({
+    await arenaMatchClaimStore.claim({
       matchId: 'm1',
       groupId: 'g1',
       tournamentId: 't1',
@@ -96,7 +96,7 @@ describe('ArenaMatchClaimDAL.claim', () => {
     } as never);
 
     await expect(
-      ArenaMatchClaimDAL.claim({
+      arenaMatchClaimStore.claim({
         matchId: 'm1',
         groupId: 'g1',
         tournamentId: 't1',
@@ -111,7 +111,7 @@ describe('ArenaMatchClaimDAL.claim', () => {
   });
 });
 
-describe('ArenaMatchClaimDAL.release', () => {
+describe('arenaMatchClaimStore.release', () => {
   it('runs release lifecycle in one transaction before publishing', async () => {
     vi.mocked(tx.arenaMatchClaim.findUnique).mockResolvedValue({
       matchId: 'm1',
@@ -127,7 +127,7 @@ describe('ArenaMatchClaimDAL.release', () => {
     vi.mocked(tx.arenaMatchClaim.delete).mockResolvedValue({} as never);
     vi.mocked(tx.match.update).mockResolvedValue({ id: 'm1' } as never);
 
-    await ArenaMatchClaimDAL.release({
+    await arenaMatchClaimStore.release({
       matchId: 'm1',
       deviceId: 'd1',
       userId: 'u1',
@@ -152,7 +152,7 @@ describe('ArenaMatchClaimDAL.release', () => {
     } as never);
 
     await expect(
-      ArenaMatchClaimDAL.release({
+      arenaMatchClaimStore.release({
         matchId: 'm1',
         deviceId: 'd1',
         userId: 'u1',
