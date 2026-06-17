@@ -4,6 +4,7 @@ import { RPCHandler } from '@orpc/server/fetch';
 import { onError } from '@orpc/server';
 import { createFileRoute } from '@tanstack/react-router';
 import router from '@/orpc/router';
+import { serverRepos } from '@/server/composition';
 
 const handler = new RPCHandler(router, {
   interceptors: [
@@ -18,6 +19,7 @@ async function handle({ request }: { request: Request }) {
     prefix: '/api/rpc',
     context: {
       headers: request.headers,
+      repos: serverRepos,
     },
   });
 

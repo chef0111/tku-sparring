@@ -1,8 +1,10 @@
 import { os } from '@orpc/server';
+import type { ServerRepos } from '@/server/composition';
 
 export const base = os
   .$context<{
     headers: Headers;
+    repos: ServerRepos;
   }>()
   .errors({
     RATE_LIMITED: {

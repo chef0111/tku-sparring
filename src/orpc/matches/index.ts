@@ -29,7 +29,6 @@ import {
   setMatchWinner as runSetMatchWinner,
   updateMatchScore as runUpdateMatchScore,
 } from '@/server/application/matches/use-cases/transition';
-import { matchTransitionStore } from '@/server/infrastructure/matches';
 
 export const listMatches = authorized
   .input(
@@ -73,7 +72,7 @@ export const adminSetMatchStatus = authorized
     assertSystemAdmin(context.user);
     return runAdminSetMatchStatus(
       { ...input, adminId: context.user.id },
-      matchTransitionStore
+      context.repos.matchTransition
     );
   });
 
@@ -130,7 +129,7 @@ export const updateScore = authorized
     assertSystemAdmin(context.user);
     const score = await runUpdateMatchScore(
       { ...input, adminId: context.user.id },
-      matchTransitionStore
+      context.repos.matchTransition
     );
     return score;
   });
@@ -141,7 +140,7 @@ export const setWinner = authorized
     assertSystemAdmin(context.user);
     const winner = await runSetMatchWinner(
       { ...input, adminId: context.user.id },
-      matchTransitionStore
+      context.repos.matchTransition
     );
     return winner;
   });

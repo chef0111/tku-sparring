@@ -8,6 +8,7 @@ import { onError } from '@orpc/server';
 import { OpenAPIReferencePlugin } from '@orpc/openapi/plugins';
 
 import router from '@/orpc/router';
+import { serverRepos } from '@/server/composition';
 
 const handler = new OpenAPIHandler(router, {
   interceptors: [
@@ -57,6 +58,7 @@ async function handle({ request }: { request: Request }) {
     prefix: '/api',
     context: {
       headers: request.headers,
+      repos: serverRepos,
     },
   });
 
