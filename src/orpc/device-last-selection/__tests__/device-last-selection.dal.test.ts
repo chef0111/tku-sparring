@@ -1,11 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { DeviceLastSelectionDAL } from '../dal';
+import { deviceLastSelectionStore } from '@/server/infrastructure/device-last-selection';
+import { getLastSelection } from '@/server/application/device-last-selection/use-cases/get';
+import { setLastSelection } from '@/server/application/device-last-selection/use-cases/set';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
   prisma: {
     deviceLastSelection: {
+      findUnique: vi.fn(),
       upsert: vi.fn(),
     },
     group: {
@@ -27,17 +30,49 @@ beforeEach(() => {
   );
 });
 
-describe('DeviceLastSelectionDAL.upsertForUserDevice', () => {
+describe('getLastSelection', () => {
+  it('returns null when no row exists', async () => {
+    vi.mocked(prisma.deviceLastSelection.findUnique).mockResolvedValue(null);
+
+    const result = await getLastSelection(
+      { userId: 'u1', deviceId: 'd1' },
+      deviceLastSelectionStore
+    );
+
+    expect(result).toBeNull();
+  });
+
+  it('returns stored selection payload', async () => {
+    vi.mocked(prisma.deviceLastSelection.findUnique).mockResolvedValue({
+      tournamentId: 't1',
+      groupId: 'g1',
+      matchId: 'm1',
+    } as never);
+
+    const result = await getLastSelection(
+      { userId: 'u1', deviceId: 'd1' },
+      deviceLastSelectionStore
+    );
+
+    expect(result).toEqual({
+      tournamentId: 't1',
+      groupId: 'g1',
+      matchId: 'm1',
+    });
+  });
+});
+
+describe('setLastSelection', () => {
   it('derives group and tournament from match selection', async () => {
     vi.mocked(prisma.match.findUnique).mockResolvedValue({
       groupId: 'g1',
       tournamentId: 't1',
     } as never);
 
-    await DeviceLastSelectionDAL.upsertForUserDevice('u1', {
-      deviceId: 'd1',
-      matchId: 'm1',
-    });
+    await setLastSelection(
+      { userId: 'u1', deviceId: 'd1', matchId: 'm1' },
+      deviceLastSelectionStore
+    );
 
     expect(prisma.deviceLastSelection.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -57,11 +92,10 @@ describe('DeviceLastSelectionDAL.upsertForUserDevice', () => {
     } as never);
 
     await expect(
-      DeviceLastSelectionDAL.upsertForUserDevice('u1', {
-        deviceId: 'd1',
-        groupId: 'g2',
-        matchId: 'm1',
-      })
+      setLastSelection(
+        { userId: 'u1', deviceId: 'd1', groupId: 'g2', matchId: 'm1' },
+        deviceLastSelectionStore
+      )
     ).rejects.toThrow(/given group/);
   });
 
@@ -72,11 +106,15 @@ describe('DeviceLastSelectionDAL.upsertForUserDevice', () => {
     } as never);
 
     await expect(
-      DeviceLastSelectionDAL.upsertForUserDevice('u1', {
-        deviceId: 'd1',
-        tournamentId: 't2',
-        matchId: 'm1',
-      })
+      setLastSelection(
+        {
+          userId: 'u1',
+          deviceId: 'd1',
+          tournamentId: 't2',
+          matchId: 'm1',
+        },
+        deviceLastSelectionStore
+      )
     ).rejects.toThrow(/given tournament/);
   });
 
@@ -85,10 +123,10 @@ describe('DeviceLastSelectionDAL.upsertForUserDevice', () => {
       tournamentId: 't1',
     } as never);
 
-    await DeviceLastSelectionDAL.upsertForUserDevice('u1', {
-      deviceId: 'd1',
-      groupId: 'g1',
-    });
+    await setLastSelection(
+      { userId: 'u1', deviceId: 'd1', groupId: 'g1' },
+      deviceLastSelectionStore
+    );
 
     expect(prisma.deviceLastSelection.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
