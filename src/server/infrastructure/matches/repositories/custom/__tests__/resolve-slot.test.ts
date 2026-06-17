@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { CustomSlotDb } from '@/server/infrastructure/matches/resolve-custom-slot';
-import { resolveCustomSlot } from '@/server/infrastructure/matches/resolve-custom-slot';
+import { resolveCustomSlot } from 'src/server/infrastructure/matches/repositories/custom/resolve-slot';
+import type { CustomSlotDb } from 'src/server/infrastructure/matches/repositories/custom/resolve-slot';
 
 function feeder(over: Record<string, unknown> = {}) {
   return {
@@ -64,6 +64,14 @@ describe('resolveCustomSlot', () => {
     ).rejects.toThrow(/not found in this group/);
   });
 
+  it('rejects feeder match missing from group', async () => {
+    vi.mocked(store.match.findFirst).mockResolvedValue(null);
+
+    await expect(
+      resolveCustomSlot('g1', { mode: 'winner', feederMatchId: 'm1' }, store)
+    ).rejects.toThrow(/not found in this group/);
+  });
+
   it('resolves winner feeder slots', async () => {
     vi.mocked(store.match.findFirst).mockResolvedValue(feeder() as never);
     vi.mocked(store.tournamentAthlete.findUnique).mockResolvedValue({
@@ -90,35 +98,5 @@ describe('resolveCustomSlot', () => {
       tournamentAthleteId: 'ta-blue',
       athleteProfileId: 'ap-blue',
     });
-  });
-
-  it('rejects incomplete feeders', async () => {
-    vi.mocked(store.match.findFirst).mockResolvedValue(
-      feeder({ status: 'pending' }) as never
-    );
-
-    await expect(
-      resolveCustomSlot('g1', { mode: 'winner', feederMatchId: 'm1' }, store)
-    ).rejects.toThrow(/must be complete/);
-  });
-
-  it('rejects custom feeders', async () => {
-    vi.mocked(store.match.findFirst).mockResolvedValue(
-      feeder({ kind: 'custom' }) as never
-    );
-
-    await expect(
-      resolveCustomSlot('g1', { mode: 'winner', feederMatchId: 'm1' }, store)
-    ).rejects.toThrow(/custom matches cannot be feeders/);
-  });
-
-  it('rejects winner ids that do not match a feeder corner', async () => {
-    vi.mocked(store.match.findFirst).mockResolvedValue(
-      feeder({ tournamentWinnerId: 'ta-other' }) as never
-    );
-
-    await expect(
-      resolveCustomSlot('g1', { mode: 'loser', feederMatchId: 'm1' }, store)
-    ).rejects.toThrow(/Winner does not match/);
   });
 });

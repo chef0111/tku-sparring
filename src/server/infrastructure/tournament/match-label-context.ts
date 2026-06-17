@@ -6,14 +6,14 @@ import {
   resolveArenaGroupOrder,
 } from '@/server/domain/tournament/arena/match-label';
 import { normalizeMatchLabelKey } from '@/server/domain/tournament/arena/match-label-key';
-import { savedArenaGroupIds } from '@/lib/tournament/arena/arena-group-order';
+import { savedArenaGroupIds } from '@/server/domain/tournament/arena/arena-group-order';
 import {
   matchProjectionSelect,
   toMatchData,
 } from '@/server/domain/tournament/match/match-projection';
 import { prisma } from '@/lib/db';
 
-export { normalizeMatchLabelKey, type MatchLabelContext };
+export type { MatchLabelContext };
 
 export async function loadMatchLabelContext(input: {
   tournamentId: string;

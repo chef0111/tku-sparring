@@ -10,7 +10,7 @@ import {
   mergeArenaGroupOrderAfterCrossArenaMove,
   mergeArenaGroupOrderAfterRetireArena,
   patchArenaGroupOrderJson,
-} from '@/lib/tournament/arena/arena-group-order';
+} from '@/server/domain/tournament/arena/arena-group-order';
 import { groupListQueryOptions } from '@/queries/group/group-list-query-options';
 import {
   invalidateAfterArenaLayoutChange,

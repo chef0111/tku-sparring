@@ -53,7 +53,7 @@ vi.mock('@/server/infrastructure/mutation-effects', () => ({
   publishTournamentMutation: vi.fn(),
 }));
 
-vi.mock('@/lib/tournament/custom/custom-match-label', () => ({
+vi.mock('@/server/infrastructure/matches/repositories/custom/label', () => ({
   assertLabelAvailable: vi.fn().mockResolvedValue(undefined),
 }));
 

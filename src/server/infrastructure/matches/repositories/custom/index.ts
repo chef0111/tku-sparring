@@ -1,16 +1,17 @@
+import { assertLabelAvailable } from 'src/server/infrastructure/matches/repositories/custom/assert-label';
+import { resolveCustomSlot } from 'src/server/infrastructure/matches/repositories/custom/resolve-slot';
 import type { CustomMatchStore } from '@/server/application/matches/repositories/custom';
 import type { Prisma } from '@/generated/prisma/client';
 import { BadRequestError } from '@/server/application/errors';
-import { CUSTOM_MATCH_ROUND } from '@/lib/tournament/custom/custom-match';
-import { assertLabelAvailable } from '@/lib/tournament/custom/custom-match-label';
-import { resolveCustomSlot } from '@/server/infrastructure/matches/resolve-custom-slot';
-import { CustomMatchValidationError } from '@/lib/tournament/custom/custom-match-validation';
+import { CustomMatchValidationError } from '@/server/domain/tournament/custom/errors';
 import { coalesceMatchRead } from '@/server/domain/tournament/match/match-read';
 import {
   publishTournamentMutation,
   recordMutationActivity,
 } from '@/server/infrastructure/mutation-effects';
 import { prisma } from '@/lib/db';
+
+const CUSTOM_MATCH_ROUND = 900;
 
 function mapValidationError(e: unknown): never {
   if (e instanceof CustomMatchValidationError) {

@@ -9,7 +9,7 @@ import {
   savedArenaGroupIds,
   shouldShowArenaOrderUi,
   sortedDistinctArenaIndices,
-} from '../arena-group-order';
+} from '@/server/domain/tournament/arena/arena-group-order';
 
 describe('savedArenaGroupIds', () => {
   it('returns ordered ids for an arena key', () => {

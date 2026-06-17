@@ -4,7 +4,7 @@ import {
   mergeArenaGroupOrderAfterCrossArenaMove,
   mergeArenaGroupOrderAfterRetireArena,
   patchArenaGroupOrderJson,
-} from '@/lib/tournament/arena/arena-group-order';
+} from '@/server/domain/tournament/arena/arena-group-order';
 import { NotFoundError } from '@/server/application/errors';
 import { publishTournamentMutation } from '@/server/infrastructure/mutation-effects';
 import { prisma } from '@/lib/db';
