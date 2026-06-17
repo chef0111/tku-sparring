@@ -12,7 +12,7 @@ import type {
   SwapSlotsDTO,
 } from './dto';
 import { isThirdPlaceMatch } from '@/lib/tournament/bracket-layout';
-import { recordTournamentActivity } from '@/orpc/activity/dal';
+import { recordMutationActivity } from '@/server/infrastructure/mutation-effects';
 import { prisma } from '@/lib/db';
 import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
 
@@ -119,7 +119,7 @@ export class MatchDAL {
         },
       });
 
-      await recordTournamentActivity(
+      await recordMutationActivity(
         {
           tournamentId: match.tournamentId,
           adminId,

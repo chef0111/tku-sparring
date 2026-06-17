@@ -1,21 +1,8 @@
-import type { ActivityDatabase, ActivityInput } from './types';
 import type { Prisma } from '@/generated/prisma/client';
 import type { ListTournamentActivityDTO } from './dto';
 import { prisma } from '@/lib/db';
 
-export async function recordTournamentActivity(
-  input: ActivityInput,
-  db: ActivityDatabase = prisma
-) {
-  const { payload = {}, ...data } = input;
-
-  return db.tournamentActivity.create({
-    data: {
-      ...data,
-      payload,
-    },
-  });
-}
+export { recordTournamentActivity } from '@/server/infrastructure/activity/record';
 
 const DEFAULT_ACTIVITY_PAGE_SIZE = 10;
 const MAX_ACTIVITY_PAGE_SIZE = 100;

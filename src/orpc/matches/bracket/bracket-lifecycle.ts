@@ -1,4 +1,3 @@
-import { applyRound0ByeAdvancement } from '../match-progression';
 import { findMatchesByGroupId } from '../match-read';
 import {
   clearAllGroupMatchRowsData,
@@ -10,12 +9,13 @@ import { buildRound0Baseline, parseRound0Baseline } from './round0-baseline';
 import type { Round0Baseline } from './round0-baseline';
 import type { GenerateBracketDTO } from '../dto';
 import type { PrismaClient } from '@/generated/prisma/client';
+import { applyRound0ByeAdvancement } from '@/lib/tournament/match-progression';
 import {
   nextPowerOfTwo,
   planBracketShell,
   planRound0Placements,
 } from '@/lib/tournament/bracket-shape';
-import { recordTournamentActivity } from '@/orpc/activity/dal';
+import { recordMutationActivity } from '@/server/infrastructure/mutation-effects';
 import { prisma } from '@/lib/db';
 import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
 
@@ -294,7 +294,7 @@ export async function generateBracket(
   await Promise.all(shell.matches.map((m) => prisma.match.create({ data: m })));
 
   if (!options?.skipActivity) {
-    await recordTournamentActivity({
+    await recordMutationActivity({
       tournamentId: group.tournamentId,
       adminId,
       eventType: 'bracket.generate',
@@ -335,7 +335,7 @@ export async function resetBracket(groupId: string, adminId: string) {
     baseline
   );
 
-  await recordTournamentActivity({
+  await recordMutationActivity({
     tournamentId: group.tournamentId,
     adminId,
     eventType: 'bracket.reset',
@@ -357,7 +357,7 @@ export async function shuffleBracket(groupId: string, adminId: string) {
 
   await runBracketShufflePlacements(prisma, groupId, group.tournamentId);
 
-  await recordTournamentActivity({
+  await recordMutationActivity({
     tournamentId: group.tournamentId,
     adminId,
     eventType: 'bracket.shuffle',
@@ -406,7 +406,7 @@ export async function regenerateBracket(groupId: string, adminId: string) {
     await groupUpdateRound0Baseline(tx, groupId, null);
   });
 
-  await recordTournamentActivity({
+  await recordMutationActivity({
     tournamentId: group.tournamentId,
     adminId,
     eventType: 'bracket.regenerate',

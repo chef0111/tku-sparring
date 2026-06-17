@@ -8,7 +8,7 @@ import {
   getNameSortKey,
   orderFieldForColumnId,
 } from '@/lib/sort/name-sort-key';
-import { notFound } from '@/orpc/errors';
+import { NotFoundError } from '@/server/application/errors';
 import { publishTournamentMutation } from '@/orpc/mutation-effects';
 import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
 
@@ -116,7 +116,7 @@ export class TournamentAthleteDAL {
       where: { id: tournamentId },
       select: { status: true },
     });
-    if (!tournament) notFound('Tournament not found');
+    if (!tournament) throw new NotFoundError('Tournament not found');
     assertTournamentAction(tournament.status, 'roster.add');
 
     const existing = await prisma.tournamentAthlete.findMany({
@@ -159,7 +159,7 @@ export class TournamentAthleteDAL {
       where: { id },
       include: { tournament: { select: { status: true } } },
     });
-    if (!existing) notFound('Tournament athlete not found');
+    if (!existing) throw new NotFoundError('Tournament athlete not found');
     assertTournamentAction(existing.tournament.status, 'roster.update');
 
     const updated = await prisma.tournamentAthlete.update({
@@ -175,7 +175,7 @@ export class TournamentAthleteDAL {
       where: { id },
       include: { tournament: { select: { status: true } } },
     });
-    if (!existing) notFound('Tournament athlete not found');
+    if (!existing) throw new NotFoundError('Tournament athlete not found');
     assertTournamentAction(existing.tournament.status, 'roster.delete');
 
     const deleted = await prisma.tournamentAthlete.delete({ where: { id } });

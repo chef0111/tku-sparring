@@ -1,5 +1,5 @@
 import type { AssignSlotDTO, SetLockDTO, SwapSlotsDTO } from '../dto';
-import { notFound } from '@/orpc/errors';
+import { NotFoundError } from '@/server/application/errors';
 import { prisma } from '@/lib/db';
 import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
 
@@ -8,7 +8,7 @@ export async function setRound0SlotLock(input: SetLockDTO) {
     where: { id: input.matchId },
     include: { tournament: { select: { status: true } } },
   });
-  if (!match) notFound('Match not found');
+  if (!match) throw new NotFoundError('Match not found');
   assertTournamentAction(match.tournament.status, 'match.slot.edit');
 
   const data =

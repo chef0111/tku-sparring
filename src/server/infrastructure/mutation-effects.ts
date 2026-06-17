@@ -1,9 +1,12 @@
-import type { ActivityDatabase, ActivityInput } from '@/orpc/activity/types';
-import { recordTournamentActivity } from '@/orpc/activity/dal';
+import type {
+  ActivityDatabase,
+  ActivityRecordInput,
+} from '@/server/application/activity/activity-record';
+import { recordTournamentActivity } from '@/server/infrastructure/activity/record';
 import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
 
 export async function recordMutationActivity(
-  input: ActivityInput,
+  input: ActivityRecordInput,
   db?: ActivityDatabase
 ) {
   return recordTournamentActivity(input, db);

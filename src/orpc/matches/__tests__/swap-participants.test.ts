@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MatchDAL } from '../dal';
-import { recordTournamentActivity } from '@/orpc/activity/dal';
+import { recordMutationActivity } from '@/server/infrastructure/mutation-effects';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
@@ -16,8 +16,9 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-vi.mock('@/orpc/activity/dal', () => ({
-  recordTournamentActivity: vi.fn(),
+vi.mock('@/server/infrastructure/mutation-effects', () => ({
+  recordMutationActivity: vi.fn(),
+  publishTournamentMutation: vi.fn(),
 }));
 
 function upperMatch(over: Record<string, unknown> = {}) {
@@ -76,7 +77,7 @@ describe('swapParticipants', () => {
         data: expect.objectContaining({ cornersSwapped: true }),
       })
     );
-    expect(recordTournamentActivity).toHaveBeenCalled();
+    expect(recordMutationActivity).toHaveBeenCalled();
   });
 
   it('rejects active tournaments', async () => {

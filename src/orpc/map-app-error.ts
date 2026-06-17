@@ -2,6 +2,7 @@ import { ORPCError } from '@orpc/server';
 
 import {
   BadRequestError,
+  ForbiddenError,
   NotFoundError,
   PolicyViolationError,
 } from '@/server/application/errors';
@@ -20,6 +21,9 @@ export function toOrpcError(e: unknown): unknown {
   }
   if (e instanceof BadRequestError) {
     return new ORPCError('BAD_REQUEST', { message: e.message, defined: true });
+  }
+  if (e instanceof ForbiddenError) {
+    return new ORPCError('FORBIDDEN', { message: e.message, defined: true });
   }
   return e;
 }

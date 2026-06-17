@@ -1,35 +1,9 @@
 import type { MatchTransitionPlan } from '@/lib/tournament/match-transition';
+import type { MatchLoadRow, MatchRead } from '@/lib/tournament/match-read';
 import type { MutationActivityInput } from '@/server/application/activity/activity-types';
 
-export type MatchTransitionRow = {
-  id: string;
-  kind: string;
-  displayLabel: string | null;
-  round: number;
-  matchIndex: number;
-  status: string;
-  redAthleteId: string | null;
-  blueAthleteId: string | null;
-  redTournamentAthleteId: string | null;
-  blueTournamentAthleteId: string | null;
-  redWins: number;
-  blueWins: number;
-  winnerId: string | null;
-  tournamentWinnerId: string | null;
-  redLocked: boolean;
-  blueLocked: boolean;
-  cornersSwapped: boolean;
-  groupId: string;
-  tournamentId: string;
-  tournamentStatus: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type MatchTransitionResult = Omit<
-  MatchTransitionRow,
-  'tournamentStatus'
->;
+export type MatchTransitionRow = MatchLoadRow;
+export type MatchTransitionResult = MatchRead;
 
 export type MatchTransitionStore = {
   findMatch: (matchId: string) => Promise<MatchTransitionRow | null>;

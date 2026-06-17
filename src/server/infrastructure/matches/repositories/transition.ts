@@ -3,7 +3,7 @@ import type { Prisma } from '@/generated/prisma/client';
 import {
   advanceWinner,
   clearWinnerAdvancement,
-} from '@/orpc/matches/match-progression';
+} from '@/lib/tournament/match-progression';
 import { coalesceMatchRead } from '@/lib/tournament/match-read';
 import {
   publishTournamentMutation,

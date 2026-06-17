@@ -4,7 +4,7 @@ import { matchTransitionStore } from '../transition';
 import {
   advanceWinner,
   clearWinnerAdvancement,
-} from '@/orpc/matches/match-progression';
+} from '@/lib/tournament/match-progression';
 import { prisma } from '@/lib/db';
 import {
   publishTournamentMutation,
@@ -30,7 +30,7 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-vi.mock('@/orpc/matches/match-progression', () => ({
+vi.mock('@/lib/tournament/match-progression', () => ({
   clearWinnerAdvancement: vi.fn(),
   advanceWinner: vi.fn(),
 }));

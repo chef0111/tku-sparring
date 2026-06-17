@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { advanceWinner } from '../match-progression';
-import type { ProgressionDb } from '../match-progression';
+import type { ProgressionDb } from '@/lib/tournament/match-progression';
+import { advanceWinner } from '@/lib/tournament/match-progression';
 import { getScoreTransition } from '@/lib/tournament/match-transition';
 import { getSuccessorSlot } from '@/lib/tournament/bracket-progression';
 import { planBracketShell } from '@/lib/tournament/bracket-shape';

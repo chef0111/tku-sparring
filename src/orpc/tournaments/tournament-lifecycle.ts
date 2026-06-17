@@ -1,4 +1,3 @@
-import { recordTournamentActivity } from '../activity/dal';
 import { TournamentStatusSchema } from './dto';
 import type {
   CreateTournamentDTO,
@@ -7,10 +6,11 @@ import type {
   UpdateTournamentDTO,
 } from './dto';
 import type { Prisma } from '@/generated/prisma/client';
+import { recordMutationActivity } from '@/server/infrastructure/mutation-effects';
 import { prisma } from '@/lib/db';
 import { getNameSortKey } from '@/lib/sort/name-sort-key';
 import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
-import { badRequest, notFound } from '@/orpc/errors';
+import { BadRequestError, NotFoundError } from '@/server/application/errors';
 import {
   assertCanForceTournamentStatus,
   assertTournamentAction,
@@ -97,7 +97,9 @@ function assertNextStatus(
   const expectedNextStatus = NEXT_TOURNAMENT_STATUS[currentStatus];
 
   if (expectedNextStatus !== nextStatus) {
-    badRequest('Tournament status must advance one step at a time');
+    throw new BadRequestError(
+      'Tournament status must advance one step at a time'
+    );
   }
 }
 
@@ -122,7 +124,7 @@ export async function updateTournament(
     where: { id },
     select: { status: true },
   });
-  if (!existing) notFound('Tournament not found');
+  if (!existing) throw new NotFoundError('Tournament not found');
   assertTournamentAction(existing.status, 'tournament.update');
 
   return prisma.tournament.update({
@@ -143,7 +145,7 @@ export async function setTournamentStatus(
     const tournament = await findTournamentWithLifecycle(input.id, tx);
 
     if (!tournament) {
-      notFound('Tournament not found');
+      throw new NotFoundError('Tournament not found');
     }
 
     const currentStatus = TournamentStatusSchema.parse(tournament.status);
@@ -158,7 +160,7 @@ export async function setTournamentStatus(
       assertNextStatus(currentStatus, input.status);
 
       if (input.status === 'completed' && !tournament.lifecycle.canComplete) {
-        badRequest(
+        throw new BadRequestError(
           'Tournament cannot be completed until every group has winner results'
         );
       }
@@ -169,7 +171,7 @@ export async function setTournamentStatus(
       data: { status: input.status },
     });
 
-    await recordTournamentActivity(
+    await recordMutationActivity(
       {
         tournamentId: input.id,
         adminId: input.adminId,
@@ -197,10 +199,10 @@ export async function deleteTournament(id: string, adminId: string) {
       where: { id },
       select: { id: true, status: true },
     });
-    if (!tournament) notFound('Tournament not found');
+    if (!tournament) throw new NotFoundError('Tournament not found');
     assertTournamentAction(tournament.status, 'tournament.delete');
 
-    await recordTournamentActivity(
+    await recordMutationActivity(
       {
         tournamentId: id,
         adminId,

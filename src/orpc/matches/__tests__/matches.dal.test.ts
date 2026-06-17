@@ -17,7 +17,6 @@ import {
   publishTournamentMutation,
   recordMutationActivity,
 } from '@/server/infrastructure/mutation-effects';
-import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
@@ -47,10 +46,6 @@ vi.mock('@/lib/db', () => ({
 vi.mock('@/server/infrastructure/mutation-effects', () => ({
   recordMutationActivity: vi.fn(),
   publishTournamentMutation: vi.fn(),
-}));
-
-vi.mock('@/orpc/activity/dal', () => ({
-  recordTournamentActivity: vi.fn(),
 }));
 
 vi.mock('@/lib/tournament/custom-match-label', () => ({
@@ -114,7 +109,7 @@ describe('generateBracket', () => {
       expect(row.blueTournamentAthleteId).toBeNull();
     }
     expect(prisma.match.update).not.toHaveBeenCalled();
-    expect(recordTournamentActivity).toHaveBeenCalledWith(
+    expect(recordMutationActivity).toHaveBeenCalledWith(
       expect.objectContaining({
         eventType: 'bracket.generate',
         payload: expect.objectContaining({ mode: 'shell', bracketSize: 2 }),
@@ -248,7 +243,7 @@ describe('resetBracket', () => {
 
     await resetBracket('group-1', 'admin-1');
 
-    expect(recordTournamentActivity).toHaveBeenCalledWith(
+    expect(recordMutationActivity).toHaveBeenCalledWith(
       expect.objectContaining({ eventType: 'bracket.reset' })
     );
     expect(prisma.match.update).toHaveBeenCalled();
@@ -664,7 +659,7 @@ describe('regenerateBracket', () => {
       where: { id: 'group-1' },
       data: { round0Baseline: null },
     });
-    expect(recordTournamentActivity).toHaveBeenCalledWith(
+    expect(recordMutationActivity).toHaveBeenCalledWith(
       expect.objectContaining({ eventType: 'bracket.regenerate' })
     );
   });
