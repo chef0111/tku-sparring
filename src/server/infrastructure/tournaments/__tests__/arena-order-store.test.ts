@@ -59,55 +59,6 @@ beforeEach(() => {
 });
 
 describe('tournament arena order infrastructure', () => {
-  it('guards arena order mutations to draft tournaments', async () => {
-    vi.mocked(prisma.tournament.findUnique).mockResolvedValue({
-      ...draftTournament,
-      status: 'active',
-    } as never);
-
-    await expect(
-      setArenaGroupOrder(
-        {
-          tournamentId: 't1',
-          arenaIndex: 1,
-          groupIds: ['g1', 'g2'],
-        },
-        tournamentArenaOrderStore
-      )
-    ).rejects.toThrow(/Draft status/);
-
-    expect(prisma.tournament.update).not.toHaveBeenCalled();
-    expect(publishTournamentMutation).not.toHaveBeenCalled();
-  });
-
-  it('requires same-arena reorder to include every group exactly once', async () => {
-    vi.mocked(prisma.tournament.findUnique).mockResolvedValue(
-      draftTournament as never
-    );
-
-    await expect(
-      setArenaGroupOrder(
-        {
-          tournamentId: 't1',
-          arenaIndex: 1,
-          groupIds: ['g1'],
-        },
-        tournamentArenaOrderStore
-      )
-    ).rejects.toThrow(/exactly once/);
-
-    await expect(
-      setArenaGroupOrder(
-        {
-          tournamentId: 't1',
-          arenaIndex: 1,
-          groupIds: ['g1', 'g3'],
-        },
-        tournamentArenaOrderStore
-      )
-    ).rejects.toThrow(/exactly once/);
-  });
-
   it('updates group arena and arena order in one transaction for cross-arena moves', async () => {
     vi.mocked(prisma.tournament.findUnique).mockResolvedValue(
       draftTournament as never

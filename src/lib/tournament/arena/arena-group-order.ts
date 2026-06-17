@@ -1,4 +1,4 @@
-import { resolveArenaGroupOrder } from './arena-match-label';
+import { resolveArenaGroupOrder } from '@/server/domain/tournament/arena/match-label';
 
 export const TOURNAMENT_MAX_ARENAS = 3;
 

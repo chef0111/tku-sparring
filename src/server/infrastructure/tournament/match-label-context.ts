@@ -1,28 +1,19 @@
+import type { MatchLabelContext } from '@/server/domain/tournament/arena/match-label-key';
 import {
   buildManualRankMap,
   buildMatchNumber,
   formatArenaMatchTitle,
   resolveArenaGroupOrder,
-} from './arena-match-label';
-import { savedArenaGroupIds } from './arena-group-order';
-import type { MatchData } from '@/features/dashboard/types';
+} from '@/server/domain/tournament/arena/match-label';
+import { normalizeMatchLabelKey } from '@/server/domain/tournament/arena/match-label-key';
+import { savedArenaGroupIds } from '@/lib/tournament/arena/arena-group-order';
 import {
   matchProjectionSelect,
   toMatchData,
 } from '@/server/domain/tournament/match/match-projection';
 import { prisma } from '@/lib/db';
 
-export function normalizeMatchLabelKey(label: string): string {
-  return label.trim().toLowerCase();
-}
-
-export type MatchLabelContext = {
-  arenaIndex: number;
-  groupIdsOnArena: Array<string>;
-  allMatches: Array<MatchData>;
-  numbers: Map<string, number | null>;
-  assignedBracketTitleKeys: Set<string>;
-};
+export { normalizeMatchLabelKey, type MatchLabelContext };
 
 export async function loadMatchLabelContext(input: {
   tournamentId: string;

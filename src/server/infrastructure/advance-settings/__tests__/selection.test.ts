@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { advanceSelectionStore } from '@/server/infrastructure/advance-settings';
-import { formatArenaMatchTitle } from '@/lib/tournament/arena/arena-match-label';
-import { loadMatchLabelContext } from '@/lib/tournament/arena/match-label-context';
+import { formatArenaMatchTitle } from '@/server/domain/tournament/arena/match-label';
+import { loadMatchLabelContext } from '@/server/infrastructure/tournament/match-label-context';
 import { loadActiveClaimsByMatchId } from '@/server/infrastructure/arena-match-claim/active-claims';
 import { prisma } from '@/lib/db';
 
@@ -24,7 +24,7 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-vi.mock('@/lib/tournament/arena/match-label-context', () => ({
+vi.mock('@/server/infrastructure/tournament/match-label-context', () => ({
   loadMatchLabelContext: vi.fn(),
 }));
 

@@ -5,7 +5,7 @@ import {
   buildManualRankMap,
   buildMatchNumber,
   resolveArenaGroupOrder,
-} from '@/lib/tournament/arena/arena-match-label';
+} from '@/server/domain/tournament/arena/match-label';
 import {
   savedArenaGroupIds,
   shouldShowArenaOrderUi,

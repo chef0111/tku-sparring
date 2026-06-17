@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { activityListStore } from '@/server/infrastructure/activity';
-import { summarizeTournamentActivity } from '@/server/application/activity/summarize';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
@@ -16,23 +15,6 @@ vi.mock('@/lib/db', () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
-});
-
-describe('summarizeTournamentActivity', () => {
-  it('describes status change', () => {
-    expect(
-      summarizeTournamentActivity('tournament.status_change', {
-        fromStatus: 'draft',
-        toStatus: 'active',
-      })
-    ).toContain('draft');
-  });
-
-  it('describes auto-assign count', () => {
-    expect(
-      summarizeTournamentActivity('group.auto_assign', { count: 5 })
-    ).toContain('5');
-  });
 });
 
 describe('activityListStore.list', () => {

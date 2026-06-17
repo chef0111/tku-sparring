@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { loadMatchLabelContext } from '../match-label-context';
+import { loadMatchLabelContext } from '@/server/infrastructure/tournament/match-label-context';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({

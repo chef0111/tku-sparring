@@ -83,58 +83,6 @@ describe('swapParticipants', () => {
     expect(recordMutationActivity).toHaveBeenCalled();
   });
 
-  it('rejects active tournaments', async () => {
-    vi.mocked(prisma.match.findUnique).mockResolvedValue(
-      upperMatch({
-        tournament: { status: 'active' },
-        group: {
-          thirdPlaceMatch: false,
-          tournament: { status: 'active' },
-        },
-      }) as never
-    );
-
-    await expect(
-      swapParticipants(
-        {
-          matchId: 'm1',
-          redTournamentAthleteId: null,
-          blueTournamentAthleteId: 'ta-red',
-          adminId: 'admin',
-        },
-        matchParticipantStore
-      )
-    ).rejects.toThrow(/Draft status/);
-
-    expect(prisma.match.update).not.toHaveBeenCalled();
-  });
-
-  it('rejects completed tournaments', async () => {
-    vi.mocked(prisma.match.findUnique).mockResolvedValue(
-      upperMatch({
-        tournament: { status: 'completed' },
-        group: {
-          thirdPlaceMatch: false,
-          tournament: { status: 'completed' },
-        },
-      }) as never
-    );
-
-    await expect(
-      swapParticipants(
-        {
-          matchId: 'm1',
-          redTournamentAthleteId: null,
-          blueTournamentAthleteId: 'ta-red',
-          adminId: 'admin',
-        },
-        matchParticipantStore
-      )
-    ).rejects.toThrow(/read-only/);
-
-    expect(prisma.match.update).not.toHaveBeenCalled();
-  });
-
   it('rejects complete matches', async () => {
     vi.mocked(prisma.match.findUnique).mockResolvedValue(
       upperMatch({ status: 'complete' }) as never

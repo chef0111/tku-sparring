@@ -8,8 +8,8 @@ import type {
   SelectionMatchesQuery,
 } from '@/server/application/advance-settings/use-cases/selection-commands';
 import { deriveGroupStatusForSelectionView } from '@/server/domain/tournament/advance/selection-status';
-import { formatArenaMatchTitle } from '@/lib/tournament/arena/arena-match-label';
-import { loadMatchLabelContext } from '@/lib/tournament/arena/match-label-context';
+import { formatArenaMatchTitle } from '@/server/domain/tournament/arena/match-label';
+import { loadMatchLabelContext } from '@/server/infrastructure/tournament/match-label-context';
 import { BadRequestError, NotFoundError } from '@/server/application/errors';
 import { loadActiveClaimsByMatchId } from '@/server/infrastructure/arena-match-claim/active-claims';
 import { prisma } from '@/lib/db';

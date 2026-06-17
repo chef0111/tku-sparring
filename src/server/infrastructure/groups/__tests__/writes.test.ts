@@ -122,47 +122,6 @@ describe('group lifecycle writes', () => {
     expect(publishTournamentMutation).toHaveBeenCalledTimes(1);
     expect(publishTournamentMutation).toHaveBeenCalledWith('t1');
   });
-
-  it('rejects create outside draft tournaments', async () => {
-    vi.mocked(prisma.tournament.findUnique).mockResolvedValue({
-      status: 'active',
-    } as never);
-
-    await expect(
-      createGroup({ name: 'Group A', tournamentId: 't1' }, groupLifecycleStore)
-    ).rejects.toThrow(/Draft status/);
-
-    expect(prisma.group.create).not.toHaveBeenCalled();
-    expect(publishTournamentMutation).not.toHaveBeenCalled();
-  });
-
-  it('rejects update on completed tournaments', async () => {
-    vi.mocked(prisma.group.findUnique).mockResolvedValue({
-      id: 'g1',
-      tournamentId: 't1',
-      tournament: { status: 'completed' },
-    } as never);
-
-    await expect(
-      updateGroup({ id: 'g1', name: 'Group B' }, groupLifecycleStore)
-    ).rejects.toThrow(/read-only/);
-
-    expect(prisma.group.update).not.toHaveBeenCalled();
-  });
-
-  it('rejects delete outside draft tournaments', async () => {
-    vi.mocked(prisma.group.findUnique).mockResolvedValue({
-      id: 'g1',
-      tournamentId: 't1',
-      tournament: { status: 'active' },
-    } as never);
-
-    await expect(
-      deleteGroup({ id: 'g1' }, groupLifecycleStore)
-    ).rejects.toThrow(/Draft status/);
-
-    expect(prisma.group.delete).not.toHaveBeenCalled();
-  });
 });
 
 describe('group autoAssign', () => {

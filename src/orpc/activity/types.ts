@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { TOURNAMENT_ACTIVITY_EVENT_TYPES } from '@/server/application/activity/activity-types';
+import { TOURNAMENT_ACTIVITY_EVENT_TYPES } from '@/server/domain/tournament/activity/event-types';
 
-export { TOURNAMENT_ACTIVITY_EVENT_TYPES } from '@/server/application/activity/activity-types';
-export type { TournamentActivityEventType } from '@/server/application/activity/activity-types';
+export { TOURNAMENT_ACTIVITY_EVENT_TYPES } from '@/server/domain/tournament/activity/event-types';
+export type { TournamentActivityEventType } from '@/server/domain/tournament/activity/event-types';
 
 export type {
   ActivityRecordInput as ActivityInput,

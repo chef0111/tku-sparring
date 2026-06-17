@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { MatchData } from '@/features/dashboard/types';
 import {
   buildArenaMatchNumberById,
   buildMatchNumber,
@@ -8,8 +9,7 @@ import {
   formatMatchHeaderLine,
   getFeederMatch,
   sortMatchesInRound,
-} from '../arena-match-label';
-import type { MatchData } from '@/features/dashboard/types';
+} from '@/server/domain/tournament/arena/match-label';
 
 function m(
   id: string,
