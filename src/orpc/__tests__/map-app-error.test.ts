@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { ORPCError } from '@orpc/server';
 
-import { mapAppError } from '../map-app-error';
+import { mapAppError, toOrpcError } from '../map-app-error';
 import {
   NotFoundError,
   PolicyViolationError,
@@ -35,5 +36,26 @@ describe('mapAppError', () => {
 
   it('rethrows unknown errors', () => {
     expect(() => mapAppError(fakeErrors(), new Error('boom'))).toThrow('boom');
+  });
+});
+
+describe('toOrpcError', () => {
+  it('maps NotFoundError to ORPCError', () => {
+    const result = toOrpcError(new NotFoundError('Match not found'));
+    expect(result).toBeInstanceOf(ORPCError);
+    expect((result as ORPCError<string, unknown>).code).toBe('NOT_FOUND');
+  });
+
+  it('maps PolicyViolationError to ORPCError', () => {
+    const result = toOrpcError(
+      new PolicyViolationError('Completed tournaments are read-only')
+    );
+    expect(result).toBeInstanceOf(ORPCError);
+    expect((result as ORPCError<string, unknown>).code).toBe('BAD_REQUEST');
+  });
+
+  it('returns unknown errors unchanged', () => {
+    const error = new Error('boom');
+    expect(toOrpcError(error)).toBe(error);
   });
 });

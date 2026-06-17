@@ -2,6 +2,7 @@ import { ORPCError } from '@orpc/server';
 
 import { base } from '@/orpc/base';
 import { auth } from '@/lib/auth';
+import { toOrpcError } from '@/orpc/map-app-error';
 
 export const authed = base.middleware(async ({ context, next }) => {
   const headers = context.headers;
@@ -30,4 +31,13 @@ export const authed = base.middleware(async ({ context, next }) => {
   });
 });
 
-export const authorized = base.use(authed);
+export const catchAppErrors = base.middleware(async ({ next }) => {
+  try {
+    return await next();
+  } catch (e) {
+    const mapped = toOrpcError(e);
+    throw mapped;
+  }
+});
+
+export const authorized = base.use(catchAppErrors).use(authed);
