@@ -1,9 +1,6 @@
+import { matchDisplayLabelFromDb, matchKindFromDb } from './match-kind';
 import type { Prisma } from '@/generated/prisma/client';
 import type { MatchData } from '@/features/dashboard/types';
-import {
-  matchDisplayLabelFromDb,
-  matchKindFromDb,
-} from '@/server/domain/tournament/match/match-kind';
 
 /** Fields required to build {@link MatchData} for arena labels and bracket tooling. */
 export const matchProjectionSelect = {

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { assertLabelAvailable } from 'src/server/infrastructure/matches/repositories/custom/assert-label';
+import { assertLabelAvailable } from '@/server/infrastructure/matches/repositories/custom/assert-label';
 import { loadMatchLabelContext } from '@/server/infrastructure/tournament/match-label-context';
 import { prisma } from '@/lib/db';
 

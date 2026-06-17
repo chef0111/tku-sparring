@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ProgressionDb } from '@/server/domain/tournament/match/match-progression';
-import { advanceWinner } from '@/server/domain/tournament/match/match-progression';
+import { advanceWinner } from 'src/server/infrastructure/matches/progression';
+import type { ProgressionDb } from 'src/server/infrastructure/matches/progression';
 import { getScoreTransition } from '@/lib/tournament/match/match-transition';
 import { getSuccessorSlot } from '@/lib/tournament/bracket/bracket-progression';
 import { planBracketShell } from '@/server/domain/tournament/bracket/bracket-shape';
@@ -58,6 +58,7 @@ function createInMemoryDb(initial: Array<MatchRow>) {
         where,
       }: {
         where: {
+          kind?: string;
           groupId: string;
           round: number;
           matchIndex: number;
@@ -65,6 +66,7 @@ function createInMemoryDb(initial: Array<MatchRow>) {
       }) => {
         for (const m of await matches.values()) {
           if (
+            (where.kind == null || m.kind === where.kind) &&
             m.groupId === where.groupId &&
             m.round === where.round &&
             m.matchIndex === where.matchIndex

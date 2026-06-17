@@ -53,9 +53,12 @@ vi.mock('@/server/infrastructure/mutation-effects', () => ({
   publishTournamentMutation: vi.fn(),
 }));
 
-vi.mock('@/server/infrastructure/matches/repositories/custom/label', () => ({
-  assertLabelAvailable: vi.fn().mockResolvedValue(undefined),
-}));
+vi.mock(
+  '@/server/infrastructure/matches/repositories/custom/assert-label',
+  () => ({
+    assertLabelAvailable: vi.fn().mockResolvedValue(undefined),
+  })
+);
 
 const draftGroup = {
   id: 'group-1',

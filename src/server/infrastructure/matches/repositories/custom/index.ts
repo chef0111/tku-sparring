@@ -1,7 +1,7 @@
-import { assertLabelAvailable } from 'src/server/infrastructure/matches/repositories/custom/assert-label';
-import { resolveCustomSlot } from 'src/server/infrastructure/matches/repositories/custom/resolve-slot';
 import type { CustomMatchStore } from '@/server/application/matches/repositories/custom';
 import type { Prisma } from '@/generated/prisma/client';
+import { assertLabelAvailable } from '@/server/infrastructure/matches/repositories/custom/assert-label';
+import { resolveCustomSlot } from '@/server/infrastructure/matches/repositories/custom/resolve-slot';
 import { BadRequestError } from '@/server/application/errors';
 import { CustomMatchValidationError } from '@/server/domain/tournament/custom/errors';
 import { coalesceMatchRead } from '@/server/domain/tournament/match/match-read';

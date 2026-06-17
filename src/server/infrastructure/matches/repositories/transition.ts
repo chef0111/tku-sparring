@@ -1,9 +1,9 @@
-import type { MatchTransitionStore } from '@/server/application/matches/repositories/transition';
-import type { Prisma } from '@/generated/prisma/client';
 import {
   advanceWinner,
   clearWinnerAdvancement,
-} from '@/server/domain/tournament/match/match-progression';
+} from 'src/server/infrastructure/matches/progression';
+import type { MatchTransitionStore } from '@/server/application/matches/repositories/transition';
+import type { Prisma } from '@/generated/prisma/client';
 import { coalesceMatchRead } from '@/server/domain/tournament/match/match-read';
 import {
   publishTournamentMutation,

@@ -1,130 +1,98 @@
-import type { PrismaClient } from '@/generated/prisma/client';
 import {
   getSuccessorSlot,
   isRound0ByeMatch,
   resolveAdvanceSide,
 } from '@/lib/tournament/bracket/bracket-progression';
 
-export type ProgressionDb = Pick<PrismaClient, 'match' | 'tournamentAthlete'>;
+export type BracketPosition = {
+  groupId: string;
+  round: number;
+  matchIndex: number;
+};
 
-export async function advanceWinner(
-  matchId: string,
-  tournamentWinnerId: string,
-  db: ProgressionDb
-) {
-  const match = await db.match.findUnique({ where: { id: matchId } });
-  if (!match) return;
-  if (match.kind === 'custom') return;
+export type SuccessorMatch = {
+  cornersSwapped: boolean;
+  redTournamentAthleteId: string | null;
+  blueTournamentAthleteId: string | null;
+};
 
-  const successor = getSuccessorSlot({
-    round: match.round,
-    matchIndex: match.matchIndex,
-  });
-  const winner = await db.tournamentAthlete.findUnique({
-    where: { id: tournamentWinnerId },
-  });
-
-  const nextMatch = await db.match.findFirst({
-    where: {
-      kind: 'bracket',
-      groupId: match.groupId,
-      round: successor.round,
-      matchIndex: successor.matchIndex,
-    },
-  });
-  if (!nextMatch) return;
-
-  const side = resolveAdvanceSide(successor.side, nextMatch.cornersSwapped);
-
-  await db.match.update({
-    where: { id: nextMatch.id },
-    data:
-      side === 'red'
-        ? {
-            redTournamentAthleteId: tournamentWinnerId,
-            redAthleteId: winner?.athleteProfileId ?? null,
-          }
-        : {
-            blueTournamentAthleteId: tournamentWinnerId,
-            blueAthleteId: winner?.athleteProfileId ?? null,
-          },
-  });
+export function successorWhere(position: BracketPosition) {
+  const slot = getSuccessorSlot(position);
+  return {
+    kind: 'bracket' as const,
+    groupId: position.groupId,
+    round: slot.round,
+    matchIndex: slot.matchIndex,
+  };
 }
 
-export async function clearWinnerAdvancement(
-  match: {
-    groupId: string;
-    round: number;
-    matchIndex: number;
-    tournamentWinnerId: string | null;
-    kind?: string;
+export function winnerAdvancePatch(
+  source: Pick<BracketPosition, 'round' | 'matchIndex'>,
+  successor: Pick<SuccessorMatch, 'cornersSwapped'>,
+  winner: { tournamentAthleteId: string; athleteProfileId: string | null }
+) {
+  const slot = getSuccessorSlot(source);
+  const side = resolveAdvanceSide(slot.side, successor.cornersSwapped);
+  if (side === 'red') {
+    return {
+      redTournamentAthleteId: winner.tournamentAthleteId,
+      redAthleteId: winner.athleteProfileId,
+    };
+  }
+  return {
+    blueTournamentAthleteId: winner.tournamentAthleteId,
+    blueAthleteId: winner.athleteProfileId,
+  };
+}
+
+export function clearAdvancePatch(
+  source: Pick<BracketPosition, 'round' | 'matchIndex'> & {
+    tournamentWinnerId: string;
   },
-  db: ProgressionDb
+  successor: SuccessorMatch
 ) {
-  if (match.kind === 'custom') return;
-
-  const wta = match.tournamentWinnerId;
-  if (!wta) return;
-
-  const successor = getSuccessorSlot({
-    round: match.round,
-    matchIndex: match.matchIndex,
-  });
-
-  const nextMatch = await db.match.findFirst({
-    where: {
-      kind: 'bracket',
-      groupId: match.groupId,
-      round: successor.round,
-      matchIndex: successor.matchIndex,
-    },
-  });
-
-  if (!nextMatch) return;
-
-  const side = resolveAdvanceSide(successor.side, nextMatch.cornersSwapped);
-
-  if (side === 'red' && nextMatch.redTournamentAthleteId === wta) {
-    await db.match.update({
-      where: { id: nextMatch.id },
-      data: { redTournamentAthleteId: null, redAthleteId: null },
-    });
-  } else if (side === 'blue' && nextMatch.blueTournamentAthleteId === wta) {
-    await db.match.update({
-      where: { id: nextMatch.id },
-      data: { blueTournamentAthleteId: null, blueAthleteId: null },
-    });
+  const slot = getSuccessorSlot(source);
+  const side = resolveAdvanceSide(slot.side, successor.cornersSwapped);
+  if (
+    side === 'red' &&
+    successor.redTournamentAthleteId === source.tournamentWinnerId
+  ) {
+    return { redTournamentAthleteId: null, redAthleteId: null };
   }
+  if (
+    side === 'blue' &&
+    successor.blueTournamentAthleteId === source.tournamentWinnerId
+  ) {
+    return { blueTournamentAthleteId: null, blueAthleteId: null };
+  }
+  return null;
 }
 
-export async function applyRound0ByeAdvancement(
-  groupId: string,
-  _tournamentId: string,
-  db: ProgressionDb
-) {
-  const round0 = await db.match.findMany({
-    where: { groupId, round: 0 },
-    orderBy: { matchIndex: 'asc' },
-  });
+export type Round0ByeRow = {
+  id: string;
+  round: number;
+  redTournamentAthleteId: string | null;
+  blueTournamentAthleteId: string | null;
+  redAthleteId: string | null;
+  blueAthleteId: string | null;
+};
 
-  for (const match of round0) {
-    if (!isRound0ByeMatch(match)) continue;
+export function round0ByePlan(row: Round0ByeRow) {
+  if (!isRound0ByeMatch(row)) return null;
 
-    const tournamentWinnerId =
-      match.redTournamentAthleteId ?? match.blueTournamentAthleteId;
-    const winnerProfileId = match.redAthleteId ?? match.blueAthleteId;
+  const tournamentWinnerId =
+    row.redTournamentAthleteId ?? row.blueTournamentAthleteId;
+  if (!tournamentWinnerId) return null;
 
-    await db.match.update({
-      where: { id: match.id },
-      data: {
-        status: 'complete',
-        tournamentWinnerId,
-        winnerId: winnerProfileId,
-        redWins: 0,
-        blueWins: 0,
-      },
-    });
-
-    await advanceWinner(match.id, tournamentWinnerId!, db);
-  }
+  return {
+    matchId: row.id,
+    completion: {
+      status: 'complete' as const,
+      tournamentWinnerId,
+      winnerId: row.redAthleteId ?? row.blueAthleteId,
+      redWins: 0,
+      blueWins: 0,
+    },
+    advanceWinnerId: tournamentWinnerId,
+  };
 }

@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { matchTransitionStore } from '../transition';
 import {
   advanceWinner,
   clearWinnerAdvancement,
-} from '@/server/domain/tournament/match/match-progression';
+} from 'src/server/infrastructure/matches/progression';
+import { matchTransitionStore } from '../transition';
 import { prisma } from '@/lib/db';
 import {
   publishTournamentMutation,
@@ -30,7 +30,7 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-vi.mock('@/server/domain/tournament/match/match-progression', () => ({
+vi.mock('@/server/infrastructure/matches/match-progression', () => ({
   clearWinnerAdvancement: vi.fn(),
   advanceWinner: vi.fn(),
 }));

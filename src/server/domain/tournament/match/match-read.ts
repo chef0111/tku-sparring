@@ -1,7 +1,4 @@
-import {
-  matchDisplayLabelFromDb,
-  matchKindFromDb,
-} from '@/server/domain/tournament/match/match-kind';
+import { matchDisplayLabelFromDb, matchKindFromDb } from './match-kind';
 
 export type MatchKind = 'bracket' | 'custom';
 

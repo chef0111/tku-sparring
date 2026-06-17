@@ -1,4 +1,4 @@
-import type { CustomSlotInput } from 'src/server/domain/tournament/custom/types';
+import type { CustomSlotInput } from '@/server/domain/tournament/custom/types';
 import { CustomMatchValidationError } from '@/server/domain/tournament/custom/errors';
 import { resolveFeederSlotId } from '@/server/domain/tournament/custom/feeder-slot';
 import { prisma } from '@/lib/db';
