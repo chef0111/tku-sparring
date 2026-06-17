@@ -1,8 +1,5 @@
 import type { DeviceLastSelectionStore } from '@/server/application/device-last-selection/repositories/last-selection';
-import type {
-  GetLastSelectionQuery,
-  SetLastSelectionCommand,
-} from '@/server/application/device-last-selection/use-cases/commands';
+import type { SetLastSelectionCommand } from '@/server/application/device-last-selection/use-cases/commands';
 import { prisma } from '@/lib/db';
 
 export const deviceLastSelectionStore: DeviceLastSelectionStore = {

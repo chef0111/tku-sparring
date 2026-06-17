@@ -8,7 +8,7 @@ import type { AdvanceFormData } from '@/contexts/settings/context';
 import type {
   SelectionGroupRow,
   SelectionMatchRow,
-} from '@/orpc/advance-settings/dal';
+} from '@/orpc/advance-settings/types';
 import {
   arenaSelectionCatalogQueryOptions,
   arenaSelectionMatchesQueryOptions,

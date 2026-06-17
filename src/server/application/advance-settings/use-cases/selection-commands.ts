@@ -1,5 +1,5 @@
 export type SelectionCatalogQuery = {
-  tournamentId?: string;
+  tournamentId?: string | null;
 };
 
 export type SelectionMatchesQuery = {
