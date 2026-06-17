@@ -211,13 +211,12 @@ export const tournamentAthleteStore: TournamentAthleteStore = {
   },
 
   async countAssigned(tournamentId, profileIds) {
-    const rows = await prisma.tournamentAthlete.findMany({
+    return prisma.tournamentAthlete.count({
       where: {
         tournamentId,
         athleteProfileId: { in: profileIds },
+        groupId: { not: null },
       },
-      select: { groupId: true },
     });
-    return rows.filter((r) => r.groupId != null).length;
   },
 };

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { findTournamentById } from '../tournament-lifecycle';
+import { findTournamentById } from '@/server/infrastructure/tournaments/repositories/read-lifecycle';
 import {
   moveGroupBetweenArenas,
   setArenaGroupOrder,
@@ -22,9 +22,12 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-vi.mock('../tournament-lifecycle', () => ({
-  findTournamentById: vi.fn(),
-}));
+vi.mock(
+  '@/server/infrastructure/tournaments/repositories/read-lifecycle',
+  () => ({
+    findTournamentById: vi.fn(),
+  })
+);
 
 vi.mock('@/server/infrastructure/mutation-effects', () => ({
   publishTournamentMutation: vi.fn(),

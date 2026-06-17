@@ -13,7 +13,7 @@ import {
   SwapSlotsSchema,
   UpdateScoreSchema,
 } from './dto';
-import { MatchDAL } from './dal';
+import { NotFoundError } from '@/server/application/errors';
 import {
   generateBracket as runGenerateBracket,
   regenerateBracket as runRegenerateBracket,
@@ -45,24 +45,22 @@ export const listMatches = authorized
       tournamentId: z.string().optional(),
     })
   )
-  .handler(async ({ input }) => {
+  .handler(async ({ input, context }) => {
     if (input.groupId) {
-      const matches = await MatchDAL.findByGroupId(input.groupId);
-      return matches;
+      return context.repos.matchRead.findByGroupId(input.groupId);
     }
     if (input.tournamentId) {
-      const matches = await MatchDAL.findByTournamentId(input.tournamentId);
-      return matches;
+      return context.repos.matchRead.findByTournamentId(input.tournamentId);
     }
-    throw new Error('Either groupId or tournamentId is required');
+    throw new NotFoundError('Either groupId or tournamentId is required');
   });
 
 export const getMatch = authorized
   .input(z.object({ id: z.string() }))
-  .handler(async ({ input }) => {
-    const match = await MatchDAL.findById(input.id);
+  .handler(async ({ input, context }) => {
+    const match = await context.repos.matchRead.findById(input.id);
     if (!match) {
-      throw new Error('Match not found');
+      throw new NotFoundError('Match not found');
     }
     return match;
   });

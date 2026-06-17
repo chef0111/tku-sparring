@@ -30,9 +30,7 @@ async function buildTournamentLifecycle(
     hasGroups && tournament.groups.every((group) => group._count.matches > 0);
 
   if (!hasGroups || !hasMatches || !everyGroupHasMatches) {
-    return {
-      canComplete: false,
-    };
+    return { canComplete: false };
   }
 
   const resolvedMatchCount = await db.match.count({

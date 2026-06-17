@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { TournamentDAL } from '../dal';
+import { tournamentReadStore } from '@/server/infrastructure/tournaments';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
@@ -76,7 +76,7 @@ describe('tournaments DAL', () => {
     );
     vi.mocked(prisma.match.count).mockResolvedValue(3);
 
-    const result = await TournamentDAL.findById('tournament-1');
+    const result = await tournamentReadStore.findById('tournament-1');
 
     expect(result).toMatchObject({
       id: 'tournament-1',
@@ -116,7 +116,7 @@ describe('tournaments DAL', () => {
       }) as never
     );
 
-    const result = await TournamentDAL.findById('tournament-1');
+    const result = await tournamentReadStore.findById('tournament-1');
 
     expect(result).toMatchObject({
       lifecycle: {

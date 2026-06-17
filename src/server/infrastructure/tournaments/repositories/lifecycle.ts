@@ -1,5 +1,5 @@
+import { findTournamentWithLifecycle } from './read-lifecycle';
 import type { TournamentLifecycleStore } from '@/server/application/tournaments/repositories/lifecycle';
-import { findTournamentWithLifecycle } from '@/orpc/tournaments/tournament-lifecycle';
 import { getNameSortKey } from '@/lib/sort/name-sort-key';
 import { NotFoundError } from '@/server/application/errors';
 import {

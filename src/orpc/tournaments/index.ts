@@ -9,7 +9,6 @@ import {
   SetTournamentStatusSchema,
   UpdateTournamentSchema,
 } from './dto';
-import { TournamentDAL } from './dal';
 import { authorized } from '@/orpc/middleware';
 import { assertSystemAdmin } from '@/orpc/policies/auth';
 import { NotFoundError } from '@/server/application/errors';
@@ -28,14 +27,14 @@ import {
 
 export const listTournaments = authorized
   .input(ListTournamentsSchema)
-  .handler(async ({ input }) => {
-    return TournamentDAL.findMany(input);
+  .handler(async ({ input, context }) => {
+    return context.repos.tournamentRead.list(input);
   });
 
 export const getTournament = authorized
   .input(z.object({ id: z.string() }))
-  .handler(async ({ input }) => {
-    const tournament = await TournamentDAL.findById(input.id);
+  .handler(async ({ input, context }) => {
+    const tournament = await context.repos.tournamentRead.findById(input.id);
     if (!tournament) {
       throw new NotFoundError('Tournament not found');
     }

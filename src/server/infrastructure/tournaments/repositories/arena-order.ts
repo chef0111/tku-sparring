@@ -1,5 +1,5 @@
+import { findTournamentById } from './read-lifecycle';
 import type { TournamentArenaOrderStore } from '@/server/application/tournaments/repositories/arena-order';
-import { findTournamentById } from '@/orpc/tournaments/tournament-lifecycle';
 import {
   mergeArenaGroupOrderAfterCrossArenaMove,
   mergeArenaGroupOrderAfterRetireArena,

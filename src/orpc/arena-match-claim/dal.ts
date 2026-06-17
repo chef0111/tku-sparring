@@ -1,6 +1,7 @@
-import { prisma } from '@/lib/db';
+import { loadActiveClaimsByMatchId } from '@/server/infrastructure/arena-match-claim/active-claims';
 import { publishTournamentMutation } from '@/orpc/mutation-effects';
 import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
+import { prisma } from '@/lib/db';
 
 const CLAIM_TTL_MS = 30 * 60 * 1000;
 
@@ -204,16 +205,6 @@ export class ArenaMatchClaimDAL {
     matchIds: Array<string>,
     now: Date
   ): Promise<Map<string, { deviceId: string }>> {
-    if (matchIds.length === 0) {
-      return new Map();
-    }
-    const rows = await prisma.arenaMatchClaim.findMany({
-      where: {
-        matchId: { in: matchIds },
-        expiresAt: { gt: now },
-      },
-      select: { matchId: true, deviceId: true },
-    });
-    return new Map(rows.map((r) => [r.matchId, { deviceId: r.deviceId }]));
+    return loadActiveClaimsByMatchId(matchIds, now);
   }
 }

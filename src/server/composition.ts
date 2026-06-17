@@ -2,6 +2,7 @@ import {
   bracketLifecycleStore,
   customMatchStore,
   matchParticipantStore,
+  matchReadStore,
   matchTransitionStore,
   round0SlotStore,
 } from '@/server/infrastructure/matches';
@@ -12,6 +13,7 @@ import {
 import {
   tournamentArenaOrderStore,
   tournamentLifecycleStore,
+  tournamentReadStore,
 } from '@/server/infrastructure/tournaments';
 import { tournamentAthleteStore } from '@/server/infrastructure/tournament-athletes';
 import { advanceSelectionStore } from '@/server/infrastructure/advance-settings';
@@ -30,6 +32,8 @@ export const serverRepos = {
   tournamentAthlete: tournamentAthleteStore,
   advanceSelection: advanceSelectionStore,
   deviceLastSelection: deviceLastSelectionStore,
+  tournamentRead: tournamentReadStore,
+  matchRead: matchReadStore,
 } as const;
 
 export type ServerRepos = typeof serverRepos;

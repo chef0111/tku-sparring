@@ -1,6 +1,9 @@
-import { TournamentStatusSchema } from './dto';
+import type {
+  ListTournamentsQuery,
+  TournamentListPage,
+} from '@/server/application/tournaments/repositories/read';
 import type { Prisma } from '@/generated/prisma/client';
-import type { ListTournamentsDTO, TournamentListPageDTO } from './dto';
+import { TournamentStatusSchema } from '@/lib/tournament/tournament-status';
 import { countActionableMatchesByTournamentId } from '@/lib/tournament/bracket/bracket-action-queue';
 import {
   matchProjectionSelect,
@@ -29,11 +32,7 @@ function toOrderBy(
 ): Prisma.TournamentOrderByWithRelationInput {
   switch (toSortField(field)) {
     case 'athletes':
-      return {
-        tournamentAthletes: {
-          _count: direction,
-        },
-      };
+      return { tournamentAthletes: { _count: direction } };
     case 'name':
       return { nameSortKey: direction };
     case 'status':
@@ -83,8 +82,8 @@ async function attachActionableMatchCounts<
 }
 
 export async function listTournaments(
-  input: ListTournamentsDTO
-): Promise<TournamentListPageDTO> {
+  input: ListTournamentsQuery
+): Promise<TournamentListPage> {
   const {
     page = 1,
     perPage = 20,
@@ -98,21 +97,13 @@ export async function listTournaments(
   const filters: Array<Prisma.TournamentWhereInput> = [];
 
   if (query) {
-    filters.push({
-      name: { contains: query, mode: 'insensitive' },
-    });
+    filters.push({ name: { contains: query, mode: 'insensitive' } });
   }
-
   if (name) {
-    filters.push({
-      name: { contains: name, mode: 'insensitive' },
-    });
+    filters.push({ name: { contains: name, mode: 'insensitive' } });
   }
-
   if (status && status.length > 0) {
-    filters.push({
-      status: { in: status },
-    });
+    filters.push({ status: { in: status } });
   }
 
   const where =
@@ -136,11 +127,10 @@ export async function listTournaments(
   ]);
 
   const enrichedItems = await attachActionableMatchCounts(rows);
-
   const items = enrichedItems.map((item) => ({
     ...item,
     status: TournamentStatusSchema.parse(item.status),
   }));
 
-  return { items, total } as TournamentListPageDTO;
+  return { items, total } as TournamentListPage;
 }
