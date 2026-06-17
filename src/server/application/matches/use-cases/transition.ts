@@ -2,8 +2,8 @@ import type {
   AdminSetMatchStatusCommand,
   SetMatchWinnerCommand,
   UpdateMatchScoreCommand,
-} from './match-transition-commands';
-import type { MatchTransitionStore } from './match-transition-ports';
+} from './commands';
+import type { MatchTransitionStore } from '../repositories/transition';
 import {
   buildAdminStatusPlan,
   buildScoreTransitionPlan,

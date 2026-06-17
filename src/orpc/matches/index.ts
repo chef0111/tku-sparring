@@ -28,7 +28,7 @@ import {
   adminSetMatchStatus as runAdminSetMatchStatus,
   setMatchWinner as runSetMatchWinner,
   updateMatchScore as runUpdateMatchScore,
-} from '@/server/application/matches/match-transition-use-cases';
+} from '@/server/application/matches/use-cases/transition';
 import { matchTransitionStore } from '@/server/infrastructure/matches';
 
 export const listMatches = authorized

@@ -4,11 +4,11 @@ import {
   adminSetMatchStatus,
   setMatchWinner,
   updateMatchScore,
-} from '../match-transition-use-cases';
+} from '../transition';
 import type {
   MatchTransitionRow,
   MatchTransitionStore,
-} from '../match-transition-ports';
+} from '../../repositories/transition';
 
 type ApplyInput = Parameters<MatchTransitionStore['applyTransition']>[0];
 

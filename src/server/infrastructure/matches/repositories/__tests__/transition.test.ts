@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { matchTransitionStore } from '../match-transition-store';
+import { matchTransitionStore } from '../transition';
 import {
   advanceWinner,
   clearWinnerAdvancement,

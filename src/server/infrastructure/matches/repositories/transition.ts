@@ -1,4 +1,4 @@
-import type { MatchTransitionStore } from '@/server/application/matches/match-transition-ports';
+import type { MatchTransitionStore } from '@/server/application/matches/repositories/transition';
 import type { Prisma } from '@/generated/prisma/client';
 import {
   advanceWinner,

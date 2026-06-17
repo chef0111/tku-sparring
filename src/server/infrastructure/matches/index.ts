@@ -1,1 +1,1 @@
-export { matchTransitionStore } from './match-transition-store';
+export { matchTransitionStore } from './repositories/transition';
