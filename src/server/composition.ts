@@ -9,6 +9,7 @@ import {
 import {
   groupAssignmentStore,
   groupLifecycleStore,
+  groupReadStore,
 } from '@/server/infrastructure/groups';
 import {
   tournamentArenaOrderStore,
@@ -30,6 +31,7 @@ export const serverRepos = {
   matchParticipant: matchParticipantStore,
   groupLifecycle: groupLifecycleStore,
   groupAssign: groupAssignmentStore,
+  groupRead: groupReadStore,
   tournamentLifecycle: tournamentLifecycleStore,
   tournamentArenaOrder: tournamentArenaOrderStore,
   tournamentAthlete: tournamentAthleteStore,

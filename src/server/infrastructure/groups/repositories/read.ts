@@ -1,7 +1,8 @@
+import type { GroupReadStore } from '@/server/application/groups/repositories/read';
 import { prisma } from '@/lib/db';
 
-export class GroupDAL {
-  static async findByTournamentId(tournamentId: string) {
+export const groupReadStore: GroupReadStore = {
+  async listByTournament(tournamentId) {
     return prisma.group.findMany({
       where: { tournamentId },
       orderBy: { createdAt: 'asc' },
@@ -9,9 +10,9 @@ export class GroupDAL {
         _count: { select: { tournamentAthletes: true, matches: true } },
       },
     });
-  }
+  },
 
-  static async findById(id: string) {
+  async findById(id) {
     return prisma.group.findUnique({
       where: { id },
       include: {
@@ -24,5 +25,5 @@ export class GroupDAL {
         _count: { select: { tournamentAthletes: true, matches: true } },
       },
     });
-  }
-}
+  },
+};

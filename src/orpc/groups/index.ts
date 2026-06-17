@@ -7,10 +7,8 @@ import {
   UnassignAthleteSchema,
   UpdateGroupSchema,
 } from './dto';
-import { GroupDAL } from './dal';
 import { authorized } from '@/orpc/middleware';
 import { assertSystemAdmin } from '@/orpc/policies/auth';
-import { NotFoundError } from '@/server/application/errors';
 import {
   assignAthleteToGroup as runAssignAthleteToGroup,
   autoAssignAllEligible as runAutoAssignAllEligible,
@@ -22,23 +20,22 @@ import {
   deleteGroup as runDeleteGroup,
   updateGroup as runUpdateGroup,
 } from '@/server/application/groups/use-cases/lifecycle';
+import {
+  getGroup as runGetGroup,
+  listGroupsByTournament as runListGroupsByTournament,
+} from '@/server/application/groups/use-cases/read';
 
 export const listGroups = authorized
   .input(z.object({ tournamentId: z.string() }))
-  .handler(async ({ input }) => {
-    const groups = await GroupDAL.findByTournamentId(input.tournamentId);
-    return groups;
-  });
+  .handler(async ({ context, input }) =>
+    runListGroupsByTournament(input.tournamentId, context.repos.groupRead)
+  );
 
 export const getGroup = authorized
   .input(z.object({ id: z.string() }))
-  .handler(async ({ input }) => {
-    const group = await GroupDAL.findById(input.id);
-    if (!group) {
-      throw new NotFoundError('Group not found');
-    }
-    return group;
-  });
+  .handler(async ({ context, input }) =>
+    runGetGroup(input.id, context.repos.groupRead)
+  );
 
 export const createGroup = authorized
   .input(CreateGroupSchema)
@@ -56,7 +53,7 @@ export const updateGroup = authorized
 
 export const removeGroup = authorized
   .input(z.object({ id: z.string() }))
-  .handler(async ({ input, context }) => {
+  .handler(async ({ context, input }) => {
     assertSystemAdmin(context.user);
     return runDeleteGroup({ id: input.id }, context.repos.groupLifecycle);
   });
