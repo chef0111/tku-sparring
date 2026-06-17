@@ -3,8 +3,8 @@ import type { Prisma } from '@/generated/prisma/client';
 import {
   advanceWinner,
   clearWinnerAdvancement,
-} from '@/lib/tournament/match-progression';
-import { coalesceMatchRead } from '@/lib/tournament/match-read';
+} from '@/server/domain/tournament/match/match-progression';
+import { coalesceMatchRead } from '@/server/domain/tournament/match/match-read';
 import {
   publishTournamentMutation,
   recordMutationActivity,

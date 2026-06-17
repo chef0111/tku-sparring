@@ -1,4 +1,4 @@
-import type { MatchRead } from '@/lib/tournament/match-read';
+import type { MatchRead } from '@/server/domain/tournament/match/match-read';
 import type { MutationActivityInput } from '@/server/application/activity/activity-types';
 import type { CreateCustomMatchCommand } from '../use-cases/custom-commands';
 

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { CustomSlotDb } from '@/lib/tournament/custom-match-slots';
-import { resolveCustomSlot } from '@/lib/tournament/custom-match-slots';
+import type { CustomSlotDb } from '@/server/infrastructure/matches/resolve-custom-slot';
+import { resolveCustomSlot } from '@/server/infrastructure/matches/resolve-custom-slot';
 
 function feeder(over: Record<string, unknown> = {}) {
   return {

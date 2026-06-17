@@ -27,8 +27,8 @@ import {
   nextArenaSlotToAdd,
   savedArenaGroupIds,
   shouldShowArenaOrderUi,
-} from '@/lib/tournament/arena-group-order';
-import { resolveArenaGroupOrder } from '@/lib/tournament/arena-match-label';
+} from '@/lib/tournament/arena/arena-group-order';
+import { resolveArenaGroupOrder } from '@/lib/tournament/arena/arena-match-label';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import {

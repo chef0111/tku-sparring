@@ -1,5 +1,5 @@
-import { buildSlotMap } from './bracket-seeding';
 import type { MatchData } from '@/features/dashboard/types';
+import { buildSlotMap } from '@/server/domain/tournament/bracket/bracket-seeding';
 
 export type ArenaRound0BracketMeta = {
   athleteCount: number;

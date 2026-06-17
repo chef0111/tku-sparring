@@ -1,6 +1,6 @@
 import type { SelectionCatalogDTO, SelectionMatchesDTO } from './dto';
-import { formatArenaMatchTitle } from '@/lib/tournament/arena-match-label';
-import { loadMatchLabelContext } from '@/lib/tournament/match-label-context';
+import { formatArenaMatchTitle } from '@/lib/tournament/arena/arena-match-label';
+import { loadMatchLabelContext } from '@/lib/tournament/arena/match-label-context';
 import { prisma } from '@/lib/db';
 import { ArenaMatchClaimDAL } from '@/orpc/arena-match-claim/dal';
 

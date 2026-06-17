@@ -1,8 +1,8 @@
 import {
   loadMatchLabelContext,
   normalizeMatchLabelKey,
-} from '@/lib/tournament/match-label-context';
-import { CustomMatchValidationError } from '@/lib/tournament/custom-match-validation';
+} from '@/lib/tournament/arena/match-label-context';
+import { CustomMatchValidationError } from '@/lib/tournament/custom/custom-match-validation';
 import { prisma } from '@/lib/db';
 
 export { normalizeMatchLabelKey };

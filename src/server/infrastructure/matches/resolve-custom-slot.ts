@@ -1,10 +1,6 @@
-import { CustomMatchValidationError } from '@/lib/tournament/custom-match-validation';
+import type { CustomSlotInput } from '@/server/domain/tournament/custom/slots';
+import { CustomMatchValidationError } from '@/lib/tournament/custom/custom-match-validation';
 import { prisma } from '@/lib/db';
-
-export type CustomSlotInput =
-  | { mode: 'direct'; tournamentAthleteId: string }
-  | { mode: 'winner'; feederMatchId: string }
-  | { mode: 'loser'; feederMatchId: string };
 
 export type CustomSlotDb = Pick<typeof prisma, 'match' | 'tournamentAthlete'>;
 

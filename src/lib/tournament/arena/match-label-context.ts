@@ -4,9 +4,12 @@ import {
   formatArenaMatchTitle,
   resolveArenaGroupOrder,
 } from './arena-match-label';
-import { matchProjectionSelect, toMatchData } from './match-projection';
 import { savedArenaGroupIds } from './arena-group-order';
 import type { MatchData } from '@/features/dashboard/types';
+import {
+  matchProjectionSelect,
+  toMatchData,
+} from '@/server/domain/tournament/match/match-projection';
 import { prisma } from '@/lib/db';
 
 export function normalizeMatchLabelKey(label: string): string {

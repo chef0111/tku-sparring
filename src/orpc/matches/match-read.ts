@@ -1,4 +1,4 @@
-import { coalesceMatchRead } from '@/lib/tournament/match-read';
+import { coalesceMatchRead } from '@/server/domain/tournament/match/match-read';
 import { prisma } from '@/lib/db';
 
 export { coalesceMatchRead };

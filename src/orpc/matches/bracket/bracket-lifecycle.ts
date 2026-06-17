@@ -1,20 +1,23 @@
 import { findMatchesByGroupId } from '../match-read';
+import type { Round0Baseline } from '@/server/domain/tournament/bracket/round0-baseline';
+import type { GenerateBracketDTO } from '../dto';
+import type { PrismaClient } from '@/generated/prisma/client';
+import {
+  buildRound0Baseline,
+  parseRound0Baseline,
+} from '@/server/domain/tournament/bracket/round0-baseline';
 import {
   clearAllGroupMatchRowsData,
   clearBracketUpperRoundData,
   round0ShuffleResetPatch,
   shuffleAthletePool,
-} from './bracket-helpers';
-import { buildRound0Baseline, parseRound0Baseline } from './round0-baseline';
-import type { Round0Baseline } from './round0-baseline';
-import type { GenerateBracketDTO } from '../dto';
-import type { PrismaClient } from '@/generated/prisma/client';
-import { applyRound0ByeAdvancement } from '@/lib/tournament/match-progression';
+} from '@/server/domain/tournament/bracket/helpers';
+import { applyRound0ByeAdvancement } from '@/server/domain/tournament/match/match-progression';
 import {
   nextPowerOfTwo,
   planBracketShell,
   planRound0Placements,
-} from '@/lib/tournament/bracket-shape';
+} from '@/server/domain/tournament/bracket/bracket-shape';
 import { recordMutationActivity } from '@/server/infrastructure/mutation-effects';
 import { prisma } from '@/lib/db';
 import { assertTournamentAction } from '@/server/application/policies/tournament-policy';

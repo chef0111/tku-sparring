@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ArenaMatchClaimDAL } from '../dal';
 import { prisma } from '@/lib/db';
-import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
+import { publishTournamentMutation } from '@/orpc/mutation-effects';
 
 const tx = {
   arenaMatchClaim: {
@@ -37,8 +37,9 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-vi.mock('@/lib/tournament/tournament-realtime-broadcast', () => ({
-  publishSelectionInvalidate: vi.fn(),
+vi.mock('@/orpc/mutation-effects', () => ({
+  publishTournamentMutation: vi.fn(),
+  recordMutationActivity: vi.fn(),
 }));
 
 beforeEach(() => {
@@ -82,7 +83,7 @@ describe('ArenaMatchClaimDAL.claim', () => {
       where: { id: 'm1' },
       data: { status: 'active' },
     });
-    expect(publishSelectionInvalidate).toHaveBeenCalledWith('t1');
+    expect(publishTournamentMutation).toHaveBeenCalledWith('t1');
   });
 
   it('rejects completed tournaments before claim writes', async () => {
@@ -106,7 +107,7 @@ describe('ArenaMatchClaimDAL.claim', () => {
 
     expect(tx.arenaMatchClaim.upsert).not.toHaveBeenCalled();
     expect(tx.match.update).not.toHaveBeenCalled();
-    expect(publishSelectionInvalidate).not.toHaveBeenCalled();
+    expect(publishTournamentMutation).not.toHaveBeenCalled();
   });
 });
 
@@ -134,7 +135,7 @@ describe('ArenaMatchClaimDAL.release', () => {
 
     expect(prisma.$transaction).toHaveBeenCalledTimes(1);
     expect(tx.arenaMatchClaim.delete).toHaveBeenCalled();
-    expect(publishSelectionInvalidate).toHaveBeenCalledWith('t1');
+    expect(publishTournamentMutation).toHaveBeenCalledWith('t1');
   });
 
   it('rejects completed tournaments before release writes', async () => {
@@ -160,6 +161,6 @@ describe('ArenaMatchClaimDAL.release', () => {
 
     expect(tx.arenaMatchClaim.delete).not.toHaveBeenCalled();
     expect(tx.match.update).not.toHaveBeenCalled();
-    expect(publishSelectionInvalidate).not.toHaveBeenCalled();
+    expect(publishTournamentMutation).not.toHaveBeenCalled();
   });
 });

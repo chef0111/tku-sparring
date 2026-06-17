@@ -1,6 +1,6 @@
 import type { MatchData } from '@/features/dashboard/types';
-import type { ArenaRound0BracketMeta } from '@/lib/tournament/arena-match-label';
-import { excludedFromArenaSequence } from '@/lib/tournament/arena-match-label';
+import type { ArenaRound0BracketMeta } from '@/lib/tournament/arena/arena-match-label';
+import { excludedFromArenaSequence } from '@/lib/tournament/arena/arena-match-label';
 
 export interface BracketActionQueueItem {
   match: MatchData;

@@ -1,4 +1,4 @@
-import type { CustomSlotInput } from '@/lib/tournament/custom-match-slots';
+import type { CustomSlotInput } from '@/server/domain/tournament/custom/slots';
 
 export type { CustomSlotInput as CustomSlotCommand };
 

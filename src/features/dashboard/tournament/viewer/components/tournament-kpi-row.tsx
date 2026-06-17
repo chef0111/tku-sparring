@@ -8,7 +8,7 @@ import {
   HubMetricCard,
   HubMetricFooter,
 } from '@/features/dashboard/home/components/hub-panel';
-import { countActionableMatchesForGroups } from '@/lib/tournament/bracket-action-queue';
+import { countActionableMatchesForGroups } from '@/lib/tournament/bracket/bracket-action-queue';
 
 interface TournamentKpiRowProps {
   tournament: TournamentData;

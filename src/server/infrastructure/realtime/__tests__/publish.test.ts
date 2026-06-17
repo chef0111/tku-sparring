@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { publishSelectionInvalidate } from '../tournament-realtime-broadcast';
+import { publishSelectionInvalidate } from '@/server/infrastructure/realtime/publish';
 
 describe('tournament realtime broadcast', () => {
   const fetchMock = vi.fn();

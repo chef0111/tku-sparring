@@ -4,8 +4,8 @@ import type {
   BracketCanvasLayout,
   BracketConnectorPath,
   BracketLayoutResult,
-} from '@/lib/tournament/bracket-layout';
-import { canvasBuilders } from '@/lib/tournament/bracket-layout';
+} from '@/lib/tournament/bracket/bracket-layout';
+import { canvasBuilders } from '@/lib/tournament/bracket/bracket-layout';
 
 export type UseBracketLayoutOptions = {
   layout?: BracketLayoutResult;

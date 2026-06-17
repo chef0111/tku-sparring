@@ -1,6 +1,6 @@
-import type { TournamentStatusValue } from '@/lib/tournament/tournament-status';
+import type { TournamentStatusValue } from '@/lib/tournament/tournament/tournament-status';
+import { TournamentStatusSchema } from '@/lib/tournament/tournament/tournament-status';
 import { PolicyViolationError } from '@/server/application/errors';
-import { TournamentStatusSchema } from '@/lib/tournament/tournament-status';
 
 export type TournamentAction =
   | 'group.create'

@@ -1,4 +1,4 @@
-import type { MatchStatus } from '@/lib/tournament/match-status';
+import type { MatchStatus } from '@/lib/tournament/match/match-status';
 
 export type UpdateMatchScoreCommand = {
   matchId: string;

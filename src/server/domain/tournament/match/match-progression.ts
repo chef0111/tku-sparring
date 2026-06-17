@@ -3,15 +3,14 @@ import {
   getSuccessorSlot,
   isRound0ByeMatch,
   resolveAdvanceSide,
-} from '@/lib/tournament/bracket-progression';
-import { prisma } from '@/lib/db';
+} from '@/lib/tournament/bracket/bracket-progression';
 
 export type ProgressionDb = Pick<PrismaClient, 'match' | 'tournamentAthlete'>;
 
 export async function advanceWinner(
   matchId: string,
   tournamentWinnerId: string,
-  db: ProgressionDb = prisma
+  db: ProgressionDb
 ) {
   const match = await db.match.findUnique({ where: { id: matchId } });
   if (!match) return;
@@ -60,7 +59,7 @@ export async function clearWinnerAdvancement(
     tournamentWinnerId: string | null;
     kind?: string;
   },
-  db: ProgressionDb = prisma
+  db: ProgressionDb
 ) {
   if (match.kind === 'custom') return;
 
@@ -101,7 +100,7 @@ export async function clearWinnerAdvancement(
 export async function applyRound0ByeAdvancement(
   groupId: string,
   _tournamentId: string,
-  db: ProgressionDb = prisma
+  db: ProgressionDb
 ) {
   const round0 = await db.match.findMany({
     where: { groupId, round: 0 },

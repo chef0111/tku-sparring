@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { planBracketShell } from '../bracket-shape';
 import {
   buildConnectorChildLeg,
   buildConnectorChildLegRtl,
@@ -14,6 +13,7 @@ import {
   twoSidedMatchRowGap,
 } from '../bracket-layout';
 import type { MatchData } from '@/features/dashboard/types';
+import { planBracketShell } from '@/server/domain/tournament/bracket/bracket-shape';
 import {
   FINAL_FEEDER_EXTRA,
   MATCH_H,

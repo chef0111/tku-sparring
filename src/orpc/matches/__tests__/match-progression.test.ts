@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { advanceWinner } from '@/lib/tournament/match-progression';
+import { advanceWinner } from '@/server/domain/tournament/match/match-progression';
 
 const db = {
   match: {

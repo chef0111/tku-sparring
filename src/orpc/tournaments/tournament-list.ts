@@ -1,11 +1,11 @@
 import { TournamentStatusSchema } from './dto';
 import type { Prisma } from '@/generated/prisma/client';
 import type { ListTournamentsDTO, TournamentListPageDTO } from './dto';
-import { countActionableMatchesByTournamentId } from '@/lib/tournament/bracket-action-queue';
+import { countActionableMatchesByTournamentId } from '@/lib/tournament/bracket/bracket-action-queue';
 import {
   matchProjectionSelect,
   toMatchData,
-} from '@/lib/tournament/match-projection';
+} from '@/server/domain/tournament/match/match-projection';
 import { prisma } from '@/lib/db';
 
 type SortableField = 'name' | 'status' | 'athletes' | 'createdAt';

@@ -32,7 +32,7 @@ oRPC folders are often **plural** (`groups/`, `matches/`); `src/queries/<domain>
 - Cross-domain flows: use-case module in the **originating** domain (mirror `invalidateOnBulkAdd` on the queries side).
 - `matches/router.ts` exports `matchRouter` and `bracketRouter` for `client.match` and `client.bracket`.
 - Follow `.cursor/rules/concise-naming.mdc`; prefer router key names over `*Endpoint` suffixes on procedure exports when renaming.
-- Prisma row → `MatchData`: `@/lib/tournament/match-projection` (`matchProjectionSelect`, `toMatchData`) — see `.cursor/rules/prisma-projection.mdc`.
+- Prisma row → `MatchData`: `@/server/domain/tournament/match/match-projection` (`matchProjectionSelect`, `toMatchData`) — see `.cursor/rules/prisma-projection.mdc`.
 
 ## Adding a procedure
 

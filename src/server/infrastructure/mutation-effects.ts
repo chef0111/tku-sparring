@@ -3,7 +3,7 @@ import type {
   ActivityRecordInput,
 } from '@/server/application/activity/activity-record';
 import { recordTournamentActivity } from '@/server/infrastructure/activity/record';
-import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
+import { publishSelectionInvalidate } from '@/server/infrastructure/realtime/publish';
 
 export async function recordMutationActivity(
   input: ActivityRecordInput,

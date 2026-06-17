@@ -1,8 +1,8 @@
 import type {
   BracketCanvasLayout,
   MatchPosition,
-} from '@/lib/tournament/bracket-layout';
-import { roundLabelPlacements } from '@/lib/tournament/bracket-layout';
+} from '@/lib/tournament/bracket/bracket-layout';
+import { roundLabelPlacements } from '@/lib/tournament/bracket/bracket-layout';
 import { ROUND_LABEL_Y } from '@/config/bracket';
 
 export interface BracketRoundLabelsProps {

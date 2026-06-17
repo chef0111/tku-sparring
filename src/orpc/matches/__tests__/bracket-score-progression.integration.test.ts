@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ProgressionDb } from '@/lib/tournament/match-progression';
-import { advanceWinner } from '@/lib/tournament/match-progression';
-import { getScoreTransition } from '@/lib/tournament/match-transition';
-import { getSuccessorSlot } from '@/lib/tournament/bracket-progression';
-import { planBracketShell } from '@/lib/tournament/bracket-shape';
+import type { ProgressionDb } from '@/server/domain/tournament/match/match-progression';
+import { advanceWinner } from '@/server/domain/tournament/match/match-progression';
+import { getScoreTransition } from '@/lib/tournament/match/match-transition';
+import { getSuccessorSlot } from '@/lib/tournament/bracket/bracket-progression';
+import { planBracketShell } from '@/server/domain/tournament/bracket/bracket-shape';
 
 type MatchRow = {
   id: string;

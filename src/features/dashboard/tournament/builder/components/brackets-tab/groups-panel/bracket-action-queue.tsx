@@ -3,9 +3,9 @@ import { formatDistanceToNow } from 'date-fns';
 import { MatchSheetStatus } from '../match-detail-panel/match-sheet-status';
 import { useTournamentBracket } from '../../../context/tournament-bracket/use-tournament-bracket';
 import type { MatchData } from '@/features/dashboard/types';
-import { buildBracketActionQueue } from '@/lib/tournament/bracket-action-queue';
-import { getBracketRoundLabel } from '@/lib/tournament/bracket-round-label';
-import { formatMatchHeaderLine } from '@/lib/tournament/arena-match-label';
+import { buildBracketActionQueue } from '@/lib/tournament/bracket/bracket-action-queue';
+import { getBracketRoundLabel } from '@/lib/tournament/bracket/bracket-round-label';
+import { formatMatchHeaderLine } from '@/lib/tournament/arena/arena-match-label';
 import { Badge } from '@/components/ui/badge';
 import {
   Card,

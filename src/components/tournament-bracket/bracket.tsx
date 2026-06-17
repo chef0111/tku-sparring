@@ -11,10 +11,10 @@ import type {
   BracketCanvasLayout,
   BracketConnectorPath,
   BracketLayoutResult,
-} from '@/lib/tournament/bracket-layout';
+} from '@/lib/tournament/bracket/bracket-layout';
 import { BracketProvider } from '@/contexts/bracket';
 import { useBracketLayout } from '@/hooks/use-bracket-layout';
-import { isBracketFinal } from '@/lib/tournament/bracket-layout';
+import { isBracketFinal } from '@/lib/tournament/bracket/bracket-layout';
 import { MATCH_HEADER_ABOVE, MATCH_W } from '@/config/bracket';
 
 export interface BracketProps {

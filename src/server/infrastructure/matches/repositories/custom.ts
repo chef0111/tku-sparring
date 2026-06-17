@@ -1,11 +1,11 @@
 import type { CustomMatchStore } from '@/server/application/matches/repositories/custom';
 import type { Prisma } from '@/generated/prisma/client';
 import { BadRequestError } from '@/server/application/errors';
-import { CUSTOM_MATCH_ROUND } from '@/lib/tournament/custom-match';
-import { assertLabelAvailable } from '@/lib/tournament/custom-match-label';
-import { resolveCustomSlot } from '@/lib/tournament/custom-match-slots';
-import { CustomMatchValidationError } from '@/lib/tournament/custom-match-validation';
-import { coalesceMatchRead } from '@/lib/tournament/match-read';
+import { CUSTOM_MATCH_ROUND } from '@/lib/tournament/custom/custom-match';
+import { assertLabelAvailable } from '@/lib/tournament/custom/custom-match-label';
+import { resolveCustomSlot } from '@/server/infrastructure/matches/resolve-custom-slot';
+import { CustomMatchValidationError } from '@/lib/tournament/custom/custom-match-validation';
+import { coalesceMatchRead } from '@/server/domain/tournament/match/match-read';
 import {
   publishTournamentMutation,
   recordMutationActivity,

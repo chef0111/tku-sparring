@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AdvanceSettingsDAL, deriveGroupStatusForSelectionView } from '../dal';
-import { formatArenaMatchTitle } from '@/lib/tournament/arena-match-label';
-import { loadMatchLabelContext } from '@/lib/tournament/match-label-context';
+import { formatArenaMatchTitle } from '@/lib/tournament/arena/arena-match-label';
+import { loadMatchLabelContext } from '@/lib/tournament/arena/match-label-context';
 import { ArenaMatchClaimDAL } from '@/orpc/arena-match-claim/dal';
 import { prisma } from '@/lib/db';
 
@@ -24,7 +24,7 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-vi.mock('@/lib/tournament/match-label-context', () => ({
+vi.mock('@/lib/tournament/arena/match-label-context', () => ({
   loadMatchLabelContext: vi.fn(),
 }));
 

@@ -2,7 +2,7 @@ import type { GroupData } from '@/features/dashboard/types';
 import {
   arenaIndicesForOrderPanel,
   shouldShowArenaOrderUi,
-} from '@/lib/tournament/arena-group-order';
+} from '@/lib/tournament/arena/arena-group-order';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 

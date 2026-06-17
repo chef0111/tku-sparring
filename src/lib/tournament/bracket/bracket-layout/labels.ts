@@ -5,7 +5,7 @@ import type {
   MatchPosition,
   RoundLabelPlacement,
 } from './types';
-import { getBracketRoundLabel } from '@/lib/tournament/bracket-round-label';
+import { getBracketRoundLabel } from '@/lib/tournament/bracket/bracket-round-label';
 
 export { oneSidedRoundLabelX, roundLabelCenterX } from './coords';
 

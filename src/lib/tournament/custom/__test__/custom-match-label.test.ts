@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { assertLabelAvailable } from '@/lib/tournament/custom-match-label';
-import { loadMatchLabelContext } from '@/lib/tournament/match-label-context';
+import { assertLabelAvailable } from '@/lib/tournament/custom/custom-match-label';
+import { loadMatchLabelContext } from '@/lib/tournament/arena/match-label-context';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
@@ -12,7 +12,7 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-vi.mock('@/lib/tournament/match-label-context', () => ({
+vi.mock('@/lib/tournament/arena/match-label-context', () => ({
   normalizeMatchLabelKey: (label: string) => label.trim().toLowerCase(),
   loadMatchLabelContext: vi.fn(),
 }));
