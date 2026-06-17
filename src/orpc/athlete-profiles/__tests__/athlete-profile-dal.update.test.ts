@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { AthleteProfileDAL } from '../dal';
+import { athleteProfileStore } from '@/server/infrastructure/athlete-profiles';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
@@ -13,7 +13,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('AthleteProfileDAL.update', () => {
+describe('athleteProfileStore.update', () => {
   it('propagates image to all tournament athletes for that profile', async () => {
     const profileUpdate = vi.fn().mockResolvedValue({
       id: 'prof1',
@@ -29,7 +29,7 @@ describe('AthleteProfileDAL.update', () => {
       return (fn as unknown as (t: typeof tx) => Promise<unknown>)(tx);
     });
 
-    await AthleteProfileDAL.update('prof1', {
+    await athleteProfileStore.update('prof1', {
       athleteCode: '001',
       image: 'https://cdn.example/a.png',
     });
@@ -60,7 +60,7 @@ describe('AthleteProfileDAL.update', () => {
       return (fn as unknown as (t: typeof tx) => Promise<unknown>)(tx);
     });
 
-    await AthleteProfileDAL.update('prof1', {
+    await athleteProfileStore.update('prof1', {
       athleteCode: '001',
       name: 'New Name',
       image: undefined,

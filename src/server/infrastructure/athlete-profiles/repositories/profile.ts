@@ -1,8 +1,10 @@
+import type { AthleteProfileStore } from '@/server/application/athlete-profiles/repositories/profile';
 import type {
-  AthleteProfilesDTO,
-  CreateAthleteProfileDTO,
-  UpdateAthleteProfileDTO,
-} from './dto';
+  BulkRemoveProfilesCommand,
+  CreateProfileData,
+  ListAthleteProfilesQuery,
+  UpdateProfileData,
+} from '@/server/application/athlete-profiles/use-cases/profile-commands';
 import type { AthleteProfileData } from '@/features/dashboard/types';
 import { prisma } from '@/lib/db';
 import { filterColumns } from '@/lib/data-table/filter-columns';
@@ -13,8 +15,8 @@ import {
 import { athleteProfileFilterMap } from '@/lib/data-table/mappings/athlete-profiles';
 import { getValidFilters } from '@/lib/data-table/utils';
 
-export class AthleteProfileDAL {
-  static async findMany(input: AthleteProfilesDTO) {
+export const athleteProfileStore: AthleteProfileStore = {
+  async list(input: ListAthleteProfilesQuery) {
     const {
       page,
       perPage,
@@ -138,33 +140,24 @@ export class AthleteProfileDAL {
     );
 
     return { items, total };
-  }
+  },
 
-  static async findById(id: string) {
+  findById(id) {
     return prisma.athleteProfile.findUnique({ where: { id } });
-  }
+  },
 
-  static async findByAthleteCodeAndName(
-    athleteCode: string,
-    name: string,
-    excludeId?: string
-  ) {
+  findByAthleteCodeAndName(athleteCode, name, excludeId) {
     return prisma.athleteProfile.findFirst({
       where: {
         athleteCode,
         name,
         ...(excludeId ? { id: { not: excludeId } } : {}),
       },
+      select: { id: true, name: true, affiliation: true },
     });
-  }
+  },
 
-  static async findPossibleDuplicates(input: {
-    name: string;
-    affiliation: string;
-    weight: number;
-    beltLevel: number;
-    excludeId?: string;
-  }) {
+  findPossibleDuplicates(input) {
     return prisma.athleteProfile.findMany({
       where: {
         name: input.name,
@@ -173,19 +166,20 @@ export class AthleteProfileDAL {
         beltLevel: input.beltLevel,
         ...(input.excludeId ? { id: { not: input.excludeId } } : {}),
       },
+      select: { id: true, name: true, affiliation: true },
     });
-  }
+  },
 
-  static async create(data: Omit<CreateAthleteProfileDTO, 'confirmDuplicate'>) {
+  create(data: CreateProfileData) {
     return prisma.athleteProfile.create({
       data: {
         ...data,
         nameSortKey: getNameSortKey(data.name),
       },
     });
-  }
+  },
 
-  static async update(id: string, data: Omit<UpdateAthleteProfileDTO, 'id'>) {
+  async update(id: string, data: UpdateProfileData) {
     return prisma.$transaction(async (tx) => {
       const profile = await tx.athleteProfile.update({
         where: { id },
@@ -206,16 +200,16 @@ export class AthleteProfileDAL {
 
       return profile;
     });
-  }
+  },
 
-  static async deleteProfile(id: string) {
+  remove(id) {
     return prisma.athleteProfile.delete({ where: { id } });
-  }
+  },
 
-  static async deleteProfiles(ids: Array<string>) {
+  async bulkRemove(command: BulkRemoveProfilesCommand) {
     const result = await prisma.athleteProfile.deleteMany({
-      where: { id: { in: ids } },
+      where: { id: { in: command.ids } },
     });
     return result.count;
-  }
-}
+  },
+};

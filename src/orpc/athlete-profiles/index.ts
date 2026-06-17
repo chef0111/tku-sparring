@@ -6,94 +6,69 @@ import {
   CreateAthleteProfileSchema,
   UpdateAthleteProfileSchema,
 } from './dto';
-import { AthleteProfileDAL } from './dal';
-import { runDedupCheck } from './dedup';
 import { authorized } from '@/orpc/middleware';
 import { assertSystemAdmin } from '@/orpc/policies/auth';
+import { bulkRemoveProfiles } from '@/server/application/athlete-profiles/use-cases/bulk-remove';
+import { createProfile } from '@/server/application/athlete-profiles/use-cases/create';
+import { runDedupCheck } from '@/server/application/athlete-profiles/use-cases/dedup';
+import { getProfile } from '@/server/application/athlete-profiles/use-cases/get';
+import { listProfiles } from '@/server/application/athlete-profiles/use-cases/list';
+import { removeProfile } from '@/server/application/athlete-profiles/use-cases/remove';
+import { updateProfile } from '@/server/application/athlete-profiles/use-cases/update';
 
 export const listAthleteProfiles = authorized
   .input(AthleteProfilesSchema)
-  .handler(async ({ input }) => {
-    const profiles = await AthleteProfileDAL.findMany(input);
-    return profiles;
-  });
+  .handler(async ({ context, input }) =>
+    listProfiles(input, context.repos.athleteProfile)
+  );
 
 export const getAthleteProfile = authorized
   .input(z.object({ id: z.string() }))
-  .handler(async ({ input }) => {
-    const profile = await AthleteProfileDAL.findById(input.id);
-    if (!profile) {
-      throw new Error('Athlete profile not found');
-    }
-    return profile;
-  });
+  .handler(async ({ context, input }) =>
+    getProfile(input.id, context.repos.athleteProfile)
+  );
 
 export const createAthleteProfile = authorized
   .input(CreateAthleteProfileSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
-    const { confirmDuplicate, ...data } = input;
-
-    if (!confirmDuplicate) {
-      const dedup = await runDedupCheck({
-        athleteCode: data.athleteCode,
-        name: data.name,
-        affiliation: data.affiliation,
-        weight: data.weight,
-        beltLevel: data.beltLevel,
-      });
-
-      if (dedup.isHardBlock) {
-        throw new Error(
-          'DUPLICATE_ATHLETE_CODE_NAME: An athlete with this code and name already exists'
-        );
-      }
-
-      if (dedup.isDuplicate) {
-        throw new Error(
-          `POSSIBLE_DUPLICATE: ${JSON.stringify(dedup.matches.map((d) => d.id))}`
-        );
-      }
-    }
-
-    const profile = await AthleteProfileDAL.create(data);
-    return profile;
+    return createProfile(input, context.repos.athleteProfile);
   });
 
 export const checkDuplicate = authorized
   .input(CheckDuplicateSchema)
-  .handler(async ({ input }) => {
-    return runDedupCheck({
-      athleteCode: input.athleteCode,
-      name: input.name,
-      affiliation: input.affiliation,
-      weight: input.weight,
-      beltLevel: input.beltLevel,
-      excludeId: input.excludeId,
-    });
-  });
+  .handler(async ({ context, input }) =>
+    runDedupCheck(
+      {
+        athleteCode: input.athleteCode,
+        name: input.name,
+        affiliation: input.affiliation,
+        weight: input.weight,
+        beltLevel: input.beltLevel,
+        excludeId: input.excludeId,
+      },
+      context.repos.athleteProfile
+    )
+  );
 
 export const updateAthleteProfile = authorized
   .input(UpdateAthleteProfileSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
     const { id, ...data } = input;
-    const profile = await AthleteProfileDAL.update(id, data);
-    return profile;
+    return updateProfile(id, data, context.repos.athleteProfile);
   });
 
 export const removeAthleteProfile = authorized
   .input(z.object({ id: z.string() }))
-  .handler(async ({ input, context }) => {
+  .handler(async ({ context, input }) => {
     assertSystemAdmin(context.user);
-    const profile = await AthleteProfileDAL.deleteProfile(input.id);
-    return profile;
+    return removeProfile(input.id, context.repos.athleteProfile);
   });
 
 export const bulkDeleteAthleteProfiles = authorized
   .input(BulkDeleteAthleteProfilesSchema)
-  .handler(async ({ input, context }) => {
+  .handler(async ({ context, input }) => {
     assertSystemAdmin(context.user);
-    const count = await AthleteProfileDAL.deleteProfiles(input.ids);
-    return count;
+    return bulkRemoveProfiles({ ids: input.ids }, context.repos.athleteProfile);
   });

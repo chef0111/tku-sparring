@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AthleteProfileDAL } from '../dal';
+
+import { athleteProfileStore } from '@/server/infrastructure/athlete-profiles';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
@@ -8,7 +9,7 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
-describe('AthleteProfileDAL.findMany excludeTournamentId', () => {
+describe('athleteProfileStore.list excludeTournamentId', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('excludes profiles already registered in the tournament', async () => {
@@ -19,7 +20,7 @@ describe('AthleteProfileDAL.findMany excludeTournamentId', () => {
       0
     );
 
-    await AthleteProfileDAL.findMany({
+    await athleteProfileStore.list({
       page: 1,
       perPage: 20,
       excludeTournamentId: 'tournament-1',
