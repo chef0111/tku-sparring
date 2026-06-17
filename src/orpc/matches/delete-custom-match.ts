@@ -5,7 +5,7 @@ import {
   recordMutationActivity,
 } from '@/orpc/mutation-effects';
 import { prisma } from '@/lib/db';
-import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
+import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
 
 export async function deleteCustomMatch(matchId: string, adminId: string) {
   const result = await prisma.$transaction(async (tx) => {

@@ -10,7 +10,7 @@ import {
 } from '@/lib/sort/name-sort-key';
 import { notFound } from '@/orpc/errors';
 import { publishTournamentMutation } from '@/orpc/mutation-effects';
-import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
+import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
 
 export class TournamentAthleteDAL {
   private static readonly UNASSIGNED_GROUP_FILTER = {

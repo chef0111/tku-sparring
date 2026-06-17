@@ -14,7 +14,7 @@ import { badRequest, notFound } from '@/orpc/errors';
 import {
   assertCanForceTournamentStatus,
   assertTournamentAction,
-} from '@/orpc/policies/tournament-policy';
+} from '@/server/application/policies/tournament-policy';
 
 type TournamentLookupDatabase = Pick<typeof prisma, 'match' | 'tournament'>;
 

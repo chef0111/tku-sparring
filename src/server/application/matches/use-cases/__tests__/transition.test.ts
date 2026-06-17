@@ -9,6 +9,10 @@ import type {
   MatchTransitionRow,
   MatchTransitionStore,
 } from '../../repositories/transition';
+import {
+  NotFoundError,
+  PolicyViolationError,
+} from '@/server/application/errors';
 
 type ApplyInput = Parameters<MatchTransitionStore['applyTransition']>[0];
 
@@ -59,6 +63,19 @@ function fakeStore(match: MatchTransitionRow = baseMatch) {
 }
 
 describe('match transition use cases', () => {
+  it('updateMatchScore throws NotFoundError when match is missing', async () => {
+    const fixture = fakeStore();
+
+    await expect(
+      updateMatchScore(
+        { matchId: 'missing', redWins: 1, blueWins: 0, adminId: 'admin-1' },
+        fixture.store
+      )
+    ).rejects.toThrow(NotFoundError);
+
+    expect(fixture.applied).toBeNull();
+  });
+
   it('updateMatchScore builds match.score_edit activity', async () => {
     const fixture = fakeStore();
 
@@ -133,7 +150,7 @@ describe('match transition use cases', () => {
         { matchId: 'm1', redWins: 1, blueWins: 0, adminId: 'admin-1' },
         fixture.store
       )
-    ).rejects.toThrow('Completed tournaments are read-only');
+    ).rejects.toThrow(PolicyViolationError);
 
     expect(fixture.applied).toBeNull();
   });
@@ -150,7 +167,7 @@ describe('match transition use cases', () => {
         },
         fixture.store
       )
-    ).rejects.toThrow('Completed tournaments are read-only');
+    ).rejects.toThrow(PolicyViolationError);
 
     expect(fixture.applied).toBeNull();
   });
@@ -163,7 +180,7 @@ describe('match transition use cases', () => {
         { matchId: 'm1', status: 'active', adminId: 'admin-1' },
         fixture.store
       )
-    ).rejects.toThrow('Completed tournaments are read-only');
+    ).rejects.toThrow(PolicyViolationError);
 
     expect(fixture.applied).toBeNull();
   });

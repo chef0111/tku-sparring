@@ -5,7 +5,7 @@ import {
 } from '@/orpc/mutation-effects';
 import { badRequest, notFound } from '@/orpc/errors';
 import { prisma } from '@/lib/db';
-import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
+import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
 
 export async function assignAthleteToGroup(
   input: AssignAthleteDTO & { adminId: string }

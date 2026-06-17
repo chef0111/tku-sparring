@@ -17,7 +17,7 @@ import {
 } from '@/lib/tournament/bracket-shape';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { prisma } from '@/lib/db';
-import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
+import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
 
 type MatchBracketWriteDb = Pick<
   PrismaClient,

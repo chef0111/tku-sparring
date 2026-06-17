@@ -1,7 +1,7 @@
 import type { AssignSlotDTO, SetLockDTO, SwapSlotsDTO } from '../dto';
 import { notFound } from '@/orpc/errors';
 import { prisma } from '@/lib/db';
-import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
+import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
 
 export async function setRound0SlotLock(input: SetLockDTO) {
   const match = await prisma.match.findUnique({

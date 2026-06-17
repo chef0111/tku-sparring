@@ -23,6 +23,7 @@ import { createCustomMatch as runCreateCustomMatch } from './create-custom-match
 import { deleteCustomMatch as runDeleteCustomMatch } from './delete-custom-match';
 import { MatchDAL } from './dal';
 import { authorized } from '@/orpc/middleware';
+import { mapAppError } from '@/orpc/map-app-error';
 import { assertSystemAdmin } from '@/orpc/policies/auth';
 import {
   adminSetMatchStatus as runAdminSetMatchStatus,
@@ -68,12 +69,16 @@ export const createCustomMatch = authorized
 
 export const adminSetMatchStatus = authorized
   .input(AdminSetMatchStatusSchema)
-  .handler(async ({ input, context }) => {
+  .handler(async ({ input, context, errors }) => {
     assertSystemAdmin(context.user);
-    return runAdminSetMatchStatus(
-      { ...input, adminId: context.user.id },
-      context.repos.matchTransition
-    );
+    try {
+      return await runAdminSetMatchStatus(
+        { ...input, adminId: context.user.id },
+        context.repos.matchTransition
+      );
+    } catch (e) {
+      throw mapAppError(errors, e);
+    }
   });
 
 export const removeMatch = authorized
@@ -125,24 +130,30 @@ export const setLock = authorized
 
 export const updateScore = authorized
   .input(UpdateScoreSchema)
-  .handler(async ({ input, context }) => {
+  .handler(async ({ input, context, errors }) => {
     assertSystemAdmin(context.user);
-    const score = await runUpdateMatchScore(
-      { ...input, adminId: context.user.id },
-      context.repos.matchTransition
-    );
-    return score;
+    try {
+      return await runUpdateMatchScore(
+        { ...input, adminId: context.user.id },
+        context.repos.matchTransition
+      );
+    } catch (e) {
+      throw mapAppError(errors, e);
+    }
   });
 
 export const setWinner = authorized
   .input(SetWinnerSchema)
-  .handler(async ({ input, context }) => {
+  .handler(async ({ input, context, errors }) => {
     assertSystemAdmin(context.user);
-    const winner = await runSetMatchWinner(
-      { ...input, adminId: context.user.id },
-      context.repos.matchTransition
-    );
-    return winner;
+    try {
+      return await runSetMatchWinner(
+        { ...input, adminId: context.user.id },
+        context.repos.matchTransition
+      );
+    } catch (e) {
+      throw mapAppError(errors, e);
+    }
   });
 
 export const swapParticipants = authorized

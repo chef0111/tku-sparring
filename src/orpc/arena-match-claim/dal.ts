@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/db';
 import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
-import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
+import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
 
 const CLAIM_TTL_MS = 30 * 60 * 1000;
 

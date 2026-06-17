@@ -98,7 +98,9 @@ Typed oRPC errors live on **`src/orpc/base`** (`.errors({ NOT_FOUND, BAD_REQUEST
 
 Application use-cases **must not** import `@/orpc/errors` or use handler `errors`. They signal failure with **application error classes** in `src/server/application/errors.ts` (e.g. `NotFoundError`, `PolicyViolationError`). Procedures catch or use `mapAppError(errors, e)` in `src/orpc/` to throw typed `errors.*`.
 
-**Remove `src/orpc/errors.ts`** once nothing imports it (phased — see migration rule 10). `src/orpc/base.ts` is the error catalog; handlers use `errors` from the handler context. **Middleware** has no handler `errors` — throw `new ORPCError('UNAUTHORIZED', { message, defined: true })` (codes must match `base.errors`). Unmigrated DAL/use-case call sites migrate per vertical slice. 10. **Phased removal of `src/orpc/errors.ts`:** delete the file only when zero imports remain. Pre-slice-2: middleware (`ORPCError`), match-transition procedures + application errors, policy move. Legacy DALs migrate with their slice.
+**Remove `src/orpc/errors.ts`** once nothing imports it (phased — see migration rule 10). `src/orpc/base.ts` is the error catalog; handlers use `errors` from the handler context. **Middleware** has no handler `errors` — throw `new ORPCError('UNAUTHORIZED', { message, defined: true })` (codes must match `base.errors`). Unmigrated DAL/use-case call sites migrate per vertical slice.
+
+10. **Phased removal of `src/orpc/errors.ts`:** delete the file only when zero imports remain. Pre-slice-2: middleware (`ORPCError`), match-transition procedures + application errors, policy move. Legacy DALs migrate with their slice.
 
 ## First Slices
 

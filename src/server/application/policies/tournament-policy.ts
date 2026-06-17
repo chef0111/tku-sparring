@@ -1,6 +1,6 @@
-import type { TournamentStatusDTO } from '@/orpc/tournaments/dto';
-import { badRequest } from '@/orpc/errors';
-import { TournamentStatusSchema } from '@/orpc/tournaments/dto';
+import type { TournamentStatusValue } from '@/lib/tournament/tournament-status';
+import { PolicyViolationError } from '@/server/application/errors';
+import { TournamentStatusSchema } from '@/lib/tournament/tournament-status';
 
 export type TournamentAction =
   | 'group.create'
@@ -44,21 +44,23 @@ const draftOnly = new Set<TournamentAction>([
 ]);
 
 export function assertTournamentAction(
-  status: TournamentStatusDTO | string,
+  status: TournamentStatusValue | string,
   action: TournamentAction
 ) {
   const parsedStatus = TournamentStatusSchema.parse(status);
 
   if (parsedStatus === 'completed') {
-    badRequest('Completed tournaments are read-only');
+    throw new PolicyViolationError('Completed tournaments are read-only');
   }
   if (draftOnly.has(action) && parsedStatus !== 'draft') {
-    badRequest('This action is only allowed in Draft status');
+    throw new PolicyViolationError(
+      'This action is only allowed in Draft status'
+    );
   }
 }
 
 export function assertCanForceTournamentStatus(
-  status: TournamentStatusDTO | string
+  status: TournamentStatusValue | string
 ) {
   assertTournamentAction(status, 'tournament.status.force');
 }

@@ -10,18 +10,15 @@ import {
   buildWinnerOverridePlan,
 } from '@/lib/tournament/match-transition';
 import { MatchStatusSchema } from '@/lib/tournament/match-status';
-import { notFound } from '@/orpc/errors';
-import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
-
-// TODO: Move application errors and lifecycle policy behind server-layer
-// boundaries after the oRPC error-boundary and policy migration plans land.
+import { NotFoundError } from '@/server/application/errors';
+import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
 
 export async function updateMatchScore(
   command: UpdateMatchScoreCommand,
   store: MatchTransitionStore
 ) {
   const match = await store.findMatch(command.matchId);
-  if (!match) notFound('Match not found');
+  if (!match) throw new NotFoundError('Match not found');
   assertTournamentAction(match.tournamentStatus, 'match.score');
 
   const plan = buildScoreTransitionPlan({
@@ -50,7 +47,7 @@ export async function setMatchWinner(
   store: MatchTransitionStore
 ) {
   const match = await store.findMatch(command.matchId);
-  if (!match) notFound('Match not found');
+  if (!match) throw new NotFoundError('Match not found');
   assertTournamentAction(match.tournamentStatus, 'match.score');
 
   const plan = buildWinnerOverridePlan({
@@ -77,7 +74,7 @@ export async function adminSetMatchStatus(
   store: MatchTransitionStore
 ) {
   const match = await store.findMatch(command.matchId);
-  if (!match) notFound('Match not found');
+  if (!match) throw new NotFoundError('Match not found');
   assertTournamentAction(match.tournamentStatus, 'match.score');
 
   const current = MatchStatusSchema.parse(match.status);

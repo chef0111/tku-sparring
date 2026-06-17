@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { assertTournamentAction } from './tournament-policy';
+import { assertTournamentAction } from '../tournament-policy';
 
 describe('assertTournamentAction', () => {
   it('allows draft-only actions in draft tournaments', () => {

@@ -14,7 +14,7 @@ import type {
 import { isThirdPlaceMatch } from '@/lib/tournament/bracket-layout';
 import { recordTournamentActivity } from '@/orpc/activity/dal';
 import { prisma } from '@/lib/db';
-import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
+import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
 
 export class MatchDAL {
   static async findByGroupId(groupId: string) {

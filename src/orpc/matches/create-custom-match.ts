@@ -3,7 +3,7 @@ import { resolveCustomSlot } from './custom-match-slots';
 import { throwMatchBadRequest } from './match-domain-error';
 import { coalesceMatchRead } from './match-read';
 import type { CreateCustomMatchDTO } from './dto';
-import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
+import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
 import {
   publishTournamentMutation,
   recordMutationActivity,

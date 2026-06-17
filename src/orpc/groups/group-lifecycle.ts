@@ -2,7 +2,7 @@ import type { CreateGroupDTO, UpdateGroupDTO } from './dto';
 import { publishTournamentMutation } from '@/orpc/mutation-effects';
 import { notFound } from '@/orpc/errors';
 import { prisma } from '@/lib/db';
-import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
+import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
 
 export async function createGroup(input: CreateGroupDTO) {
   const group = await prisma.$transaction(async (tx) => {

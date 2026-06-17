@@ -12,7 +12,7 @@ import {
 } from '@/lib/tournament/arena-group-order';
 import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
 import { prisma } from '@/lib/db';
-import { assertTournamentAction } from '@/orpc/policies/tournament-policy';
+import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
 
 async function loadTournament(tournamentId: string) {
   const tournament = await prisma.tournament.findUnique({
