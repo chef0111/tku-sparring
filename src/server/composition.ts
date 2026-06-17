@@ -19,6 +19,8 @@ import { tournamentAthleteStore } from '@/server/infrastructure/tournament-athle
 import { advanceSelectionStore } from '@/server/infrastructure/advance-settings';
 import { deviceLastSelectionStore } from '@/server/infrastructure/device-last-selection';
 import { arenaMatchClaimStore } from '@/server/infrastructure/arena-match-claim';
+import { activityListStore } from '@/server/infrastructure/activity';
+import { athleteProfileStore } from '@/server/infrastructure/athlete-profiles';
 
 export const serverRepos = {
   matchTransition: matchTransitionStore,
@@ -34,6 +36,8 @@ export const serverRepos = {
   advanceSelection: advanceSelectionStore,
   deviceLastSelection: deviceLastSelectionStore,
   arenaMatchClaim: arenaMatchClaimStore,
+  activityList: activityListStore,
+  athleteProfile: athleteProfileStore,
   tournamentRead: tournamentReadStore,
   matchRead: matchReadStore,
 } as const;

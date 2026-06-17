@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getNormalizedEvents } from '../filter-options';
+import { getNormalizedEvents } from '@/lib/tournament/activity/filter-options';
 
 describe('getNormalizedEvents', () => {
   it('orders tournament before bracket and uses normalized labels', () => {

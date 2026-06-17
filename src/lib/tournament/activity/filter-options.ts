@@ -1,5 +1,5 @@
-import { TOURNAMENT_ACTIVITY_EVENT_TYPES } from './types';
-import type { TournamentActivityEventType } from './types';
+import type { TournamentActivityEventType } from '@/server/application/activity/activity-types';
+import { TOURNAMENT_ACTIVITY_EVENT_TYPES } from '@/server/application/activity/activity-types';
 
 const CATEGORY_ORDER = ['tournament', 'bracket', 'match', 'group'] as const;
 

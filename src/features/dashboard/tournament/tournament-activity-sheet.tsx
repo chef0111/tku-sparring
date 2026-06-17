@@ -2,8 +2,8 @@ import * as React from 'react';
 import { ListFilter, ScrollText, X } from 'lucide-react';
 import { ActivityEventRow } from './viewer/components/activity-event-row';
 import type { TournamentActivityEventType } from '@/orpc/activity/types';
-import type { ActivityEventFilterOption } from '@/orpc/activity/filter-options';
-import { getNormalizedEvents } from '@/orpc/activity/filter-options';
+import type { ActivityEventFilterOption } from '@/lib/tournament/activity/filter-options';
+import { getNormalizedEvents } from '@/lib/tournament/activity/filter-options';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {

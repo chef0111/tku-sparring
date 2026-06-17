@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { listTournamentActivity, summarizeTournamentActivity } from '../dal';
+import { activityListStore } from '@/server/infrastructure/activity';
+import { summarizeTournamentActivity } from '@/server/application/activity/summarize';
 import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
@@ -34,7 +35,7 @@ describe('summarizeTournamentActivity', () => {
   });
 });
 
-describe('listTournamentActivity', () => {
+describe('activityListStore.list', () => {
   it('returns summaries and admin names', async () => {
     const createdAt = new Date('2024-01-02T12:00:00Z');
     vi.mocked(prisma.tournamentActivity.findMany).mockResolvedValue([
@@ -52,7 +53,7 @@ describe('listTournamentActivity', () => {
       { id: 'u1', name: 'Admin One' },
     ] as never);
 
-    const result = await listTournamentActivity({
+    const result = await activityListStore.list({
       tournamentId: 't1',
       limit: 50,
     });
@@ -66,7 +67,7 @@ describe('listTournamentActivity', () => {
   it('applies eventTypes filter in the query', async () => {
     vi.mocked(prisma.tournamentActivity.findMany).mockResolvedValue([]);
 
-    await listTournamentActivity({
+    await activityListStore.list({
       tournamentId: 't1',
       eventTypes: ['bracket.generate', 'bracket.regenerate'],
     });
