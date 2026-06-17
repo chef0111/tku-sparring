@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { MatchDAL } from '../dal';
+import { swapParticipants } from '@/server/application/matches/use-cases/swap-participants';
+import { matchParticipantStore } from '@/server/infrastructure/matches/repositories/swap-participants';
 import { recordMutationActivity } from '@/server/infrastructure/mutation-effects';
 import { prisma } from '@/lib/db';
 
@@ -37,6 +38,7 @@ function upperMatch(over: Record<string, unknown> = {}) {
     blueAthleteId: null,
     tournamentId: 't-1',
     groupId: 'g1',
+    tournament: { status: 'draft' },
     group: {
       thirdPlaceMatch: false,
       tournament: { status: 'draft' },
@@ -63,13 +65,14 @@ describe('swapParticipants', () => {
   it('toggles cornersSwapped on upper-round matches', async () => {
     vi.mocked(prisma.match.findUnique).mockResolvedValue(upperMatch() as never);
 
-    await MatchDAL.swapParticipants(
+    await swapParticipants(
       {
         matchId: 'm1',
         redTournamentAthleteId: null,
         blueTournamentAthleteId: 'ta-red',
+        adminId: 'admin',
       },
-      'admin'
+      matchParticipantStore
     );
 
     expect(prisma.match.update).toHaveBeenCalledWith(
@@ -83,6 +86,7 @@ describe('swapParticipants', () => {
   it('rejects active tournaments', async () => {
     vi.mocked(prisma.match.findUnique).mockResolvedValue(
       upperMatch({
+        tournament: { status: 'active' },
         group: {
           thirdPlaceMatch: false,
           tournament: { status: 'active' },
@@ -91,13 +95,14 @@ describe('swapParticipants', () => {
     );
 
     await expect(
-      MatchDAL.swapParticipants(
+      swapParticipants(
         {
           matchId: 'm1',
           redTournamentAthleteId: null,
           blueTournamentAthleteId: 'ta-red',
+          adminId: 'admin',
         },
-        'admin'
+        matchParticipantStore
       )
     ).rejects.toThrow(/Draft status/);
 
@@ -107,6 +112,7 @@ describe('swapParticipants', () => {
   it('rejects completed tournaments', async () => {
     vi.mocked(prisma.match.findUnique).mockResolvedValue(
       upperMatch({
+        tournament: { status: 'completed' },
         group: {
           thirdPlaceMatch: false,
           tournament: { status: 'completed' },
@@ -115,13 +121,14 @@ describe('swapParticipants', () => {
     );
 
     await expect(
-      MatchDAL.swapParticipants(
+      swapParticipants(
         {
           matchId: 'm1',
           redTournamentAthleteId: null,
           blueTournamentAthleteId: 'ta-red',
+          adminId: 'admin',
         },
-        'admin'
+        matchParticipantStore
       )
     ).rejects.toThrow(/read-only/);
 
@@ -134,13 +141,14 @@ describe('swapParticipants', () => {
     );
 
     await expect(
-      MatchDAL.swapParticipants(
+      swapParticipants(
         {
           matchId: 'm1',
           redTournamentAthleteId: null,
           blueTournamentAthleteId: 'ta-red',
+          adminId: 'admin',
         },
-        'admin'
+        matchParticipantStore
       )
     ).rejects.toThrow(/complete match/);
   });
@@ -151,13 +159,14 @@ describe('swapParticipants', () => {
     );
 
     await expect(
-      MatchDAL.swapParticipants(
+      swapParticipants(
         {
           matchId: 'm1',
           redTournamentAthleteId: null,
           blueTournamentAthleteId: 'ta-red',
+          adminId: 'admin',
         },
-        'admin'
+        matchParticipantStore
       )
     ).rejects.toThrow(/locked/);
   });
@@ -168,13 +177,14 @@ describe('swapParticipants', () => {
     );
 
     await expect(
-      MatchDAL.swapParticipants(
+      swapParticipants(
         {
           matchId: 'm1',
           redTournamentAthleteId: 'ta-blue',
           blueTournamentAthleteId: 'ta-red',
+          adminId: 'admin',
         },
-        'admin'
+        matchParticipantStore
       )
     ).rejects.toThrow(/opening-round/);
   });
@@ -185,6 +195,7 @@ describe('swapParticipants', () => {
         id: 'third',
         round: 2,
         matchIndex: 1,
+        tournament: { status: 'draft' },
         group: {
           thirdPlaceMatch: true,
           tournament: { status: 'draft' },
@@ -197,13 +208,14 @@ describe('swapParticipants', () => {
     ] as never);
 
     await expect(
-      MatchDAL.swapParticipants(
+      swapParticipants(
         {
           matchId: 'third',
           redTournamentAthleteId: 'ta-a',
           blueTournamentAthleteId: 'ta-b',
+          adminId: 'admin',
         },
-        'admin'
+        matchParticipantStore
       )
     ).rejects.toThrow(/third-place/);
   });
@@ -212,13 +224,14 @@ describe('swapParticipants', () => {
     vi.mocked(prisma.match.findUnique).mockResolvedValue(upperMatch() as never);
 
     await expect(
-      MatchDAL.swapParticipants(
+      swapParticipants(
         {
           matchId: 'm1',
           redTournamentAthleteId: 'ta-red',
           blueTournamentAthleteId: null,
+          adminId: 'admin',
         },
-        'admin'
+        matchParticipantStore
       )
     ).rejects.toThrow(/transpose/);
   });

@@ -13,13 +13,19 @@ import {
   SwapSlotsSchema,
   UpdateScoreSchema,
 } from './dto';
+import { MatchDAL } from './dal';
 import {
   generateBracket as runGenerateBracket,
   regenerateBracket as runRegenerateBracket,
   resetBracket as runResetBracket,
   shuffleBracket as runShuffleBracket,
-} from './bracket/bracket-lifecycle';
-import { MatchDAL } from './dal';
+} from '@/server/application/matches/use-cases/bracket-lifecycle';
+import {
+  assignSlot as runAssignSlot,
+  setLock as runSetLock,
+  swapSlots as runSwapSlots,
+} from '@/server/application/matches/use-cases/round0-slot';
+import { swapParticipants as runSwapParticipants } from '@/server/application/matches/use-cases/swap-participants';
 import {
   createCustomMatch as runCreateCustomMatch,
   deleteCustomMatch as runDeleteCustomMatch,
@@ -95,40 +101,47 @@ export const generateBracket = authorized
   .input(GenerateBracketSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
-    const matches = await runGenerateBracket(input, context.user.id);
-    return matches;
+    return runGenerateBracket(
+      { ...input, adminId: context.user.id },
+      context.repos.bracketLifecycle
+    );
   });
 
 export const shuffleBracket = authorized
   .input(ShuffleBracketSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
-    const matches = await runShuffleBracket(input.groupId, context.user.id);
-    return matches;
+    return runShuffleBracket(
+      { groupId: input.groupId, adminId: context.user.id },
+      context.repos.bracketLifecycle
+    );
   });
 
 export const regenerateBracket = authorized
   .input(RegenerateBracketSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
-    const matches = await runRegenerateBracket(input.groupId, context.user.id);
-    return matches;
+    return runRegenerateBracket(
+      { groupId: input.groupId, adminId: context.user.id },
+      context.repos.bracketLifecycle
+    );
   });
 
 export const resetBracket = authorized
   .input(ResetBracketSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
-    const matches = await runResetBracket(input.groupId, context.user.id);
-    return matches;
+    return runResetBracket(
+      { groupId: input.groupId, adminId: context.user.id },
+      context.repos.bracketLifecycle
+    );
   });
 
 export const setLock = authorized
   .input(SetLockSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
-    const match = await MatchDAL.setLock(input);
-    return match;
+    return runSetLock(input, context.repos.round0Slot);
   });
 
 export const updateScore = authorized
@@ -155,25 +168,28 @@ export const swapParticipants = authorized
   .input(SwapParticipantsSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
-    const participants = await MatchDAL.swapParticipants(
-      input,
-      context.user.id
+    return runSwapParticipants(
+      { ...input, adminId: context.user.id },
+      context.repos.matchParticipant
     );
-    return participants;
   });
 
 export const assignSlot = authorized
   .input(AssignSlotSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
-    const slot = await MatchDAL.assignSlot(input, context.user.id);
-    return slot;
+    return runAssignSlot(
+      { ...input, adminId: context.user.id },
+      context.repos.round0Slot
+    );
   });
 
 export const swapSlots = authorized
   .input(SwapSlotsSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
-    const slots = await MatchDAL.swapSlots(input, context.user.id);
-    return slots;
+    return runSwapSlots(
+      { ...input, adminId: context.user.id },
+      context.repos.round0Slot
+    );
   });

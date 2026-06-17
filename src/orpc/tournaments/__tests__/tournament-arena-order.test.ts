@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { findTournamentById } from '../tournament-lifecycle';
 import {
   moveGroupBetweenArenas,
   setArenaGroupOrder,
-} from '../tournament-arena-order';
-import { findTournamentById } from '../tournament-lifecycle';
+} from '@/server/application/tournaments/use-cases/arena-order';
+import { tournamentArenaOrderStore } from '@/server/infrastructure/tournaments';
 import { prisma } from '@/lib/db';
-import { publishSelectionInvalidate } from '@/lib/tournament/tournament-realtime-broadcast';
+import { publishTournamentMutation } from '@/server/infrastructure/mutation-effects';
 
 vi.mock('@/lib/db', () => ({
   prisma: {
@@ -25,8 +26,9 @@ vi.mock('../tournament-lifecycle', () => ({
   findTournamentById: vi.fn(),
 }));
 
-vi.mock('@/lib/tournament/tournament-realtime-broadcast', () => ({
-  publishSelectionInvalidate: vi.fn(),
+vi.mock('@/server/infrastructure/mutation-effects', () => ({
+  publishTournamentMutation: vi.fn(),
+  recordMutationActivity: vi.fn(),
 }));
 
 const draftTournament = {
@@ -53,7 +55,7 @@ beforeEach(() => {
   vi.mocked(prisma.$transaction).mockResolvedValue([] as never);
 });
 
-describe('tournament arena order', () => {
+describe('tournament arena order infrastructure', () => {
   it('guards arena order mutations to draft tournaments', async () => {
     vi.mocked(prisma.tournament.findUnique).mockResolvedValue({
       ...draftTournament,
@@ -61,15 +63,18 @@ describe('tournament arena order', () => {
     } as never);
 
     await expect(
-      setArenaGroupOrder({
-        tournamentId: 't1',
-        arenaIndex: 1,
-        groupIds: ['g1', 'g2'],
-      })
+      setArenaGroupOrder(
+        {
+          tournamentId: 't1',
+          arenaIndex: 1,
+          groupIds: ['g1', 'g2'],
+        },
+        tournamentArenaOrderStore
+      )
     ).rejects.toThrow(/Draft status/);
 
     expect(prisma.tournament.update).not.toHaveBeenCalled();
-    expect(publishSelectionInvalidate).not.toHaveBeenCalled();
+    expect(publishTournamentMutation).not.toHaveBeenCalled();
   });
 
   it('requires same-arena reorder to include every group exactly once', async () => {
@@ -78,19 +83,25 @@ describe('tournament arena order', () => {
     );
 
     await expect(
-      setArenaGroupOrder({
-        tournamentId: 't1',
-        arenaIndex: 1,
-        groupIds: ['g1'],
-      })
+      setArenaGroupOrder(
+        {
+          tournamentId: 't1',
+          arenaIndex: 1,
+          groupIds: ['g1'],
+        },
+        tournamentArenaOrderStore
+      )
     ).rejects.toThrow(/exactly once/);
 
     await expect(
-      setArenaGroupOrder({
-        tournamentId: 't1',
-        arenaIndex: 1,
-        groupIds: ['g1', 'g3'],
-      })
+      setArenaGroupOrder(
+        {
+          tournamentId: 't1',
+          arenaIndex: 1,
+          groupIds: ['g1', 'g3'],
+        },
+        tournamentArenaOrderStore
+      )
     ).rejects.toThrow(/exactly once/);
   });
 
@@ -99,13 +110,16 @@ describe('tournament arena order', () => {
       draftTournament as never
     );
 
-    await moveGroupBetweenArenas({
-      tournamentId: 't1',
-      groupId: 'g2',
-      fromArena: 1,
-      toArena: 2,
-      insertIndex: 1,
-    });
+    await moveGroupBetweenArenas(
+      {
+        tournamentId: 't1',
+        groupId: 'g2',
+        fromArena: 1,
+        toArena: 2,
+        insertIndex: 1,
+      },
+      tournamentArenaOrderStore
+    );
 
     expect(prisma.group.update).toHaveBeenCalledWith({
       where: { id: 'g2' },
@@ -126,13 +140,16 @@ describe('tournament arena order', () => {
       draftTournament as never
     );
 
-    await setArenaGroupOrder({
-      tournamentId: 't1',
-      arenaIndex: 1,
-      groupIds: ['g2', 'g1'],
-    });
+    await setArenaGroupOrder(
+      {
+        tournamentId: 't1',
+        arenaIndex: 1,
+        groupIds: ['g2', 'g1'],
+      },
+      tournamentArenaOrderStore
+    );
 
-    expect(publishSelectionInvalidate).toHaveBeenCalledTimes(1);
-    expect(publishSelectionInvalidate).toHaveBeenCalledWith('t1');
+    expect(publishTournamentMutation).toHaveBeenCalledTimes(1);
+    expect(publishTournamentMutation).toHaveBeenCalledWith('t1');
   });
 });

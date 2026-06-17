@@ -20,7 +20,7 @@ import {
   forceSetTournamentStatus,
   isBackwardStatusTransition,
   tournamentStatusRiskNotes,
-} from '@/lib/tournament/tournament/tournament-status';
+} from '@/lib/tournament/tournament-status';
 import { TOURNAMENT_STATUSES } from '@/features/dashboard/types';
 import { Button } from '@/components/ui/button';
 import {
