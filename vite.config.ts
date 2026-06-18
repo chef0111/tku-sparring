@@ -38,7 +38,11 @@ function ssrStreamErrorGuard(): Plugin {
 
 const config = defineConfig({
   plugins: [
-    tanstackStart(),
+    tanstackStart({
+      router: {
+        routeFileIgnorePattern: 'tanstack-start-server-route\\.d\\.ts',
+      },
+    }),
     ssrStreamErrorGuard(),
     devtools(),
     nitro(),
