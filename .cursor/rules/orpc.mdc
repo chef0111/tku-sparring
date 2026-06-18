@@ -14,7 +14,7 @@ Server RPC lives under **`src/orpc`**. Client apps consume it via `@/orpc/client
 | Layer           | Location                                                     | Responsibility                                                    |
 | --------------- | ------------------------------------------------------------ | ----------------------------------------------------------------- |
 | Router assembly | `src/orpc/router.ts`, `<domain>/router.ts`                   | Map `client.*` keys only; no business logic                       |
-| Procedures      | `<domain>/index.ts`                                          | `authedProcedure` + input schema + delegate                       |
+| Procedures      | `<domain>/index.ts`                                          | `authorized` + input schema + delegate                            |
 | DTOs            | `<domain>/dto.ts`                                            | Zod; consumed by procedures and `queries/api`                     |
 | DAL             | `<domain>/dal.ts`                                            | Prisma / persistence                                              |
 | Use-cases       | `<domain>/*.ts` (e.g. `bulk-add.ts`, `bracket-lifecycle.ts`) | Multi-step / cross-DAL orchestration; procedures call in one line |
@@ -32,12 +32,12 @@ oRPC folders are often **plural** (`groups/`, `matches/`); `src/queries/<domain>
 - Cross-domain flows: use-case module in the **originating** domain (mirror `invalidateOnBulkAdd` on the queries side).
 - `matches/router.ts` exports `matchRouter` and `bracketRouter` for `client.match` and `client.bracket`.
 - Follow `.cursor/rules/concise-naming.mdc`; prefer router key names over `*Endpoint` suffixes on procedure exports when renaming.
-- Prisma row → `MatchData`: `@/lib/tournament/match-projection` (`matchProjectionSelect`, `toMatchData`) — see `.cursor/rules/prisma-projection.mdc`.
+- Prisma row → `MatchData`: `@/server/domain/tournament/match/match-projection` (`matchProjectionSelect`, `toMatchData`) — see `.cursor/rules/prisma-projection.mdc`.
 
 ## Adding a procedure
 
 1. Schema in `<domain>/dto.ts` if shared with client types.
 2. Logic in `dal.ts` or a use-case `*.ts` if multi-step.
-3. `authedProcedure` export in `<domain>/index.ts`.
+3. `authorized` export in `<domain>/index.ts`.
 4. Wire in `<domain>/router.ts` and ensure root `router.ts` merges the fragment.
 5. Add thin adapter in `src/queries/api/*-api.ts` when the UI needs it.

@@ -28,7 +28,7 @@ Queries: `prisma.match.findMany({ select: matchProjectionSelect, … })` then `.
 ## Do not
 
 - Inline a 15+ field anonymous type on a private `prismaXToY` helper in a DAL.
-- Duplicate `kind === 'custom' ? …` / `displayLabel ?? null` — use `@/lib/tournament/match-kind` (`matchKindFromDb`, `matchDisplayLabelFromDb`).
+- Duplicate `kind === 'custom' ? …` / `displayLabel ?? null` — use `@/server/domain/tournament/match/match-kind` (`matchKindFromDb`, `matchDisplayLabelFromDb`).
 - Redefine the **output** type if it already exists — import `MatchData` (or the Zod-inferred DTO) and map into it.
 
 **Layers stay separate:** `match-kind` is the shared **domain invariant** only. `toMatchData` and `coalesceMatchRead` remain different projections; they call `match-kind`, they do not replace each other.
@@ -37,8 +37,8 @@ Queries: `prisma.match.findMany({ select: matchProjectionSelect, … })` then `.
 
 | Output used by                                    | Projection home                                                                   |
 | ------------------------------------------------- | --------------------------------------------------------------------------------- |
-| Arena labels, bracket tooling, multiple oRPC DALs | `@/lib/tournament/match-projection` (`toMatchData`)                               |
-| `kind` / `displayLabel` DB → domain rule          | `@/lib/tournament/match-kind`                                                     |
+| Arena labels, bracket tooling, multiple oRPC DALs | `@/server/domain/tournament/match/match-projection` (`toMatchData`)                               |
+| `kind` / `displayLabel` DB → domain rule          | `@/server/domain/tournament/match/match-kind`                                                     |
 | oRPC procedure JSON (full row, light normalize)   | `orpc/matches/match-read` (`coalesceMatchRead`) — different seam than `MatchData` |
 | RPC contract / client types                       | `orpc/<domain>/dto.ts` (Zod) — not a Prisma projection                            |
 

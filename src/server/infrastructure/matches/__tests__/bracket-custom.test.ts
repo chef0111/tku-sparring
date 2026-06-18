@@ -1,0 +1,940 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import {
+  generateBracket,
+  regenerateBracket,
+  resetBracket,
+  shuffleBracket,
+} from '@/server/application/matches/use-cases/bracket-lifecycle';
+import { bracketLifecycleStore } from '@/server/infrastructure/matches/repositories/bracket-lifecycle';
+import { buildRound0Baseline } from '@/server/domain/tournament/bracket/round0-baseline';
+import {
+  assignSlot,
+  swapSlots,
+} from '@/server/application/matches/use-cases/round0-slot';
+import { round0SlotStore } from '@/server/infrastructure/matches/repositories/round0-slot';
+import {
+  createCustomMatch,
+  deleteCustomMatch,
+} from '@/server/application/matches/use-cases/custom';
+import { customMatchStore } from '@/server/infrastructure/matches/repositories/custom';
+import {
+  publishTournamentMutation,
+  recordMutationActivity,
+} from '@/server/infrastructure/mutation-effects';
+import { prisma } from '@/lib/db';
+
+vi.mock('@/lib/db', () => ({
+  prisma: {
+    group: { findUnique: vi.fn(), update: vi.fn() },
+    match: {
+      count: vi.fn(),
+      create: vi.fn(),
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      findFirst: vi.fn(),
+      update: vi.fn(),
+      updateMany: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn(),
+      aggregate: vi.fn(),
+    },
+    tournamentAthlete: {
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      findFirst: vi.fn(),
+    },
+    $transaction: vi.fn(),
+  },
+}));
+
+vi.mock('@/server/infrastructure/mutation-effects', () => ({
+  recordMutationActivity: vi.fn(),
+  publishTournamentMutation: vi.fn(),
+}));
+
+vi.mock(
+  '@/server/infrastructure/matches/repositories/custom/assert-label',
+  () => ({
+    assertLabelAvailable: vi.fn().mockResolvedValue(undefined),
+  })
+);
+
+const draftGroup = {
+  id: 'group-1',
+  tournamentId: 't-1',
+  thirdPlaceMatch: false,
+  tournament: { id: 't-1', status: 'draft' },
+};
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.mocked(prisma.group.update).mockResolvedValue({} as never);
+  vi.mocked(prisma.$transaction).mockImplementation(async (arg: unknown) => {
+    if (typeof arg === 'function') {
+      return arg(prisma as never);
+    }
+    if (Array.isArray(arg)) {
+      return Promise.all(
+        arg.map((op: unknown) =>
+          typeof op === 'object' && op && 'then' in op ? op : op
+        )
+      );
+    }
+    return arg;
+  });
+});
+
+describe('generateBracket', () => {
+  it('creates empty shell: all slots null, no bye advancement updates', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue(draftGroup as never);
+    vi.mocked(prisma.match.count).mockResolvedValue(0);
+    vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue([
+      { id: 'ta1', athleteProfileId: 'ap1', beltLevel: 3, weight: 60 },
+      { id: 'ta2', athleteProfileId: 'ap2', beltLevel: 3, weight: 62 },
+    ] as never);
+    vi.mocked(prisma.match.create).mockImplementation((args) => {
+      const data = args.data as { round: number; matchIndex: number };
+      return Promise.resolve({
+        id: `m-${data.round}-${data.matchIndex}`,
+        ...data,
+      }) as never;
+    });
+    vi.mocked(prisma.match.findMany).mockResolvedValue([]);
+
+    await generateBracket(
+      { groupId: 'group-1', adminId: 'admin-1' },
+      bracketLifecycleStore
+    );
+
+    expect(prisma.match.count).toHaveBeenCalledWith({
+      where: { groupId: 'group-1', kind: 'bracket' },
+    });
+
+    const creates = vi
+      .mocked(prisma.match.create)
+      .mock.calls.map((c) => c[0].data);
+    expect(creates.length).toBe(1);
+    for (const row of creates) {
+      expect(row.redTournamentAthleteId).toBeNull();
+      expect(row.blueTournamentAthleteId).toBeNull();
+    }
+    expect(prisma.match.update).not.toHaveBeenCalled();
+    expect(recordMutationActivity).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'bracket.generate',
+        payload: expect.objectContaining({ mode: 'shell', bracketSize: 2 }),
+      }),
+      prisma
+    );
+  });
+
+  it('rejects when matches already exist', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue(draftGroup as never);
+    vi.mocked(prisma.match.count).mockResolvedValue(1);
+    await expect(
+      generateBracket(
+        { groupId: 'group-1', adminId: 'admin-1' },
+        bracketLifecycleStore
+      )
+    ).rejects.toThrow(/already exist/);
+  });
+
+  it('does not create third-place match when athletes < 4 even if toggle on', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      ...draftGroup,
+      thirdPlaceMatch: true,
+    } as never);
+    vi.mocked(prisma.match.count).mockResolvedValue(0);
+    vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue([
+      { id: 'ta1', athleteProfileId: 'ap1', beltLevel: 3, weight: 60 },
+      { id: 'ta2', athleteProfileId: 'ap2', beltLevel: 3, weight: 62 },
+      { id: 'ta3', athleteProfileId: 'ap3', beltLevel: 3, weight: 64 },
+    ] as never);
+    vi.mocked(prisma.match.create).mockImplementation((args) => {
+      const data = args.data as { round: number; matchIndex: number };
+      return Promise.resolve({
+        id: `m-${data.round}-${data.matchIndex}`,
+        ...data,
+      }) as never;
+    });
+    vi.mocked(prisma.match.findMany).mockResolvedValue([]);
+
+    await generateBracket(
+      { groupId: 'group-1', adminId: 'admin-1' },
+      bracketLifecycleStore
+    );
+
+    const creates = vi
+      .mocked(prisma.match.create)
+      .mock.calls.map((c) => c[0].data as { round: number });
+    expect(creates.some((row) => row.round === 2)).toBe(false);
+    expect(creates.length).toBe(3);
+  });
+
+  it('creates third-place match when toggle on and athletes >= 4', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      ...draftGroup,
+      thirdPlaceMatch: true,
+    } as never);
+    vi.mocked(prisma.match.count).mockResolvedValue(0);
+    vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue([
+      { id: 'ta1', athleteProfileId: 'ap1', beltLevel: 3, weight: 60 },
+      { id: 'ta2', athleteProfileId: 'ap2', beltLevel: 3, weight: 62 },
+      { id: 'ta3', athleteProfileId: 'ap3', beltLevel: 3, weight: 64 },
+      { id: 'ta4', athleteProfileId: 'ap4', beltLevel: 3, weight: 66 },
+    ] as never);
+    vi.mocked(prisma.match.create).mockImplementation((args) => {
+      const data = args.data as { round: number; matchIndex: number };
+      return Promise.resolve({
+        id: `m-${data.round}-${data.matchIndex}`,
+        ...data,
+      }) as never;
+    });
+    vi.mocked(prisma.match.findMany).mockResolvedValue([]);
+
+    await generateBracket(
+      { groupId: 'group-1', adminId: 'admin-1' },
+      bracketLifecycleStore
+    );
+
+    const creates = vi
+      .mocked(prisma.match.create)
+      .mock.calls.map((c) => c[0].data as { round: number });
+    expect(creates.filter((row) => row.round === 2)).toHaveLength(1);
+    expect(creates.length).toBe(4);
+  });
+});
+
+describe('resetBracket', () => {
+  it('throws when there is no saved shuffle layout', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      ...draftGroup,
+      round0Baseline: null,
+    } as never);
+
+    await expect(
+      resetBracket(
+        { groupId: 'group-1', adminId: 'admin-1' },
+        bracketLifecycleStore
+      )
+    ).rejects.toThrow(/Shuffle once/i);
+    expect(prisma.match.findMany).not.toHaveBeenCalled();
+  });
+
+  it('restores round 0 from baseline and logs bracket.reset', async () => {
+    const r0m0 = {
+      id: 'm0',
+      round: 0,
+      matchIndex: 0,
+      redLocked: false,
+      blueLocked: false,
+      redTournamentAthleteId: 'ta-a',
+      blueTournamentAthleteId: 'ta-b',
+      redAthleteId: 'p1',
+      blueAthleteId: 'p2',
+      redWins: 0,
+      blueWins: 0,
+      winnerId: null,
+      tournamentWinnerId: null,
+      status: 'pending',
+    };
+    const baseline = buildRound0Baseline([r0m0]);
+
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      ...draftGroup,
+      round0Baseline: baseline,
+    } as never);
+
+    vi.mocked(prisma.match.findMany).mockImplementation(((args) => {
+      const w = args?.where as { round?: number; kind?: string } | undefined;
+      if (w?.kind === 'bracket' && w.round === undefined) {
+        return Promise.resolve([r0m0] as never);
+      }
+      if (w?.round === 0) {
+        return Promise.resolve([r0m0] as never);
+      }
+      return Promise.resolve([] as never);
+    }) as typeof prisma.match.findMany);
+
+    vi.mocked(prisma.match.updateMany).mockResolvedValue({ count: 0 } as never);
+    vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue([
+      { id: 'ta-a', athleteProfileId: 'p1', beltLevel: 4, weight: 65 },
+      { id: 'ta-b', athleteProfileId: 'p2', beltLevel: 4, weight: 66 },
+    ] as never);
+    vi.mocked(prisma.match.update).mockResolvedValue({} as never);
+    vi.mocked(prisma.match.findUnique).mockResolvedValue(null);
+
+    await resetBracket(
+      { groupId: 'group-1', adminId: 'admin-1' },
+      bracketLifecycleStore
+    );
+
+    expect(recordMutationActivity).toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: 'bracket.reset' }),
+      prisma
+    );
+    expect(prisma.match.update).toHaveBeenCalled();
+  });
+});
+
+describe('assignSlot', () => {
+  it('throws when slot is locked', async () => {
+    vi.mocked(prisma.match.findUnique).mockResolvedValue({
+      id: 'm1',
+      round: 0,
+      redLocked: true,
+      groupId: 'group-1',
+      tournament: { status: 'draft' },
+      group: { tournament: { status: 'draft' } },
+    } as never);
+
+    await expect(
+      assignSlot(
+        {
+          matchId: 'm1',
+          side: 'red',
+          tournamentAthleteId: 'ta1',
+          adminId: 'admin',
+        },
+        round0SlotStore
+      )
+    ).rejects.toThrow(/locked/);
+  });
+
+  it('throws when athlete is in another group', async () => {
+    vi.mocked(prisma.match.findUnique).mockResolvedValue({
+      id: 'm1',
+      round: 0,
+      redLocked: false,
+      groupId: 'group-1',
+      tournament: { status: 'draft' },
+      group: { tournament: { status: 'draft' } },
+    } as never);
+    vi.mocked(prisma.tournamentAthlete.findUnique).mockResolvedValue({
+      id: 'ta1',
+      groupId: 'other',
+      athleteProfileId: 'ap1',
+    } as never);
+
+    await expect(
+      assignSlot(
+        {
+          matchId: 'm1',
+          side: 'blue',
+          tournamentAthleteId: 'ta1',
+          adminId: 'admin',
+        },
+        round0SlotStore
+      )
+    ).rejects.toThrow(/does not belong/);
+  });
+
+  it('throws when match is complete', async () => {
+    vi.mocked(prisma.match.findUnique).mockResolvedValue({
+      id: 'm1',
+      round: 0,
+      status: 'complete',
+      groupId: 'group-1',
+      redLocked: false,
+      blueLocked: false,
+      tournament: { status: 'draft' },
+      group: { tournament: { status: 'draft' } },
+    } as never);
+
+    await expect(
+      assignSlot(
+        {
+          matchId: 'm1',
+          side: 'red',
+          tournamentAthleteId: 'ta1',
+          adminId: 'admin',
+        },
+        round0SlotStore
+      )
+    ).rejects.toThrow(/complete match/);
+  });
+});
+
+describe('swapSlots', () => {
+  it('throws when either side is locked', async () => {
+    const a = {
+      id: 'ma',
+      round: 0,
+      groupId: 'g1',
+      redLocked: true,
+      blueLocked: false,
+      redTournamentAthleteId: 'ta1',
+      blueTournamentAthleteId: null,
+      redAthleteId: 'ap1',
+      blueAthleteId: null,
+      tournament: { status: 'draft' },
+      group: { tournament: { status: 'draft' } },
+    };
+    const b = {
+      id: 'mb',
+      round: 0,
+      groupId: 'g1',
+      redLocked: false,
+      blueLocked: false,
+      redTournamentAthleteId: null,
+      blueTournamentAthleteId: 'ta2',
+      redAthleteId: null,
+      blueAthleteId: 'ap2',
+      tournament: { status: 'draft' },
+      group: { tournament: { status: 'draft' } },
+    };
+    vi.mocked(prisma.match.findUnique).mockImplementation((({
+      where,
+    }: {
+      where: { id: string };
+    }) => {
+      if (where.id === 'ma') return Promise.resolve(a as never);
+      if (where.id === 'mb') return Promise.resolve(b as never);
+      return Promise.resolve(null);
+    }) as never);
+
+    await expect(
+      swapSlots(
+        {
+          matchAId: 'ma',
+          sideA: 'red',
+          matchBId: 'mb',
+          sideB: 'red',
+          adminId: 'admin',
+        },
+        round0SlotStore
+      )
+    ).rejects.toThrow(/locked/);
+  });
+
+  it('throws when either match is complete', async () => {
+    const a = {
+      id: 'ma',
+      round: 0,
+      status: 'complete',
+      groupId: 'g1',
+      redLocked: false,
+      blueLocked: false,
+      redTournamentAthleteId: 'ta1',
+      blueTournamentAthleteId: null,
+      redAthleteId: 'ap1',
+      blueAthleteId: null,
+      tournament: { status: 'draft' },
+      group: { tournament: { status: 'draft' } },
+    };
+    const b = {
+      id: 'mb',
+      round: 0,
+      status: 'pending',
+      groupId: 'g1',
+      redLocked: false,
+      blueLocked: false,
+      redTournamentAthleteId: null,
+      blueTournamentAthleteId: 'ta2',
+      redAthleteId: null,
+      blueAthleteId: 'ap2',
+      tournament: { status: 'draft' },
+      group: { tournament: { status: 'draft' } },
+    };
+    vi.mocked(prisma.match.findUnique).mockImplementation((({
+      where,
+    }: {
+      where: { id: string };
+    }) => {
+      if (where.id === 'ma') return Promise.resolve(a as never);
+      if (where.id === 'mb') return Promise.resolve(b as never);
+      return Promise.resolve(null);
+    }) as never);
+
+    await expect(
+      swapSlots(
+        {
+          matchAId: 'ma',
+          sideA: 'red',
+          matchBId: 'mb',
+          sideB: 'blue',
+          adminId: 'admin',
+        },
+        round0SlotStore
+      )
+    ).rejects.toThrow(/complete match/);
+  });
+});
+
+describe('shuffleBracket', () => {
+  it('throws when no matches', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue(draftGroup as never);
+    vi.mocked(prisma.match.findMany).mockResolvedValue([]);
+
+    await expect(
+      shuffleBracket(
+        { groupId: 'group-1', adminId: 'admin' },
+        bracketLifecycleStore
+      )
+    ).rejects.toThrow(/Generate a bracket first/);
+  });
+
+  it('preserves locked red athlete on round 0', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue(draftGroup as never);
+    const r0m0 = {
+      id: 'm0',
+      round: 0,
+      matchIndex: 0,
+      redLocked: true,
+      blueLocked: false,
+      redTournamentAthleteId: 'ta-locked',
+      blueTournamentAthleteId: null,
+      redAthleteId: 'apx',
+      blueAthleteId: null,
+      redWins: 0,
+      blueWins: 0,
+      winnerId: null,
+      tournamentWinnerId: null,
+      status: 'pending',
+    };
+    const r0m1 = {
+      id: 'm0b',
+      round: 0,
+      matchIndex: 1,
+      redLocked: false,
+      blueLocked: false,
+      redTournamentAthleteId: null,
+      blueTournamentAthleteId: null,
+      redAthleteId: null,
+      blueAthleteId: null,
+      redWins: 0,
+      blueWins: 0,
+      winnerId: null,
+      tournamentWinnerId: null,
+      status: 'pending',
+    };
+
+    let bracketR0Pass = 0;
+    vi.mocked(prisma.match.findMany).mockImplementation(((args) => {
+      const w = args?.where as
+        | {
+            round?: number;
+            kind?: string;
+            groupId?: string;
+          }
+        | undefined;
+      if (w?.kind === 'bracket' && w.round === undefined) {
+        return Promise.resolve([r0m0, r0m1] as never);
+      }
+      if (w?.kind === 'bracket' && w.round === 0) {
+        bracketR0Pass++;
+        if (bracketR0Pass === 1) {
+          return Promise.resolve([r0m0, r0m1] as never);
+        }
+        return Promise.resolve([
+          {
+            ...r0m0,
+            blueTournamentAthleteId: 'ta-fill',
+            blueAthleteId: 'ap-fill',
+          },
+          {
+            ...r0m1,
+            redTournamentAthleteId: 'ta-a',
+            blueTournamentAthleteId: 'ta-b',
+            redAthleteId: 'p2',
+            blueAthleteId: 'p3',
+          },
+        ] as never);
+      }
+      if (w?.round === 0 && !w?.kind) {
+        return Promise.resolve([
+          {
+            ...r0m0,
+            blueTournamentAthleteId: 'ta-fill',
+            blueAthleteId: 'ap-fill',
+          },
+          {
+            ...r0m1,
+            redTournamentAthleteId: 'ta-a',
+            blueTournamentAthleteId: 'ta-b',
+            redAthleteId: 'p2',
+            blueAthleteId: 'p3',
+          },
+        ] as never);
+      }
+      return Promise.resolve([] as never);
+    }) as typeof prisma.match.findMany);
+
+    vi.mocked(prisma.match.updateMany).mockResolvedValue({ count: 0 } as never);
+
+    vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue([
+      { id: 'ta-locked', athleteProfileId: 'p1', beltLevel: 5, weight: 70 },
+      { id: 'ta-a', athleteProfileId: 'p2', beltLevel: 4, weight: 65 },
+      { id: 'ta-b', athleteProfileId: 'p3', beltLevel: 4, weight: 66 },
+    ] as never);
+
+    vi.mocked(prisma.match.update).mockResolvedValue({} as never);
+    vi.mocked(prisma.match.findUnique).mockResolvedValue(null);
+
+    await shuffleBracket(
+      { groupId: 'group-1', adminId: 'admin' },
+      bracketLifecycleStore
+    );
+
+    const updates = vi.mocked(prisma.match.update).mock.calls.map((c) => c[0]);
+    const r0Update = updates.find((u) => u.where.id === 'm0');
+    expect(r0Update?.data).toMatchObject({
+      redTournamentAthleteId: 'ta-locked',
+      redAthleteId: 'apx',
+    });
+  });
+
+  it('places 5 athletes without phantom round-0 and with one contested opening match', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue(draftGroup as never);
+
+    const baseR0 = (i: number) => ({
+      id: `r0-${i}`,
+      round: 0,
+      matchIndex: i,
+      redLocked: false,
+      blueLocked: false,
+      redTournamentAthleteId: null as string | null,
+      blueTournamentAthleteId: null as string | null,
+      redAthleteId: null as string | null,
+      blueAthleteId: null as string | null,
+      redWins: 0,
+      blueWins: 0,
+      winnerId: null,
+      tournamentWinnerId: null,
+      status: 'pending',
+    });
+    const r0 = [0, 1, 2, 3].map(baseR0);
+    const r1 = [0, 1].map((i) => ({
+      id: `r1-${i}`,
+      round: 1,
+      matchIndex: i,
+      redLocked: false,
+      blueLocked: false,
+      redTournamentAthleteId: null,
+      blueTournamentAthleteId: null,
+      redAthleteId: null,
+      blueAthleteId: null,
+      redWins: 0,
+      blueWins: 0,
+      winnerId: null,
+      tournamentWinnerId: null,
+      status: 'pending',
+    }));
+    const r2 = {
+      id: 'r2-0',
+      round: 2,
+      matchIndex: 0,
+      redLocked: false,
+      blueLocked: false,
+      redTournamentAthleteId: null,
+      blueTournamentAthleteId: null,
+      redAthleteId: null,
+      blueAthleteId: null,
+      redWins: 0,
+      blueWins: 0,
+      winnerId: null,
+      tournamentWinnerId: null,
+      status: 'pending',
+    };
+
+    vi.mocked(prisma.match.findMany).mockImplementation(((
+      args: Parameters<typeof prisma.match.findMany>[0]
+    ) => {
+      const w = args?.where as { round?: number } | undefined;
+      if (w?.round === 0) {
+        return Promise.resolve(r0);
+      }
+      return Promise.resolve([...r0, ...r1, r2]);
+    }) as never);
+
+    vi.mocked(prisma.match.updateMany).mockResolvedValue({ count: 0 } as never);
+
+    vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue(
+      ['ta1', 'ta2', 'ta3', 'ta4', 'ta5'].map((id, ix) => ({
+        id,
+        athleteProfileId: `ap${ix + 1}`,
+        beltLevel: 3,
+        weight: 60,
+      })) as never
+    );
+
+    vi.mocked(prisma.match.update).mockResolvedValue({} as never);
+    vi.mocked(prisma.match.findUnique).mockResolvedValue(null);
+
+    await shuffleBracket(
+      { groupId: 'group-1', adminId: 'admin' },
+      bracketLifecycleStore
+    );
+
+    const updates = vi.mocked(prisma.match.update).mock.calls.map((c) => c[0]);
+    const r0Updates = updates.filter((u) =>
+      String(u.where.id).startsWith('r0-')
+    );
+    const placementR0 = r0Updates.slice(-4);
+    expect(placementR0).toHaveLength(4);
+
+    let bothFilled = 0;
+    let oneFilled = 0;
+    let bothEmpty = 0;
+    for (const u of placementR0) {
+      const d = u.data as {
+        redTournamentAthleteId: string | null;
+        blueTournamentAthleteId: string | null;
+      };
+      const r = d.redTournamentAthleteId != null;
+      const b = d.blueTournamentAthleteId != null;
+      if (r && b) bothFilled++;
+      else if (r !== b) oneFilled++;
+      else bothEmpty++;
+    }
+    expect(bothFilled).toBe(1);
+    expect(oneFilled).toBe(3);
+    expect(bothEmpty).toBe(0);
+  });
+});
+
+describe('regenerateBracket', () => {
+  it('clears all group matches, deletes every match row, then recreates the shell in a transaction', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue(draftGroup as never);
+    vi.mocked(prisma.match.updateMany).mockResolvedValue({ count: 4 } as never);
+    vi.mocked(prisma.match.deleteMany).mockResolvedValue({ count: 4 } as never);
+    vi.mocked(prisma.tournamentAthlete.findMany).mockResolvedValue([
+      { id: 'ta1', athleteProfileId: 'ap1', beltLevel: 3, weight: 60 },
+      { id: 'ta2', athleteProfileId: 'ap2', beltLevel: 3, weight: 62 },
+    ] as never);
+    vi.mocked(prisma.match.create).mockImplementation((args) => {
+      const data = args.data as { round: number; matchIndex: number };
+      return Promise.resolve({
+        id: `m-${data.round}-${data.matchIndex}`,
+        ...data,
+      }) as never;
+    });
+    vi.mocked(prisma.match.findMany).mockResolvedValue([]);
+
+    await regenerateBracket(
+      { groupId: 'group-1', adminId: 'admin-1' },
+      bracketLifecycleStore
+    );
+
+    expect(prisma.match.updateMany).toHaveBeenCalledWith({
+      where: { groupId: 'group-1' },
+      data: expect.objectContaining({
+        redTournamentAthleteId: null,
+        blueTournamentAthleteId: null,
+        redLocked: false,
+        blueLocked: false,
+        status: 'pending',
+      }),
+    });
+    expect(prisma.match.deleteMany).toHaveBeenCalledWith({
+      where: { groupId: 'group-1' },
+    });
+    expect(prisma.match.create).toHaveBeenCalled();
+    expect(prisma.group.update).toHaveBeenCalledWith({
+      where: { id: 'group-1' },
+      data: { round0Baseline: null },
+    });
+    expect(recordMutationActivity).toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: 'bracket.regenerate' }),
+      prisma
+    );
+  });
+});
+
+describe('createCustomMatch', () => {
+  it('creates custom match with direct athletes and notifies realtime', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      id: 'group-1',
+      tournamentId: 't-1',
+      tournament: { id: 't-1', status: 'active' },
+    } as never);
+
+    vi.mocked(prisma.tournamentAthlete.findFirst)
+      .mockResolvedValueOnce({
+        id: 'ta-red',
+        athleteProfileId: 'ap-r',
+        groupId: 'group-1',
+      } as never)
+      .mockResolvedValueOnce({
+        id: 'ta-blue',
+        athleteProfileId: 'ap-b',
+        groupId: 'group-1',
+      } as never);
+
+    vi.mocked(prisma.match.aggregate).mockResolvedValue({
+      _max: { matchIndex: null },
+    } as never);
+    vi.mocked(prisma.match.create).mockResolvedValue({
+      id: 'custom-1',
+      kind: 'custom',
+      displayLabel: 'Exhibition',
+      groupId: 'group-1',
+      tournamentId: 't-1',
+      round: 900,
+      matchIndex: 0,
+    } as never);
+
+    const row = await createCustomMatch(
+      {
+        groupId: 'group-1',
+        displayLabel: 'Exhibition',
+        red: { mode: 'direct', tournamentAthleteId: 'ta-red' },
+        blue: { mode: 'direct', tournamentAthleteId: 'ta-blue' },
+        adminId: 'admin-1',
+      },
+      customMatchStore
+    );
+
+    expect(row.kind).toBe('custom');
+    expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+    expect(prisma.match.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          kind: 'custom',
+          displayLabel: 'Exhibition',
+          redTournamentAthleteId: 'ta-red',
+          blueTournamentAthleteId: 'ta-blue',
+        }),
+      })
+    );
+    expect(recordMutationActivity).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'match.create_custom',
+        entityType: 'match',
+      }),
+      prisma
+    );
+    expect(publishTournamentMutation).toHaveBeenCalledWith('t-1');
+  });
+
+  it('rejects duplicate red and blue athlete', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      id: 'group-1',
+      tournamentId: 't-1',
+      tournament: { id: 't-1', status: 'active' },
+    } as never);
+
+    vi.mocked(prisma.tournamentAthlete.findFirst).mockResolvedValue({
+      id: 'ta-red',
+      athleteProfileId: 'ap-r',
+      groupId: 'group-1',
+    } as never);
+
+    await expect(
+      createCustomMatch(
+        {
+          groupId: 'group-1',
+          displayLabel: 'Exhibition',
+          red: { mode: 'direct', tournamentAthleteId: 'ta-red' },
+          blue: { mode: 'direct', tournamentAthleteId: 'ta-red' },
+          adminId: 'admin-1',
+        },
+        customMatchStore
+      )
+    ).rejects.toThrow(/same athlete/);
+
+    expect(prisma.match.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects completed tournament', async () => {
+    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+      id: 'group-1',
+      tournamentId: 't-1',
+      tournament: { id: 't-1', status: 'completed' },
+    } as never);
+
+    await expect(
+      createCustomMatch(
+        {
+          groupId: 'group-1',
+          displayLabel: 'Exhibition',
+          red: { mode: 'direct', tournamentAthleteId: 'ta-red' },
+          blue: { mode: 'direct', tournamentAthleteId: 'ta-blue' },
+          adminId: 'admin-1',
+        },
+        customMatchStore
+      )
+    ).rejects.toThrow(/read-only/);
+
+    expect(prisma.match.create).not.toHaveBeenCalled();
+  });
+});
+
+describe('deleteCustomMatch', () => {
+  it('deletes custom matches with audit and realtime publication', async () => {
+    const match = {
+      id: 'custom-1',
+      kind: 'custom',
+      displayLabel: 'Exhibition',
+      tournamentId: 't-1',
+      groupId: 'group-1',
+      tournament: { status: 'active' },
+    };
+    vi.mocked(prisma.match.findUnique).mockResolvedValue(match as never);
+    vi.mocked(prisma.match.delete).mockResolvedValue(match as never);
+
+    const deleted = await deleteCustomMatch(
+      { matchId: 'custom-1', adminId: 'admin-1' },
+      customMatchStore
+    );
+
+    expect(deleted.kind).toBe('custom');
+    expect(prisma.match.delete).toHaveBeenCalledWith({
+      where: { id: 'custom-1' },
+    });
+    expect(recordMutationActivity).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tournamentId: 't-1',
+        adminId: 'admin-1',
+        eventType: 'match.delete_custom',
+        entityType: 'match',
+        entityId: 'custom-1',
+        payload: {
+          groupId: 'group-1',
+          displayLabel: 'Exhibition',
+        },
+      }),
+      prisma
+    );
+    expect(publishTournamentMutation).toHaveBeenCalledWith('t-1');
+  });
+
+  it('rejects non-custom matches', async () => {
+    vi.mocked(prisma.match.findUnique).mockResolvedValue({
+      id: 'match-1',
+      kind: 'bracket',
+      tournamentId: 't-1',
+      groupId: 'group-1',
+      tournament: { status: 'active' },
+    } as never);
+
+    await expect(
+      deleteCustomMatch(
+        { matchId: 'match-1', adminId: 'admin-1' },
+        customMatchStore
+      )
+    ).rejects.toThrow(/Only custom matches/);
+
+    expect(prisma.match.delete).not.toHaveBeenCalled();
+  });
+
+  it('rejects completed tournaments', async () => {
+    vi.mocked(prisma.match.findUnique).mockResolvedValue({
+      id: 'custom-1',
+      kind: 'custom',
+      tournamentId: 't-1',
+      groupId: 'group-1',
+      tournament: { status: 'completed' },
+    } as never);
+
+    await expect(
+      deleteCustomMatch(
+        { matchId: 'custom-1', adminId: 'admin-1' },
+        customMatchStore
+      )
+    ).rejects.toThrow(/read-only/);
+
+    expect(prisma.match.delete).not.toHaveBeenCalled();
+  });
+});

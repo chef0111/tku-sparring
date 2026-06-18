@@ -1,18 +1,24 @@
-import { DeviceLastSelectionDAL } from './dal';
 import { GetLastSelectionSchema, SetLastSelectionSchema } from './dto';
-import { authedProcedure } from '@/orpc/middleware';
+import { authorized } from '@/orpc/middleware';
+import { assertSystemAdmin } from '@/orpc/policies/auth';
+import { getLastSelection as runGetLastSelection } from '@/server/application/device-last-selection/use-cases/get';
+import { setLastSelection as runSetLastSelection } from '@/server/application/device-last-selection/use-cases/set';
 
-export const getLastSelection = authedProcedure
+export const getLastSelection = authorized
   .input(GetLastSelectionSchema)
-  .handler(async ({ context, input }) => {
-    return DeviceLastSelectionDAL.getForUserDevice(
-      context.user.id,
-      input.deviceId
-    );
-  });
+  .handler(async ({ context, input }) =>
+    runGetLastSelection(
+      { userId: context.user.id, deviceId: input.deviceId },
+      context.repos.deviceLastSelection
+    )
+  );
 
-export const setLastSelection = authedProcedure
+export const setLastSelection = authorized
   .input(SetLastSelectionSchema)
   .handler(async ({ context, input }) => {
-    return DeviceLastSelectionDAL.upsertForUserDevice(context.user.id, input);
+    assertSystemAdmin(context.user);
+    return runSetLastSelection(
+      { userId: context.user.id, ...input },
+      context.repos.deviceLastSelection
+    );
   });

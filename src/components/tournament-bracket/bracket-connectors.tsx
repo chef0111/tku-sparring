@@ -1,4 +1,4 @@
-import type { BracketConnectorPath } from '@/lib/tournament/bracket-layout';
+import type { BracketConnectorPath } from '@/lib/tournament/bracket/bracket-layout';
 import type { MatchStatus } from '@/features/dashboard/types';
 
 const statusStroke: Record<MatchStatus, string> = {

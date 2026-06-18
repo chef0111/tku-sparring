@@ -3,7 +3,7 @@ import { Circle } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { BracketSlot } from './bracket-slot';
 import type { BracketSlotDirection } from './bracket-slot';
-import type { MatchPosition } from '@/lib/tournament/bracket-layout';
+import type { MatchPosition } from '@/lib/tournament/bracket/bracket-layout';
 import { useBracket } from '@/contexts/bracket';
 import { useSlotLabels } from '@/hooks/use-slot-labels';
 import { ATHLETE_ROW_H, MATCH_H, MATCH_W } from '@/config/bracket';

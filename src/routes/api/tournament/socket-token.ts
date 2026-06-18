@@ -7,7 +7,7 @@ import { prisma } from '@/lib/db';
 export const Route = createFileRoute('/api/tournament/socket-token')({
   server: {
     handlers: {
-      GET: async ({ request }) => {
+      GET: async ({ request }: { request: Request }) => {
         const session = await auth.api.getSession({ headers: request.headers });
 
         if (!session?.user?.id) {

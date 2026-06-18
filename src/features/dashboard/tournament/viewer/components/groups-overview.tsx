@@ -17,7 +17,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
-import { countActionableMatchesByGroupId } from '@/lib/tournament/bracket-action-queue';
+import { countActionableMatchesByGroupId } from '@/lib/tournament/bracket/bracket-action-queue';
 
 interface GroupsOverviewProps {
   groups: Array<GroupData>;

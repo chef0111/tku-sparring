@@ -1,17 +1,26 @@
-import { os } from '@orpc/server';
-import { auth } from '@/lib/auth';
+import { ORPCError } from '@orpc/server';
 
-export const authed = os.middleware(async ({ context, next }) => {
-  const headers = (context as { headers?: Headers }).headers;
+import { base } from '@/orpc/base';
+import { auth } from '@/lib/auth';
+import { toOrpcError } from '@/orpc/map-app-error';
+
+export const authed = base.middleware(async ({ context, next }) => {
+  const headers = context.headers;
 
   if (!headers) {
-    throw new Error('Unauthorized: No headers provided');
+    throw new ORPCError('UNAUTHORIZED', {
+      message: 'Unauthorized: No headers provided',
+      defined: true,
+    });
   }
 
   const session = await auth.api.getSession({ headers });
 
   if (!session) {
-    throw new Error('Unauthorized: Invalid session');
+    throw new ORPCError('UNAUTHORIZED', {
+      message: 'Unauthorized: Invalid session',
+      defined: true,
+    });
   }
 
   return next({
@@ -22,4 +31,13 @@ export const authed = os.middleware(async ({ context, next }) => {
   });
 });
 
-export const authedProcedure = os.use(authed);
+export const catchAppErrors = base.middleware(async ({ next }) => {
+  try {
+    return await next();
+  } catch (e) {
+    const mapped = toOrpcError(e);
+    throw mapped;
+  }
+});
+
+export const authorized = base.use(catchAppErrors).use(authed);

@@ -1,6 +1,7 @@
 import { z } from 'zod';
+import { TournamentStatusSchema } from '@/lib/tournament/tournament-status';
 
-export const TournamentStatusSchema = z.enum(['draft', 'active', 'completed']);
+export { TournamentStatusSchema };
 export const TournamentSortFieldSchema = z.enum([
   'name',
   'status',

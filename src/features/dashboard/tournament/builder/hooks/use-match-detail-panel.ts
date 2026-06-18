@@ -13,8 +13,8 @@ import {
   useSwapParticipants,
   useUpdateScore,
 } from '@/queries/match';
-import { getBracketRoundLabel } from '@/lib/tournament/bracket-round-label';
-import { isThirdPlaceMatch } from '@/lib/tournament/bracket-layout';
+import { getBracketRoundLabel } from '@/lib/tournament/bracket/bracket-round-label';
+import { isThirdPlaceMatch } from '@/lib/tournament/bracket/bracket-layout';
 
 const MATCH_STATUS_RANK: Record<MatchStatus, number> = {
   pending: 0,
