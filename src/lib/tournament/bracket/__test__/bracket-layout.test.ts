@@ -13,7 +13,6 @@ import {
   twoSidedMatchRowGap,
 } from '../bracket-layout';
 import type { MatchData } from '@/features/dashboard/types';
-import { planBracketShell } from '@/server/domain/tournament/bracket/bracket-shape';
 import {
   FINAL_FEEDER_EXTRA,
   MATCH_H,
@@ -26,13 +25,20 @@ function shellToMatches(
   athleteCount: number,
   thirdPlaceMatch: boolean
 ): Array<MatchData> {
-  const plan = planBracketShell({
-    groupId: 'g1',
-    tournamentId: 't1',
-    athleteCount,
-    thirdPlaceMatch,
-  });
-  return plan.matches.map((m, i) => ({
+  let bracketSize = 1;
+  while (bracketSize < athleteCount) bracketSize *= 2;
+  const totalRounds = Math.log2(bracketSize);
+  const shell: Array<{ round: number; matchIndex: number }> = [];
+  for (let round = 0; round < totalRounds; round++) {
+    const matchesInRound = bracketSize / 2 ** (round + 1);
+    for (let matchIndex = 0; matchIndex < matchesInRound; matchIndex++) {
+      shell.push({ round, matchIndex });
+    }
+  }
+  if (thirdPlaceMatch && athleteCount >= 4) {
+    shell.push({ round: totalRounds, matchIndex: 0 });
+  }
+  return shell.map((m, i) => ({
     id: `m-${i}`,
     kind: 'bracket' as const,
     displayLabel: null,

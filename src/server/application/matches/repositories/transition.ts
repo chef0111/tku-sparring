@@ -1,4 +1,4 @@
-import type { MatchTransitionPlan } from '@/lib/tournament/match/match-transition';
+import type { MatchTransitionPlan } from '@/lib/tournament/match-transition';
 import type {
   MatchLoadRow,
   MatchRead,

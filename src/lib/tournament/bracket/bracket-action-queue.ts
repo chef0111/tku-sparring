@@ -1,6 +1,6 @@
+import { isArenaSequenceEligible } from 'src/lib/tournament/match-eligibility';
 import type { MatchData } from '@/features/dashboard/types';
-import type { ArenaRound0BracketMeta } from '@/server/domain/tournament/arena/match-label';
-import { excludedFromArenaSequence } from '@/server/domain/tournament/arena/match-label';
+import type { ArenaRound0BracketMeta } from 'src/lib/tournament/match-eligibility';
 
 export interface BracketActionQueueItem {
   match: MatchData;
@@ -46,7 +46,7 @@ function buildSingleGroupBracketMeta(
       {
         athleteCount,
         round0MatchCount: round0.length,
-        distinctRound0TournamentAthleteCount: ta.size,
+        round0AthleteCount: ta.size,
       },
     ],
   ]);
@@ -76,10 +76,7 @@ export function buildBracketActionQueue(
     const emptyBlue = m.blueTournamentAthleteId == null;
     if (emptyRed && emptyBlue) continue;
 
-    if (
-      m.kind !== 'custom' &&
-      excludedFromArenaSequence(m, groupMeta, sorted)
-    ) {
+    if (m.kind !== 'custom' && isArenaSequenceEligible(m, groupMeta, sorted)) {
       continue;
     }
 

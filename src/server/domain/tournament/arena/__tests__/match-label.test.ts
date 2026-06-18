@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import { isArenaSequenceEligible } from 'src/lib/tournament/match-eligibility';
 import type { MatchData } from '@/features/dashboard/types';
 import {
   buildArenaMatchNumberById,
   buildMatchNumber,
-  excludedFromArenaSequence,
   formatFeederWinnerLabel,
   formatFeederWinnerPlaceholder,
   formatMatchHeaderLine,
@@ -59,16 +59,16 @@ describe('sortMatchesInRound', () => {
   });
 });
 
-describe('excludedFromArenaSequence', () => {
+describe('isArenaSequenceEligible', () => {
   it('is true for custom matches', () => {
-    expect(excludedFromArenaSequence(m('x', 0, 0, { kind: 'custom' }))).toBe(
+    expect(isArenaSequenceEligible(m('x', 0, 0, { kind: 'custom' }))).toBe(
       true
     );
   });
 
   it('is true for round 0 with exactly one tournament athlete', () => {
     expect(
-      excludedFromArenaSequence(
+      isArenaSequenceEligible(
         m('a', 0, 0, {
           redTournamentAthleteId: 't1',
           blueTournamentAthleteId: null,
@@ -76,7 +76,7 @@ describe('excludedFromArenaSequence', () => {
       )
     ).toBe(true);
     expect(
-      excludedFromArenaSequence(
+      isArenaSequenceEligible(
         m('b', 0, 0, {
           blueTournamentAthleteId: 't2',
           redTournamentAthleteId: null,
@@ -86,9 +86,9 @@ describe('excludedFromArenaSequence', () => {
   });
 
   it('is false when both or neither sides have an athlete in round 0 (without bracket meta)', () => {
-    expect(excludedFromArenaSequence(m('c', 0, 0))).toBe(false);
+    expect(isArenaSequenceEligible(m('c', 0, 0))).toBe(false);
     expect(
-      excludedFromArenaSequence(
+      isArenaSequenceEligible(
         m('d', 0, 0, {
           redTournamentAthleteId: 't1',
           blueTournamentAthleteId: 't2',
@@ -104,19 +104,19 @@ describe('excludedFromArenaSequence', () => {
         {
           athleteCount: 3,
           round0MatchCount: 4,
-          distinctRound0TournamentAthleteCount: 0,
+          round0AthleteCount: 0,
         },
       ],
     ]);
     const phantom = m('phantom', 0, 1, { groupId: 'g' });
-    expect(excludedFromArenaSequence(phantom, meta)).toBe(true);
+    expect(isArenaSequenceEligible(phantom, meta)).toBe(true);
     const real = m('real', 0, 0, { groupId: 'g' });
-    expect(excludedFromArenaSequence(real, meta)).toBe(false);
+    expect(isArenaSequenceEligible(real, meta)).toBe(false);
   });
 
   it('is false for rounds after round 0 when a tournament athlete is already placed', () => {
     expect(
-      excludedFromArenaSequence(
+      isArenaSequenceEligible(
         m('e', 1, 0, {
           redTournamentAthleteId: 't1',
           blueTournamentAthleteId: null,
@@ -134,7 +134,7 @@ describe('excludedFromArenaSequence', () => {
       m('r0-1', 0, 1),
       m('sf0', 1, 0),
     ];
-    expect(excludedFromArenaSequence(m('sf0', 1, 0), undefined, matches)).toBe(
+    expect(isArenaSequenceEligible(m('sf0', 1, 0), undefined, matches)).toBe(
       true
     );
   });
@@ -151,14 +151,14 @@ describe('excludedFromArenaSequence', () => {
       }),
       m('sf0', 1, 0),
     ];
-    expect(excludedFromArenaSequence(m('sf0', 1, 0), undefined, matches)).toBe(
+    expect(isArenaSequenceEligible(m('sf0', 1, 0), undefined, matches)).toBe(
       false
     );
   });
 
   it('does not exclude upper round when both round-0 feeders are phantoms', () => {
     const matches = [m('r0-0', 0, 0), m('r0-1', 0, 1), m('sf0', 1, 0)];
-    expect(excludedFromArenaSequence(m('sf0', 1, 0), undefined, matches)).toBe(
+    expect(isArenaSequenceEligible(m('sf0', 1, 0), undefined, matches)).toBe(
       false
     );
   });
@@ -175,7 +175,7 @@ describe('excludedFromArenaSequence', () => {
         blueTournamentAthleteId: null,
       }),
     ];
-    expect(excludedFromArenaSequence(m('sf0', 1, 0), undefined, matches)).toBe(
+    expect(isArenaSequenceEligible(m('sf0', 1, 0), undefined, matches)).toBe(
       true
     );
   });
@@ -187,12 +187,12 @@ describe('excludedFromArenaSequence', () => {
         {
           athleteCount: 5,
           round0MatchCount: 4,
-          distinctRound0TournamentAthleteCount: 5,
+          round0AthleteCount: 5,
         },
       ],
     ]);
     expect(
-      excludedFromArenaSequence(m('empty-mid', 0, 1, { groupId: 'g1' }), meta)
+      isArenaSequenceEligible(m('empty-mid', 0, 1, { groupId: 'g1' }), meta)
     ).toBe(true);
   });
 
@@ -203,12 +203,12 @@ describe('excludedFromArenaSequence', () => {
         {
           athleteCount: 5,
           round0MatchCount: 4,
-          distinctRound0TournamentAthleteCount: 4,
+          round0AthleteCount: 4,
         },
       ],
     ]);
     expect(
-      excludedFromArenaSequence(m('empty-mid', 0, 1, { groupId: 'g1' }), meta)
+      isArenaSequenceEligible(m('empty-mid', 0, 1, { groupId: 'g1' }), meta)
     ).toBe(false);
   });
 });

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { advanceWinner } from 'src/server/infrastructure/matches/progression';
-import type { ProgressionDb } from 'src/server/infrastructure/matches/progression';
-import { getScoreTransition } from '@/lib/tournament/match/match-transition';
+import type { ProgressionDb } from '@/server/infrastructure/matches/progression';
+import { advanceWinner } from '@/server/infrastructure/matches/progression';
+import { getScoreTransition } from '@/lib/tournament/match-transition';
 import { getSuccessorSlot } from '@/lib/tournament/bracket/bracket-progression';
 import { planBracketShell } from '@/server/domain/tournament/bracket/bracket-shape';
 

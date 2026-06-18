@@ -1,0 +1,55 @@
+---
+description: Shared client/server types and constants in src/contracts (no re-export chains)
+alwaysApply: true
+---
+
+# Contracts
+
+**`src/contracts/`** holds types and constants agreed by **client, oRPC, and server** — one canonical module per concept. Import directly; do not re-export through `lib/`, `orpc/*/types.ts`, or `server/`.
+
+## What belongs here
+
+- Stable **vocabulary**: enum literals, string unions, row DTOs returned by RPC
+- **No** React, Prisma, oRPC handlers, or I/O
+- **No** UI formatting (labels, sort orders, filter option builders)
+
+Layout: `src/contracts/<domain>/<concept>.ts` (e.g. `activity/event-types.ts`, `advance/selection.ts`).
+
+## What does not belong here
+
+| Put elsewhere         | Examples                                                            |
+| --------------------- | ------------------------------------------------------------------- |
+| Feature UI helpers    | `features/.../lib/` — e.g. activity filter label formatting         |
+| Feature-scoped lib    | `lib/data-table/` — only used by data-table                         |
+| Pure tournament rules | `lib/tournament/` or `server/domain/` — logic, not shared DTOs      |
+| Server-only ports     | `server/application/**/repositories/` — workflow interfaces         |
+| Zod input schemas     | `orpc/<domain>/dto.ts` — import const unions **from** `@/contracts` |
+
+## Import rules
+
+```ts
+// ✅ Client, queries, server, infra — same source
+import type { TournamentActivityEventType } from '@/contracts/activity/event-types';
+import { TOURNAMENT_ACTIVITY_EVENT_TYPES } from '@/contracts/activity/event-types';
+
+// ✅ oRPC dto — Zod wraps contract const; no types.ts passthrough file
+import { TOURNAMENT_ACTIVITY_EVENT_TYPES } from '@/contracts/activity/event-types';
+const Schema = z.enum(TOURNAMENT_ACTIVITY_EVENT_TYPES);
+
+// ❌ Re-export chains
+export { X } from '@/contracts/...'; // in orpc/types.ts or activity-types.ts
+
+// ❌ Client or lib importing server for shared vocabulary
+import { X } from '@/server/domain/...';
+```
+
+## Adding a new contract
+
+1. Add `src/contracts/<domain>/<name>.ts` with const + types (or DTO interfaces only).
+2. Wire oRPC Zod in `orpc/<domain>/dto.ts` from the contract const when validation is needed.
+3. Server application/infra import the same path — do not duplicate or re-export.
+4. UI-only derivation (display labels, combobox options) lives under the **feature** that uses it.
+
+## Seam leak check
+
+If a file under `features/`, `queries/`, `hooks/`, `components/`, or `lib/` imports `@/server/**` for a type/const also used on the server, move that type/const to `contracts/` instead.

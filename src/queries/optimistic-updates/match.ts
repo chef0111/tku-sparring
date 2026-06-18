@@ -11,7 +11,7 @@ import {
   getSuccessorSlot,
   resolveAdvanceSide,
 } from '@/lib/tournament/bracket/bracket-progression';
-import { getScoreTransition } from '@/lib/tournament/match/match-transition';
+import { getScoreTransition } from '@/lib/tournament/match-transition';
 import { matchKeys } from '@/queries/keys';
 
 export type MatchListQueryKey = ReturnType<typeof matchKeys.listByGroup>;

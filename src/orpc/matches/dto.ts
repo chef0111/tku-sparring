@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { MatchStatusSchema } from '@/lib/tournament/match/match-status';
+import { MatchStatusSchema } from '@/lib/tournament/match-status';
 
 export {
   MatchStatusSchema,
   type MatchStatus as MatchStatusDTO,
-} from '@/lib/tournament/match/match-status';
+} from '@/lib/tournament/match-status';
 
 export const MatchKindSchema = z.enum(['bracket', 'custom']);
 

@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { ListFilter, ScrollText, X } from 'lucide-react';
 import { ActivityEventRow } from './viewer/components/activity-event-row';
-import type { TournamentActivityEventType } from '@/orpc/activity/types';
-import type { ActivityEventFilterOption } from '@/lib/tournament/activity/filter-options';
-import { getNormalizedEvents } from '@/lib/tournament/activity/filter-options';
+import type { TournamentActivityEventType } from '@/contracts/activity/event-types';
+import type { ActivityEventFilterOption } from '@/features/dashboard/tournament/lib/activity-filter-options';
+import { getNormalizedEvents } from '@/features/dashboard/tournament/lib/activity-filter-options';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -139,11 +139,11 @@ export function TournamentActivitySheet({
                             {o.label}
                           </span>
                         ))}
-                        {comboboxValue.length > 2 ? (
+                        {comboboxValue.length > 2 && (
                           <span className="text-muted-foreground text-xs">
                             +{comboboxValue.length - 2}
                           </span>
-                        ) : null}
+                        )}
                       </div>
                     </>
                   )}
@@ -172,7 +172,7 @@ export function TournamentActivitySheet({
                     );
                   }}
                 </ComboboxList>
-                {selectedTypes.length > 0 ? (
+                {selectedTypes.length > 0 && (
                   <>
                     <ComboboxSeparator />
                     <button
@@ -187,7 +187,7 @@ export function TournamentActivitySheet({
                       <X className="size-4 shrink-0" />
                     </button>
                   </>
-                ) : null}
+                )}
               </ComboboxContent>
             </Combobox>
           </div>
@@ -211,7 +211,7 @@ export function TournamentActivitySheet({
           )}
         </div>
 
-        {query.hasNextPage ? (
+        {query.hasNextPage && (
           <div className="border-t p-4">
             <Button
               variant="outline"
@@ -223,7 +223,7 @@ export function TournamentActivitySheet({
               {query.isFetchingNextPage ? 'Loading…' : 'Load more'}
             </Button>
           </div>
-        ) : null}
+        )}
       </SheetContent>
     </Sheet>
   );

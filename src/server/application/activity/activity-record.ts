@@ -1,7 +1,7 @@
 import type { Prisma } from '@/generated/prisma/client';
 import type { prisma } from '@/lib/db';
 
-import type { TournamentActivityEventType } from './activity-types';
+import type { TournamentActivityEventType } from '@/contracts/activity/event-types';
 
 export type ActivityRecordInput = {
   tournamentId: string;

@@ -1,7 +1,7 @@
-import { applyRound0ByeAdvancement } from 'src/server/infrastructure/matches/progression';
 import type { BracketLifecycleStore } from '@/server/application/matches/repositories/bracket-lifecycle';
 import type { Prisma, PrismaClient } from '@/generated/prisma/client';
 import type { Round0Baseline } from '@/server/domain/tournament/bracket/round0-baseline';
+import { applyRound0ByeAdvancement } from '@/server/infrastructure/matches/progression';
 import {
   clearAllGroupMatchRowsData,
   clearBracketUpperRoundData,

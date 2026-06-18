@@ -1,5 +1,5 @@
-import { buildSlotMap } from './bracket-seeding';
 import type { BracketMatchInput } from './bracket-match-input';
+import { buildSlotMap } from '@/lib/tournament/bracket/bracket-seeding';
 
 export function nextPowerOfTwo(n: number): number {
   let p = 1;
