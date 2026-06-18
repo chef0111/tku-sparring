@@ -10,12 +10,16 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      DIRECT_DATABASE_URL: postgresql://ci:ci@localhost:7749/ci
+      DATABASE_URL: postgresql://ci:ci@localhost:7749/ci
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile
+      - run: bun run db:generate
       - run: bun run test
       - run: bun run typecheck
       - run: bun run lint
