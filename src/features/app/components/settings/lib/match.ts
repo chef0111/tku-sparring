@@ -1,4 +1,4 @@
-import type { SelectionMatchRow } from '@/orpc/advance-settings/dal';
+import type { SelectionMatchRow } from '@/contracts/advance/selection';
 
 export type MatchComboboxStatusVariant =
   | 'online'

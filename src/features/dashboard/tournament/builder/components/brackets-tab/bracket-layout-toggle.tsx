@@ -1,4 +1,4 @@
-import type { BracketCanvasLayout } from '@/lib/tournament/bracket-layout';
+import type { BracketCanvasLayout } from '@/lib/tournament/bracket/bracket-layout';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { bracketConfig } from '@/config/bracket';
 import {

@@ -8,6 +8,7 @@ import { onError } from '@orpc/server';
 import { OpenAPIReferencePlugin } from '@orpc/openapi/plugins';
 
 import router from '@/orpc/router';
+import { serverRepos } from '@/server/composition';
 
 const handler = new OpenAPIHandler(router, {
   interceptors: [
@@ -55,7 +56,10 @@ const handler = new OpenAPIHandler(router, {
 async function handle({ request }: { request: Request }) {
   const { response } = await handler.handle(request, {
     prefix: '/api',
-    context: {},
+    context: {
+      headers: request.headers,
+      repos: serverRepos,
+    },
   });
 
   return response ?? new Response('Not Found', { status: 404 });

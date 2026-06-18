@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import type { BracketCanvasLayout } from '@/lib/tournament/bracket-layout';
+import type { BracketCanvasLayout } from '@/lib/tournament/bracket/bracket-layout';
 
 const STORAGE_KEY = 'tku-bracket-canvas-layout';
 

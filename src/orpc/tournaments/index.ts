@@ -9,77 +9,100 @@ import {
   SetTournamentStatusSchema,
   UpdateTournamentSchema,
 } from './dto';
-import { TournamentDAL } from './dal';
-import { authedProcedure } from '@/orpc/middleware';
+import { authorized } from '@/orpc/middleware';
+import { assertSystemAdmin } from '@/orpc/policies/auth';
+import { NotFoundError } from '@/server/application/errors';
+import {
+  createTournament as runCreateTournament,
+  deleteTournament as runDeleteTournament,
+  setTournamentStatus as runSetTournamentStatus,
+  updateTournament as runUpdateTournament,
+} from '@/server/application/tournaments/use-cases/lifecycle';
+import {
+  ensureArenaSlot as runEnsureArenaSlot,
+  moveGroupBetweenArenas as runMoveGroupBetweenArenas,
+  retireArena as runRetireArena,
+  setArenaGroupOrder as runSetArenaGroupOrder,
+} from '@/server/application/tournaments/use-cases/arena-order';
 
-export const listTournaments = authedProcedure
+export const listTournaments = authorized
   .input(ListTournamentsSchema)
-  .handler(async ({ input }) => {
-    return TournamentDAL.findMany(input);
+  .handler(async ({ input, context }) => {
+    return context.repos.tournamentRead.list(input);
   });
 
-export const getTournament = authedProcedure
+export const getTournament = authorized
   .input(z.object({ id: z.string() }))
-  .handler(async ({ input }) => {
-    const tournament = await TournamentDAL.findById(input.id);
+  .handler(async ({ input, context }) => {
+    const tournament = await context.repos.tournamentRead.findById(input.id);
     if (!tournament) {
-      throw new Error('Tournament not found');
+      throw new NotFoundError('Tournament not found');
     }
     return tournament;
   });
 
-export const createTournament = authedProcedure
+export const createTournament = authorized
   .input(CreateTournamentSchema)
-  .handler(async ({ input }) => {
-    const tournament = await TournamentDAL.create(input);
-    return tournament;
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
+    return runCreateTournament(input, context.repos.tournamentLifecycle);
   });
 
-export const updateTournament = authedProcedure
+export const updateTournament = authorized
   .input(UpdateTournamentSchema)
-  .handler(async ({ input }) => {
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
     const { id, ...data } = input;
-    const tournament = await TournamentDAL.update(id, data);
-    return tournament;
+    return runUpdateTournament(
+      { id, ...data },
+      context.repos.tournamentLifecycle
+    );
   });
 
-export const setTournamentStatus = authedProcedure
+export const setTournamentStatus = authorized
   .input(SetTournamentStatusSchema)
   .handler(async ({ input, context }) => {
-    const tournament = await TournamentDAL.setStatus({
-      ...input,
-      adminId: context.user.id,
-    });
-    return tournament;
+    assertSystemAdmin(context.user);
+    return runSetTournamentStatus(
+      { ...input, adminId: context.user.id },
+      context.repos.tournamentLifecycle
+    );
   });
 
-export const setArenaGroupOrder = authedProcedure
+export const setArenaGroupOrder = authorized
   .input(SetArenaGroupOrderSchema)
-  .handler(async ({ input }) => {
-    return TournamentDAL.setArenaGroupOrder(input);
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
+    return runSetArenaGroupOrder(input, context.repos.tournamentArenaOrder);
   });
 
-export const moveGroupArena = authedProcedure
+export const moveGroupArena = authorized
   .input(MoveGroupArenaSchema)
-  .handler(async ({ input }) => {
-    return TournamentDAL.moveGroupBetweenArenas(input);
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
+    return runMoveGroupBetweenArenas(input, context.repos.tournamentArenaOrder);
   });
 
-export const ensureArenaSlot = authedProcedure
+export const ensureArenaSlot = authorized
   .input(EnsureArenaSlotSchema)
-  .handler(async ({ input }) => {
-    return TournamentDAL.ensureArenaSlot(input);
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
+    return runEnsureArenaSlot(input, context.repos.tournamentArenaOrder);
   });
 
-export const retireArena = authedProcedure
+export const retireArena = authorized
   .input(RetireArenaSchema)
-  .handler(async ({ input }) => {
-    return TournamentDAL.retireArena(input);
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
+    return runRetireArena(input, context.repos.tournamentArenaOrder);
   });
 
-export const removeTournament = authedProcedure
+export const removeTournament = authorized
   .input(z.object({ id: z.string() }))
-  .handler(async ({ input }) => {
-    const tournament = await TournamentDAL.deleteTournament(input.id);
-    return tournament;
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
+    return runDeleteTournament(
+      { id: input.id, adminId: context.user.id },
+      context.repos.tournamentLifecycle
+    );
   });

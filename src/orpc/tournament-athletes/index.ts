@@ -5,51 +5,48 @@ import {
   ListTournamentAthletesSchema,
   UpdateTournamentAthleteSchema,
 } from './dto';
-import { TournamentAthleteDAL } from './dal';
-import { bulkAddAthletesToTournament } from './bulk-add';
-import { authedProcedure } from '@/orpc/middleware';
+import { authorized } from '@/orpc/middleware';
+import { assertSystemAdmin } from '@/orpc/policies/auth';
+import { bulkAddAthletes as runBulkAddAthletes } from '@/server/application/tournament-athletes/use-cases/bulk-add';
+import { bulkRemoveTournamentAthletes as runBulkRemove } from '@/server/application/tournament-athletes/use-cases/bulk-remove';
+import { listTournamentAthletes as runList } from '@/server/application/tournament-athletes/use-cases/list';
+import { removeTournamentAthlete as runRemove } from '@/server/application/tournament-athletes/use-cases/remove';
+import { updateTournamentAthlete as runUpdate } from '@/server/application/tournament-athletes/use-cases/update';
 
-export const listTournamentAthletes = authedProcedure
+export const listTournamentAthletes = authorized
   .input(ListTournamentAthletesSchema)
-  .handler(async ({ input }) => {
-    const athletes = await TournamentAthleteDAL.findByTournamentId(input);
-    return athletes;
+  .handler(async ({ input, context }) => {
+    return runList(input, context.repos.tournamentAthlete);
   });
 
-export const bulkAddAthletes = authedProcedure
+export const bulkAddAthletes = authorized
   .input(BulkAddAthletesSchema)
   .handler(async ({ input, context }) => {
-    return bulkAddAthletesToTournament({
-      ...input,
-      adminId: context.user.id,
-    });
+    assertSystemAdmin(context.user);
+    return runBulkAddAthletes(
+      { ...input, adminId: context.user.id },
+      context.repos.tournamentAthlete,
+      context.repos.groupAssign
+    );
   });
 
-export const updateTournamentAthleteRecord = authedProcedure
+export const updateTournamentAthleteRecord = authorized
   .input(UpdateTournamentAthleteSchema)
-  .handler(async ({ input }) => {
-    const { id, ...data } = input;
-    const athlete = await TournamentAthleteDAL.updateTournamentAthlete(
-      id,
-      data
-    );
-    return athlete;
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
+    return runUpdate(input, context.repos.tournamentAthlete);
   });
 
-export const removeTournamentAthleteRecord = authedProcedure
+export const removeTournamentAthleteRecord = authorized
   .input(z.object({ id: z.string() }))
-  .handler(async ({ input }) => {
-    const athlete = await TournamentAthleteDAL.removeTournamentAthlete(
-      input.id
-    );
-    return athlete;
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
+    return runRemove({ id: input.id }, context.repos.tournamentAthlete);
   });
 
-export const bulkRemoveTournamentAthleteRecords = authedProcedure
+export const bulkRemoveTournamentAthleteRecords = authorized
   .input(BulkRemoveTournamentAthletesSchema)
-  .handler(async ({ input }) => {
-    const count = await TournamentAthleteDAL.bulkRemoveTournamentAthletes(
-      input.ids
-    );
-    return count;
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
+    return runBulkRemove(input, context.repos.tournamentAthlete);
   });

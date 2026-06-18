@@ -15,7 +15,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Card } from '@/components/ui/card';
-import { isResettableMatch } from '@/lib/tournament/bracket-progression';
+import { isResettableMatch } from '@/lib/tournament/bracket/bracket-progression';
 
 export function BracketToolbar() {
   const {

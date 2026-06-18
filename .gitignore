@@ -16,6 +16,7 @@ todos.json
 
 /generated/prisma
 /generated
+docs/plans
 
 scripts/migration-id-map.json
 

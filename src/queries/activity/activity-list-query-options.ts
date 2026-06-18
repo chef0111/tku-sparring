@@ -1,4 +1,4 @@
-import type { TournamentActivityEventType } from '@/orpc/activity/types';
+import type { TournamentActivityEventType } from '@/contracts/activity/event-types';
 import { activityKeys } from '@/queries/keys';
 import { listTournamentActivity } from '@/queries/api/activity-api';
 

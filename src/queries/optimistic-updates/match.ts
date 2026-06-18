@@ -10,7 +10,7 @@ import type { MatchData } from '@/features/dashboard/types';
 import {
   getSuccessorSlot,
   resolveAdvanceSide,
-} from '@/lib/tournament/bracket-progression';
+} from '@/lib/tournament/bracket/bracket-progression';
 import { getScoreTransition } from '@/lib/tournament/match-transition';
 import { matchKeys } from '@/queries/keys';
 

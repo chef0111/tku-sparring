@@ -1,4 +1,4 @@
-import type { SelectionGroupRow } from '@/orpc/advance-settings/dal';
+import type { SelectionGroupRow } from '@/contracts/advance/selection';
 
 export type GroupComboboxStatusVariant = 'online' | 'offline' | 'maintenance';
 

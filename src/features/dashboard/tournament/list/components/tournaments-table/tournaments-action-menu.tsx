@@ -15,13 +15,13 @@ import type {
   TournamentRowActionOptions,
   TournamentStatus,
 } from '@/features/dashboard/types';
-import { TOURNAMENT_STATUSES } from '@/features/dashboard/types';
 import {
   TOURNAMENT_STATUS_LABEL,
   forceSetTournamentStatus,
   isBackwardStatusTransition,
   tournamentStatusRiskNotes,
 } from '@/lib/tournament/tournament-status';
+import { TOURNAMENT_STATUSES } from '@/features/dashboard/types';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,

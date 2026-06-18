@@ -68,7 +68,6 @@ function GroupSettingsForm({ group, onClose }: GroupSettingsFormProps) {
       weightMin: group.weightMin ?? undefined,
       weightMax: group.weightMax ?? undefined,
       thirdPlaceMatch: group.thirdPlaceMatch,
-      arenaIndex: group.arenaIndex,
     },
     onSubmit: ({ value }) => {
       updateGroup.mutate({
@@ -81,7 +80,6 @@ function GroupSettingsForm({ group, onClose }: GroupSettingsFormProps) {
         weightMin: value.weightMin ?? null,
         weightMax: value.weightMax ?? null,
         thirdPlaceMatch: value.thirdPlaceMatch,
-        arenaIndex: value.arenaIndex,
       });
     },
   });
@@ -187,16 +185,6 @@ function GroupSettingsForm({ group, onClose }: GroupSettingsFormProps) {
           </TooltipContent>
         )}
       </Tooltip>
-
-      <form.AppField name="arenaIndex">
-        {(field) => (
-          <field.NumberSelect label="Arena">
-            <SelectItem value="1">Arena 1</SelectItem>
-            <SelectItem value="2">Arena 2</SelectItem>
-            <SelectItem value="3">Arena 3</SelectItem>
-          </field.NumberSelect>
-        )}
-      </form.AppField>
 
       <div className="flex items-center gap-2 p-0 pt-6">
         <Button

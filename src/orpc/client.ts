@@ -7,12 +7,14 @@ import { createIsomorphicFn } from '@tanstack/react-start';
 import type { RouterClient } from '@orpc/server';
 
 import router from '@/orpc/router';
+import { serverRepos } from '@/server/composition';
 
 const getORPCClient = createIsomorphicFn()
   .server(() =>
     createRouterClient(router, {
       context: () => ({
         headers: getRequestHeaders(),
+        repos: serverRepos,
       }),
     })
   )

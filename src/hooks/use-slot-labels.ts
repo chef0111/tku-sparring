@@ -6,7 +6,7 @@ import type {
 import {
   formatFeederWinnerPlaceholder,
   getFeederMatch,
-} from '@/lib/tournament/arena-match-label';
+} from '@/server/domain/tournament/arena/match-label';
 
 export function useSlotLabels(
   match: MatchData,

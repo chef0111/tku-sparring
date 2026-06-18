@@ -35,6 +35,13 @@ export function DataTablePagination<TData>({
   const selectedRowCount = Object.keys(state.rowSelection).length;
   /** Server / manual tables must set `state.filteredRowCount` or `rowCount` on the table. */
   const filteredRowCount = state.filteredRowCount ?? table.getRowCount();
+  const isMinPageSize = state.pagination.pageSize < pageSizeOptions[0];
+  const showPagination =
+    filteredRowCount > pageSizeOptions[0]
+      ? true
+      : filteredRowCount > state.pagination.pageSize
+        ? isMinPageSize
+        : false;
 
   return (
     <div
@@ -50,7 +57,7 @@ export function DataTablePagination<TData>({
           {filteredRowCount === 1 ? 'row' : 'rows'} selected.
         </div>
       )}
-      {filteredRowCount > state.pagination.pageSize && (
+      {showPagination && (
         <div className="ml-auto flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
           <div className="flex items-center space-x-2">
             <p className="text-sm font-medium whitespace-nowrap">

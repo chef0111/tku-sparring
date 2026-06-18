@@ -3,7 +3,6 @@ import {
   AdminSetMatchStatusSchema,
   AssignSlotSchema,
   CreateCustomMatchSchema,
-  CreateMatchSchema,
   GenerateBracketSchema,
   RegenerateBracketSchema,
   ResetBracketSchema,
@@ -12,156 +11,185 @@ import {
   ShuffleBracketSchema,
   SwapParticipantsSchema,
   SwapSlotsSchema,
-  UpdateMatchSchema,
   UpdateScoreSchema,
 } from './dto';
+import { NotFoundError } from '@/server/application/errors';
 import {
   generateBracket as runGenerateBracket,
   regenerateBracket as runRegenerateBracket,
   resetBracket as runResetBracket,
   shuffleBracket as runShuffleBracket,
-} from './bracket/bracket-lifecycle';
-import { createCustomMatch as runCreateCustomMatch } from './create-custom-match';
-import { MatchDAL } from './dal';
-import { throwMatchBadRequest } from './match-domain-error';
-import { authedProcedure } from '@/orpc/middleware';
+} from '@/server/application/matches/use-cases/bracket-lifecycle';
+import {
+  assignSlot as runAssignSlot,
+  setLock as runSetLock,
+  swapSlots as runSwapSlots,
+} from '@/server/application/matches/use-cases/round0-slot';
+import { swapParticipants as runSwapParticipants } from '@/server/application/matches/use-cases/swap-participants';
+import {
+  createCustomMatch as runCreateCustomMatch,
+  deleteCustomMatch as runDeleteCustomMatch,
+} from '@/server/application/matches/use-cases/custom';
+import { authorized } from '@/orpc/middleware';
+import { assertSystemAdmin } from '@/orpc/policies/auth';
+import {
+  adminSetMatchStatus as runAdminSetMatchStatus,
+  setMatchWinner as runSetMatchWinner,
+  updateMatchScore as runUpdateMatchScore,
+} from '@/server/application/matches/use-cases/transition';
 
-export const listMatches = authedProcedure
+export const listMatches = authorized
   .input(
     z.object({
       groupId: z.string().optional(),
       tournamentId: z.string().optional(),
     })
   )
-  .handler(async ({ input }) => {
+  .handler(async ({ input, context }) => {
     if (input.groupId) {
-      const matches = await MatchDAL.findByGroupId(input.groupId);
-      return matches;
+      return await context.repos.matchRead.findByGroupId(input.groupId);
     }
     if (input.tournamentId) {
-      const matches = await MatchDAL.findByTournamentId(input.tournamentId);
-      return matches;
+      return await context.repos.matchRead.findByTournamentId(
+        input.tournamentId
+      );
     }
-    throw new Error('Either groupId or tournamentId is required');
+    throw new NotFoundError('Either groupId or tournamentId is required');
   });
 
-export const getMatch = authedProcedure
+export const getMatch = authorized
   .input(z.object({ id: z.string() }))
-  .handler(async ({ input }) => {
-    const match = await MatchDAL.findById(input.id);
+  .handler(async ({ input, context }) => {
+    const match = await context.repos.matchRead.findById(input.id);
     if (!match) {
-      throw new Error('Match not found');
+      throw new NotFoundError('Match not found');
     }
     return match;
   });
 
-export const createMatch = authedProcedure
-  .input(CreateMatchSchema)
-  .handler(async ({ input }) => {
-    const match = await MatchDAL.create(input);
-    return match;
-  });
-
-export const createCustomMatch = authedProcedure
+export const createCustomMatch = authorized
   .input(CreateCustomMatchSchema)
   .handler(async ({ input, context }) => {
-    return runCreateCustomMatch(input, context.user.id);
+    assertSystemAdmin(context.user);
+    return runCreateCustomMatch(
+      { ...input, adminId: context.user.id },
+      context.repos.customMatch
+    );
   });
 
-export const updateMatch = authedProcedure
-  .input(UpdateMatchSchema)
-  .handler(async ({ input }) => {
-    const { id, ...data } = input;
-    const match = await MatchDAL.update(id, data);
-    return match;
-  });
-
-export const adminSetMatchStatus = authedProcedure
+export const adminSetMatchStatus = authorized
   .input(AdminSetMatchStatusSchema)
   .handler(async ({ input, context }) => {
-    return MatchDAL.adminSetMatchStatus(input, context.user.id);
+    assertSystemAdmin(context.user);
+    return runAdminSetMatchStatus(
+      { ...input, adminId: context.user.id },
+      context.repos.matchTransition
+    );
   });
 
-export const removeMatch = authedProcedure
+export const removeMatch = authorized
   .input(z.object({ id: z.string() }))
-  .handler(async ({ input }) => {
-    const existing = await MatchDAL.findById(input.id);
-    if (!existing) throwMatchBadRequest('Match not found');
-    if (existing.kind !== 'custom') {
-      throwMatchBadRequest('Only custom matches can be deleted');
-    }
-    return MatchDAL.deleteMatch(input.id);
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
+    return runDeleteCustomMatch(
+      { matchId: input.id, adminId: context.user.id },
+      context.repos.customMatch
+    );
   });
 
-export const generateBracket = authedProcedure
+export const generateBracket = authorized
   .input(GenerateBracketSchema)
   .handler(async ({ input, context }) => {
-    const matches = await runGenerateBracket(input, context.user.id);
-    return matches;
+    assertSystemAdmin(context.user);
+    return runGenerateBracket(
+      { ...input, adminId: context.user.id },
+      context.repos.bracketLifecycle
+    );
   });
 
-export const shuffleBracket = authedProcedure
+export const shuffleBracket = authorized
   .input(ShuffleBracketSchema)
   .handler(async ({ input, context }) => {
-    const matches = await runShuffleBracket(input.groupId, context.user.id);
-    return matches;
+    assertSystemAdmin(context.user);
+    return runShuffleBracket(
+      { groupId: input.groupId, adminId: context.user.id },
+      context.repos.bracketLifecycle
+    );
   });
 
-export const regenerateBracket = authedProcedure
+export const regenerateBracket = authorized
   .input(RegenerateBracketSchema)
   .handler(async ({ input, context }) => {
-    const matches = await runRegenerateBracket(input.groupId, context.user.id);
-    return matches;
+    assertSystemAdmin(context.user);
+    return runRegenerateBracket(
+      { groupId: input.groupId, adminId: context.user.id },
+      context.repos.bracketLifecycle
+    );
   });
 
-export const resetBracket = authedProcedure
+export const resetBracket = authorized
   .input(ResetBracketSchema)
   .handler(async ({ input, context }) => {
-    const matches = await runResetBracket(input.groupId, context.user.id);
-    return matches;
+    assertSystemAdmin(context.user);
+    return runResetBracket(
+      { groupId: input.groupId, adminId: context.user.id },
+      context.repos.bracketLifecycle
+    );
   });
 
-export const setLock = authedProcedure
+export const setLock = authorized
   .input(SetLockSchema)
-  .handler(async ({ input }) => {
-    const match = await MatchDAL.setLock(input);
-    return match;
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
+    return runSetLock(input, context.repos.round0Slot);
   });
 
-export const updateScore = authedProcedure
+export const updateScore = authorized
   .input(UpdateScoreSchema)
   .handler(async ({ input, context }) => {
-    const score = await MatchDAL.updateScore(input, context.user.id);
-    return score;
+    assertSystemAdmin(context.user);
+    return runUpdateMatchScore(
+      { ...input, adminId: context.user.id },
+      context.repos.matchTransition
+    );
   });
 
-export const setWinner = authedProcedure
+export const setWinner = authorized
   .input(SetWinnerSchema)
   .handler(async ({ input, context }) => {
-    const winner = await MatchDAL.setWinner(input, context.user.id);
-    return winner;
+    assertSystemAdmin(context.user);
+    return runSetMatchWinner(
+      { ...input, adminId: context.user.id },
+      context.repos.matchTransition
+    );
   });
 
-export const swapParticipants = authedProcedure
+export const swapParticipants = authorized
   .input(SwapParticipantsSchema)
   .handler(async ({ input, context }) => {
-    const participants = await MatchDAL.swapParticipants(
-      input,
-      context.user.id
+    assertSystemAdmin(context.user);
+    return runSwapParticipants(
+      { ...input, adminId: context.user.id },
+      context.repos.matchParticipant
     );
-    return participants;
   });
 
-export const assignSlot = authedProcedure
+export const assignSlot = authorized
   .input(AssignSlotSchema)
   .handler(async ({ input, context }) => {
-    const slot = await MatchDAL.assignSlot(input, context.user.id);
-    return slot;
+    assertSystemAdmin(context.user);
+    return runAssignSlot(
+      { ...input, adminId: context.user.id },
+      context.repos.round0Slot
+    );
   });
 
-export const swapSlots = authedProcedure
+export const swapSlots = authorized
   .input(SwapSlotsSchema)
   .handler(async ({ input, context }) => {
-    const slots = await MatchDAL.swapSlots(input, context.user.id);
-    return slots;
+    assertSystemAdmin(context.user);
+    return runSwapSlots(
+      { ...input, adminId: context.user.id },
+      context.repos.round0Slot
+    );
   });

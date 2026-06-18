@@ -7,83 +7,93 @@ import {
   UnassignAthleteSchema,
   UpdateGroupSchema,
 } from './dto';
-import { GroupDAL } from './dal';
-import { authedProcedure } from '@/orpc/middleware';
+import { authorized } from '@/orpc/middleware';
+import { assertSystemAdmin } from '@/orpc/policies/auth';
+import {
+  assignAthleteToGroup as runAssignAthleteToGroup,
+  autoAssignAllEligible as runAutoAssignAllEligible,
+  autoAssignGroup as runAutoAssignGroup,
+  unassignAthleteFromGroup as runUnassignAthleteFromGroup,
+} from '@/server/application/groups/use-cases/assign';
+import {
+  createGroup as runCreateGroup,
+  deleteGroup as runDeleteGroup,
+  updateGroup as runUpdateGroup,
+} from '@/server/application/groups/use-cases/lifecycle';
+import {
+  getGroup as runGetGroup,
+  listGroupsByTournament as runListGroupsByTournament,
+} from '@/server/application/groups/use-cases/read';
 
-export const listGroups = authedProcedure
+export const listGroups = authorized
   .input(z.object({ tournamentId: z.string() }))
-  .handler(async ({ input }) => {
-    const groups = await GroupDAL.findByTournamentId(input.tournamentId);
-    return groups;
-  });
+  .handler(async ({ context, input }) =>
+    runListGroupsByTournament(input.tournamentId, context.repos.groupRead)
+  );
 
-export const getGroup = authedProcedure
+export const getGroup = authorized
   .input(z.object({ id: z.string() }))
-  .handler(async ({ input }) => {
-    const group = await GroupDAL.findById(input.id);
-    if (!group) {
-      throw new Error('Group not found');
-    }
-    return group;
-  });
+  .handler(async ({ context, input }) =>
+    runGetGroup(input.id, context.repos.groupRead)
+  );
 
-export const createGroup = authedProcedure
+export const createGroup = authorized
   .input(CreateGroupSchema)
-  .handler(async ({ input }) => {
-    const group = await GroupDAL.create(input);
-    return group;
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
+    return runCreateGroup(input, context.repos.groupLifecycle);
   });
 
-export const updateGroup = authedProcedure
+export const updateGroup = authorized
   .input(UpdateGroupSchema)
-  .handler(async ({ input }) => {
-    const { id, ...data } = input;
-    const group = await GroupDAL.update(id, data);
-    return group;
+  .handler(async ({ input, context }) => {
+    assertSystemAdmin(context.user);
+    return runUpdateGroup(input, context.repos.groupLifecycle);
   });
 
-export const removeGroup = authedProcedure
+export const removeGroup = authorized
   .input(z.object({ id: z.string() }))
-  .handler(async ({ input }) => {
-    const group = await GroupDAL.deleteGroup(input.id);
-    return group;
+  .handler(async ({ context, input }) => {
+    assertSystemAdmin(context.user);
+    return runDeleteGroup({ id: input.id }, context.repos.groupLifecycle);
   });
 
-export const autoAssignGroup = authedProcedure
+export const autoAssignGroup = authorized
   .input(AutoAssignSchema)
   .handler(async ({ input, context }) => {
-    const result = await GroupDAL.autoAssign({
-      ...input,
-      adminId: context.user.id,
-    });
-    return result;
+    assertSystemAdmin(context.user);
+    return runAutoAssignGroup(
+      { ...input, adminId: context.user.id },
+      context.repos.groupAssign
+    );
   });
 
-export const autoAssignAllGroups = authedProcedure
+export const autoAssignAllGroups = authorized
   .input(AutoAssignAllSchema)
   .handler(async ({ input, context }) => {
-    return GroupDAL.autoAssignAllEligible({
-      tournamentId: input.tournamentId,
-      adminId: context.user.id,
-    });
+    assertSystemAdmin(context.user);
+    return runAutoAssignAllEligible(
+      { tournamentId: input.tournamentId, adminId: context.user.id },
+      context.repos.groupAssign
+    );
   });
 
-export const assignAthleteToGroup = authedProcedure
+export const assignAthleteToGroup = authorized
   .input(AssignAthleteSchema)
   .handler(async ({ input, context }) => {
-    const athlete = await GroupDAL.assignAthlete({
-      ...input,
-      adminId: context.user.id,
-    });
-    return athlete;
+    assertSystemAdmin(context.user);
+    return runAssignAthleteToGroup(
+      { ...input, adminId: context.user.id },
+      context.repos.groupAssign
+    );
   });
 
-export const unassignAthleteFromGroup = authedProcedure
+export const unassignAthleteFromGroup = authorized
   .input(UnassignAthleteSchema)
   .handler(async ({ input, context }) => {
-    const athlete = await GroupDAL.unassignAthlete({
-      ...input,
-      adminId: context.user.id,
-    });
-    return athlete;
+    assertSystemAdmin(context.user);
+    return runUnassignAthleteFromGroup(
+      { ...input, adminId: context.user.id },
+      context.repos.groupAssign
+    );
   });
