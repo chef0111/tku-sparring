@@ -1,6 +1,6 @@
 import type {
   ListTournamentsQuery,
-  TournamentListPage,
+  TournamentsPage,
 } from '@/server/application/tournaments/repositories/read';
 import type { Prisma } from '@/generated/prisma/client';
 import { TournamentStatusSchema } from '@/lib/tournament/tournament-status';
@@ -83,7 +83,7 @@ async function attachActionableMatchCounts<
 
 export async function listTournaments(
   input: ListTournamentsQuery
-): Promise<TournamentListPage> {
+): Promise<TournamentsPage> {
   const {
     page = 1,
     perPage = 20,
@@ -132,5 +132,5 @@ export async function listTournaments(
     status: TournamentStatusSchema.parse(item.status),
   }));
 
-  return { items, total } as TournamentListPage;
+  return { items, total } as TournamentsPage;
 }

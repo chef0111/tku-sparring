@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { TournamentPage } from '@/features/dashboard';
+import { TournamentCommandCenter } from 'src/features/dashboard/tournament/components/command-center';
+import { useTournamentRealtimeStream } from 'src/hooks/use-tournament-realtime-stream';
 import { groupListQueryOptions } from '@/queries/group/group-list-query-options';
 import { activityListInfiniteQueryOptions } from '@/queries/activity';
 import { tournamentMatchesQueryOptions } from '@/queries/match';
@@ -17,10 +18,12 @@ export const Route = createFileRoute('/dashboard/tournaments/$id')({
       }),
     });
   },
-  component: TournamentDetail,
+  component: TournamentPage,
 });
 
-function TournamentDetail() {
+function TournamentPage() {
   const { id } = Route.useParams();
-  return <TournamentPage id={id} />;
+  useTournamentRealtimeStream(id);
+
+  return <TournamentCommandCenter tournamentId={id} />;
 }

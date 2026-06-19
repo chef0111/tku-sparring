@@ -4,13 +4,13 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { getTournamentsTableColumns } from 'src/features/dashboard/tournament/overview/components/tournaments-table/tournaments-table-columns';
 import type { SortingState, VisibilityState } from '@tanstack/react-table';
 import type { DataTableControlledState } from '@/hooks/use-data-table';
 import type {
   TournamentListItem,
   TournamentRowActionOptions,
 } from '@/features/dashboard/types';
+import { getTournamentsTableColumns } from '@/features/dashboard/tournament/components/overview/tournaments-table/tournaments-table-columns';
 
 export function useRecentTournamentsTable(
   tournaments: Array<TournamentListItem>,
