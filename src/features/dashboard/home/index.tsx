@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
+import { RenameTournamentDialog } from 'src/features/dashboard/tournament/overview/components/dialogs/rename-tournament-dialog';
+import { DeleteTournamentDialog } from 'src/features/dashboard/tournament/overview/components/dialogs/delete-tournament-dialog';
 import { SiteHeader } from '../site-header';
 import { DashboardHomeSkeleton } from './components/dashboard-home-skeleton';
 import { HubChartsSection } from './components/hub-charts-section';
@@ -11,8 +13,6 @@ import type { TournamentListItem } from '@/features/dashboard/types';
 import type { DataTableRowAction } from '@/types/data-table';
 import { Button } from '@/components/ui/button';
 import { CreateTournamentDialog } from '@/features/dashboard/tournament/create-tournament-dialog';
-import { RenameTournamentDialog } from '@/features/dashboard/tournament/list/components/dialogs/rename-tournament-dialog';
-import { DeleteTournamentDialog } from '@/features/dashboard/tournament/list/components/dialogs/delete-tournament-dialog';
 
 export function DashboardHome() {
   const { isPending, stats } = useDashboardStats();
@@ -47,7 +47,10 @@ export function DashboardHome() {
             <>
               <KpiStrip stats={stats.kpis} />
               <HubChartsSection chartData={stats.chartData} />
-              <StatusPipeline pipeline={stats.pipeline} />
+              <StatusPipeline
+                pipeline={stats.pipeline}
+                statusCounts={stats.kpis.byStatus}
+              />
               <RecentTournamentsSection
                 tournaments={stats.recentTournaments}
                 pending={isPending}

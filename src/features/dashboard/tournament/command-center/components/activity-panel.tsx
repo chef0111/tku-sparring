@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { History } from 'lucide-react';
+import { ActivityPanelSkeleton } from '../loading';
 import { ActivityEventRow } from './activity-event-row';
 import {
   HubSection,
@@ -7,7 +8,6 @@ import {
 } from '@/features/dashboard/home/components/hub-panel';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useTournamentActivityInfinite } from '@/queries/activity';
 
 interface ActivityPanelProps {
@@ -26,6 +26,10 @@ export function ActivityPanel({ tournamentId, onViewAll }: ActivityPanelProps) {
     [query.data]
   );
 
+  if (query.isLoading) {
+    return <ActivityPanelSkeleton />;
+  }
+
   return (
     <HubSection
       title="Recent activity"
@@ -39,13 +43,7 @@ export function ActivityPanel({ tournamentId, onViewAll }: ActivityPanelProps) {
       }
     >
       <HubSectionContent padded={false}>
-        {query.isLoading ? (
-          <div className="flex flex-col gap-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-16 w-full rounded-md" />
-            ))}
-          </div>
-        ) : query.isError ? (
+        {query.isError ? (
           <Alert variant="destructive">
             <AlertDescription>
               {query.error?.message ?? 'Failed to load activity.'}

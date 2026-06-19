@@ -1,7 +1,7 @@
+import { TournamentStatusPill } from 'src/features/dashboard/tournament/overview/components/tournament-status-pill';
 import type { TournamentData } from '@/features/dashboard/types';
 import type { User } from '@/lib/auth';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { TournamentStatusPill } from '@/features/dashboard/tournament/list/components/tournament-status-pill';
 import { UserDropdown } from '@/components/user/user-dropdown';
 import { LogoIcon } from '@/components/ui/logo';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';

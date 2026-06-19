@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ListFilter, ScrollText, X } from 'lucide-react';
-import { ActivityEventRow } from './viewer/components/activity-event-row';
+import { ActivityEventRow } from './command-center/components/activity-event-row';
 import type { TournamentActivityEventType } from '@/contracts/activity/event-types';
 import type { ActivityEventFilterOption } from '@/features/dashboard/tournament/lib/activity-filter-options';
 import { getNormalizedEvents } from '@/features/dashboard/tournament/lib/activity-filter-options';

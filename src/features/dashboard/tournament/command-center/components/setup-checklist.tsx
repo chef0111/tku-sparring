@@ -164,7 +164,7 @@ function SetupStepRow({
           </span>
         </div>
 
-        {!step.complete ? (
+        {!step.complete && (
           <div className="flex justify-end">
             <Button
               variant={isCurrent ? 'default' : 'outline'}
@@ -185,7 +185,7 @@ function SetupStepRow({
               </Link>
             </Button>
           </div>
-        ) : null}
+        )}
       </article>
     </li>
   );
@@ -219,7 +219,11 @@ export function SetupChecklist({ steps, tournamentId }: SetupChecklistProps) {
               {Math.round(progressValue)}%
             </span>
           </div>
-          <Progress value={progressValue} aria-label="Setup progress" />
+          <Progress
+            value={progressValue}
+            aria-label="Setup progress"
+            className="h-2"
+          />
         </div>
 
         <ol className="flex flex-col" role="list">

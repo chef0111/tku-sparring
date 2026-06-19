@@ -1,13 +1,5 @@
-import { Link } from '@tanstack/react-router';
-import { ArrowLeft, Trophy } from 'lucide-react';
-import { TournamentViewer } from './viewer';
-import { TournamentViewerLoading } from './viewer/loading';
-import type { GroupData, MatchData, TournamentData } from '../types';
-import { Button } from '@/components/ui/button';
+import { TournamentCommandCenter } from './command-center';
 import { useTournamentRealtimeStream } from '@/hooks/use-tournament-realtime-stream';
-import { useTournamentMatches } from '@/queries/match';
-import { useTournament } from '@/queries/tournament';
-import { useGroups } from '@/queries/group';
 
 interface TournamentPageProps {
   id: string;
@@ -15,39 +7,5 @@ interface TournamentPageProps {
 
 export function TournamentPage({ id }: TournamentPageProps) {
   useTournamentRealtimeStream(id);
-
-  const tournamentQuery = useTournament(id);
-  const groupsQuery = useGroups(id);
-  const matchesQuery = useTournamentMatches(id);
-
-  if (tournamentQuery.isPending) {
-    return <TournamentViewerLoading />;
-  }
-
-  if (tournamentQuery.isError || !tournamentQuery.data) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center gap-4">
-        <Trophy className="text-muted-foreground size-12" />
-        <h2 className="text-lg font-semibold">Tournament not found</h2>
-        <Button variant="outline" asChild>
-          <Link to="/dashboard/tournaments">
-            <ArrowLeft />
-            Back to tournaments
-          </Link>
-        </Button>
-      </div>
-    );
-  }
-
-  const tournament = tournamentQuery.data as TournamentData;
-  const groups = groupsQuery.data ?? [];
-
-  return (
-    <TournamentViewer
-      tournament={tournament}
-      groups={groups as Array<GroupData>}
-      matches={(matchesQuery.data ?? []) as Array<MatchData>}
-      tournamentId={id}
-    />
-  );
+  return <TournamentCommandCenter tournamentId={id} />;
 }
