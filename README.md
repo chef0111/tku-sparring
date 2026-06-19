@@ -1,6 +1,6 @@
 # TKU Sparring System • ![License](https://img.shields.io/badge/License-MIT-blue)
 
-A tournament operations platform for UIT Taekwondo: an admin CRM for athletes, groups, and brackets, plus an arena client for live match scoring.
+A tournament operations platform for Taekwondo UIT: an admin CRM for taekwondo tournaments, plus an arena client for live match scoring.
 
 ## 🚀 Installation Guide
 
