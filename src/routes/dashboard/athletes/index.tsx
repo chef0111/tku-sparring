@@ -1,15 +1,27 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { NotFound } from '@/components/not-found';
-import { Skeleton } from '@/components/ui/skeleton';
-import { DataTableSkeleton } from '@/components/data-table/data-table-skeleton';
+import React from 'react';
+import type { AthleteDrawerMode } from '@/features/dashboard/athlete/components/athlete-drawer';
+import type {
+  AthleteProfileData,
+  AthleteRow,
+} from '@/features/dashboard/types';
+import type { DataTableRowAction } from '@/types/data-table';
+import { FeatureFlagsProvider } from '@/contexts/feature-flags';
+import { AthleteDrawer } from '@/features/dashboard/athlete/components/athlete-drawer';
+import { AthleteTable } from '@/features/dashboard/athlete/components/athlete-table';
+import { AthleteEditSheet } from '@/features/dashboard/athlete/components/athlete-table/athlete-edit-sheet';
+import { getAthletesTableColumns } from '@/features/dashboard/athlete/components/athlete-table/athletes-table-columns';
+import { AthleteImportDialog } from '@/features/dashboard/athlete/components/dialogs/athlete-import-dialog';
+import { DeleteAthleteDialog } from '@/features/dashboard/athlete/components/dialogs/delete-athlete-dialog';
+import { athleteProfileToRow } from '@/features/dashboard/athlete/lib/athlete-profile-to-row';
+import { SiteHeader } from '@/features/dashboard/site-header';
 import {
   athleteProfilesDefaultListInput,
   athleteProfilesQueryOptions,
 } from '@/queries/athlete-profile';
-import { SiteHeader } from '@/features/dashboard/site-header';
-import AthletesManager from '@/features/dashboard/athlete';
+import { NotFound } from '@/components/not-found';
+import { Button } from '@/components/ui/button';
 
 export const Route = createFileRoute('/dashboard/athletes/')({
   loader: async ({ context: { queryClient } }) => {
@@ -17,26 +29,101 @@ export const Route = createFileRoute('/dashboard/athletes/')({
       athleteProfilesQueryOptions(athleteProfilesDefaultListInput)
     );
   },
-
-  pendingComponent: () => (
-    <div className="flex h-full flex-col">
-      <SiteHeader title="Athletes">
-        <div className="ml-auto pr-4">
-          <Button size="sm">
-            <Plus className="mr-1 size-4" />
-            Add Athlete
-          </Button>
-        </div>
-      </SiteHeader>
-      <div className="mx-auto w-full max-w-7xl p-6">
-        <Skeleton className="mb-8 h-7 w-64" />
-        <DataTableSkeleton columnCount={7} filterCount={4} rowCount={10} />
-      </div>
-    </div>
-  ),
   pendingMs: 0,
   pendingMinMs: 0,
 
   component: AthletesManager,
   notFoundComponent: NotFound,
 });
+
+export default function AthletesManager() {
+  const enableQueryFilter = true;
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [drawerMode, setDrawerMode] =
+    React.useState<AthleteDrawerMode>('create');
+  const [drawerSeedRows, setDrawerSeedRows] =
+    React.useState<Array<AthleteRow> | null>(null);
+  const bulkEditCompleteRef = React.useRef<(() => void) | null>(null);
+
+  const [rowAction, setRowAction] =
+    React.useState<DataTableRowAction<AthleteProfileData> | null>(null);
+  const [importOpen, setImportOpen] = React.useState(false);
+
+  const columns = React.useMemo(
+    () =>
+      getAthletesTableColumns({
+        onRowAction: setRowAction,
+        nameFilterQueryKey: enableQueryFilter ? 'query' : 'name',
+      }),
+    [enableQueryFilter]
+  );
+
+  function openCreateDrawer() {
+    setDrawerMode('create');
+    setDrawerSeedRows(null);
+    bulkEditCompleteRef.current = null;
+    setDrawerOpen(true);
+  }
+
+  function handleDrawerOpenChange(open: boolean) {
+    setDrawerOpen(open);
+    if (!open) {
+      setDrawerMode('create');
+      setDrawerSeedRows(null);
+      bulkEditCompleteRef.current = null;
+    }
+  }
+
+  return (
+    <div className="flex h-full flex-col">
+      <SiteHeader title="Athletes">
+        <div className="ml-auto pr-4">
+          <Button size="sm" onClick={openCreateDrawer}>
+            <Plus className="mr-1 size-4" />
+            Add Athlete
+          </Button>
+        </div>
+      </SiteHeader>
+
+      <div className="mx-auto w-full max-w-7xl p-6">
+        <FeatureFlagsProvider>
+          <AthleteTable
+            columns={columns}
+            className="pt-6"
+            onAdd={openCreateDrawer}
+            onImport={() => setImportOpen(true)}
+            enableQueryFilter={enableQueryFilter}
+            onBulkEdit={(profiles, onComplete) => {
+              setDrawerSeedRows(profiles.map(athleteProfileToRow));
+              setDrawerMode('bulk-edit');
+              bulkEditCompleteRef.current = onComplete;
+              setDrawerOpen(true);
+            }}
+          />
+        </FeatureFlagsProvider>
+      </div>
+
+      <AthleteDrawer
+        open={drawerOpen}
+        setOpen={setDrawerOpen}
+        onOpenChange={handleDrawerOpenChange}
+        mode={drawerMode}
+        seedRows={drawerSeedRows}
+        onBulkEditSaved={() => bulkEditCompleteRef.current?.()}
+      />
+      <AthleteEditSheet
+        athlete={
+          rowAction?.variant === 'update' ? rowAction.row.original : null
+        }
+        onOpenChange={() => setRowAction(null)}
+      />
+      <AthleteImportDialog open={importOpen} onOpenChange={setImportOpen} />
+      <DeleteAthleteDialog
+        athlete={
+          rowAction?.variant === 'delete' ? rowAction.row.original : null
+        }
+        onClose={() => setRowAction(null)}
+      />
+    </div>
+  );
+}

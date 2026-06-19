@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { TournamentBuilderPage } from '@/features/dashboard/tournament/builder';
+import { TournamentBuilderPage } from 'src/features/dashboard/tournament/components/builder';
 import LoadingScreen from '@/components/navigation/loading';
 import { groupListQueryOptions } from '@/queries/group/group-list-query-options';
 import { tournamentQueryOptions } from '@/queries/tournament';

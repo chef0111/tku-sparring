@@ -70,7 +70,7 @@ export const TournamentListItemSchema = TournamentSchema.extend({
   _count: TournamentListItemCountSchema,
 });
 
-export const TournamentListPageSchema = z.object({
+export const TournamentsPageSchema = z.object({
   items: z.array(TournamentListItemSchema),
   total: z.number(),
 });
@@ -96,4 +96,4 @@ export type EnsureArenaSlotDTO = z.infer<typeof EnsureArenaSlotSchema>;
 export type RetireArenaDTO = z.infer<typeof RetireArenaSchema>;
 export type ListTournamentsDTO = z.infer<typeof ListTournamentsSchema>;
 export type TournamentListItemDTO = z.infer<typeof TournamentListItemSchema>;
-export type TournamentListPageDTO = z.infer<typeof TournamentListPageSchema>;
+export type TournamentsPageDTO = z.infer<typeof TournamentsPageSchema>;

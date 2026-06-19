@@ -10,7 +10,7 @@ import type {
   TournamentListItem,
   TournamentRowActionOptions,
 } from '@/features/dashboard/types';
-import { getTournamentsTableColumns } from '@/features/dashboard/tournament/list/components/tournaments-table/tournaments-table-columns';
+import { getTournamentsTableColumns } from '@/features/dashboard/tournament/components/overview/tournaments-table/tournaments-table-columns';
 
 export function useRecentTournamentsTable(
   tournaments: Array<TournamentListItem>,

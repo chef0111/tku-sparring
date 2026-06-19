@@ -1,5 +1,3 @@
-export { DashboardHome } from './home';
-export { TournamentsListManager as TournamentListPage } from './tournament/list';
-export { TournamentPage } from './tournament';
-export { TournamentBuilderPage } from './tournament/builder';
+export { TournamentsListManager as TournamentsPage } from './tournament/components/overview';
+export { TournamentBuilderPage } from './tournament/components/builder';
 export { AppSidebar } from './app-sidebar';

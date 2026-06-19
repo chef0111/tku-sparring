@@ -49,7 +49,7 @@ export type TournamentListItem = {
   };
 };
 
-export type TournamentListPage = {
+export type TournamentsPage = {
   items: Array<TournamentListItem>;
   total: number;
 };
@@ -57,5 +57,5 @@ export type TournamentListPage = {
 export type TournamentReadStore = {
   findWithLifecycle: (id: string) => Promise<TournamentDetail | null>;
   findById: (id: string) => Promise<TournamentDetail | null>;
-  list: (query: ListTournamentsQuery) => Promise<TournamentListPage>;
+  list: (query: ListTournamentsQuery) => Promise<TournamentsPage>;
 };

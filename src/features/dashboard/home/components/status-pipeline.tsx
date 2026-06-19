@@ -1,7 +1,19 @@
 import { Link } from '@tanstack/react-router';
 import { formatDistanceToNow } from 'date-fns';
-import { ArrowRight, ArrowUpRight, Trophy } from 'lucide-react';
+import {
+  Archive,
+  ArrowRight,
+  ArrowUpRight,
+  BlocksIcon,
+  Layers,
+  LayoutGrid,
+  Pencil,
+  Radio,
+  Users,
+} from 'lucide-react';
 import { HubSection } from './hub-panel';
+import type { ReactNode } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import type { DashboardStats } from '../lib/compute-dashboard-stats';
 import type {
   TournamentListItem,
@@ -10,27 +22,12 @@ import type {
 import type { StatusProps } from '@/components/ui/status';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/components/ui/empty';
 import { Status, StatusIndicator, StatusLabel } from '@/components/ui/status';
 import { cn } from '@/lib/utils';
 
 interface StatusPipelineProps {
   pipeline: DashboardStats['pipeline'];
+  statusCounts: DashboardStats['kpis']['byStatus'];
 }
 
 const columns: Array<{
@@ -38,24 +35,28 @@ const columns: Array<{
   label: string;
   subtitle: string;
   viewAllLabel: string;
+  icon: LucideIcon;
 }> = [
   {
     status: 'draft',
     label: 'Draft',
     subtitle: 'Setup in progress',
     viewAllLabel: 'View draft',
+    icon: Pencil,
   },
   {
     status: 'active',
     label: 'Active',
     subtitle: 'Live operations',
     viewAllLabel: 'View active',
+    icon: Radio,
   },
   {
     status: 'completed',
     label: 'Completed',
-    subtitle: 'Archived & read-only',
+    subtitle: 'Archived and read-only',
     viewAllLabel: 'View completed',
+    icon: Archive,
   },
 ];
 
@@ -65,145 +66,208 @@ const pipelineStatusVariant: Record<TournamentStatus, StatusProps['status']> = {
   completed: 'maintenance',
 };
 
-function PipelineTournamentTile({
+const stageAccent: Record<TournamentStatus, string> = {
+  draft: 'border-l-amber-500',
+  active: 'border-l-emerald-500',
+  completed: 'border-l-blue-500',
+};
+
+const rowHoverAccent: Record<TournamentStatus, string> = {
+  draft: 'hover:border-l-amber-500',
+  active: 'hover:border-l-emerald-500',
+  completed: 'hover:border-l-blue-500',
+};
+
+function PipelineFrame({ children }: { children: ReactNode }) {
+  return (
+    <div className="border-border/80 bg-muted/20 overflow-hidden rounded-md border">
+      <div className="border-border/60 bg-muted/40 flex items-center gap-2 border-b px-3 py-2">
+        <BlocksIcon className="size-3.5" />
+        <span className="text-muted-foreground font-mono text-xs tracking-widest uppercase">
+          Lifecycle stages
+        </span>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function PipelineStageHeader({
+  status,
+  label,
+  subtitle,
+  count,
+}: {
+  status: TournamentStatus;
+  label: string;
+  subtitle: string;
+  count: number;
+}) {
+  return (
+    <header className="border-border/60 flex items-center justify-between gap-2 border-b px-3 py-2">
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <Status
+          status={pipelineStatusVariant[status]}
+          className="gap-1.5 bg-transparent p-0"
+        >
+          <StatusIndicator />
+          <StatusLabel className="text-foreground text-xs font-medium">
+            {label}
+          </StatusLabel>
+        </Status>
+        <span className="text-muted-foreground truncate font-mono text-[10px]">
+          {subtitle}
+        </span>
+      </div>
+      <Badge variant="secondary" className="shrink-0 font-mono tabular-nums">
+        {count}
+      </Badge>
+    </header>
+  );
+}
+
+function PipelineTournamentRow({
   tournament,
+  status,
 }: {
   tournament: TournamentListItem;
+  status: TournamentStatus;
 }) {
   const matchCount = tournament._count.actionableMatches;
 
   return (
     <li>
-      <Card
-        size="sm"
-        className="group hover:ring-primary/30 py-0 shadow-none transition-colors duration-200"
+      <Link
+        to="/dashboard/tournaments/$id"
+        params={{ id: tournament.id }}
+        aria-label={`Open ${tournament.name}`}
+        className={cn(
+          'group flex flex-col gap-1.5 border-l-2 border-l-transparent px-3 py-2.5',
+          rowHoverAccent[status],
+          'hover:bg-muted/40 smooth-hover transition-colors duration-200',
+          'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none'
+        )}
       >
-        <Link
-          to="/dashboard/tournaments/$id"
-          params={{ id: tournament.id }}
-          aria-label={`Open ${tournament.name}`}
-          className={cn(
-            'flex cursor-pointer flex-col',
-            'focus-visible:ring-ring space-y-2 rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
-          )}
-        >
-          <CardHeader className="gap-1">
-            <CardTitle className="truncate">{tournament.name}</CardTitle>
-            <CardAction>
-              <ArrowUpRight
-                aria-hidden="true"
-                className="text-muted-foreground group-hover:text-foreground size-5 opacity-60 transition-colors duration-200 group-hover:opacity-100"
-              />
-            </CardAction>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-1 pt-0">
-            <CardDescription className="text-xs tabular-nums">
-              {tournament._count.groups} groups ·{' '}
-              {tournament._count.tournamentAthletes} athletes · {matchCount}{' '}
-              {matchCount === 1 ? 'match' : 'matches'}
-            </CardDescription>
-            <CardDescription className="text-xs">
-              Created{' '}
-              {formatDistanceToNow(new Date(tournament.createdAt), {
-                addSuffix: true,
-              })}
-            </CardDescription>
-          </CardContent>
-        </Link>
-      </Card>
+        <div className="flex items-center justify-between gap-2">
+          <span className="min-w-0 truncate text-sm font-medium">
+            {tournament.name}
+          </span>
+          <ArrowUpRight
+            aria-hidden="true"
+            className="text-muted-foreground size-3.5 shrink-0 opacity-40 transition-opacity group-hover:opacity-100"
+          />
+        </div>
+        <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] tabular-nums">
+          <span className="inline-flex items-center gap-1">
+            <Layers className="size-3" aria-hidden="true" />
+            {tournament._count.groups} groups
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <Users className="size-3" aria-hidden="true" />
+            {tournament._count.tournamentAthletes} athletes
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <LayoutGrid className="size-3" aria-hidden="true" />
+            {matchCount} {matchCount === 1 ? 'match' : 'matches'}
+          </span>
+        </div>
+        <span className="text-muted-foreground font-mono text-[10px]">
+          Created{' '}
+          {formatDistanceToNow(new Date(tournament.createdAt), {
+            addSuffix: true,
+          })}
+        </span>
+      </Link>
     </li>
   );
 }
 
-function PipelineColumnEmpty({ label }: { label: string }) {
+function PipelineStageEmpty({
+  label,
+  icon: Icon,
+}: {
+  label: string;
+  icon: LucideIcon;
+}) {
   return (
-    <Empty className="border-border/60 bg-muted/20 min-h-24 flex-1 border border-dashed">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <Trophy />
-        </EmptyMedia>
-        <EmptyTitle className="text-xs">
-          No {label.toLowerCase()} tournaments
-        </EmptyTitle>
-        <EmptyDescription className="text-xs">
-          Tournaments in this stage will appear here.
-        </EmptyDescription>
-      </EmptyHeader>
-    </Empty>
+    <div className="text-muted-foreground flex flex-1 flex-col items-center justify-center gap-2 px-4 py-10 text-center">
+      <Icon className="size-5 opacity-40" aria-hidden="true" />
+      <p className="text-sm font-medium">
+        No {label.toLowerCase()} tournaments
+      </p>
+      <p className="font-mono text-[10px]">Awaiting intake</p>
+    </div>
   );
 }
 
-function PipelineColumn({
+function PipelineStage({
   status,
   label,
   subtitle,
   viewAllLabel,
+  icon,
   items,
+  count,
 }: {
   status: TournamentStatus;
   label: string;
   subtitle: string;
   viewAllLabel: string;
+  icon: LucideIcon;
   items: Array<TournamentListItem>;
+  count: number;
 }) {
   return (
-    <Card
-      size="sm"
-      className="bg-drawer flex min-h-80 w-[85vw] shrink-0 snap-center flex-col gap-2! pt-2! pb-0! ring-0 sm:w-[60vw] lg:min-h-84 xl:w-auto"
-    >
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-sm font-medium">
-          <Status
-            status={pipelineStatusVariant[status]}
-            className="gap-1.5 bg-transparent p-0 pl-1"
-          >
-            <StatusIndicator />
-            <StatusLabel className="text-foreground text-sm font-medium">
-              {label}
-            </StatusLabel>
-          </Status>
-          <Badge variant="secondary" className="font-mono tabular-nums">
-            {items.length}
-          </Badge>
-        </CardTitle>
-        <CardAction className="my-auto">
-          <CardDescription className="text-xs">{subtitle}</CardDescription>
-        </CardAction>
-      </CardHeader>
-
-      <CardContent className="bg-card/80 flex flex-1 flex-col gap-3 rounded-xl border py-4">
-        {items.length === 0 ? (
-          <PipelineColumnEmpty label={label} />
-        ) : (
-          <ul className="flex flex-col gap-2" role="list">
-            {items.map((tournament) => (
-              <PipelineTournamentTile
-                key={tournament.id}
-                tournament={tournament}
-              />
-            ))}
-          </ul>
+    <div className="flex h-full min-h-72 min-w-[78vw] shrink-0 snap-center flex-col sm:min-w-[52vw] xl:min-w-0">
+      <div
+        className={cn(
+          'flex min-h-0 flex-1 flex-col border-l-2',
+          stageAccent[status]
         )}
-
-        <CardFooter className="mt-auto px-0! pt-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground hover:text-foreground h-8 cursor-pointer px-2"
-            asChild
-          >
-            <Link to="/dashboard/tournaments" search={{ status: [status] }}>
-              {viewAllLabel}
-              <ArrowRight data-icon="inline-end" aria-hidden="true" />
-            </Link>
-          </Button>
-        </CardFooter>
-      </CardContent>
-    </Card>
+      >
+        <PipelineStageHeader
+          status={status}
+          label={label}
+          subtitle={subtitle}
+          count={count}
+        />
+        <div className="flex min-h-0 flex-1 flex-col">
+          {items.length === 0 ? (
+            <PipelineStageEmpty label={label} icon={icon} />
+          ) : (
+            <ul className="divide-border/60 divide-y" role="list">
+              {items.map((tournament) => (
+                <PipelineTournamentRow
+                  key={tournament.id}
+                  tournament={tournament}
+                  status={status}
+                />
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+      <footer className="border-border/60 shrink-0 border-x border-t px-2 py-1.5">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground hover:text-foreground h-8 px-2"
+          asChild
+        >
+          <Link to="/dashboard/tournaments" search={{ status: [status] }}>
+            {viewAllLabel}
+            <ArrowRight data-icon="inline-end" aria-hidden="true" />
+          </Link>
+        </Button>
+      </footer>
+    </div>
   );
 }
 
-export function StatusPipeline({ pipeline }: StatusPipelineProps) {
+export function StatusPipeline({
+  pipeline,
+  statusCounts,
+}: StatusPipelineProps) {
   return (
     <HubSection
       title="Status pipeline"
@@ -218,18 +282,22 @@ export function StatusPipeline({ pipeline }: StatusPipelineProps) {
         </Button>
       }
     >
-      <div className="-mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto px-1 pb-1 lg:mx-0 lg:gap-4 lg:px-0 lg:pb-0 xl:grid xl:snap-none xl:grid-cols-3 xl:overflow-visible">
-        {columns.map((column) => (
-          <PipelineColumn
-            key={column.status}
-            status={column.status}
-            label={column.label}
-            subtitle={column.subtitle}
-            viewAllLabel={column.viewAllLabel}
-            items={pipeline[column.status]}
-          />
-        ))}
-      </div>
+      <PipelineFrame>
+        <div className="divide-border/60 flex snap-x snap-mandatory divide-x overflow-x-auto xl:grid xl:snap-none xl:grid-cols-3 xl:divide-x-0 xl:overflow-visible">
+          {columns.map((column) => (
+            <PipelineStage
+              key={column.status}
+              status={column.status}
+              label={column.label}
+              subtitle={column.subtitle}
+              viewAllLabel={column.viewAllLabel}
+              icon={column.icon}
+              items={pipeline[column.status]}
+              count={statusCounts[column.status]}
+            />
+          ))}
+        </div>
+      </PipelineFrame>
     </HubSection>
   );
 }

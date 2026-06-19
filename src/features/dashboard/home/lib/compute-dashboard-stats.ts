@@ -27,9 +27,11 @@ export interface DashboardStats {
   recentTournaments: Array<TournamentListItem>;
 }
 
-const PIPELINE_CAP = 5;
-const RECENT_CAP = 10;
+const PIPELINE_CAP = 3;
+const RECENT_CAP = 5;
 const TOP_TOURNAMENTS_CAP = 8;
+
+export { PIPELINE_CAP as pipelineDisplayLimit };
 
 const STATUS_LABELS: Record<TournamentStatus, string> = {
   draft: 'Draft',
