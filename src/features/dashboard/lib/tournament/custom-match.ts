@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { CustomSlotDTO } from '@/orpc/matches/dto';
 import type { MatchData } from '@/features/dashboard/types';
 import type { CreateCustomMatchFormValues } from '@/lib/validations';
-import { formatArenaMatchTitle } from '@/server/domain/tournament/arena/match-label';
+import { formatArenaMatchTitle } from '@/lib/tournament/arena/match-label';
 import { customMatchCornersUseSameSource } from '@/lib/validations';
 
 type SlotMode = CreateCustomMatchFormValues['redAthlete'];

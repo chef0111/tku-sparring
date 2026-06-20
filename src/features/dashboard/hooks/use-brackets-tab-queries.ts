@@ -5,11 +5,11 @@ import {
   buildManualRankMap,
   buildMatchNumber,
   resolveArenaGroupOrder,
-} from '@/server/domain/tournament/arena/match-label';
+} from '@/lib/tournament/arena/match-label';
 import {
   savedArenaGroupIds,
   shouldShowArenaOrderUi,
-} from '@/server/domain/tournament/arena/arena-group-order';
+} from '@/lib/tournament/arena/arena-group-order';
 import { useMatches, useTournamentMatches } from '@/queries/match';
 import { useTournamentAthletes } from '@/queries/tournament-athlete';
 import { useTournament } from '@/queries/tournament';

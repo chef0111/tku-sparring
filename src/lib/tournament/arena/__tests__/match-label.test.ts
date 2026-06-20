@@ -9,7 +9,7 @@ import {
   formatMatchHeaderLine,
   getFeederMatch,
   sortMatchesInRound,
-} from '@/server/domain/tournament/arena/match-label';
+} from '@/lib/tournament/arena/match-label';
 
 function m(
   id: string,

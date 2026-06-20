@@ -13,7 +13,7 @@ import { ParticipantRow } from './participant-row';
 import { ScoreControl } from './score-control';
 import type { MatchStatus } from '@/features/dashboard/types';
 import { useMatchDetailPanel } from '@/features/dashboard/hooks/use-match-detail-panel';
-import { formatMatchHeaderLine } from '@/server/domain/tournament/arena/match-label';
+import { formatMatchHeaderLine } from '@/lib/tournament/arena/match-label';
 import {
   Sheet,
   SheetContent,

@@ -5,7 +5,7 @@ import type { MatchData } from '@/features/dashboard/types';
 import { useTournamentBracket } from '@/features/dashboard/contexts/tournament-bracket/use-tournament-bracket';
 import { buildBracketActionQueue } from '@/lib/tournament/bracket/bracket-action-queue';
 import { getBracketRoundLabel } from '@/lib/tournament/bracket/bracket-round-label';
-import { formatMatchHeaderLine } from '@/server/domain/tournament/arena/match-label';
+import { formatMatchHeaderLine } from '@/lib/tournament/arena/match-label';
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
