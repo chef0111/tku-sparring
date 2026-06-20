@@ -108,7 +108,7 @@ function PipelineStageHeader({
       <div className="flex min-w-0 flex-col gap-0.5">
         <Status
           status={pipelineStatusVariant[status]}
-          className="gap-1.5 bg-transparent p-0"
+          className="gap-1.5 bg-transparent p-0 pl-1"
         >
           <StatusIndicator />
           <StatusLabel className="text-foreground text-xs font-medium">

@@ -1,5 +1,5 @@
 import { Settings } from 'lucide-react';
-import { GroupViolationCountBadge } from '../out-of-range-badge';
+import { GroupViolationBadge } from '../group-violation-badge';
 import { GroupRosterEmptyState } from './group-roster-empty-state';
 import type { GroupData } from '@/contracts/tournament/group';
 import { useGroupRosterTable } from '@/features/dashboard/hooks/use-group-roster-table';
@@ -85,7 +85,7 @@ function GroupRosterActive({
               {group.weightMin ?? 20}–{group.weightMax ?? 150}kg
             </Badge>
           )}
-          <GroupViolationCountBadge count={roster.violationCount} />
+          <GroupViolationBadge count={roster.violationCount} />
 
           <div className="ml-auto flex items-center gap-2">
             <Status status="online" className="h-6 px-1.5">

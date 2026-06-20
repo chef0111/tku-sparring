@@ -61,19 +61,17 @@ export function OutOfRangeBadge({ violations }: OutOfRangeBadgeProps) {
   );
 }
 
-interface GroupViolationCountBadgeProps {
+interface GroupViolationBadgeProps {
   count: number;
 }
 
-export function GroupViolationCountBadge({
-  count,
-}: GroupViolationCountBadgeProps) {
+export function GroupViolationBadge({ count }: GroupViolationBadgeProps) {
   if (count === 0) return null;
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Badge variant="destructive" className="gap-1">
+        <Badge variant="warning" className="gap-1">
           <AlertTriangle className="size-3" />
           {count}
         </Badge>
