@@ -1,5 +1,5 @@
 import { Crown } from 'lucide-react';
-import type { TournamentAthleteData } from '@/contracts/tournament/group';
+import type { TournamentAthleteData } from '@/contracts/tournament/division';
 import { cn } from '@/lib/utils';
 
 export function ParticipantRow({

@@ -11,27 +11,26 @@ import {
 import { TournamentActivitySheet } from '../tournament-activity-sheet';
 import { TournamentStatusPill } from '../tournament-status-pill';
 import { ActivityPanel } from './activity-panel';
-import { GroupsOverview } from './groups-overview';
+import { DivisionsOverview } from './divisions-overview';
 import { SetupChecklist } from './setup-checklist';
 import { TournamentKpiRow } from './tournament-kpi-row';
 import { TournamentStatusDialog } from './tournament-status-dialog';
 import {
-  GroupsOverviewSkeleton,
+  DivisionsOverviewSkeleton,
   HeaderControlsSkeleton,
   SetupChecklistSkeleton,
   TournamentCommandCenterHeaderActionSkeleton,
   TournamentKpiRowSkeleton,
 } from './loading';
 import type { TournamentStatus } from './tournament-status-dialog';
-import type { GroupData } from '@/contracts/tournament/group';
+import type { DivisionData } from '@/contracts/tournament/division';
 import type { MatchData } from '@/contracts/tournament/match';
 import type { TournamentData } from '@/contracts/tournament/list';
 import { useTournamentCommandCenter } from '@/features/dashboard/hooks/use-tournament-command-center';
 import { SiteHeader } from '@/features/dashboard/components/sidebar/site-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { useTournamentReadOnly } from '@/hooks/use-tournament-read-only';
-import { useGroups } from '@/queries/group';
+import { useDivisions } from '@/queries/division';
 import { useTournamentMatches } from '@/queries/match';
 import { useTournament } from '@/queries/tournament';
 
@@ -43,18 +42,17 @@ export function TournamentCommandCenter({
   tournamentId,
 }: TournamentCommandCenterProps) {
   const tournamentQuery = useTournament(tournamentId);
-  const groupsQuery = useGroups(tournamentId);
+  const divisionsQuery = useDivisions(tournamentId);
   const matchesQuery = useTournamentMatches(tournamentId);
 
   const tournament = tournamentQuery.data as TournamentData | undefined;
-  const groups = (groupsQuery.data ?? []) as Array<GroupData>;
+  const divisions = (divisionsQuery.data ?? []) as Array<DivisionData>;
   const matches = (matchesQuery.data ?? []) as Array<MatchData>;
 
   const isTournamentPending = tournamentQuery.isPending;
-  const isGroupsPending = groupsQuery.isPending;
+  const isDivisionsPending = divisionsQuery.isPending;
   const isMatchesPending = matchesQuery.isPending;
 
-  const isReadOnly = useTournamentReadOnly(tournamentId);
   const [activityOpen, setActivityOpen] = React.useState(false);
   const [confirmStatus, setConfirmStatus] =
     React.useState<TournamentStatus | null>(null);
@@ -148,7 +146,7 @@ export function TournamentCommandCenter({
                 params={{ id: tournamentId }}
               >
                 <Edit data-icon="inline-start" />
-                {isReadOnly ? 'Open Builder' : 'Edit Tournament'}
+                Open Builder
               </Link>
             </Button>
             {transitionAction && (
@@ -197,18 +195,18 @@ export function TournamentCommandCenter({
           ) : (
             <TournamentKpiRow
               tournament={tournament!}
-              groups={groups}
+              divisions={divisions}
               matches={matches}
             />
           )}
 
           <div className="grid gap-6 lg:grid-cols-5">
             <div className="flex flex-col gap-4 lg:col-span-3">
-              {isGroupsPending ? (
-                <GroupsOverviewSkeleton />
+              {isDivisionsPending ? (
+                <DivisionsOverviewSkeleton />
               ) : (
-                <GroupsOverview
-                  groups={groups}
+                <DivisionsOverview
+                  divisions={divisions}
                   matches={matches}
                   tournamentId={tournamentId}
                 />

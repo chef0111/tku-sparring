@@ -11,11 +11,11 @@ export async function generateBracket(
   command: GenerateBracketCommand,
   store: BracketLifecycleStore
 ) {
-  const group = await store.findGroup(command.groupId);
-  if (!group) throw new NotFoundError('Group not found');
+  const group = await store.findDivision(command.divisionId);
+  if (!group) throw new NotFoundError('Division not found');
   assertTournamentAction(group.tournamentStatus, 'bracket.generate');
 
-  const existing = await store.countBracketMatches(command.groupId);
+  const existing = await store.countBracketMatches(command.divisionId);
   if (existing > 0) {
     throw new BadRequestError(
       'Matches already exist for this group. Use regenerate to recreate.'
@@ -33,8 +33,8 @@ export async function shuffleBracket(
   command: GroupBracketCommand,
   store: BracketLifecycleStore
 ) {
-  const group = await store.findGroup(command.groupId);
-  if (!group) throw new NotFoundError('Group not found');
+  const group = await store.findDivision(command.divisionId);
+  if (!group) throw new NotFoundError('Division not found');
   assertTournamentAction(group.tournamentStatus, 'bracket.shuffle');
 
   return store.shuffle({
@@ -48,8 +48,8 @@ export async function resetBracket(
   command: GroupBracketCommand,
   store: BracketLifecycleStore
 ) {
-  const group = await store.findGroup(command.groupId);
-  if (!group) throw new NotFoundError('Group not found');
+  const group = await store.findDivision(command.divisionId);
+  if (!group) throw new NotFoundError('Division not found');
   assertTournamentAction(group.tournamentStatus, 'bracket.reset');
 
   const baseline = parseRound0Baseline(group.round0Baseline);
@@ -70,8 +70,8 @@ export async function regenerateBracket(
   command: GroupBracketCommand,
   store: BracketLifecycleStore
 ) {
-  const group = await store.findGroup(command.groupId);
-  if (!group) throw new NotFoundError('Group not found');
+  const group = await store.findDivision(command.divisionId);
+  if (!group) throw new NotFoundError('Division not found');
   assertTournamentAction(group.tournamentStatus, 'bracket.regenerate');
 
   return store.regenerate({

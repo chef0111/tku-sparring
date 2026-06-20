@@ -26,11 +26,11 @@ async function cleanupExpired(
 }
 
 async function releaseAllForDeviceInGroup(
-  input: { groupId: string; deviceId: string },
+  input: { divisionId: string; deviceId: string },
   db: ClaimDb = prisma
 ) {
   const claims = await db.arenaMatchClaim.findMany({
-    where: { groupId: input.groupId, deviceId: input.deviceId },
+    where: { divisionId: input.divisionId, deviceId: input.deviceId },
     select: { matchId: true },
   });
   if (claims.length === 0) return;
@@ -54,7 +54,7 @@ async function releaseAllForDeviceInGroup(
   }
 
   await db.arenaMatchClaim.deleteMany({
-    where: { groupId: input.groupId, deviceId: input.deviceId },
+    where: { divisionId: input.divisionId, deviceId: input.deviceId },
   });
 
   for (const [index, mid] of matchIds.entries()) {
@@ -79,14 +79,14 @@ export const arenaMatchClaimStore: ArenaMatchClaimStore = {
         where: { id: command.matchId },
         select: {
           id: true,
-          groupId: true,
+          divisionId: true,
           tournamentId: true,
           status: true,
           tournament: { select: { status: true } },
         },
       });
 
-      if (!match || match.groupId !== command.groupId) {
+      if (!match || match.divisionId !== command.divisionId) {
         throw new NotFoundError('Match not found for this group');
       }
       if (match.tournamentId !== command.tournamentId) {
@@ -107,7 +107,7 @@ export const arenaMatchClaimStore: ArenaMatchClaimStore = {
       }
 
       await releaseAllForDeviceInGroup(
-        { groupId: command.groupId, deviceId: command.deviceId },
+        { divisionId: command.divisionId, deviceId: command.deviceId },
         tx
       );
 
@@ -115,7 +115,7 @@ export const arenaMatchClaimStore: ArenaMatchClaimStore = {
       const data = {
         deviceId: command.deviceId,
         userId: command.userId,
-        groupId: command.groupId,
+        divisionId: command.divisionId,
         tournamentId: command.tournamentId,
         expiresAt: exp,
       };

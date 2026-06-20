@@ -4,6 +4,6 @@ export type SelectionCatalogQuery = {
 
 export type SelectionMatchesQuery = {
   tournamentId: string;
-  groupId: string;
+  divisionId: string;
   deviceId: string;
 };

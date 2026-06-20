@@ -32,15 +32,15 @@ export const SetTournamentStatusSchema = z.object({
   force: z.boolean().optional(),
 });
 
-export const SetArenaGroupOrderSchema = z.object({
+export const SetArenaDivisionOrderSchema = z.object({
   tournamentId: z.string(),
   arenaIndex: z.number().int().min(1),
-  groupIds: z.array(z.string()),
+  divisionIds: z.array(z.string()),
 });
 
-export const MoveGroupArenaSchema = z.object({
+export const MoveDivisionArenaSchema = z.object({
   tournamentId: z.string(),
-  groupId: z.string(),
+  divisionId: z.string(),
   fromArena: z.number().int().min(1),
   toArena: z.number().int().min(1),
   insertIndex: z.number().int().min(0),
@@ -58,7 +58,7 @@ export const RetireArenaSchema = z.object({
 });
 
 export const TournamentListItemCountSchema = z.object({
-  groups: z.number(),
+  divisions: z.number(),
   matches: z.number(),
   tournamentAthletes: z.number(),
   actionableMatches: z.number(),
@@ -66,7 +66,7 @@ export const TournamentListItemCountSchema = z.object({
 
 export const TournamentListItemSchema = TournamentSchema.extend({
   nameSortKey: z.string(),
-  arenaGroupOrder: z.unknown(),
+  arenaDivisionOrder: z.unknown(),
   _count: TournamentListItemCountSchema,
 });
 
@@ -90,8 +90,10 @@ export type TournamentDTO = z.infer<typeof TournamentSchema>;
 export type CreateTournamentDTO = z.infer<typeof CreateTournamentSchema>;
 export type UpdateTournamentDTO = z.infer<typeof UpdateTournamentSchema>;
 export type SetTournamentStatusDTO = z.infer<typeof SetTournamentStatusSchema>;
-export type SetArenaGroupOrderDTO = z.infer<typeof SetArenaGroupOrderSchema>;
-export type MoveGroupArenaDTO = z.infer<typeof MoveGroupArenaSchema>;
+export type SetArenaDivisionOrderDTO = z.infer<
+  typeof SetArenaDivisionOrderSchema
+>;
+export type MoveDivisionArenaDTO = z.infer<typeof MoveDivisionArenaSchema>;
 export type EnsureArenaSlotDTO = z.infer<typeof EnsureArenaSlotSchema>;
 export type RetireArenaDTO = z.infer<typeof RetireArenaSchema>;
 export type ListTournamentsDTO = z.infer<typeof ListTournamentsSchema>;

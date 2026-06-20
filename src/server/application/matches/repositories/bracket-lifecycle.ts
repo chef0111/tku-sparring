@@ -5,7 +5,7 @@ import type {
   GroupBracketCommand,
 } from '../use-cases/bracket-lifecycle-commands';
 
-export type BracketGroupContext = {
+export type BracketDivisionContext = {
   id: string;
   tournamentId: string;
   tournamentStatus: string;
@@ -14,26 +14,26 @@ export type BracketGroupContext = {
 };
 
 export type BracketLifecycleStore = {
-  findGroup: (groupId: string) => Promise<BracketGroupContext | null>;
-  countBracketMatches: (groupId: string) => Promise<number>;
+  findDivision: (divisionId: string) => Promise<BracketDivisionContext | null>;
+  countBracketMatches: (divisionId: string) => Promise<number>;
   generate: (input: {
     command: GenerateBracketCommand;
-    group: BracketGroupContext;
+    group: BracketDivisionContext;
     activity: MutationActivityInput;
   }) => Promise<Array<MatchRead>>;
   shuffle: (input: {
     command: GroupBracketCommand;
-    group: BracketGroupContext;
+    group: BracketDivisionContext;
     activity: MutationActivityInput;
   }) => Promise<Array<MatchRead>>;
   reset: (input: {
     command: GroupBracketCommand;
-    group: BracketGroupContext;
+    group: BracketDivisionContext;
     activity: MutationActivityInput;
   }) => Promise<Array<MatchRead>>;
   regenerate: (input: {
     command: GroupBracketCommand;
-    group: BracketGroupContext;
+    group: BracketDivisionContext;
     activity: MutationActivityInput;
   }) => Promise<Array<MatchRead>>;
 };

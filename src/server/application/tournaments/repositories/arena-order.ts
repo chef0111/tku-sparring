@@ -1,27 +1,27 @@
 import type {
   EnsureArenaSlotCommand,
-  MoveGroupArenaCommand,
+  MoveDivisionArenaCommand,
   RetireArenaCommand,
-  SetArenaGroupOrderCommand,
+  SetArenaDivisionOrderCommand,
 } from '../use-cases/arena-order-commands';
 
 export type ArenaOrderTournament = {
   id: string;
   status: string;
-  arenaGroupOrder: unknown;
-  groups: Array<{ id: string; arenaIndex: number }>;
+  arenaDivisionOrder: unknown;
+  divisions: Array<{ id: string; arenaIndex: number }>;
 };
 
 export type TournamentArenaOrderStore = {
   findTournament: (
     tournamentId: string
   ) => Promise<ArenaOrderTournament | null>;
-  setArenaGroupOrder: (
-    command: SetArenaGroupOrderCommand,
+  setArenaDivisionOrder: (
+    command: SetArenaDivisionOrderCommand,
     tournament: ArenaOrderTournament
   ) => Promise<unknown>;
-  moveGroupBetweenArenas: (
-    command: MoveGroupArenaCommand,
+  moveDivisionBetweenArenas: (
+    command: MoveDivisionArenaCommand,
     tournament: ArenaOrderTournament
   ) => Promise<unknown>;
   ensureArenaSlot: (

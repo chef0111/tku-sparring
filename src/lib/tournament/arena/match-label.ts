@@ -44,43 +44,43 @@ export function formatFeederWinnerPlaceholder(
 export function sortMatchesInRound(
   roundMatches: Array<MatchData>,
   thirdPlaceMatch: boolean,
-  groupMaxRound: number,
+  divisionMaxRound: number,
   round: number
 ): Array<MatchData> {
   let arr = [...roundMatches].sort((a, b) => a.matchIndex - b.matchIndex);
-  if (thirdPlaceMatch && round === groupMaxRound && arr.length === 2) {
+  if (thirdPlaceMatch && round === divisionMaxRound && arr.length === 2) {
     arr = [...arr].sort((a, b) => b.matchIndex - a.matchIndex);
   }
   return arr;
 }
 
-export type ArenaGroupMeta = { id: string; thirdPlaceMatch: boolean };
+export type ArenaDivisionMeta = { id: string; thirdPlaceMatch: boolean };
 
-export type ArenaCrossGroupOrderInput = {
+export type ArenaCrossDivisionOrderInput = {
   arenaIndex: number;
-  groups: ReadonlyArray<ArenaGroupMeta>;
+  divisions: ReadonlyArray<ArenaDivisionMeta>;
   matches: ReadonlyArray<MatchData>;
-  /** groupIds in “who goes first within each round” order for this arena. */
-  groupOrder: ReadonlyArray<string>;
+  /** divisionIds in “who goes first within each round” order for this arena. */
+  divisionOrder: ReadonlyArray<string>;
   /** Optional: when set, round-0 BYE-vs-BYE rows are excluded from the arena sequence (see {@link isArenaSequenceEligible}). */
-  groupAthleteCountById?: ReadonlyMap<string, number>;
+  divisionAthleteCountById?: ReadonlyMap<string, number>;
   /** Optional: lower runs earlier within same `(round, group)` bucket. */
   manualRankByMatchId?: ReadonlyMap<string, number>;
 };
 
 /** Merge saved order with any new groups on the same arena (stable append). */
-export function resolveArenaGroupOrder(
-  groupsOnArena: ReadonlyArray<{ id: string }>,
+export function resolveArenaDivisionOrder(
+  divisionsOnArena: ReadonlyArray<{ id: string }>,
   saved: ReadonlyArray<string> | null | undefined
 ): Array<string> {
-  const ids = new Set(groupsOnArena.map((g) => g.id));
+  const ids = new Set(divisionsOnArena.map((g) => g.id));
   const out: Array<string> = [];
   if (saved) {
     for (const id of saved) {
       if (ids.has(id)) out.push(id);
     }
   }
-  for (const g of groupsOnArena) {
+  for (const g of divisionsOnArena) {
     if (!out.includes(g.id)) out.push(g.id);
   }
   return out;
@@ -97,52 +97,57 @@ export function buildManualRankMap(
 }
 
 /**
- * One shared `k` for all groups on the same arena: round-major, then `groupOrder`,
+ * One shared `k` for all groups on the same arena: round-major, then `divisionOrder`,
  * then optional manual rank within `(round, group)`.
  * Every match in `input.matches` gets a map entry: `number` or `null` when excluded
  * ({@link isArenaSequenceEligible}, including upper rounds fed by a fully empty round-0 row).
  */
 export function buildMatchNumber(
-  input: ArenaCrossGroupOrderInput
+  input: ArenaCrossDivisionOrderInput
 ): Map<string, number | null> {
   const safeArena = Math.max(1, input.arenaIndex);
   const base = safeArena * 100;
-  const groupMeta = new Map(input.groups.map((g) => [g.id, g]));
-  let groupBracketMeta: ReadonlyMap<string, ArenaRound0BracketMeta> | undefined;
-  if (input.groupAthleteCountById && input.groupAthleteCountById.size > 0) {
-    const round0CountByGroup = new Map<string, number>();
-    const distinctTaByGroup = new Map<string, Set<string>>();
+  const divisionMeta = new Map(input.divisions.map((g) => [g.id, g]));
+  let divisionBracketMeta:
+    | ReadonlyMap<string, ArenaRound0BracketMeta>
+    | undefined;
+  if (
+    input.divisionAthleteCountById &&
+    input.divisionAthleteCountById.size > 0
+  ) {
+    const round0CountByDivision = new Map<string, number>();
+    const distinctTaByDivision = new Map<string, Set<string>>();
     for (const m of input.matches) {
       if (m.round !== 0) continue;
-      round0CountByGroup.set(
-        m.groupId,
-        (round0CountByGroup.get(m.groupId) ?? 0) + 1
+      round0CountByDivision.set(
+        m.divisionId,
+        (round0CountByDivision.get(m.divisionId) ?? 0) + 1
       );
-      let taSet = distinctTaByGroup.get(m.groupId);
+      let taSet = distinctTaByDivision.get(m.divisionId);
       if (!taSet) {
         taSet = new Set<string>();
-        distinctTaByGroup.set(m.groupId, taSet);
+        distinctTaByDivision.set(m.divisionId, taSet);
       }
       if (m.redTournamentAthleteId) taSet.add(m.redTournamentAthleteId);
       if (m.blueTournamentAthleteId) taSet.add(m.blueTournamentAthleteId);
     }
     const meta = new Map<string, ArenaRound0BracketMeta>();
-    for (const [gid, athleteCount] of input.groupAthleteCountById) {
-      const round0MatchCount = round0CountByGroup.get(gid);
+    for (const [gid, athleteCount] of input.divisionAthleteCountById) {
+      const round0MatchCount = round0CountByDivision.get(gid);
       if (round0MatchCount !== undefined) {
         meta.set(gid, {
           athleteCount,
           round0MatchCount,
-          round0AthleteCount: distinctTaByGroup.get(gid)?.size ?? 0,
+          round0AthleteCount: distinctTaByDivision.get(gid)?.size ?? 0,
         });
       }
     }
-    if (meta.size > 0) groupBracketMeta = meta;
+    if (meta.size > 0) divisionBracketMeta = meta;
   }
-  const groupMaxRound = new Map<string, number>();
-  for (const gid of input.groupOrder) {
-    const gm = input.matches.filter((m) => m.groupId === gid);
-    groupMaxRound.set(
+  const divisionMaxRound = new Map<string, number>();
+  for (const gid of input.divisionOrder) {
+    const gm = input.matches.filter((m) => m.divisionId === gid);
+    divisionMaxRound.set(
       gid,
       gm.length === 0 ? 0 : Math.max(...gm.map((m) => m.round))
     );
@@ -154,14 +159,14 @@ export function buildMatchNumber(
   const ordered: Array<MatchData> = [];
 
   for (const round of rounds) {
-    for (const gid of input.groupOrder) {
-      const meta = groupMeta.get(gid);
+    for (const gid of input.divisionOrder) {
+      const meta = divisionMeta.get(gid);
       if (!meta) continue;
       const roundMatches = input.matches.filter(
-        (m) => m.groupId === gid && m.round === round
+        (m) => m.divisionId === gid && m.round === round
       );
       if (roundMatches.length === 0) continue;
-      const maxR = groupMaxRound.get(gid) ?? 0;
+      const maxR = divisionMaxRound.get(gid) ?? 0;
       const bracketSorted = sortMatchesInRound(
         roundMatches,
         meta.thirdPlaceMatch,
@@ -186,7 +191,7 @@ export function buildMatchNumber(
   const map = new Map<string, number | null>();
   let seq = 0;
   for (const m of ordered) {
-    if (isArenaSequenceEligible(m, groupBracketMeta, input.matches)) {
+    if (isArenaSequenceEligible(m, divisionBracketMeta, input.matches)) {
       map.set(m.id, null);
     } else {
       seq += 1;
@@ -207,18 +212,18 @@ export function buildArenaMatchNumberById(
   thirdPlaceMatch: boolean,
   athleteCount?: number
 ): Map<string, number | null> {
-  const gid = matches[0]?.groupId;
+  const gid = matches[0]?.divisionId;
   if (!gid) return new Map();
-  const groupAthleteCountById =
+  const divisionAthleteCountById =
     athleteCount !== undefined
       ? new Map<string, number>([[gid, athleteCount]])
       : undefined;
   return buildMatchNumber({
     arenaIndex,
-    groups: [{ id: gid, thirdPlaceMatch }],
+    divisions: [{ id: gid, thirdPlaceMatch }],
     matches,
-    groupOrder: [gid],
-    groupAthleteCountById,
+    divisionOrder: [gid],
+    divisionAthleteCountById,
   });
 }
 
@@ -232,7 +237,7 @@ export function formatFeederWinnerLabel(displayNumber: number): string {
 
 export function getFeederMatch(
   matches: ReadonlyArray<MatchData>,
-  groupId: string,
+  divisionId: string,
   round: number,
   matchIndex: number,
   side: 'red' | 'blue',
@@ -248,7 +253,7 @@ export function getFeederMatch(
     effectiveSide === 'red' ? matchIndex * 2 : matchIndex * 2 + 1;
   return matches.find(
     (m) =>
-      m.groupId === groupId &&
+      m.divisionId === divisionId &&
       m.round === round - 1 &&
       m.matchIndex === childIndex
   );

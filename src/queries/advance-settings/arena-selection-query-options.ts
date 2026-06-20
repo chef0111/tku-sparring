@@ -33,19 +33,19 @@ export function arenaSelectionCatalogQueryOptions(args: {
 export function arenaSelectionMatchesQueryOptions(args: {
   deviceId: string | undefined;
   tournamentId: string | null;
-  groupId: string | null;
+  divisionId: string | null;
 }) {
-  const { deviceId, tournamentId, groupId } = args;
+  const { deviceId, tournamentId, divisionId } = args;
   const tid = tournamentId && tournamentId.length > 0 ? tournamentId : null;
-  const gid = groupId && groupId.length > 0 ? groupId : null;
+  const did = divisionId && divisionId.length > 0 ? divisionId : null;
 
   return queryOptions({
-    queryKey: advanceSettingsKeys.selectionMatches(deviceId ?? null, tid, gid),
+    queryKey: advanceSettingsKeys.selectionMatches(deviceId ?? null, tid, did),
     queryFn: () =>
       selectionMatches({
         deviceId: deviceId!,
         tournamentId: tid!,
-        groupId: gid!,
+        divisionId: did!,
       }),
     staleTime: Number.POSITIVE_INFINITY,
     gcTime: 5 * 60 * 1000,

@@ -3,10 +3,10 @@ import {
   buildManualRankMap,
   buildMatchNumber,
   formatArenaMatchTitle,
-  resolveArenaGroupOrder,
+  resolveArenaDivisionOrder,
 } from '@/server/domain/tournament/arena/match-label';
 import { normalizeMatchLabelKey } from '@/server/domain/tournament/arena/match-label-key';
-import { savedArenaGroupIds } from '@/server/domain/tournament/arena/arena-group-order';
+import { savedArenaDivisionIds } from '@/server/domain/tournament/arena/arena-division-order';
 import {
   matchProjectionSelect,
   toMatchData,
@@ -17,13 +17,13 @@ export type { MatchLabelContext };
 
 export async function loadMatchLabelContext(input: {
   tournamentId: string;
-  groupId: string;
+  divisionId: string;
 }): Promise<MatchLabelContext> {
   const tournament = await prisma.tournament.findUnique({
     where: { id: input.tournamentId },
     select: {
-      arenaGroupOrder: true,
-      groups: {
+      arenaDivisionOrder: true,
+      divisions: {
         select: {
           id: true,
           arenaIndex: true,
@@ -35,46 +35,51 @@ export async function loadMatchLabelContext(input: {
   });
   if (!tournament) throw new Error('Tournament not found');
 
-  const targetGroup = tournament.groups.find((g) => g.id === input.groupId);
-  if (!targetGroup) throw new Error('Group not found on tournament');
+  const targetDivision = tournament.divisions.find(
+    (g) => g.id === input.divisionId
+  );
+  if (!targetDivision) throw new Error('Division not found on tournament');
 
-  const arenaIndex = targetGroup.arenaIndex;
-  const groupsOnArena = tournament.groups.filter(
+  const arenaIndex = targetDivision.arenaIndex;
+  const divisionsOnArena = tournament.divisions.filter(
     (g) => g.arenaIndex === arenaIndex
   );
-  const saved = savedArenaGroupIds(tournament.arenaGroupOrder, arenaIndex);
-  const groupOrder = resolveArenaGroupOrder(groupsOnArena, saved);
-  const groupIdsOnArena = groupsOnArena.map((g) => g.id);
+  const saved = savedArenaDivisionIds(
+    tournament.arenaDivisionOrder,
+    arenaIndex
+  );
+  const divisionOrder = resolveArenaDivisionOrder(divisionsOnArena, saved);
+  const divisionIdsOnArena = divisionsOnArena.map((g) => g.id);
 
   const allMatchRows = await prisma.match.findMany({
-    where: { groupId: { in: groupIdsOnArena } },
+    where: { divisionId: { in: divisionIdsOnArena } },
     select: matchProjectionSelect,
     orderBy: [{ round: 'asc' }, { matchIndex: 'asc' }],
   });
 
   const athleteCountRows = await prisma.tournamentAthlete.groupBy({
-    by: ['groupId'],
-    where: { groupId: { in: groupIdsOnArena } },
+    by: ['divisionId'],
+    where: { divisionId: { in: divisionIdsOnArena } },
     _count: { _all: true },
   });
-  const groupAthleteCountById = new Map<string, number>();
+  const divisionAthleteCountById = new Map<string, number>();
   for (const row of athleteCountRows) {
-    if (row.groupId != null) {
-      groupAthleteCountById.set(row.groupId, row._count._all);
+    if (row.divisionId != null) {
+      divisionAthleteCountById.set(row.divisionId, row._count._all);
     }
   }
 
-  const meta = groupsOnArena.map((g) => ({
+  const meta = divisionsOnArena.map((g) => ({
     id: g.id,
     thirdPlaceMatch: g.thirdPlaceMatch,
   }));
   const allMatches = allMatchRows.map(toMatchData);
   const numbers = buildMatchNumber({
     arenaIndex,
-    groups: meta,
+    divisions: meta,
     matches: allMatches,
-    groupOrder,
-    groupAthleteCountById,
+    divisionOrder,
+    divisionAthleteCountById,
     manualRankByMatchId: buildManualRankMap(allMatches),
   });
 
@@ -91,7 +96,7 @@ export async function loadMatchLabelContext(input: {
 
   return {
     arenaIndex,
-    groupIdsOnArena,
+    divisionIdsOnArena,
     allMatches,
     numbers,
     assignedBracketTitleKeys,

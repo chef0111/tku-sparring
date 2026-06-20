@@ -5,11 +5,11 @@ import { BracketCanvas } from './bracket-canvas';
 import { BracketScreenshotDialog } from './bracket-screenshot-dialog';
 import { BracketToolbar } from './bracket-toolbar';
 import { EmptyBracketState } from './empty-bracket-state';
-import { ArenaGroupOrderSheet } from './groups-panel/arena-group-order-sheet';
-import { GroupsPanel } from './groups-panel';
+import { ArenaDivisionOrderSheet } from './divisions-panel/arena-division-order-sheet';
+import { DivisionsPanel } from './divisions-panel';
 import { MatchDetailPanel } from './match-detail-panel';
 import { LoadingBracketState } from './skeletons';
-import { EmptyGroupsPlaceholder } from './empty-groups-placeholder';
+import { EmptyDivisionsPlaceholder } from './empty-divisions-placeholder';
 import { useBracketChrome } from '@/features/dashboard/contexts/bracket-chrome';
 import { useBuilderWorkspace } from '@/features/dashboard/contexts/builder-workspace';
 import { useTournamentBracket } from '@/features/dashboard/contexts/tournament-bracket';
@@ -18,10 +18,10 @@ import { getBeltLabel } from '@/config/athlete';
 export function BracketsTab() {
   const {
     tournamentId,
-    groups,
+    divisions,
     readOnly,
     tournamentStatus,
-    selectedGroupId,
+    selectedDivisionId,
     matchesQuery,
     matches,
     athleteCount,
@@ -33,11 +33,11 @@ export function BracketsTab() {
     dragLabel,
   } = useTournamentBracket();
 
-  const { groups: builderGroups } = useBuilderWorkspace();
+  const { divisions: builderDivisions } = useBuilderWorkspace();
   const { isFullscreen } = useBracketChrome();
 
-  if (builderGroups.length === 0) {
-    return <EmptyGroupsPlaceholder />;
+  if (builderDivisions.length === 0) {
+    return <EmptyDivisionsPlaceholder />;
   }
 
   return (
@@ -52,7 +52,7 @@ export function BracketsTab() {
             <LoadingBracketState />
           ) : matches.length === 0 ? (
             <EmptyBracketState
-              groupId={selectedGroupId}
+              divisionId={selectedDivisionId}
               readOnly={readOnly}
               tournamentStatus={tournamentStatus}
               athleteCount={athleteCount}
@@ -65,10 +65,10 @@ export function BracketsTab() {
 
         {isFullscreen ? (
           <EdgeReveal edge="right">
-            <GroupsPanel />
+            <DivisionsPanel />
           </EdgeReveal>
         ) : (
-          <GroupsPanel />
+          <DivisionsPanel />
         )}
       </div>
 
@@ -102,11 +102,11 @@ export function BracketsTab() {
 
       <BracketScreenshotDialog />
 
-      <ArenaGroupOrderSheet
+      <ArenaDivisionOrderSheet
         open={arenaOrderSheetOpen}
         onOpenChange={setArenaOrderSheetOpen}
         tournamentId={tournamentId}
-        groups={groups}
+        divisions={divisions}
         readOnly={readOnly}
       />
     </DndContext>

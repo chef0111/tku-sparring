@@ -36,7 +36,6 @@ export function useAddAthletesSheet({
   const [weightMax, setWeightMax] = React.useState<number | null>(null);
 
   const orgQuery = useAthleteProfilesOrgTotal({ enabled: open });
-  const orgTotal = orgQuery.data ?? 0;
 
   const listQuery = useAthleteProfilesInfinite({
     excludeTournamentId: tournamentId,
@@ -64,6 +63,10 @@ export function useAddAthletesSheet({
     beltMax != null ||
     weightMin != null ||
     weightMax != null;
+
+  const orgTotal = orgQuery.data ?? 0;
+  const pendingEmpty =
+    !listQuery.isPending && total === 0 && !hasFilters && orgQuery.isPending;
 
   const bulkAdd = useBulkAddAthletes({
     onSuccess: (result) => {
@@ -152,9 +155,17 @@ export function useAddAthletesSheet({
   }, [autoAssign, bulkAdd, readOnly, selectedIds, tournamentId]);
 
   const emptyLibrary =
-    !listQuery.isPending && total === 0 && !hasFilters && orgTotal === 0;
+    !listQuery.isPending &&
+    !orgQuery.isPending &&
+    total === 0 &&
+    !hasFilters &&
+    orgTotal === 0;
   const allInTournament =
-    !listQuery.isPending && total === 0 && !hasFilters && orgTotal > 0;
+    !listQuery.isPending &&
+    !orgQuery.isPending &&
+    total === 0 &&
+    !hasFilters &&
+    orgTotal > 0;
 
   const patchBeltFilter = React.useCallback(
     (patch: { poolBeltMin?: number | null; poolBeltMax?: number | null }) => {
@@ -189,7 +200,7 @@ export function useAddAthletesSheet({
       patchWeightFilter,
     },
     list: {
-      isPending: listQuery.isPending,
+      isPending: listQuery.isPending || pendingEmpty,
       items: items as Array<AthleteProfileData>,
       total,
       hasFilters,

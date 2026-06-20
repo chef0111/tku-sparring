@@ -145,12 +145,12 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
             advance.match &&
             deviceId &&
             advance.tournament &&
-            advance.group
+            advance.division
           ) {
             try {
               await client.arenaMatchClaim.claim({
                 matchId: advance.match,
-                groupId: advance.group,
+                divisionId: advance.division,
                 tournamentId: advance.tournament,
                 deviceId,
               });
@@ -166,12 +166,12 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
 
           if (advance.match) {
             let label = advance.matchLabel?.trim() ?? '';
-            if (!label && advance.tournament && advance.group && deviceId) {
+            if (!label && advance.tournament && advance.division && deviceId) {
               const cached = queryClient.getQueryData(
                 arenaSelectionMatchesQueryOptions({
                   deviceId,
                   tournamentId: advance.tournament,
-                  groupId: advance.group,
+                  divisionId: advance.division,
                 }).queryKey
               ) as
                 | { matches: Array<{ id: string; label: string }> }
@@ -192,12 +192,12 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
               label,
             });
 
-            if (deviceId && advance.tournament && advance.group) {
+            if (deviceId && advance.tournament && advance.division) {
               await queryClient.invalidateQueries({
                 queryKey: arenaSelectionMatchesQueryOptions({
                   deviceId,
                   tournamentId: advance.tournament,
-                  groupId: advance.group,
+                  divisionId: advance.division,
                 }).queryKey,
               });
             }

@@ -6,11 +6,11 @@
 
 ## Product Summary
 
-The TKU Sparring System is a full tournament operations platform that serves both arena-side clients and system admins. It includes an arena client for match execution and scoring, and an admin CRM for managing athletes, tournaments, groups, and brackets. The CRM provides a global athlete registry, a tournament builder with Groups and Brackets tabs, and a deterministic bracket canvas with manual overrides. The goal is to reduce setup time, improve accuracy in grouping and seeding, and provide a clean operational workflow from tournament creation through match completion.
+The TKU Sparring System is a full tournament operations platform that serves both arena-side clients and system admins. It includes an arena client for match execution and scoring, and an admin CRM for managing athletes, tournaments, divisions, and brackets. The CRM provides a global athlete registry, a tournament builder with Divisions and Brackets tabs, and a deterministic bracket canvas with manual overrides. The goal is to reduce setup time, improve accuracy in division placement and seeding, and provide a clean operational workflow from tournament creation through match completion.
 
 Target users:
 
-- System Admins who run TKU tournaments and manage athlete rosters, groups, and brackets.
+- System Admins who run TKU tournaments and manage athlete rosters, divisions, and brackets.
 - Arena Operators who run matches and record results on the arena client.
 
 Primary value:
@@ -18,7 +18,7 @@ Primary value:
 - One source of truth for athletes across tournaments.
 - Fast, auditable, and deterministic tournament setup.
 - Simple arena-side scoring that stays in sync with official records.
-- Clear operational control of groups, brackets, and match progression.
+- Clear operational control of divisions, brackets, and match progression.
 
 ## Goals
 
@@ -33,7 +33,7 @@ Primary value:
 - Multi-role permissions beyond System Admin.
 - Double-elimination, round robin, or Swiss brackets.
 - Public-facing bracket view or spectator UX.
-- Real-time collaborative editing of brackets or groups beyond per-match reservation (see **Arena match claim** in [CONTEXT.md](CONTEXT.md)).
+- Real-time collaborative editing of brackets or divisions beyond per-match reservation (see **Arena match claim** in [CONTEXT.md](CONTEXT.md)).
 - Automated tournament completion without admin confirmation.
 - Advanced hardware integration beyond existing scoring inputs.
 
@@ -42,10 +42,10 @@ Primary value:
 In scope:
 
 - Global athlete registry with CRUD and de-dup validation.
-- Tournament builder with two tabs: Groups and Brackets.
+- Tournament builder with two tabs: Divisions and Brackets.
 - Tournament athlete selection from global registry.
-- Group constraints and auto-assign, with manual drag-and-drop overrides.
-- Single-elimination brackets with optional third-place match per group.
+- Division constraints and auto-assign, with manual drag-and-drop overrides.
+- Single-elimination brackets with optional third-place match per division.
 - Custom SVG bracket canvas with DnD-kit interactions.
 - Match records created in Draft; bracket locked in Active.
 - Audit log for critical actions.
@@ -66,16 +66,16 @@ Out of scope:
 
 1. Create tournament.
 2. Open Tournament Builder and select Athletes from the global registry into the tournament pool.
-3. Define groups with constraints (gender, belt range, weight range).
-4. Run Auto-assign for group placement, then manually adjust via drag-and-drop.
+3. Define divisions with constraints (gender, belt range, weight range).
+4. Run Auto-assign for division placement, then manually adjust via drag-and-drop.
 5. Generate bracket in Draft and review seeds, locks, and BYEs.
 6. Switch to Brackets tab, inspect the canvas, and edit match outcomes via the detail panel.
 7. Set tournament to Active and record results as matches progress.
-8. When all groups have winners, system shows "Ready to complete"; admin confirms to Complete.
+8. When all divisions have winners, system shows "Ready to complete"; admin confirms to Complete.
 
 Arena flow (per device):
 
-1. Open Advance Settings and select tournament, group, and match.
+1. Open Advance Settings and select tournament, division, and match.
 2. Run the match on the arena client and score each round.
 3. Submit round-end results; finish the match to finalize and return to selection.
 
@@ -123,23 +123,23 @@ Data / Inputs:
 UAC:
 
 - Selected athletes are added to the tournament as TournamentAthlete entries with status `selected`.
-- If auto-assign is enabled, system runs assignment immediately using current group constraints.
+- If auto-assign is enabled, system runs assignment immediately using current division constraints.
 - If auto-assign is disabled, athletes stay in the unassigned pool.
 
-### 3) Groups Tab (Tournament Builder)
+### 3) Divisions Tab (Tournament Builder)
 
 What the user sees:
 
-- Split view: left panel shows selected athlete pool with filters, right panel shows groups.
-- Group panels with counts and constraint badges.
+- Split view: left panel shows selected athlete pool with filters, right panel shows divions.
+- Division panels with counts and constraint badges.
 - "Auto-assign" button to apply constraints.
 - Warning badges for out-of-range athletes, with a "Fix assignments" action.
-- Per-group settings drawer with third-place match toggle (default OFF).
-- Group status badge in Advance Settings reflects selection / lifecycle (e.g. Selected, Open, Finished), not group-wide leases.
+- Per-division settings drawer with third-place match toggle (default OFF).
+- Division status badge in Advance Settings reflects selection / lifecycle (e.g. Selected, Open, Finished), not division-wide leases.
 
 Data / Inputs:
 
-- Group name
+- Division name
 - Constraints: gender (M/F), belt range, weight range
 - Third-place match toggle
 - Manual athlete placement via drag-and-drop
@@ -148,13 +148,13 @@ Data / Inputs:
 
 UAC:
 
-- Admin can create, edit, and delete groups within a tournament.
-- Auto-assign uses only the selected athlete pool and group constraints.
+- Admin can create, edit, and delete divisions within a tournament.
+- Auto-assign uses only the selected athlete pool and division constraints.
 - Manual drag-and-drop overrides auto-assignment.
 - If constraints are changed, existing assignments remain but show "out of range" warnings until fixed.
-- Advance Settings lists groups and selectable matches independently; matches **in use by another device** show Degraded/In use and cannot be chosen until released or TTL expiry.
-- Advance Settings auto-restores the last selected tournament, group, and match per device after login.
-- Admin can assign each group to an arena using a dropdown in Groups tab.
+- Advance Settings lists divisions and selectable matches independently; matches **in use by another device** show Degraded/In use and cannot be chosen until released or TTL expiry.
+- Advance Settings auto-restores the last selected tournament, division, and match per device after login.
+- Admin can assign each division to an arena using a dropdown in Divisions tab.
 - Arena list is configured per tournament in the builder (default 3: Arena 1-3).
 - Arena labels are editable, defaulting to "Arena 1-N".
 - Arena ordering becomes fixed once matches are generated to keep match labels stable.
@@ -164,8 +164,8 @@ UAC:
 
 What the user sees:
 
-- One group bracket visible at a time.
-- Group selector to switch between brackets.
+- One division bracket visible at a time.
+- Division selector to switch between brackets.
 - Custom SVG bracket canvas with drag-and-drop slots.
 - Each node shows lock icon, seed number, athlete name, BO3 score, and status color.
 - Right-side detail panel on match click to edit participants and record results.
@@ -179,7 +179,7 @@ Data / Inputs:
 
 UAC:
 
-- Bracket generation creates Match records for the group in Draft.
+- Bracket generation creates Match records for the division in Draft.
 - BYEs are auto-generated as empty slots to the next power of two; paired athletes auto-advance.
 - Shuffle does not move locked athletes.
 - Drag-and-drop is blocked for locked athletes unless unlocked.
@@ -209,7 +209,7 @@ UAC:
 What the user sees:
 
 - Tournament status label (Draft, Active, Completed).
-- Banner when all groups have winners: "Ready to complete".
+- Banner when all divisions have winners: "Ready to complete".
 
 Data / Inputs:
 
@@ -229,11 +229,11 @@ What the user sees:
 
 Data / Inputs:
 
-- Event types: manual winner override, score edit, reseed/shuffle, group assignment changes
+- Event types: manual winner override, score edit, reseed/shuffle, division assignment changes
 
 UAC:
 
-- Each listed event captures who did it, when, and the affected entity (group/match/athlete).
+- Each listed event captures who did it, when, and the affected entity (division/match/athlete).
 - Activity list is filterable by event type (optional for MVP).
 
 ### 8) Arena Client (Match Execution)
@@ -241,20 +241,20 @@ UAC:
 What the user sees:
 
 - Full-screen scoring UI for a single match.
-- "Advance Settings" to select tournament, group, and match.
+- "Advance Settings" to select tournament, division, and match.
 - "Match Result" modal with a "Finish Match" action.
 
 Data / Inputs:
 
-- Selected tournament, group, and match.
+- Selected tournament, division, and match.
 - Per-round scoring inputs.
 
 UAC:
 
-- Arena devices restore the last selected tournament, group, and match per device.
+- Arena devices restore the last selected tournament, division, and match per device.
 - Round-end results are submitted automatically.
 - "Finish Match" finalizes the match, then the operator opens the menu, chooses "Advance Settings", selects a match via combobox, and confirms.
-- The active **Arena match claim** persists for the bout until the device Applies another match in the same group, releases it, or the TTL expires; conflicts surface when another device tries to Apply the same match.
+- The active **Arena match claim** persists for the bout until the device Applies another match in the same division, releases it, or the TTL expires; conflicts surface when another device tries to Apply the same match.
 - If the device goes offline, scoring continues locally and syncs on reconnect.
 
 ## Functional Requirements
@@ -262,16 +262,16 @@ UAC:
 - Global athletes are managed in a dedicated route; tournament builder uses selected pool only.
 - De-dup rules are enforced before creating athlete profiles.
 - Seeding algorithm: round-0 placement uses the standard tournament slot map for the next-power-of-two bracket size. Athletes are randomly assigned to seed positions 1..N; positions N+1..bracketSize are BYEs. This balances BYEs across opposite branches of the tree. **Shuffle** applies this mapping (locked slots are preserved).
-- Bracket format is single-elimination only; optional third-place match per group.
+- Bracket format is single-elimination only; optional third-place match per division.
 - Bracket generation is Draft-only and creates Match records; regeneration deletes and recreates Draft matches.
 - Active tournaments allow score edits but no shuffle; bracket changes require explicit unlock.
 - Completed tournaments are read-only.
 - Applying Advance Settings succeeds only after `arenaMatchClaim.claim` for the chosen match; another device holding a non-expired claim blocks Apply for that row.
-- **Arena match claims** use a 30-minute TTL. A new Apply in the same group releases the device’s prior claim; `arenaMatchClaim.release` is also available. Expired rows are cleaned up on subsequent claim operations.
+- **Arena match claims** use a 30-minute TTL. A new Apply in the same division releases the device’s prior claim; `arenaMatchClaim.release` is also available. Expired rows are cleaned up on subsequent claim operations.
 - **Tournament realtime** (Socket.io) delivers `invalidate` for a tournament so all clients refresh Advance selection queries (`selectionCatalog`, `selectionMatches`) and bracket `match` queries. See `docs/tournament-realtime.md`.
 - Coordinating identity uses a persistent **device UUID** in `localStorage`.
 - After **Finish Match**, the operator returns to Advance Settings to pick the next match; the prior claim remains until replaced or TTL expiry.
-- Performance targets: 256 athletes per tournament, 8 groups per tournament, 32 athletes per group.
+- Performance targets: 256 athletes per tournament, 8 divisions per tournament, 32 athletes per division.
 - Arena client is a separate experience from the admin CRM.
 - Arena selection uses Advance Settings as the primary flow for MVP.
 - Round-end results are submitted automatically; match completion is finalized by "Finish Match".
@@ -283,7 +283,7 @@ UAC:
 
 - Frontend: Tanstack Start + React + TypeScript
 - Backend: oRPC + Tanstack Query
-- Data model: `tournament`, `group`, `match`, `athleteProfile`, `tournamentAthlete`
+- Data model: `tournament`, `division`, `match`, `athleteProfile`, `tournamentAthlete`
 - Storage: S3 bucket (planned for athlete images, but deferred for MVP)
 - Auth Model: System Admin only for MVP; arena-client access scoped to match execution.
 
@@ -291,7 +291,7 @@ UAC:
 
 - Phase 1: Admin CRM Foundation
   - Athlete registry + de-dup
-  - Tournament builder (Groups/Brackets)
+  - Tournament builder (Divisions/Brackets)
   - Bracket generation + audit log
 - Phase 2: Arena Client Integration
   - Advance Settings API integration

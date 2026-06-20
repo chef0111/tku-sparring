@@ -1,6 +1,6 @@
 export type ClaimMatchCommand = {
   matchId: string;
-  groupId: string;
+  divisionId: string;
   tournamentId: string;
   deviceId: string;
   userId: string;

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { BracketLayoutToggle } from './bracket-layout-toggle';
 import { BracketViewToolbar } from './bracket-view-toolbar';
 import type { MatchData } from '@/contracts/tournament/match';
-import type { TournamentAthleteData } from '@/contracts/tournament/group';
+import type { TournamentAthleteData } from '@/contracts/tournament/division';
 import { useBracketChrome } from '@/features/dashboard/contexts/bracket-chrome';
 import { useTournamentBracket } from '@/features/dashboard/contexts/tournament-bracket/use-tournament-bracket';
 import { useBracketCanvasLayout } from '@/features/dashboard/hooks/use-bracket-canvas-layout';
@@ -15,14 +15,14 @@ export function BracketCanvas() {
   const {
     matches,
     athletes,
-    selectedGroup,
+    selectedDivision,
     matchLabel,
     handleSlotClick,
     readOnly,
   } = useTournamentBracket();
 
   const setLock = useSetLock();
-  const thirdPlaceMatch = selectedGroup?.thirdPlaceMatch ?? false;
+  const thirdPlaceMatch = selectedDivision?.thirdPlaceMatch ?? false;
   const matchListFull = matches as Array<MatchData>;
   const matchList = matchListFull.filter((m) => m.kind !== 'custom');
 
@@ -61,7 +61,7 @@ export function BracketCanvas() {
     layout.height,
     layoutMode,
     matchList.length,
-    selectedGroup?.id,
+    selectedDivision?.id,
     setCaptureTarget,
   ]);
 

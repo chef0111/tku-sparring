@@ -1,5 +1,5 @@
 import { Layers, LayoutGrid, Users } from 'lucide-react';
-import type { GroupData } from '@/contracts/tournament/group';
+import type { DivisionData } from '@/contracts/tournament/division';
 import type { MatchData } from '@/contracts/tournament/match';
 import type { TournamentData } from '@/contracts/tournament/list';
 import {
@@ -10,23 +10,23 @@ import { countActionableMatchesForGroups } from '@/lib/tournament/bracket/bracke
 
 interface TournamentKpiRowProps {
   tournament: TournamentData;
-  groups: Array<GroupData>;
+  divisions: Array<DivisionData>;
   matches: Array<MatchData>;
 }
 
-function getArenaCount(groups: Array<GroupData>) {
-  if (groups.length === 0) return 0;
-  return new Set(groups.map((g) => g.arenaIndex)).size;
+function getArenaCount(divisions: Array<DivisionData>) {
+  if (divisions.length === 0) return 0;
+  return new Set(divisions.map((d) => d.arenaIndex)).size;
 }
 
-function getAssignedAthleteCount(groups: Array<GroupData>) {
-  return groups.reduce(
-    (sum, group) => sum + group._count.tournamentAthletes,
+function getAssignedAthleteCount(divisions: Array<DivisionData>) {
+  return divisions.reduce(
+    (sum, division) => sum + division._count.tournamentAthletes,
     0
   );
 }
 
-function getGroupsFooter(arenaCount: number) {
+function getDivisionsFooter(arenaCount: number) {
   if (arenaCount === 0) {
     return (
       <HubMetricFooter
@@ -48,26 +48,26 @@ function getGroupsFooter(arenaCount: number) {
 
 function getAthletesFooter(
   tournament: TournamentData,
-  groups: Array<GroupData>
+  divisions: Array<DivisionData>
 ) {
   const total = tournament._count.tournamentAthletes;
-  const groupCount = tournament._count.groups;
+  const divisionCount = tournament._count.divisions;
 
   if (total === 0) {
     return <HubMetricFooter status="degraded" value="None" label="added yet" />;
   }
 
-  if (groupCount === 0) {
+  if (divisionCount === 0) {
     return (
       <HubMetricFooter
         status="degraded"
         value="Unassigned"
-        label="create groups first"
+        label="create divisions first"
       />
     );
   }
 
-  const unassigned = total - getAssignedAthleteCount(groups);
+  const unassigned = total - getAssignedAthleteCount(divisions);
 
   if (unassigned > 0) {
     return (
@@ -87,7 +87,7 @@ function getAthletesFooter(
     <HubMetricFooter
       status="online"
       value="All placed"
-      label={`across ${groupCount} ${groupCount === 1 ? 'group' : 'groups'}`}
+      label={`across ${divisionCount} ${divisionCount === 1 ? 'division' : 'divisions'}`}
     />
   );
 }
@@ -122,26 +122,29 @@ function getMatchesFooter(tournament: TournamentData) {
 
 export function TournamentKpiRow({
   tournament,
-  groups,
+  divisions,
   matches,
 }: TournamentKpiRowProps) {
-  const arenaCount = getArenaCount(groups);
-  const actionableMatchCount = countActionableMatchesForGroups(groups, matches);
+  const arenaCount = getArenaCount(divisions);
+  const actionableMatchCount = countActionableMatchesForGroups(
+    divisions,
+    matches
+  );
 
   const tiles = [
     {
-      key: 'groups',
-      label: 'Groups',
+      key: 'divisions',
+      label: 'Divisions',
       icon: Layers,
-      value: tournament._count.groups,
-      footer: getGroupsFooter(arenaCount),
+      value: tournament._count.divisions,
+      footer: getDivisionsFooter(arenaCount),
     },
     {
       key: 'athletes',
       label: 'Athletes',
       icon: Users,
       value: tournament._count.tournamentAthletes,
-      footer: getAthletesFooter(tournament, groups),
+      footer: getAthletesFooter(tournament, divisions),
     },
     {
       key: 'matches',

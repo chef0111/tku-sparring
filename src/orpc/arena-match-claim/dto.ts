@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const ClaimMatchSchema = z.object({
   matchId: z.string().min(1),
-  groupId: z.string().min(1),
+  divisionId: z.string().min(1),
   tournamentId: z.string().min(1),
   deviceId: z.string().min(1),
 });

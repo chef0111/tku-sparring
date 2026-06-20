@@ -5,13 +5,13 @@ type TournamentLookupDatabase = Pick<typeof prisma, 'match' | 'tournament'>;
 
 export const findTournamentWithLifecycleArgs = {
   include: {
-    groups: {
+    divisions: {
       include: {
         _count: { select: { tournamentAthletes: true, matches: true } },
       },
     },
     _count: {
-      select: { groups: true, matches: true, tournamentAthletes: true },
+      select: { divisions: true, matches: true, tournamentAthletes: true },
     },
   },
 } as const satisfies Prisma.TournamentDefaultArgs;
@@ -24,10 +24,11 @@ async function buildTournamentLifecycle(
   tournament: TournamentWithLifecyclePayload,
   db: TournamentLookupDatabase
 ) {
-  const hasGroups = tournament.groups.length > 0;
+  const hasGroups = tournament.divisions.length > 0;
   const hasMatches = tournament._count.matches > 0;
   const everyGroupHasMatches =
-    hasGroups && tournament.groups.every((group) => group._count.matches > 0);
+    hasGroups &&
+    tournament.divisions.every((group) => group._count.matches > 0);
 
   if (!hasGroups || !hasMatches || !everyGroupHasMatches) {
     return { canComplete: false };

@@ -57,7 +57,7 @@ function shellToMatches(
     blueLocked: false,
     cornersSwapped: false,
     updatedAt: new Date(),
-    groupId: 'g1',
+    divisionId: 'g1',
     tournamentId: 't1',
   }));
 }

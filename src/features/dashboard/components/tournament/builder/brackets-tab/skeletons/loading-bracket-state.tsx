@@ -15,7 +15,7 @@ export function LoadingBracketState() {
           <Spinner className="size-8" />
         </EmptyMedia>
         <EmptyTitle>Loading bracket</EmptyTitle>
-        <EmptyDescription>Fetching matches for this group.</EmptyDescription>
+        <EmptyDescription>Fetching matches for this division.</EmptyDescription>
       </EmptyHeader>
     </Empty>
   );

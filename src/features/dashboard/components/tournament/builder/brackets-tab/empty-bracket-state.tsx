@@ -13,14 +13,14 @@ import {
 import { Spinner } from '@/components/ui/spinner';
 
 interface EmptyBracketStateProps {
-  groupId: string | null;
+  divisionId: string | null;
   readOnly: boolean;
   tournamentStatus: string;
   athleteCount: number;
 }
 
 export function EmptyBracketState({
-  groupId,
+  divisionId,
   readOnly,
   tournamentStatus,
   athleteCount,
@@ -37,7 +37,7 @@ export function EmptyBracketState({
           </EmptyMedia>
           <EmptyTitle>No bracket yet</EmptyTitle>
           <EmptyDescription>
-            No bracket has been generated for this group.
+            No bracket has been generated for this division.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -58,10 +58,10 @@ export function EmptyBracketState({
       </EmptyHeader>
       <EmptyContent>
         <Button
-          disabled={!groupId || generate.isPending || athleteCount < 2}
+          disabled={!divisionId || generate.isPending || athleteCount < 2}
           onClick={() => {
-            if (!groupId) return;
-            void toast.promise(generate.mutateAsync({ groupId }), {
+            if (!divisionId) return;
+            void toast.promise(generate.mutateAsync({ divisionId }), {
               loading: 'Generating shell…',
               success: 'Bracket shell created',
               error: (e) =>

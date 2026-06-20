@@ -8,7 +8,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 
 const kpiTiles = [
-  { key: 'groups', label: 'Groups', icon: Layers },
+  { key: 'divisions', label: 'Divisions', icon: Layers },
   { key: 'athletes', label: 'Athletes', icon: Users },
   { key: 'matches', label: 'Matches', icon: LayoutGrid },
 ] as const;
@@ -89,10 +89,10 @@ export function SetupChecklistSkeleton() {
   );
 }
 
-export function GroupsOverviewSkeleton() {
+export function DivisionsOverviewSkeleton() {
   return (
     <HubSection
-      title="Groups"
+      title="Divisions"
       description="Divisions and arena assignments for this tournament"
       className="mt-6 ml-6 bg-transparent p-0"
     >

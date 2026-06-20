@@ -9,7 +9,7 @@ export type ArenaRound0BracketMeta = {
 
 function getFeederMatch(
   matches: ReadonlyArray<MatchData>,
-  groupId: string,
+  divisionId: string,
   round: number,
   matchIndex: number,
   side: 'red' | 'blue',
@@ -25,7 +25,7 @@ function getFeederMatch(
     effectiveSide === 'red' ? matchIndex * 2 : matchIndex * 2 + 1;
   return matches.find(
     (m) =>
-      m.groupId === groupId &&
+      m.divisionId === divisionId &&
       m.round === round - 1 &&
       m.matchIndex === childIndex
   );
@@ -33,7 +33,7 @@ function getFeederMatch(
 
 export function isArenaSequenceEligible(
   match: MatchData,
-  groupBracketMeta?: ReadonlyMap<string, ArenaRound0BracketMeta>,
+  divisionBracketMeta?: ReadonlyMap<string, ArenaRound0BracketMeta>,
   allMatches?: ReadonlyArray<MatchData>
 ): boolean {
   if (match.kind === 'custom') return true;
@@ -43,8 +43,8 @@ export function isArenaSequenceEligible(
     const hasBlue = match.blueTournamentAthleteId != null;
     if (hasRed !== hasBlue) return true;
 
-    if (!groupBracketMeta) return false;
-    const meta = groupBracketMeta.get(match.groupId);
+    if (!divisionBracketMeta) return false;
+    const meta = divisionBracketMeta.get(match.divisionId);
     if (!meta) return false;
 
     const { athleteCount: n, round0MatchCount, round0AthleteCount: k } = meta;
@@ -73,14 +73,14 @@ export function isArenaSequenceEligible(
 
   const fr = getFeederMatch(
     allMatches,
-    match.groupId,
+    match.divisionId,
     match.round,
     match.matchIndex,
     'red'
   );
   const fb = getFeederMatch(
     allMatches,
-    match.groupId,
+    match.divisionId,
     match.round,
     match.matchIndex,
     'blue'

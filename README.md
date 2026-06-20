@@ -35,7 +35,7 @@ Refer to [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed instructions on how to 
   </tr>
   <tr>
     <td>Tournament builder — Groups</td>
-    <td>Constraint-based auto-assign, manual drag-and-drop, out-of-range warnings, per-group third-place toggle, arena assignment</td>
+    <td>Constraint-based auto-assign, manual drag-and-drop, out-of-range warnings, per-division third-place toggle, arena assignment</td>
   </tr>
   <tr>
     <td>Tournament builder — Brackets</td>
@@ -51,7 +51,7 @@ Refer to [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed instructions on how to 
   </tr>
   <tr>
     <td>Audit log</td>
-    <td>Per-tournament activity for score edits, reseeds, group changes, and manual overrides</td>
+    <td>Per-tournament activity for score edits, reseeds, division changes, and manual overrides</td>
   </tr>
 </table>
 
@@ -64,7 +64,7 @@ Refer to [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed instructions on how to 
   </tr>
   <tr>
     <td>Advance Settings</td>
-    <td>Select tournament, group, and match before a bout; per-device restore of last selection</td>
+    <td>Select tournament, division, and match before a bout; per-device restore of last selection</td>
   </tr>
   <tr>
     <td>Arena match claim</td>

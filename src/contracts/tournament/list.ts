@@ -27,14 +27,14 @@ export interface TournamentData {
   lifecycle: {
     canComplete: boolean;
   };
-  /** Map of arena index string → ordered group ids (draft arena scheduling). */
-  arenaGroupOrder?: unknown;
-  groups: Array<{
+  /** Map of arena index string → ordered division ids (draft arena scheduling). */
+  arenaDivisionOrder?: unknown;
+  divisions: Array<{
     id: string;
     name: string;
     _count: { tournamentAthletes: number; matches: number };
   }>;
-  _count: { groups: number; matches: number; tournamentAthletes: number };
+  _count: { divisions: number; matches: number; tournamentAthletes: number };
 }
 
 /** List row from `tournament.list` (includes `actionableMatches` on `_count`). */

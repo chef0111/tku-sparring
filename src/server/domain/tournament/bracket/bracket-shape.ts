@@ -8,7 +8,7 @@ export function nextPowerOfTwo(n: number): number {
 }
 
 function createEmptyMatch(
-  groupId: string,
+  divisionId: string,
   tournamentId: string,
   round: number,
   matchIndex: number
@@ -24,13 +24,13 @@ function createEmptyMatch(
     blueAthleteId: null,
     redLocked: false,
     blueLocked: false,
-    groupId,
+    divisionId,
     tournamentId,
   };
 }
 
 export function planBracketShell(input: {
-  groupId: string;
+  divisionId: string;
   tournamentId: string;
   athleteCount: number;
   thirdPlaceMatch: boolean;
@@ -47,14 +47,19 @@ export function planBracketShell(input: {
     const matchesInRound = bracketSize / Math.pow(2, round + 1);
     for (let matchIndex = 0; matchIndex < matchesInRound; matchIndex++) {
       matches.push(
-        createEmptyMatch(input.groupId, input.tournamentId, round, matchIndex)
+        createEmptyMatch(
+          input.divisionId,
+          input.tournamentId,
+          round,
+          matchIndex
+        )
       );
     }
   }
 
   if (input.thirdPlaceMatch && input.athleteCount >= 4) {
     matches.push(
-      createEmptyMatch(input.groupId, input.tournamentId, totalRounds, 0)
+      createEmptyMatch(input.divisionId, input.tournamentId, totalRounds, 0)
     );
   }
 

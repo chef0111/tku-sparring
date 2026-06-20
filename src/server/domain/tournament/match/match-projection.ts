@@ -21,7 +21,7 @@ export const matchProjectionSelect = {
   blueLocked: true,
   cornersSwapped: true,
   updatedAt: true,
-  groupId: true,
+  divisionId: true,
   tournamentId: true,
 } as const satisfies Prisma.MatchSelect;
 
@@ -51,7 +51,7 @@ export function toMatchData(m: MatchProjectionRow): MatchData {
     blueLocked: m.blueLocked,
     cornersSwapped: m.cornersSwapped,
     updatedAt: m.updatedAt,
-    groupId: m.groupId,
+    divisionId: m.divisionId,
     tournamentId: m.tournamentId,
     arenaSequenceRank: m.arenaSequenceRank ?? null,
   };

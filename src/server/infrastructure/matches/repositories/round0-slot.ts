@@ -31,7 +31,7 @@ export const round0SlotStore: Round0SlotStore = {
   async assignSlot(command) {
     const match = await prisma.match.findUnique({
       where: { id: command.matchId },
-      include: { group: { include: { tournament: true } } },
+      include: { division: { include: { tournament: true } } },
     });
     if (!match) throw new NotFoundError('Match not found');
     if (match.round !== 0) {
@@ -70,7 +70,7 @@ export const round0SlotStore: Round0SlotStore = {
       where: { id: command.tournamentAthleteId },
     });
     if (!ta) throw new NotFoundError('Tournament athlete not found');
-    if (ta.groupId !== match.groupId) {
+    if (ta.divisionId !== match.divisionId) {
       throw new BadRequestError(
         'Athlete does not belong to this bracket group'
       );
@@ -98,15 +98,15 @@ export const round0SlotStore: Round0SlotStore = {
     const [a, b] = await Promise.all([
       prisma.match.findUnique({
         where: { id: command.matchAId },
-        include: { group: { include: { tournament: true } } },
+        include: { division: { include: { tournament: true } } },
       }),
       prisma.match.findUnique({
         where: { id: command.matchBId },
-        include: { group: { include: { tournament: true } } },
+        include: { division: { include: { tournament: true } } },
       }),
     ]);
     if (!a || !b) throw new NotFoundError('Match not found');
-    if (a.groupId !== b.groupId) {
+    if (a.divisionId !== b.divisionId) {
       throw new BadRequestError('Both slots must be in the same group');
     }
     if (a.round !== 0 || b.round !== 0) {

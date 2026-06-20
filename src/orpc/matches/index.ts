@@ -41,20 +41,20 @@ import {
 export const listMatches = authorized
   .input(
     z.object({
-      groupId: z.string().optional(),
+      divisionId: z.string().optional(),
       tournamentId: z.string().optional(),
     })
   )
   .handler(async ({ input, context }) => {
-    if (input.groupId) {
-      return await context.repos.matchRead.findByGroupId(input.groupId);
+    if (input.divisionId) {
+      return await context.repos.matchRead.findByDivisionId(input.divisionId);
     }
     if (input.tournamentId) {
       return await context.repos.matchRead.findByTournamentId(
         input.tournamentId
       );
     }
-    throw new NotFoundError('Either groupId or tournamentId is required');
+    throw new NotFoundError('Either divisionId or tournamentId is required');
   });
 
 export const getMatch = authorized
@@ -112,7 +112,7 @@ export const shuffleBracket = authorized
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
     return runShuffleBracket(
-      { groupId: input.groupId, adminId: context.user.id },
+      { ...input, adminId: context.user.id },
       context.repos.bracketLifecycle
     );
   });
@@ -122,7 +122,7 @@ export const regenerateBracket = authorized
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
     return runRegenerateBracket(
-      { groupId: input.groupId, adminId: context.user.id },
+      { ...input, adminId: context.user.id },
       context.repos.bracketLifecycle
     );
   });
@@ -132,7 +132,7 @@ export const resetBracket = authorized
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
     return runResetBracket(
-      { groupId: input.groupId, adminId: context.user.id },
+      { ...input, adminId: context.user.id },
       context.repos.bracketLifecycle
     );
   });

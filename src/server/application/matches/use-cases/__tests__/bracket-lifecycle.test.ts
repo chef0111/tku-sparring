@@ -33,11 +33,11 @@ function fakeStore(
   let regenerated: unknown = null;
 
   const store: BracketLifecycleStore = {
-    findGroup(groupId) {
-      return Promise.resolve(group?.id === groupId ? group : null);
+    findDivision(divisionId) {
+      return Promise.resolve(group?.id === divisionId ? group : null);
     },
-    countBracketMatches(groupId) {
-      return Promise.resolve(groupId === 'g1' ? bracketCount : 0);
+    countBracketMatches(divisionId) {
+      return Promise.resolve(divisionId === 'g1' ? bracketCount : 0);
     },
     generate(input) {
       generated = input;
@@ -79,7 +79,7 @@ describe('bracket lifecycle use cases', () => {
     const fixture = fakeStore(null);
 
     await expect(
-      generateBracket({ groupId: 'g1', adminId: 'admin' }, fixture.store)
+      generateBracket({ divisionId: 'g1', adminId: 'admin' }, fixture.store)
     ).rejects.toThrow(NotFoundError);
 
     expect(fixture.generated).toBeNull();
@@ -89,7 +89,7 @@ describe('bracket lifecycle use cases', () => {
     const fixture = fakeStore({ ...baseGroup, tournamentStatus: 'active' });
 
     await expect(
-      generateBracket({ groupId: 'g1', adminId: 'admin' }, fixture.store)
+      generateBracket({ divisionId: 'g1', adminId: 'admin' }, fixture.store)
     ).rejects.toThrow(PolicyViolationError);
 
     expect(fixture.generated).toBeNull();
@@ -99,7 +99,7 @@ describe('bracket lifecycle use cases', () => {
     const fixture = fakeStore(baseGroup, 1);
 
     await expect(
-      generateBracket({ groupId: 'g1', adminId: 'admin' }, fixture.store)
+      generateBracket({ divisionId: 'g1', adminId: 'admin' }, fixture.store)
     ).rejects.toThrow(BadRequestError);
 
     expect(fixture.generated).toBeNull();
@@ -108,10 +108,13 @@ describe('bracket lifecycle use cases', () => {
   it('generateBracket delegates store.generate', async () => {
     const fixture = fakeStore();
 
-    await generateBracket({ groupId: 'g1', adminId: 'admin' }, fixture.store);
+    await generateBracket(
+      { divisionId: 'g1', adminId: 'admin' },
+      fixture.store
+    );
 
     expect(fixture.generated).toMatchObject({
-      command: { groupId: 'g1', adminId: 'admin' },
+      command: { divisionId: 'g1', adminId: 'admin' },
       activity: { eventType: 'bracket.generate' },
     });
   });
@@ -120,7 +123,7 @@ describe('bracket lifecycle use cases', () => {
     const fixture = fakeStore();
 
     await expect(
-      resetBracket({ groupId: 'g1', adminId: 'admin' }, fixture.store)
+      resetBracket({ divisionId: 'g1', adminId: 'admin' }, fixture.store)
     ).rejects.toThrow(BadRequestError);
 
     expect(fixture.reset).toBeNull();
@@ -129,10 +132,10 @@ describe('bracket lifecycle use cases', () => {
   it('shuffleBracket delegates store.shuffle', async () => {
     const fixture = fakeStore();
 
-    await shuffleBracket({ groupId: 'g1', adminId: 'admin' }, fixture.store);
+    await shuffleBracket({ divisionId: 'g1', adminId: 'admin' }, fixture.store);
 
     expect(fixture.shuffled).toMatchObject({
-      command: { groupId: 'g1', adminId: 'admin' },
+      command: { divisionId: 'g1', adminId: 'admin' },
       activity: { eventType: 'bracket.shuffle' },
     });
   });
@@ -144,7 +147,7 @@ describe('bracket lifecycle use cases', () => {
     });
 
     await expect(
-      regenerateBracket({ groupId: 'g1', adminId: 'admin' }, fixture.store)
+      regenerateBracket({ divisionId: 'g1', adminId: 'admin' }, fixture.store)
     ).rejects.toThrow(PolicyViolationError);
 
     expect(fixture.regenerated).toBeNull();

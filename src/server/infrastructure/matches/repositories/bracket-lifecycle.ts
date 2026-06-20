@@ -28,7 +28,7 @@ import { prisma } from '@/lib/db';
 
 type MatchBracketWriteDb = Pick<
   PrismaClient,
-  'match' | 'tournamentAthlete' | 'group'
+  'match' | 'tournamentAthlete' | 'division'
 >;
 
 type GroupBaselineRow = { round0Baseline?: unknown };
@@ -43,32 +43,32 @@ function mapBracketError(e: unknown): never {
   throw e;
 }
 
-async function loadGroupMatches(groupId: string) {
+async function loadDivisionMatches(divisionId: string) {
   const rows = await prisma.match.findMany({
-    where: { groupId },
+    where: { divisionId },
     orderBy: [{ round: 'asc' }, { matchIndex: 'asc' }],
   });
   return rows.map(coalesceMatchRead);
 }
 
-function groupUpdateRound0Baseline(
+function divisionUpdateRound0Baseline(
   db: MatchBracketWriteDb,
-  groupId: string,
+  divisionId: string,
   baseline: ReturnType<typeof buildRound0Baseline> | null
 ) {
-  return db.group.update({
-    where: { id: groupId },
+  return db.division.update({
+    where: { id: divisionId },
     data: { round0Baseline: baseline } as never,
   });
 }
 
 async function runBracketShufflePlacements(
   db: MatchBracketWriteDb,
-  groupId: string,
+  divisionId: string,
   tournamentId: string
 ): Promise<void> {
   const allMatches = await db.match.findMany({
-    where: { groupId, kind: 'bracket' },
+    where: { divisionId, kind: 'bracket' },
     orderBy: [{ round: 'asc' }, { matchIndex: 'asc' }],
   });
   if (allMatches.length === 0) {
@@ -76,7 +76,7 @@ async function runBracketShufflePlacements(
   }
 
   const athletes = await db.tournamentAthlete.findMany({
-    where: { groupId },
+    where: { divisionId },
     orderBy: [{ beltLevel: 'desc' }, { weight: 'asc' }],
   });
 
@@ -93,11 +93,11 @@ async function runBracketShufflePlacements(
 
   await Promise.all([
     db.match.updateMany({
-      where: { groupId, kind: 'custom' },
+      where: { divisionId, kind: 'custom' },
       data: clearAllGroupMatchRowsData(),
     }),
     db.match.updateMany({
-      where: { groupId, kind: 'bracket', round: { gte: 1 } },
+      where: { divisionId, kind: 'bracket', round: { gte: 1 } },
       data: clearBracketUpperRoundData(),
     }),
     ...round0.map((m) =>
@@ -109,7 +109,7 @@ async function runBracketShufflePlacements(
   ]);
 
   const round0Fresh = await db.match.findMany({
-    where: { groupId, kind: 'bracket', round: 0 },
+    where: { divisionId, kind: 'bracket', round: 0 },
     orderBy: { matchIndex: 'asc' },
   });
 
@@ -162,21 +162,21 @@ async function runBracketShufflePlacements(
   );
 
   const placedForBaseline = await db.match.findMany({
-    where: { groupId, kind: 'bracket', round: 0 },
+    where: { divisionId, kind: 'bracket', round: 0 },
     orderBy: { matchIndex: 'asc' },
   });
-  await groupUpdateRound0Baseline(
+  await divisionUpdateRound0Baseline(
     db,
-    groupId,
+    divisionId,
     buildRound0Baseline(placedForBaseline)
   );
 
-  await applyRound0ByeAdvancement(groupId, tournamentId, db);
+  await applyRound0ByeAdvancement(divisionId, tournamentId, db);
 }
 
 async function restoreBracketFromRound0Baseline(
   db: MatchBracketWriteDb,
-  groupId: string,
+  divisionId: string,
   tournamentId: string,
   baseline: Round0Baseline
 ): Promise<void> {
@@ -185,7 +185,7 @@ async function restoreBracketFromRound0Baseline(
   );
 
   const allMatches = await db.match.findMany({
-    where: { groupId, kind: 'bracket' },
+    where: { divisionId, kind: 'bracket' },
     orderBy: [{ round: 'asc' }, { matchIndex: 'asc' }],
   });
   if (allMatches.length === 0) {
@@ -193,7 +193,7 @@ async function restoreBracketFromRound0Baseline(
   }
 
   const athletes = await db.tournamentAthlete.findMany({
-    where: { groupId },
+    where: { divisionId },
     orderBy: [{ beltLevel: 'desc' }, { weight: 'asc' }],
   });
 
@@ -232,11 +232,11 @@ async function restoreBracketFromRound0Baseline(
 
   await Promise.all([
     db.match.updateMany({
-      where: { groupId, kind: 'custom' },
+      where: { divisionId, kind: 'custom' },
       data: clearAllGroupMatchRowsData(),
     }),
     db.match.updateMany({
-      where: { groupId, kind: 'bracket', round: { gte: 1 } },
+      where: { divisionId, kind: 'bracket', round: { gte: 1 } },
       data: clearBracketUpperRoundData(),
     }),
     ...round0.map((m) =>
@@ -269,13 +269,13 @@ async function restoreBracketFromRound0Baseline(
     })
   );
 
-  await applyRound0ByeAdvancement(groupId, tournamentId, db);
+  await applyRound0ByeAdvancement(divisionId, tournamentId, db);
 }
 
 export const bracketLifecycleStore: BracketLifecycleStore = {
-  async findGroup(groupId) {
-    const group = await prisma.group.findUnique({
-      where: { id: groupId },
+  async findDivision(divisionId) {
+    const group = await prisma.division.findUnique({
+      where: { id: divisionId },
       include: { tournament: { select: { status: true } } },
     });
     if (!group) return null;
@@ -289,9 +289,9 @@ export const bracketLifecycleStore: BracketLifecycleStore = {
     };
   },
 
-  async countBracketMatches(groupId) {
+  async countBracketMatches(divisionId) {
     return prisma.match.count({
-      where: { groupId, kind: 'bracket' },
+      where: { divisionId, kind: 'bracket' },
     });
   },
 
@@ -300,15 +300,15 @@ export const bracketLifecycleStore: BracketLifecycleStore = {
 
     try {
       const result = await prisma.$transaction(async (tx) => {
-        const fresh = await tx.group.findUnique({
-          where: { id: command.groupId },
+        const fresh = await tx.division.findUnique({
+          where: { id: command.divisionId },
           include: { tournament: { select: { status: true } } },
         });
-        if (!fresh) throw new NotFoundError('Group not found');
+        if (!fresh) throw new NotFoundError('Division not found');
         assertTournamentAction(fresh.tournament.status, 'bracket.generate');
 
         const existing = await tx.match.count({
-          where: { groupId: command.groupId, kind: 'bracket' },
+          where: { divisionId: command.divisionId, kind: 'bracket' },
         });
         if (existing > 0) {
           throw new BadRequestError(
@@ -317,7 +317,7 @@ export const bracketLifecycleStore: BracketLifecycleStore = {
         }
 
         const athletes = await tx.tournamentAthlete.findMany({
-          where: { groupId: command.groupId },
+          where: { divisionId: command.divisionId },
           orderBy: [{ beltLevel: 'desc' }, { weight: 'asc' }],
         });
 
@@ -328,7 +328,7 @@ export const bracketLifecycleStore: BracketLifecycleStore = {
         }
 
         const shell = planBracketShell({
-          groupId: command.groupId,
+          divisionId: command.divisionId,
           tournamentId: group.tournamentId,
           athleteCount: athletes.length,
           thirdPlaceMatch: fresh.thirdPlaceMatch,
@@ -343,8 +343,8 @@ export const bracketLifecycleStore: BracketLifecycleStore = {
             tournamentId: group.tournamentId,
             adminId: command.adminId,
             eventType: activity.eventType,
-            entityType: 'group',
-            entityId: command.groupId,
+            entityType: 'division',
+            entityId: command.divisionId,
             payload: {
               athleteCount: athletes.length,
               bracketSize: shell.bracketSize,
@@ -354,11 +354,14 @@ export const bracketLifecycleStore: BracketLifecycleStore = {
           tx
         );
 
-        return { tournamentId: group.tournamentId, groupId: command.groupId };
+        return {
+          tournamentId: group.tournamentId,
+          divisionId: command.divisionId,
+        };
       });
 
       publishTournamentMutation(result.tournamentId);
-      return loadGroupMatches(result.groupId);
+      return loadDivisionMatches(result.divisionId);
     } catch (e) {
       mapBracketError(e);
     }
@@ -369,16 +372,16 @@ export const bracketLifecycleStore: BracketLifecycleStore = {
 
     try {
       const result = await prisma.$transaction(async (tx) => {
-        const fresh = await tx.group.findUnique({
-          where: { id: command.groupId },
+        const fresh = await tx.division.findUnique({
+          where: { id: command.divisionId },
           include: { tournament: { select: { status: true } } },
         });
-        if (!fresh) throw new NotFoundError('Group not found');
+        if (!fresh) throw new NotFoundError('Division not found');
         assertTournamentAction(fresh.tournament.status, 'bracket.shuffle');
 
         await runBracketShufflePlacements(
           tx,
-          command.groupId,
+          command.divisionId,
           group.tournamentId
         );
 
@@ -387,18 +390,21 @@ export const bracketLifecycleStore: BracketLifecycleStore = {
             tournamentId: group.tournamentId,
             adminId: command.adminId,
             eventType: activity.eventType,
-            entityType: 'group',
-            entityId: command.groupId,
+            entityType: 'division',
+            entityId: command.divisionId,
             payload: activity.payload as Prisma.InputJsonValue | undefined,
           },
           tx
         );
 
-        return { tournamentId: group.tournamentId, groupId: command.groupId };
+        return {
+          tournamentId: group.tournamentId,
+          divisionId: command.divisionId,
+        };
       });
 
       publishTournamentMutation(result.tournamentId);
-      return loadGroupMatches(result.groupId);
+      return loadDivisionMatches(result.divisionId);
     } catch (e) {
       mapBracketError(e);
     }
@@ -409,11 +415,11 @@ export const bracketLifecycleStore: BracketLifecycleStore = {
 
     try {
       const result = await prisma.$transaction(async (tx) => {
-        const fresh = await tx.group.findUnique({
-          where: { id: command.groupId },
+        const fresh = await tx.division.findUnique({
+          where: { id: command.divisionId },
           include: { tournament: { select: { status: true } } },
         });
-        if (!fresh) throw new NotFoundError('Group not found');
+        if (!fresh) throw new NotFoundError('Division not found');
         assertTournamentAction(fresh.tournament.status, 'bracket.reset');
 
         const baseline = parseRound0Baseline(
@@ -427,7 +433,7 @@ export const bracketLifecycleStore: BracketLifecycleStore = {
 
         await restoreBracketFromRound0Baseline(
           tx,
-          command.groupId,
+          command.divisionId,
           group.tournamentId,
           baseline
         );
@@ -437,18 +443,21 @@ export const bracketLifecycleStore: BracketLifecycleStore = {
             tournamentId: group.tournamentId,
             adminId: command.adminId,
             eventType: activity.eventType,
-            entityType: 'group',
-            entityId: command.groupId,
+            entityType: 'division',
+            entityId: command.divisionId,
             payload: activity.payload as Prisma.InputJsonValue | undefined,
           },
           tx
         );
 
-        return { tournamentId: group.tournamentId, groupId: command.groupId };
+        return {
+          tournamentId: group.tournamentId,
+          divisionId: command.divisionId,
+        };
       });
 
       publishTournamentMutation(result.tournamentId);
-      return loadGroupMatches(result.groupId);
+      return loadDivisionMatches(result.divisionId);
     } catch (e) {
       mapBracketError(e);
     }
@@ -459,21 +468,23 @@ export const bracketLifecycleStore: BracketLifecycleStore = {
 
     try {
       const result = await prisma.$transaction(async (tx) => {
-        const fresh = await tx.group.findUnique({
-          where: { id: command.groupId },
+        const fresh = await tx.division.findUnique({
+          where: { id: command.divisionId },
           include: { tournament: { select: { status: true } } },
         });
-        if (!fresh) throw new NotFoundError('Group not found');
+        if (!fresh) throw new NotFoundError('Division not found');
         assertTournamentAction(fresh.tournament.status, 'bracket.regenerate');
 
         await tx.match.updateMany({
-          where: { groupId: command.groupId },
+          where: { divisionId: command.divisionId },
           data: clearAllGroupMatchRowsData(),
         });
-        await tx.match.deleteMany({ where: { groupId: command.groupId } });
+        await tx.match.deleteMany({
+          where: { divisionId: command.divisionId },
+        });
 
         const athletes = await tx.tournamentAthlete.findMany({
-          where: { groupId: command.groupId },
+          where: { divisionId: command.divisionId },
           orderBy: [{ beltLevel: 'desc' }, { weight: 'asc' }],
         });
         if (athletes.length < 2) {
@@ -483,7 +494,7 @@ export const bracketLifecycleStore: BracketLifecycleStore = {
         }
 
         const shell = planBracketShell({
-          groupId: command.groupId,
+          divisionId: command.divisionId,
           tournamentId: group.tournamentId,
           athleteCount: athletes.length,
           thirdPlaceMatch: fresh.thirdPlaceMatch,
@@ -493,25 +504,28 @@ export const bracketLifecycleStore: BracketLifecycleStore = {
           shell.matches.map((row) => tx.match.create({ data: row }))
         );
 
-        await groupUpdateRound0Baseline(tx, command.groupId, null);
+        await divisionUpdateRound0Baseline(tx, command.divisionId, null);
 
         await recordMutationActivity(
           {
             tournamentId: group.tournamentId,
             adminId: command.adminId,
             eventType: activity.eventType,
-            entityType: 'group',
-            entityId: command.groupId,
+            entityType: 'division',
+            entityId: command.divisionId,
             payload: activity.payload as Prisma.InputJsonValue | undefined,
           },
           tx
         );
 
-        return { tournamentId: group.tournamentId, groupId: command.groupId };
+        return {
+          tournamentId: group.tournamentId,
+          divisionId: command.divisionId,
+        };
       });
 
       publishTournamentMutation(result.tournamentId);
-      return loadGroupMatches(result.groupId);
+      return loadDivisionMatches(result.divisionId);
     } catch (e) {
       mapBracketError(e);
     }

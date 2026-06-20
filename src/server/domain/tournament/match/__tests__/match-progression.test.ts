@@ -10,10 +10,10 @@ import {
 describe('successorWhere', () => {
   it('maps round-0 match index 0 to round-1 match 0', () => {
     expect(
-      successorWhere({ groupId: 'group-1', round: 0, matchIndex: 0 })
+      successorWhere({ divisionId: 'group-1', round: 0, matchIndex: 0 })
     ).toEqual({
       kind: 'bracket',
-      groupId: 'group-1',
+      divisionId: 'group-1',
       round: 1,
       matchIndex: 0,
     });

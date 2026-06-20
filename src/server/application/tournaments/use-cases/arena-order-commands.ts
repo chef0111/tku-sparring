@@ -1,12 +1,12 @@
-export type SetArenaGroupOrderCommand = {
+export type SetArenaDivisionOrderCommand = {
   tournamentId: string;
   arenaIndex: number;
-  groupIds: Array<string>;
+  divisionIds: Array<string>;
 };
 
-export type MoveGroupArenaCommand = {
+export type MoveDivisionArenaCommand = {
   tournamentId: string;
-  groupId: string;
+  divisionId: string;
   fromArena: number;
   toArena: number;
   insertIndex: number;

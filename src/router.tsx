@@ -15,6 +15,8 @@ export function getRouter() {
     scrollRestoration: true,
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
+    defaultPendingMs: 0,
+    defaultPendingMinMs: 0,
     Wrap: ({ children }) => (
       <QueryProvider queryClient={context.queryClient}>
         {children}

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { Lock, LockOpen } from 'lucide-react';
 import type { MatchData } from '@/contracts/tournament/match';
-import type { TournamentAthleteData } from '@/contracts/tournament/group';
+import type { TournamentAthleteData } from '@/contracts/tournament/division';
 import { ATHLETE_ROW_H, MATCH_W } from '@/config/bracket';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -69,7 +69,7 @@ export function BracketSlot({
     from: 'slot' as const,
     matchId: match.id,
     side,
-    groupId: match.groupId,
+    divisionId: match.divisionId,
     round: match.round,
     redTournamentAthleteId: match.redTournamentAthleteId,
     blueTournamentAthleteId: match.blueTournamentAthleteId,

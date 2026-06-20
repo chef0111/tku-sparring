@@ -2,18 +2,18 @@ import type { QueryClient } from '@tanstack/react-query';
 import {
   activityKeys,
   advanceSettingsKeys,
-  groupKeys,
+  divisionKeys,
   matchKeys,
   tournamentKeys,
 } from '@/queries/keys';
 
 export function invalidateMatchQueries(
   queryClient: QueryClient,
-  scope?: { tournamentId?: string; groupId?: string }
+  scope?: { tournamentId?: string; divisionId?: string }
 ) {
-  if (scope?.groupId) {
+  if (scope?.divisionId) {
     void queryClient.invalidateQueries({
-      queryKey: matchKeys.listByGroup(scope.groupId),
+      queryKey: matchKeys.listByDivision(scope.divisionId),
     });
   } else if (scope?.tournamentId) {
     void queryClient.invalidateQueries({
@@ -27,7 +27,7 @@ export function invalidateMatchQueries(
 export function invalidateAfterMatchWrite(queryClient: QueryClient) {
   void queryClient.invalidateQueries({ queryKey: matchKeys.all });
   void queryClient.invalidateQueries({ queryKey: tournamentKeys.all });
-  void queryClient.invalidateQueries({ queryKey: groupKeys.lists() });
+  void queryClient.invalidateQueries({ queryKey: divisionKeys.lists() });
   void queryClient.invalidateQueries({ queryKey: activityKeys.all });
   void queryClient.invalidateQueries({ queryKey: advanceSettingsKeys.all });
 }

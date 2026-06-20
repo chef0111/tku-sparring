@@ -14,9 +14,9 @@ export interface TournamentBracketProviderProps {
 export function TournamentBracketProvider({
   children,
 }: TournamentBracketProviderProps) {
-  const { tournamentId, groups, readOnly, tournamentStatus } =
+  const { tournamentId, divisions, readOnly, tournamentStatus } =
     useBuilderWorkspace();
-  const { selectedGroupId, setSelectedGroup: setSelectedGroupId } =
+  const { selectedDivisionId, setSelectedDivision: setSelectedDivisionId } =
     useBuilderManagerQuery();
 
   const [selectedMatch, setSelectedMatch] = React.useState<MatchData | null>(
@@ -26,18 +26,21 @@ export function TournamentBracketProvider({
   const [arenaOrderSheetOpen, setArenaOrderSheetOpen] = React.useState(false);
 
   React.useEffect(() => {
-    if (!selectedGroupId && groups.length > 0) {
-      void setSelectedGroupId(groups[0]!.id);
+    if (!selectedDivisionId && divisions.length > 0) {
+      void setSelectedDivisionId(divisions[0]!.id);
     }
-    if (selectedGroupId && !groups.find((g) => g.id === selectedGroupId)) {
-      void setSelectedGroupId(groups[0]?.id ?? null);
+    if (
+      selectedDivisionId &&
+      !divisions.find((d) => d.id === selectedDivisionId)
+    ) {
+      void setSelectedDivisionId(divisions[0]?.id ?? null);
     }
-  }, [groups, selectedGroupId, setSelectedGroupId]);
+  }, [divisions, selectedDivisionId, setSelectedDivisionId]);
 
   const data = useBracketsTabQueries({
     tournamentId,
-    groups,
-    selectedGroupId,
+    divisions,
+    selectedDivisionId,
     tournamentStatus,
     readOnly,
   });
@@ -74,12 +77,12 @@ export function TournamentBracketProvider({
       onDragStart,
       onDragEnd,
       tournamentId,
-      groups,
+      divisions,
       readOnly,
       tournamentStatus,
       isDraft,
-      selectedGroupId,
-      setSelectedGroupId,
+      selectedDivisionId,
+      setSelectedDivisionId,
       selectedMatch,
       setSelectedMatch,
       panelOpen,
@@ -98,11 +101,11 @@ export function TournamentBracketProvider({
     onDragStart,
     onDragEnd,
     tournamentId,
-    groups,
+    divisions,
     readOnly,
     tournamentStatus,
     isDraft,
-    selectedGroupId,
+    selectedDivisionId,
     selectedMatch,
     panelOpen,
     arenaOrderSheetOpen,

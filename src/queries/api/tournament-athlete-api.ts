@@ -15,7 +15,7 @@ export function getAthleteIdentityKey(
 ): string {
   return JSON.stringify({
     tournamentId: input.tournamentId,
-    groupId: input.groupId ?? null,
+    divisionId: input.divisionId ?? null,
     unassignedOnly: input.unassignedOnly ?? false,
     query: input.query ?? '',
     gender: input.gender ?? null,

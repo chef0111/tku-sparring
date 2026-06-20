@@ -1,27 +1,27 @@
 import * as React from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBuilderManagerQuery } from './use-builder-manager-query';
-import type { GroupData } from '@/contracts/tournament/group';
+import type { DivisionData } from '@/contracts/tournament/division';
 import type {
   TournamentData,
   TournamentStatus,
 } from '@/contracts/tournament/list';
-import { invalidateGroupListQueries } from '@/queries/group';
+import { invalidateDivisionListQueries } from '@/queries/division';
 import { useTournamentReadOnly } from '@/hooks/use-tournament-read-only';
 import { authClient } from '@/lib/auth-client';
 
 export interface UseTournamentBuilderArgs {
   tournament: TournamentData;
-  groups: Array<GroupData>;
+  divisions: Array<DivisionData>;
   tournamentId: string;
 }
 
 export function useTournamentBuilder({
   tournament,
-  groups,
+  divisions,
   tournamentId,
 }: UseTournamentBuilderArgs) {
-  void groups;
+  void divisions;
 
   const isReadOnly = useTournamentReadOnly(tournamentId);
   const { tab, setTab } = useBuilderManagerQuery();
@@ -54,7 +54,7 @@ export function useTournamentBuilder({
     try {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['tournament'] }),
-        invalidateGroupListQueries(queryClient),
+        invalidateDivisionListQueries(queryClient),
         queryClient.invalidateQueries({ queryKey: ['match'] }),
         queryClient.invalidateQueries({ queryKey: ['tournamentAthlete'] }),
       ]);

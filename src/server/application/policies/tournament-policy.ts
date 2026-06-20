@@ -3,11 +3,11 @@ import { TournamentStatusSchema } from '@/lib/tournament/tournament-status';
 import { PolicyViolationError } from '@/server/application/errors';
 
 export type TournamentAction =
-  | 'group.create'
-  | 'group.update'
-  | 'group.delete'
-  | 'group.assignAthlete'
-  | 'group.autoAssign'
+  | 'division.create'
+  | 'division.update'
+  | 'division.delete'
+  | 'division.assignAthlete'
+  | 'division.autoAssign'
   | 'arenaOrder.update'
   | 'bracket.generate'
   | 'bracket.shuffle'
@@ -26,11 +26,11 @@ export type TournamentAction =
   | 'tournament.status.force';
 
 const draftOnly = new Set<TournamentAction>([
-  'group.create',
-  'group.update',
-  'group.delete',
-  'group.assignAthlete',
-  'group.autoAssign',
+  'division.create',
+  'division.update',
+  'division.delete',
+  'division.assignAthlete',
+  'division.autoAssign',
   'arenaOrder.update',
   'bracket.generate',
   'bracket.shuffle',

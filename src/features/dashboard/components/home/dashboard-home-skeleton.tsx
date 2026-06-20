@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 const kpiTiles = [
   { key: 'tournaments', label: 'Tournaments', icon: Trophy, withAction: true },
   { key: 'athletes', label: 'Athletes', icon: Users },
-  { key: 'groups', label: 'Groups', icon: Layers },
+  { key: 'divisions', label: 'Divisions', icon: Layers },
   { key: 'matches', label: 'Matches', icon: LayoutGrid },
 ] as const;
 

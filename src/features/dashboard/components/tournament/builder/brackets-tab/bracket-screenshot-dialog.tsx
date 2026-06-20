@@ -23,7 +23,7 @@ import { Spinner } from '@/components/ui/spinner';
 export function BracketScreenshotDialog() {
   const { screenshotOpen, setScreenshotOpen, captureTarget } =
     useBracketChrome();
-  const { tournamentId, selectedGroup } = useTournamentBracket();
+  const { tournamentId, selectedDivision } = useTournamentBracket();
   const tournamentQuery = useTournament(tournamentId);
 
   const [blob, setBlob] = React.useState<Blob | null>(null);
@@ -76,7 +76,7 @@ export function BracketScreenshotDialog() {
 
   const filename = bracketScreenshotFilename(
     tournamentQuery.data?.name ?? 'tournament',
-    selectedGroup?.name ?? 'group'
+    selectedDivision?.name ?? 'division'
   );
 
   const actionsDisabled = isCapturing || !blob;
@@ -97,8 +97,8 @@ export function BracketScreenshotDialog() {
         <DialogHeader>
           <DialogTitle className="text-lg">Bracket screenshot</DialogTitle>
           <DialogDescription>
-            Screenshot export for {selectedGroup?.name ?? 'this group'}. Copy or
-            save without closing this preview.
+            Screenshot export for {selectedDivision?.name ?? 'this division'}.
+            Copy or save without closing this preview.
           </DialogDescription>
         </DialogHeader>
 

@@ -40,8 +40,8 @@ export const AdvanceSettings = () => {
     Boolean(
       advance.tournament &&
       advance.tournament.length > 0 &&
-      advance.group &&
-      advance.group.length > 0
+      advance.division &&
+      advance.division.length > 0
     );
 
   const catalogQuery = useArenaSelectionCatalog({
@@ -54,7 +54,7 @@ export const AdvanceSettings = () => {
   const matchesQuery = useArenaSelectionMatches({
     deviceId,
     tournamentId: advance.tournament,
-    groupId: advance.group,
+    divisionId: advance.division,
     enabled: Boolean(session?.user),
     refetchInterval: pollSelectionMatches ? SELECTION_MATCHES_POLL_MS : false,
   });
@@ -63,13 +63,13 @@ export const AdvanceSettings = () => {
     () =>
       [
         advance.tournament ?? '',
-        advance.group ?? '',
+        advance.division ?? '',
         advance.match ?? '',
         advance.matchLabel ?? '',
         deviceId ?? '',
       ].join(':'),
     [
-      advance.group,
+      advance.division,
       advance.match,
       advance.matchLabel,
       advance.tournament,
@@ -80,7 +80,7 @@ export const AdvanceSettings = () => {
   const form = useAppForm({
     defaultValues: {
       tournament: advance.tournament,
-      group: advance.group,
+      division: advance.division,
       match: advance.match,
       redPlayerAvatar: undefined as File | undefined,
       bluePlayerAvatar: undefined as File | undefined,
@@ -103,7 +103,7 @@ export const AdvanceSettings = () => {
     prevTournamentForCascade.current = t;
 
     if (prev != null && prev !== t) {
-      form.setFieldValue('group', '');
+      form.setFieldValue('division', '');
       form.setFieldValue('match', '');
     }
   }, [advance.tournament, form]);
@@ -115,7 +115,7 @@ export const AdvanceSettings = () => {
 
       updateAdvanceForm({
         tournament: values.tournament,
-        group: values.group,
+        division: values.division,
         match: values.match,
         redPlayerName: values.redPlayerName,
         bluePlayerName: values.bluePlayerName,

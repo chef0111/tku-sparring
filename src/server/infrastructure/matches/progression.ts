@@ -38,7 +38,7 @@ export async function advanceWinner(
 
 export async function clearWinnerAdvancement(
   match: {
-    groupId: string;
+    divisionId: string;
     round: number;
     matchIndex: number;
     tournamentWinnerId: string | null;
@@ -73,12 +73,12 @@ export async function clearWinnerAdvancement(
 }
 
 export async function applyRound0ByeAdvancement(
-  groupId: string,
+  divisionId: string,
   _tournamentId: string,
   db: ProgressionDb = prisma
 ) {
   const round0 = await db.match.findMany({
-    where: { groupId, round: 0 },
+    where: { divisionId, round: 0 },
     orderBy: { matchIndex: 'asc' },
   });
 

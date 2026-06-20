@@ -27,7 +27,7 @@ interface SetupChecklistProps {
 
 const STEP_ICONS: Record<SetupStep['id'], LucideIcon> = {
   athletes: Users,
-  groups: Layers,
+  divisions: Layers,
   brackets: GitBranch,
 };
 

@@ -21,7 +21,7 @@ beforeEach(() => {
   vi.mocked(prisma.match.findMany).mockResolvedValue([]);
   vi.mocked(loadMatchLabelContext).mockResolvedValue({
     arenaIndex: 1,
-    groupIdsOnArena: ['g1'],
+    divisionIdsOnArena: ['g1'],
     allMatches: [],
     numbers: new Map(),
     assignedBracketTitleKeys: new Set(),
@@ -33,7 +33,7 @@ describe('assertLabelAvailable', () => {
     await expect(
       assertLabelAvailable({
         tournamentId: 't1',
-        groupId: 'g1',
+        divisionId: 'g1',
         displayLabel: 'Final Preview',
         excludeMatchId: 'm-existing',
       })

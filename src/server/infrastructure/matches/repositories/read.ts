@@ -3,9 +3,9 @@ import { coalesceMatchRead } from '@/server/domain/tournament/match/match-read';
 import { prisma } from '@/lib/db';
 
 export const matchReadStore: MatchReadStore = {
-  async findByGroupId(groupId) {
+  async findByDivisionId(divisionId) {
     const rows = await prisma.match.findMany({
-      where: { groupId },
+      where: { divisionId },
       orderBy: [{ round: 'asc' }, { matchIndex: 'asc' }],
     });
     return rows.map((m) => coalesceMatchRead(m));

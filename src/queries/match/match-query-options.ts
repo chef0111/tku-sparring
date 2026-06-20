@@ -1,14 +1,14 @@
 import { queryOptions } from '@tanstack/react-query';
 import { matchKeys } from '@/queries/keys';
 import {
-  listMatchesByGroup,
+  listMatchesByDivision,
   listMatchesByTournament,
 } from '@/queries/api/match-api';
 
-export function matchesByGroupQueryOptions(groupId: string) {
+export function matchesByDivisionQueryOptions(divisionId: string) {
   return queryOptions({
-    queryKey: matchKeys.listByGroup(groupId),
-    queryFn: () => listMatchesByGroup(groupId),
+    queryKey: matchKeys.listByDivision(divisionId),
+    queryFn: () => listMatchesByDivision(divisionId),
   });
 }
 

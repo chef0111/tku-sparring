@@ -11,7 +11,7 @@ vi.mock('@/lib/db', () => ({
       findUnique: vi.fn(),
       upsert: vi.fn(),
     },
-    group: {
+    division: {
       findUnique: vi.fn(),
     },
     match: {
@@ -45,7 +45,7 @@ describe('getLastSelection', () => {
   it('returns stored selection payload', async () => {
     vi.mocked(prisma.deviceLastSelection.findUnique).mockResolvedValue({
       tournamentId: 't1',
-      groupId: 'g1',
+      divisionId: 'g1',
       matchId: 'm1',
     } as never);
 
@@ -56,7 +56,7 @@ describe('getLastSelection', () => {
 
     expect(result).toEqual({
       tournamentId: 't1',
-      groupId: 'g1',
+      divisionId: 'g1',
       matchId: 'm1',
     });
   });
@@ -65,7 +65,7 @@ describe('getLastSelection', () => {
 describe('setLastSelection', () => {
   it('derives group and tournament from match selection', async () => {
     vi.mocked(prisma.match.findUnique).mockResolvedValue({
-      groupId: 'g1',
+      divisionId: 'g1',
       tournamentId: 't1',
     } as never);
 
@@ -78,7 +78,7 @@ describe('setLastSelection', () => {
       expect.objectContaining({
         create: expect.objectContaining({
           tournamentId: 't1',
-          groupId: 'g1',
+          divisionId: 'g1',
           matchId: 'm1',
         }),
       })
@@ -87,21 +87,21 @@ describe('setLastSelection', () => {
 
   it('rejects match selections with mismatched group', async () => {
     vi.mocked(prisma.match.findUnique).mockResolvedValue({
-      groupId: 'g1',
+      divisionId: 'g1',
       tournamentId: 't1',
     } as never);
 
     await expect(
       setLastSelection(
-        { userId: 'u1', deviceId: 'd1', groupId: 'g2', matchId: 'm1' },
+        { userId: 'u1', deviceId: 'd1', divisionId: 'g2', matchId: 'm1' },
         deviceLastSelectionStore
       )
-    ).rejects.toThrow(/given group/);
+    ).rejects.toThrow(/given division/);
   });
 
   it('rejects match selections with mismatched tournament', async () => {
     vi.mocked(prisma.match.findUnique).mockResolvedValue({
-      groupId: 'g1',
+      divisionId: 'g1',
       tournamentId: 't1',
     } as never);
 
@@ -119,12 +119,12 @@ describe('setLastSelection', () => {
   });
 
   it('derives tournament from group-only selection', async () => {
-    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+    vi.mocked(prisma.division.findUnique).mockResolvedValue({
       tournamentId: 't1',
     } as never);
 
     await setLastSelection(
-      { userId: 'u1', deviceId: 'd1', groupId: 'g1' },
+      { userId: 'u1', deviceId: 'd1', divisionId: 'g1' },
       deviceLastSelectionStore
     );
 
@@ -132,7 +132,7 @@ describe('setLastSelection', () => {
       expect.objectContaining({
         create: expect.objectContaining({
           tournamentId: 't1',
-          groupId: 'g1',
+          divisionId: 'g1',
           matchId: null,
         }),
       })

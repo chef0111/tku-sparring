@@ -14,7 +14,7 @@ export const GetLastSelectionSchema = z.object({
 export const SetLastSelectionSchema = z.object({
   deviceId: z.string().min(1),
   tournamentId: optionalNullableId,
-  groupId: optionalNullableId,
+  divisionId: optionalNullableId,
   matchId: optionalNullableId,
 });
 

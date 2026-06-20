@@ -1,9 +1,9 @@
 import { createContext } from 'react';
-import type { GroupData } from '@/contracts/tournament/group';
+import type { DivisionData } from '@/contracts/tournament/division';
 
 export interface BuilderWorkspaceContextValue {
   tournamentId: string;
-  groups: Array<GroupData>;
+  divisions: Array<DivisionData>;
   readOnly: boolean;
   tournamentStatus: string;
 }

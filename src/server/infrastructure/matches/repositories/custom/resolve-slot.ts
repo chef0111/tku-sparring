@@ -6,7 +6,7 @@ import { prisma } from '@/lib/db';
 export type CustomSlotDb = Pick<typeof prisma, 'match' | 'tournamentAthlete'>;
 
 export async function resolveCustomSlot(
-  groupId: string,
+  divisionId: string,
   slot: CustomSlotInput,
   db: CustomSlotDb = prisma
 ): Promise<{
@@ -15,7 +15,7 @@ export async function resolveCustomSlot(
 }> {
   if (slot.mode === 'direct') {
     const ta = await db.tournamentAthlete.findFirst({
-      where: { id: slot.tournamentAthleteId, groupId },
+      where: { id: slot.tournamentAthleteId, divisionId },
     });
     if (!ta) {
       throw new CustomMatchValidationError(
@@ -29,7 +29,7 @@ export async function resolveCustomSlot(
   }
 
   const feeder = await db.match.findFirst({
-    where: { id: slot.feederMatchId, groupId },
+    where: { id: slot.feederMatchId, divisionId },
   });
   if (!feeder) {
     throw new CustomMatchValidationError(

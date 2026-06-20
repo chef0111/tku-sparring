@@ -13,8 +13,8 @@ Client consumption stays in `src/queries/api/*-api.ts` → `@/orpc/client`. TanS
 ## Non-goals
 
 - Change `client.*` router keys (breaking RPC contract)
-- Rename domain folders (`groups/` stays plural; `queries/group/` stays singular)
-- Remove router procedures (including low-use `group.get`, `match.get`, etc.)
+- Rename domain folders (`divisions/` stays plural; `queries/division/` stays singular)
+- Remove router procedures (including low-use `division.get`, `match.get`, etc.)
 - Add `queries/api` for `arenaMatchClaim`, `device`, or `tournamentAthlete.bulkRemove` in this refactor
 - Extract Prisma out of oRPC or split microservices
 - Duplicate Zod DTOs under `src/queries`
@@ -46,7 +46,7 @@ Use `as const` on fragments for stable `RouterClient` inference. Domain `router.
 | `client.*`             | oRPC folder              | queries folder         |
 | ---------------------- | ------------------------ | ---------------------- |
 | `tournament`           | `tournaments/`           | `tournament/`          |
-| `group`                | `groups/`                | `group/`               |
+| `division`             | `divisions/`             | `division/`            |
 | `match`, `bracket`     | `matches/`               | `match/`               |
 | `athleteProfile`       | `athlete-profiles/`      | `athlete-profile/`     |
 | `tournamentAthlete`    | `tournament-athletes/`   | `tournament-athlete/`  |
@@ -71,6 +71,6 @@ bun run lint
 
 Smoke (unchanged RPC paths):
 
-- Tournament builder: groups, add-athletes sheet, brackets
+- Tournament builder: divisions, add-athletes sheet, brackets
 - Advance settings arena selection
 - Athlete library CRUD

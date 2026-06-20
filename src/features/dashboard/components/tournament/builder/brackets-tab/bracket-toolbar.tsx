@@ -19,7 +19,7 @@ import { isResettableMatch } from '@/lib/tournament/bracket/bracket-progression'
 
 export function BracketToolbar() {
   const {
-    selectedGroupId: groupId,
+    selectedDivisionId: divisionId,
     toolbarDisabled: disabled,
     readOnly,
     tournamentStatus,
@@ -31,11 +31,11 @@ export function BracketToolbar() {
   const [customOpen, setCustomOpen] = React.useState(false);
 
   const draftOnly = tournamentStatus !== 'draft';
-  const blocked = disabled || readOnly || draftOnly || !groupId;
+  const blocked = disabled || readOnly || draftOnly || !divisionId;
   const customBlocked =
     disabled ||
     readOnly ||
-    !groupId ||
+    !divisionId ||
     tournamentStatus === 'completed' ||
     matches.length === 0;
   const reason = draftOnly
@@ -46,7 +46,7 @@ export function BracketToolbar() {
         ? 'Generate a bracket first'
         : undefined;
 
-  const resetHasWork = groupId != null && isResettableMatch(matches);
+  const resetHasWork = divisionId != null && isResettableMatch(matches);
   const resetDisabledForCleanBracket =
     blocked || reset.isPending || !resetHasWork;
   const resetTooltip =
@@ -91,8 +91,8 @@ export function BracketToolbar() {
           <TooltipContent side="right">
             {readOnly
               ? 'Read-only mode'
-              : !groupId
-                ? 'Select a group'
+              : !divisionId
+                ? 'Select a division'
                 : matches.length === 0
                   ? 'Generate a bracket first'
                   : tournamentStatus === 'completed'
@@ -113,8 +113,8 @@ export function BracketToolbar() {
                 aria-label="Shuffle bracket"
                 className="rounded-sm"
                 onClick={() => {
-                  if (!groupId) return;
-                  void wrap(shuffle.mutateAsync({ groupId }), {
+                  if (!divisionId) return;
+                  void wrap(shuffle.mutateAsync({ divisionId }), {
                     loading: 'Shuffling bracket…',
                     success: 'Bracket shuffled',
                   });
@@ -139,8 +139,8 @@ export function BracketToolbar() {
                 disabled={blocked || regenerate.isPending}
                 aria-label="Regenerate bracket"
                 onClick={() => {
-                  if (!groupId) return;
-                  void wrap(regenerate.mutateAsync({ groupId }), {
+                  if (!divisionId) return;
+                  void wrap(regenerate.mutateAsync({ divisionId }), {
                     loading: 'Regenerating bracket…',
                     success: 'Bracket regenerated',
                   });
@@ -165,8 +165,8 @@ export function BracketToolbar() {
                 disabled={resetDisabledForCleanBracket}
                 aria-label="Reset bracket"
                 onClick={() => {
-                  if (!groupId) return;
-                  void wrap(reset.mutateAsync({ groupId }), {
+                  if (!divisionId) return;
+                  void wrap(reset.mutateAsync({ divisionId }), {
                     loading: 'Resetting bracket…',
                     success: 'Bracket reset',
                   });

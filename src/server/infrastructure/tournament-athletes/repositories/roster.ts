@@ -15,14 +15,14 @@ import { NotFoundError } from '@/server/application/errors';
 import { publishTournamentMutation } from '@/server/infrastructure/mutation-effects';
 import { assertTournamentAction } from '@/server/application/policies/tournament-policy';
 
-const UNASSIGNED_GROUP_FILTER = {
-  groupId: null,
+const UNASSIGNED_DIVISION_FILTER = {
+  divisionId: null,
 } satisfies Prisma.TournamentAthleteWhereInput;
 
 function buildListWhere(input: ListTournamentAthletesQuery) {
   const {
     tournamentId,
-    groupId,
+    divisionId,
     unassignedOnly,
     status,
     query,
@@ -36,9 +36,9 @@ function buildListWhere(input: ListTournamentAthletesQuery) {
 
   const andBranches: Array<Prisma.TournamentAthleteWhereInput> = [];
   if (unassignedOnly) {
-    andBranches.push(UNASSIGNED_GROUP_FILTER);
-  } else if (groupId) {
-    andBranches.push({ groupId });
+    andBranches.push(UNASSIGNED_DIVISION_FILTER);
+  } else if (divisionId) {
+    andBranches.push({ divisionId });
   }
   if (query) {
     andBranches.push({
@@ -215,7 +215,7 @@ export const tournamentAthleteStore: TournamentAthleteStore = {
       where: {
         tournamentId,
         athleteProfileId: { in: profileIds },
-        groupId: { not: null },
+        divisionId: { not: null },
       },
     });
   },

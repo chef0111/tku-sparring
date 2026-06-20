@@ -22,7 +22,7 @@ describe('advanceWinner', () => {
     vi.mocked(db.match.findUnique).mockResolvedValue({
       id: 'm-r0-0',
       kind: 'bracket',
-      groupId: 'group-1',
+      divisionId: 'group-1',
       round: 0,
       matchIndex: 0,
     } as never);
@@ -46,7 +46,7 @@ describe('advanceWinner', () => {
     expect(db.match.findFirst).toHaveBeenCalledWith({
       where: {
         kind: 'bracket',
-        groupId: 'group-1',
+        divisionId: 'group-1',
         round: 1,
         matchIndex: 0,
       },
@@ -65,7 +65,7 @@ describe('advanceWinner', () => {
     vi.mocked(db.match.findUnique).mockResolvedValue({
       id: 'custom-1',
       kind: 'custom',
-      groupId: 'group-1',
+      divisionId: 'group-1',
       round: 900,
       matchIndex: 0,
     } as never);
@@ -80,7 +80,7 @@ describe('advanceWinner', () => {
     vi.mocked(db.match.findUnique).mockResolvedValue({
       id: 'm-r0-0',
       kind: 'bracket',
-      groupId: 'group-1',
+      divisionId: 'group-1',
       round: 0,
       matchIndex: 0,
     } as never);

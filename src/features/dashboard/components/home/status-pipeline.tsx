@@ -108,7 +108,7 @@ function PipelineStageHeader({
       <div className="flex min-w-0 flex-col gap-0.5">
         <Status
           status={pipelineStatusVariant[status]}
-          className="gap-1.5 bg-transparent p-0"
+          className="gap-1.5 bg-transparent p-0 pl-1"
         >
           <StatusIndicator />
           <StatusLabel className="text-foreground text-xs font-medium">
@@ -160,7 +160,7 @@ function PipelineTournamentRow({
         <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] tabular-nums">
           <span className="inline-flex items-center gap-1">
             <Layers className="size-3" aria-hidden="true" />
-            {tournament._count.groups} groups
+            {tournament._count.divisions} divisions
           </span>
           <span className="inline-flex items-center gap-1">
             <Users className="size-3" aria-hidden="true" />

@@ -71,17 +71,17 @@ export function getTournamentsTableColumns(
       },
     },
     {
-      id: 'groups',
-      accessorFn: (row) => row._count.groups,
+      id: 'divisions',
+      accessorFn: (row) => row._count.divisions,
       header: ({ column, table }) => (
         <DataTableColumnHeader
           column={column}
           state={table.getState()}
-          label="Groups"
+          label="Divisions"
         />
       ),
       cell: ({ row }) => (
-        <span className="tabular-nums">{row.original._count.groups}</span>
+        <span className="tabular-nums">{row.original._count.divisions}</span>
       ),
       maxSize: 100,
       enableSorting: false,

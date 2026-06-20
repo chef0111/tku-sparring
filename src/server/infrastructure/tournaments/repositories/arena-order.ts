@@ -1,10 +1,10 @@
 import { findTournamentById } from './read-lifecycle';
 import type { TournamentArenaOrderStore } from '@/server/application/tournaments/repositories/arena-order';
 import {
-  mergeArenaGroupOrderAfterCrossArenaMove,
-  mergeArenaGroupOrderAfterRetireArena,
-  patchArenaGroupOrderJson,
-} from '@/server/domain/tournament/arena/arena-group-order';
+  mergeArenaDivisionOrderAfterCrossArenaMove,
+  mergeArenaDivisionOrderAfterRetireArena,
+  patchArenaDivisionOrderJson,
+} from '@/server/domain/tournament/arena/arena-division-order';
 import { NotFoundError } from '@/server/application/errors';
 import { publishTournamentMutation } from '@/server/infrastructure/mutation-effects';
 import { prisma } from '@/lib/db';
@@ -23,45 +23,45 @@ export const tournamentArenaOrderStore: TournamentArenaOrderStore = {
       select: {
         id: true,
         status: true,
-        arenaGroupOrder: true,
-        groups: { select: { id: true, arenaIndex: true } },
+        arenaDivisionOrder: true,
+        divisions: { select: { id: true, arenaIndex: true } },
       },
     });
   },
 
-  async setArenaGroupOrder(command, tournament) {
-    const nextJson = patchArenaGroupOrderJson(
-      tournament.arenaGroupOrder,
+  async setArenaDivisionOrder(command, tournament) {
+    const nextJson = patchArenaDivisionOrderJson(
+      tournament.arenaDivisionOrder,
       command.arenaIndex,
-      command.groupIds
+      command.divisionIds
     );
 
     await prisma.tournament.update({
       where: { id: command.tournamentId },
-      data: { arenaGroupOrder: nextJson },
+      data: { arenaDivisionOrder: nextJson },
     });
 
     return finishArenaOrderMutation(command.tournamentId);
   },
 
-  async moveGroupBetweenArenas(command, tournament) {
-    const nextJson = mergeArenaGroupOrderAfterCrossArenaMove({
-      arenaGroupOrder: tournament.arenaGroupOrder,
-      groups: tournament.groups,
-      groupId: command.groupId,
+  async moveDivisionBetweenArenas(command, tournament) {
+    const nextJson = mergeArenaDivisionOrderAfterCrossArenaMove({
+      arenaDivisionOrder: tournament.arenaDivisionOrder,
+      divisions: tournament.divisions,
+      divisionId: command.divisionId,
       fromArena: command.fromArena,
       toArena: command.toArena,
       insertIndex: command.insertIndex,
     });
 
     await prisma.$transaction([
-      prisma.group.update({
-        where: { id: command.groupId },
+      prisma.division.update({
+        where: { id: command.divisionId },
         data: { arenaIndex: command.toArena },
       }),
       prisma.tournament.update({
         where: { id: command.tournamentId },
-        data: { arenaGroupOrder: nextJson },
+        data: { arenaDivisionOrder: nextJson },
       }),
     ]);
 
@@ -69,30 +69,30 @@ export const tournamentArenaOrderStore: TournamentArenaOrderStore = {
   },
 
   async ensureArenaSlot(command, tournament) {
-    const nextJson = patchArenaGroupOrderJson(
-      tournament.arenaGroupOrder,
+    const nextJson = patchArenaDivisionOrderJson(
+      tournament.arenaDivisionOrder,
       command.arenaIndex,
       []
     );
 
     await prisma.tournament.update({
       where: { id: command.tournamentId },
-      data: { arenaGroupOrder: nextJson },
+      data: { arenaDivisionOrder: nextJson },
     });
 
     return finishArenaOrderMutation(command.tournamentId);
   },
 
   async retireArena(command, tournament) {
-    const nextJson = mergeArenaGroupOrderAfterRetireArena({
-      arenaGroupOrder: tournament.arenaGroupOrder,
-      groups: tournament.groups,
+    const nextJson = mergeArenaDivisionOrderAfterRetireArena({
+      arenaDivisionOrder: tournament.arenaDivisionOrder,
+      divisions: tournament.divisions,
       fromArena: command.fromArena,
       toArena: command.toArena,
     });
 
     await prisma.$transaction([
-      prisma.group.updateMany({
+      prisma.division.updateMany({
         where: {
           tournamentId: command.tournamentId,
           arenaIndex: command.fromArena,
@@ -101,7 +101,7 @@ export const tournamentArenaOrderStore: TournamentArenaOrderStore = {
       }),
       prisma.tournament.update({
         where: { id: command.tournamentId },
-        data: { arenaGroupOrder: nextJson },
+        data: { arenaDivisionOrder: nextJson },
       }),
     ]);
 

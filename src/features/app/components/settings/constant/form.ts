@@ -68,15 +68,15 @@ type ComboboxOption = {
 };
 
 export type TournamentFieldPending = {
-  group?: boolean;
+  division?: boolean;
   match?: boolean;
 };
 
 export const getTournamentFields = (
   tournamentOptions: Array<ComboboxOption>,
-  groupOptions: Array<ComboboxOption>,
+  divisionOptions: Array<ComboboxOption>,
   matchOptions: Array<ComboboxOption>,
-  groupsDisabled: boolean,
+  divisionsDisabled: boolean,
   matchesDisabled: boolean,
   pending?: TournamentFieldPending
 ) => [
@@ -89,12 +89,12 @@ export const getTournamentFields = (
     pending: false,
   },
   {
-    name: 'group' as const,
-    data: groupOptions,
-    type: 'groups',
-    label: 'SELECT GROUP',
-    disabled: groupsDisabled,
-    pending: Boolean(pending?.group),
+    name: 'division' as const,
+    data: divisionOptions,
+    type: 'divisions',
+    label: 'SELECT DIVISION',
+    disabled: divisionsDisabled,
+    pending: Boolean(pending?.division),
   },
   {
     name: 'match' as const,

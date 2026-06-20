@@ -2,7 +2,7 @@ import * as React from 'react';
 import { MouseSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { toast } from 'sonner';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
-import type { TournamentAthleteData } from '@/contracts/tournament/group';
+import type { TournamentAthleteData } from '@/contracts/tournament/division';
 import {
   useAssignSlot,
   useSwapParticipants,
@@ -70,7 +70,7 @@ export function useBracketsTabDnd(athletes: Array<TournamentAthleteData>) {
         | {
             from?: string;
             tournamentAthleteId?: string | null;
-            groupId?: string;
+            divisionId?: string;
             matchId?: string;
             side?: 'red' | 'blue';
             round?: number;
@@ -83,7 +83,7 @@ export function useBracketsTabDnd(athletes: Array<TournamentAthleteData>) {
       const dst = e.over?.data.current as
         | {
             from?: string;
-            groupId?: string | null;
+            divisionId?: string | null;
             matchId?: string;
             side?: 'red' | 'blue';
             locked?: boolean;
@@ -123,8 +123,8 @@ export function useBracketsTabDnd(athletes: Array<TournamentAthleteData>) {
         src.matchId &&
         src.side &&
         dst?.from === 'panel-drop' &&
-        dst.groupId &&
-        src.groupId === dst.groupId
+        dst?.divisionId &&
+        src.divisionId === dst.divisionId
       ) {
         assignSlot.mutate(
           {
