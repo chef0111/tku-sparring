@@ -6,13 +6,11 @@ import { tournamentQueryOptions } from '@/queries/tournament';
 import { ThemeProvider } from '@/contexts/themes';
 
 export const Route = createFileRoute('/dashboard_/tournaments/$id/builder')({
-  loader: async ({ params, context: { queryClient } }) => {
-    await queryClient.ensureQueryData(tournamentQueryOptions(params.id));
-    await queryClient.ensureQueryData(divisionListQueryOptions(params.id));
+  loader: ({ params, context: { queryClient } }) => {
+    void queryClient.prefetchQuery(tournamentQueryOptions(params.id));
+    void queryClient.prefetchQuery(divisionListQueryOptions(params.id));
   },
   pendingComponent: () => <LoadingScreen title="Loading workspace..." />,
-  pendingMs: 0,
-  pendingMinMs: 0,
   component: TournamentBuilderPage,
 });
 

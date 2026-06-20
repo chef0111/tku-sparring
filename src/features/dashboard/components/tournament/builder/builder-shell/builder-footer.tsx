@@ -172,9 +172,10 @@ export function BuilderFooter({
             <Link
               to="/dashboard/tournaments/$id"
               params={{ id: tournament.id }}
+              search={{}}
             >
               <ArrowLeft className="size-4" />
-              <span>Back to Detail</span>
+              <span>Command Center</span>
             </Link>
           </Button>
         </div>

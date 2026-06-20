@@ -30,7 +30,6 @@ import { useTournamentCommandCenter } from '@/features/dashboard/hooks/use-tourn
 import { SiteHeader } from '@/features/dashboard/components/sidebar/site-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { useTournamentReadOnly } from '@/hooks/use-tournament-read-only';
 import { useDivisions } from '@/queries/division';
 import { useTournamentMatches } from '@/queries/match';
 import { useTournament } from '@/queries/tournament';
@@ -54,7 +53,6 @@ export function TournamentCommandCenter({
   const isDivisionsPending = divisionsQuery.isPending;
   const isMatchesPending = matchesQuery.isPending;
 
-  const isReadOnly = useTournamentReadOnly(tournamentId);
   const [activityOpen, setActivityOpen] = React.useState(false);
   const [confirmStatus, setConfirmStatus] =
     React.useState<TournamentStatus | null>(null);
@@ -148,7 +146,7 @@ export function TournamentCommandCenter({
                 params={{ id: tournamentId }}
               >
                 <Edit data-icon="inline-start" />
-                {isReadOnly ? 'Open Builder' : 'Edit Tournament'}
+                Open Builder
               </Link>
             </Button>
             {transitionAction && (
