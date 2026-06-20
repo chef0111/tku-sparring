@@ -1,4 +1,4 @@
-import { LoginForm } from './components/login-form';
+import { LoginForm } from './login-form';
 import {
   FieldDescription,
   FieldGroup,
@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/field';
 import { Highlighter } from '@/components/ui/highlighter';
 
-export const Login = () => {
+export function LoginPage() {
   return (
     <FieldSet className="flex flex-col space-y-4 text-center">
       <FieldLegend className="text-2xl! font-bold tracking-wide">
@@ -30,4 +30,4 @@ export const Login = () => {
       </FieldGroup>
     </FieldSet>
   );
-};
+}

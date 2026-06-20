@@ -2,8 +2,8 @@ import * as React from 'react';
 import { Link } from '@tanstack/react-router';
 import { NavSecondary } from './nav-secondary';
 import { NavDocuments } from './nav-documents';
+import { NavMain } from './nav-main';
 import { LogoIcon } from '@/components/ui/logo';
-import { NavMain } from '@/features/dashboard/components/sidebar/nav-main';
 import { UserNav } from '@/components/user/user-nav';
 import {
   Sidebar,
