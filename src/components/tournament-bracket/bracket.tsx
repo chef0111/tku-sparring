@@ -4,7 +4,7 @@ import { BracketFinalMatchNode } from './bracket-final-match-node';
 import { BracketMatchNode } from './bracket-match-node';
 import { BracketRoundLabels } from './bracket-round-labels';
 import type { MatchData } from '@/contracts/tournament/match';
-import type { TournamentAthleteData } from '@/contracts/tournament/group';
+import type { TournamentAthleteData } from '@/contracts/tournament/division';
 import type {
   BracketCanvasLayout,
   BracketConnectorPath,

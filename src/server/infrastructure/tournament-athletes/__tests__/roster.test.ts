@@ -287,35 +287,35 @@ describe('list', () => {
     const args = getFindManyArgs();
     expect(args?.where).toMatchObject({
       tournamentId: 'tournament-1',
-      AND: [{ groupId: null }],
+      AND: [{ divisionId: null }],
     });
   });
 
-  it('filters by groupId when provided and unassignedOnly is false', async () => {
+  it('filters by divisionId when provided and unassignedOnly is false', async () => {
     mockResult([], 0);
     await tournamentAthleteStore.list({
       ...baseInput,
-      groupId: 'group-1',
+      divisionId: 'group-1',
     });
 
     const args = getFindManyArgs();
     expect(args?.where).toMatchObject({
       tournamentId: 'tournament-1',
-      AND: [{ groupId: 'group-1' }],
+      AND: [{ divisionId: 'group-1' }],
     });
   });
 
-  it('prefers unassignedOnly over groupId when both are set', async () => {
+  it('prefers unassignedOnly over divisionId when both are set', async () => {
     mockResult([], 0);
     await tournamentAthleteStore.list({
       ...baseInput,
       unassignedOnly: true,
-      groupId: 'group-1',
+      divisionId: 'group-1',
     });
 
     const args = getFindManyArgs();
     expect(args?.where).toMatchObject({
-      AND: [{ groupId: null }],
+      AND: [{ divisionId: null }],
     });
   });
 
@@ -332,7 +332,7 @@ describe('list', () => {
     expect(Array.isArray(andClauses)).toBe(true);
     if (!Array.isArray(andClauses)) throw new Error('expected AND array');
     expect(andClauses).toHaveLength(2);
-    expect(andClauses[0]).toMatchObject({ groupId: null });
+    expect(andClauses[0]).toMatchObject({ divisionId: null });
     expect(andClauses[1]).toMatchObject({
       OR: [
         { name: { contains: 'lee', mode: 'insensitive' } },

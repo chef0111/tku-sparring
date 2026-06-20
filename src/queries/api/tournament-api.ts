@@ -2,9 +2,9 @@ import type {
   CreateTournamentDTO,
   EnsureArenaSlotDTO,
   ListTournamentsDTO,
-  MoveGroupArenaDTO,
+  MoveDivisionArenaDTO,
   RetireArenaDTO,
-  SetArenaGroupOrderDTO,
+  SetArenaDivisionOrderDTO,
   SetTournamentStatusDTO,
   UpdateTournamentDTO,
 } from '@/orpc/tournaments/dto';
@@ -26,12 +26,12 @@ export function updateTournament(data: UpdateTournamentDTO) {
   return client.tournament.update(data);
 }
 
-export function setArenaGroupOrder(input: SetArenaGroupOrderDTO) {
-  return client.tournament.setArenaGroupOrder(input);
+export function setArenaDivisionOrder(input: SetArenaDivisionOrderDTO) {
+  return client.tournament.setArenaDivisionOrder(input);
 }
 
-export function moveGroupArena(input: MoveGroupArenaDTO) {
-  return client.tournament.moveGroupArena(input);
+export function moveDivisionArena(input: MoveDivisionArenaDTO) {
+  return client.tournament.moveDivisionArena(input);
 }
 
 export function ensureArenaSlot(input: EnsureArenaSlotDTO) {

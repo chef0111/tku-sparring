@@ -7,7 +7,7 @@ export type MatchRead = {
   id: string;
   kind: string;
   displayLabel: string | null;
-  groupId: string;
+  divisionId: string;
   tournamentId: string;
   round: number;
   matchIndex: number;

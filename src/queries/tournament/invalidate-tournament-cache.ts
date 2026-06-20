@@ -1,7 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query';
 import {
   activityKeys,
-  groupKeys,
+  divisionKeys,
   matchKeys,
   tournamentKeys,
 } from '@/queries/keys';
@@ -25,7 +25,7 @@ export function invalidateAfterArenaLayoutChange(
 ) {
   invalidateTournamentDetail(queryClient, tournamentId);
   void queryClient.invalidateQueries({
-    queryKey: groupKeys.list(tournamentId),
+    queryKey: divisionKeys.list(tournamentId),
   });
   void queryClient.invalidateQueries({
     queryKey: matchKeys.listByTournament(tournamentId),

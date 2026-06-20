@@ -51,7 +51,7 @@ export const StandardSettingsSchema = z.object({
 
 export const AdvanceSettingsSchema = StandardSettingsSchema.extend({
   tournament: z.string().min(1, 'Tournament is required'),
-  group: z.string().min(1, 'Group is required'),
+  division: z.string().min(1, 'Division is required'),
   match: z.string().min(1, 'Match is required'),
 });
 
@@ -76,7 +76,7 @@ export const EditAthleteSchema = z.object({
   ),
 });
 
-export const GroupConstraintsSchema = z.object({
+export const DivisionConstraintsSchema = z.object({
   gender: z
     .enum(['M', 'F'], { message: 'Gender must be Male or Female' })
     .nullable()

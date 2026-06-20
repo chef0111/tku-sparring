@@ -14,7 +14,7 @@ export const BulkRemoveTournamentAthletesSchema = z.object({
 
 export const UpdateTournamentAthleteSchema = z.object({
   id: z.string(),
-  groupId: z.string().nullable().optional(),
+  divisionId: z.string().nullable().optional(),
   status: z.enum(['selected', 'assigned', 'eliminated']).optional(),
   seed: z.number().int().nullable().optional(),
   locked: z.boolean().optional(),
@@ -23,7 +23,7 @@ export const UpdateTournamentAthleteSchema = z.object({
 
 export const ListTournamentAthletesSchema = z.object({
   tournamentId: z.string(),
-  groupId: z.string().optional(),
+  divisionId: z.string().optional(),
   unassignedOnly: z.boolean().optional().default(false),
   page: z.number().int().min(1).optional().default(1),
   perPage: z.number().int().min(1).max(200).optional().default(30),

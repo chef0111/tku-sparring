@@ -5,7 +5,7 @@ import {
 } from '@/lib/tournament/bracket/bracket-progression';
 
 export type BracketPosition = {
-  groupId: string;
+  divisionId: string;
   round: number;
   matchIndex: number;
 };
@@ -20,7 +20,7 @@ export function successorWhere(position: BracketPosition) {
   const slot = getSuccessorSlot(position);
   return {
     kind: 'bracket' as const,
-    groupId: position.groupId,
+    divisionId: position.divisionId,
     round: slot.round,
     matchIndex: slot.matchIndex,
   };

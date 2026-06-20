@@ -21,9 +21,9 @@ function mapValidationError(e: unknown): never {
 }
 
 export const customMatchStore: CustomMatchStore = {
-  async findGroup(groupId) {
-    const group = await prisma.group.findUnique({
-      where: { id: groupId },
+  async findDivision(divisionId) {
+    const group = await prisma.division.findUnique({
+      where: { id: divisionId },
       include: { tournament: { select: { status: true } } },
     });
     if (!group) return null;
@@ -55,21 +55,29 @@ export const customMatchStore: CustomMatchStore = {
         await assertLabelAvailable(
           {
             tournamentId: group.tournamentId,
-            groupId: command.groupId,
+            divisionId: command.divisionId,
             displayLabel,
           },
           tx
         );
 
-        const red = await resolveCustomSlot(command.groupId, command.red, tx);
-        const blue = await resolveCustomSlot(command.groupId, command.blue, tx);
+        const red = await resolveCustomSlot(
+          command.divisionId,
+          command.red,
+          tx
+        );
+        const blue = await resolveCustomSlot(
+          command.divisionId,
+          command.blue,
+          tx
+        );
 
         if (red.tournamentAthleteId === blue.tournamentAthleteId) {
           throw new BadRequestError('Red and blue cannot be the same athlete');
         }
 
         const idxAgg = await tx.match.aggregate({
-          where: { groupId: command.groupId, round: CUSTOM_MATCH_ROUND },
+          where: { divisionId: command.divisionId, round: CUSTOM_MATCH_ROUND },
           _max: { matchIndex: true },
         });
         const nextMatchIndex = (idxAgg._max.matchIndex ?? -1) + 1;
@@ -78,7 +86,7 @@ export const customMatchStore: CustomMatchStore = {
           data: {
             kind: 'custom',
             displayLabel,
-            groupId: command.groupId,
+            divisionId: command.divisionId,
             tournamentId: group.tournamentId,
             round: CUSTOM_MATCH_ROUND,
             matchIndex: nextMatchIndex,

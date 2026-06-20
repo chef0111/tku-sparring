@@ -160,7 +160,7 @@ function PipelineTournamentRow({
         <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] tabular-nums">
           <span className="inline-flex items-center gap-1">
             <Layers className="size-3" aria-hidden="true" />
-            {tournament._count.groups} groups
+            {tournament._count.divisions} divisions
           </span>
           <span className="inline-flex items-center gap-1">
             <Users className="size-3" aria-hidden="true" />

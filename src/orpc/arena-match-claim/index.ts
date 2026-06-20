@@ -11,7 +11,7 @@ export const claim = authorized
     return runClaimMatch(
       {
         matchId: input.matchId,
-        groupId: input.groupId,
+        divisionId: input.divisionId,
         tournamentId: input.tournamentId,
         deviceId: input.deviceId,
         userId: context.user.id,

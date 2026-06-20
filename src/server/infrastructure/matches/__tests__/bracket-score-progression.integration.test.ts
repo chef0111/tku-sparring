@@ -9,7 +9,7 @@ import { planBracketShell } from '@/server/domain/tournament/bracket/bracket-sha
 type MatchRow = {
   id: string;
   kind: string;
-  groupId: string;
+  divisionId: string;
   tournamentId: string;
   round: number;
   matchIndex: number;
@@ -59,7 +59,7 @@ function createInMemoryDb(initial: Array<MatchRow>) {
       }: {
         where: {
           kind?: string;
-          groupId: string;
+          divisionId: string;
           round: number;
           matchIndex: number;
         };
@@ -67,7 +67,7 @@ function createInMemoryDb(initial: Array<MatchRow>) {
         for (const m of await matches.values()) {
           if (
             (where.kind == null || m.kind === where.kind) &&
-            m.groupId === where.groupId &&
+            m.divisionId === where.divisionId &&
             m.round === where.round &&
             m.matchIndex === where.matchIndex
           ) {
@@ -114,7 +114,7 @@ async function simulateUpdateScore(
 describe('bracket score progression integration', () => {
   it('advances round-0 winner into round-1 red slot for a 4-athlete shell', async () => {
     const shell = planBracketShell({
-      groupId: 'g1',
+      divisionId: 'g1',
       tournamentId: 't1',
       athleteCount: 4,
       thirdPlaceMatch: false,
@@ -123,7 +123,7 @@ describe('bracket score progression integration', () => {
     const rows: Array<MatchRow> = shell.matches.map((m, i) => ({
       id: `m-${m.round}-${m.matchIndex}`,
       kind: 'bracket',
-      groupId: m.groupId,
+      divisionId: m.divisionId,
       tournamentId: m.tournamentId,
       round: m.round,
       matchIndex: m.matchIndex,

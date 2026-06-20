@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { findTournamentById } from '@/server/infrastructure/tournaments/repositories/read-lifecycle';
 import {
-  moveGroupBetweenArenas,
-  setArenaGroupOrder,
+  moveDivisionBetweenArenas,
+  setArenaDivisionOrder,
 } from '@/server/application/tournaments/use-cases/arena-order';
 import { tournamentArenaOrderStore } from '@/server/infrastructure/tournaments';
 import { prisma } from '@/lib/db';
@@ -12,7 +12,7 @@ import { publishTournamentMutation } from '@/server/infrastructure/mutation-effe
 vi.mock('@/lib/db', () => ({
   prisma: {
     $transaction: vi.fn(),
-    group: {
+    division: {
       update: vi.fn(),
     },
     tournament: {
@@ -37,8 +37,8 @@ vi.mock('@/server/infrastructure/mutation-effects', () => ({
 const draftTournament = {
   id: 't1',
   status: 'draft',
-  arenaGroupOrder: { '1': ['g1', 'g2'], '2': ['g3'] },
-  groups: [
+  arenaDivisionOrder: { '1': ['g1', 'g2'], '2': ['g3'] },
+  divisions: [
     { id: 'g1', arenaIndex: 1 },
     { id: 'g2', arenaIndex: 1 },
     { id: 'g3', arenaIndex: 2 },
@@ -54,7 +54,7 @@ beforeEach(() => {
   vi.mocked(prisma.tournament.update).mockReturnValue({
     op: 'tournament',
   } as never);
-  vi.mocked(prisma.group.update).mockReturnValue({ op: 'group' } as never);
+  vi.mocked(prisma.division.update).mockReturnValue({ op: 'group' } as never);
   vi.mocked(prisma.$transaction).mockResolvedValue([] as never);
 });
 
@@ -64,10 +64,10 @@ describe('tournament arena order infrastructure', () => {
       draftTournament as never
     );
 
-    await moveGroupBetweenArenas(
+    await moveDivisionBetweenArenas(
       {
         tournamentId: 't1',
-        groupId: 'g2',
+        divisionId: 'g2',
         fromArena: 1,
         toArena: 2,
         insertIndex: 1,
@@ -75,13 +75,13 @@ describe('tournament arena order infrastructure', () => {
       tournamentArenaOrderStore
     );
 
-    expect(prisma.group.update).toHaveBeenCalledWith({
+    expect(prisma.division.update).toHaveBeenCalledWith({
       where: { id: 'g2' },
       data: { arenaIndex: 2 },
     });
     expect(prisma.tournament.update).toHaveBeenCalledWith({
       where: { id: 't1' },
-      data: { arenaGroupOrder: { '1': ['g1'], '2': ['g3', 'g2'] } },
+      data: { arenaDivisionOrder: { '1': ['g1'], '2': ['g3', 'g2'] } },
     });
     expect(prisma.$transaction).toHaveBeenCalledWith([
       { op: 'group' },
@@ -94,11 +94,11 @@ describe('tournament arena order infrastructure', () => {
       draftTournament as never
     );
 
-    await setArenaGroupOrder(
+    await setArenaDivisionOrder(
       {
         tournamentId: 't1',
         arenaIndex: 1,
-        groupIds: ['g2', 'g1'],
+        divisionIds: ['g2', 'g1'],
       },
       tournamentArenaOrderStore
     );

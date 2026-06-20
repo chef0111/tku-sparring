@@ -12,7 +12,7 @@ export const deviceLastSelectionStore: DeviceLastSelectionStore = {
     }
     return {
       tournamentId: row.tournamentId,
-      groupId: row.groupId,
+      divisionId: row.divisionId,
       matchId: row.matchId,
     };
   },
@@ -20,13 +20,13 @@ export const deviceLastSelectionStore: DeviceLastSelectionStore = {
   async findMatchContext(matchId) {
     return prisma.match.findUnique({
       where: { id: matchId },
-      select: { groupId: true, tournamentId: true },
+      select: { divisionId: true, tournamentId: true },
     });
   },
 
-  async findGroupContext(groupId) {
-    return prisma.group.findUnique({
-      where: { id: groupId },
+  async findDivisionContext(divisionId) {
+    return prisma.division.findUnique({
+      where: { id: divisionId },
       select: { tournamentId: true },
     });
   },
@@ -40,25 +40,25 @@ export const deviceLastSelectionStore: DeviceLastSelectionStore = {
   },
 
   async upsert(command: SetLastSelectionCommand) {
-    const { userId, deviceId, tournamentId, groupId, matchId } = command;
+    const { userId, deviceId, tournamentId, divisionId, matchId } = command;
     const row = await prisma.deviceLastSelection.upsert({
       where: { userId_deviceId: { userId, deviceId } },
       create: {
         userId,
         deviceId,
         tournamentId: tournamentId ?? null,
-        groupId: groupId ?? null,
+        divisionId: divisionId ?? null,
         matchId: matchId ?? null,
       },
       update: {
         tournamentId: tournamentId ?? null,
-        groupId: groupId ?? null,
+        divisionId: divisionId ?? null,
         matchId: matchId ?? null,
       },
     });
     return {
       tournamentId: row.tournamentId,
-      groupId: row.groupId,
+      divisionId: row.divisionId,
       matchId: row.matchId,
     };
   },

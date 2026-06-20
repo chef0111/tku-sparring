@@ -2,7 +2,7 @@ import type { MatchRead } from '@/server/domain/tournament/match/match-read';
 import type { MutationActivityInput } from '@/server/application/activity/activity-types';
 import type { CreateCustomMatchCommand } from '../use-cases/custom-commands';
 
-export type CustomMatchGroupContext = {
+export type CustomMatchDivisionContext = {
   id: string;
   tournamentId: string;
   tournamentStatus: string;
@@ -12,7 +12,7 @@ export type CustomMatchDeleteContext = {
   id: string;
   kind: string;
   displayLabel: string | null;
-  groupId: string;
+  divisionId: string;
   tournamentId: string;
   tournamentStatus: string;
 };
@@ -20,11 +20,13 @@ export type CustomMatchDeleteContext = {
 export type CustomMatchResult = MatchRead;
 
 export type CustomMatchStore = {
-  findGroup: (groupId: string) => Promise<CustomMatchGroupContext | null>;
+  findDivision: (
+    divisionId: string
+  ) => Promise<CustomMatchDivisionContext | null>;
   findForDelete: (matchId: string) => Promise<CustomMatchDeleteContext | null>;
   create: (input: {
     command: CreateCustomMatchCommand;
-    group: CustomMatchGroupContext;
+    group: CustomMatchDivisionContext;
     activity: MutationActivityInput;
   }) => Promise<CustomMatchResult>;
   delete: (input: {

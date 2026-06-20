@@ -14,7 +14,7 @@ export type TournamentLifecycleFlags = {
   canComplete: boolean;
 };
 
-export type TournamentGroupSummary = {
+export type TournamentDivisionSummary = {
   id: string;
   name: string;
   _count: { tournamentAthletes: number; matches: number };
@@ -27,9 +27,9 @@ export type TournamentDetail = {
   createdAt: Date;
   updatedAt: Date;
   nameSortKey: string;
-  arenaGroupOrder: unknown;
-  groups: Array<TournamentGroupSummary>;
-  _count: { groups: number; matches: number; tournamentAthletes: number };
+  arenaDivisionOrder: unknown;
+  divisions: Array<TournamentDivisionSummary>;
+  _count: { divisions: number; matches: number; tournamentAthletes: number };
   lifecycle: TournamentLifecycleFlags;
 };
 
@@ -40,9 +40,9 @@ export type TournamentListItem = {
   createdAt: Date;
   updatedAt: Date;
   nameSortKey: string;
-  arenaGroupOrder: unknown;
+  arenaDivisionOrder: unknown;
   _count: {
-    groups: number;
+    divisions: number;
     matches: number;
     tournamentAthletes: number;
     actionableMatches: number;

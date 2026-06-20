@@ -1,5 +1,5 @@
 import { tournamentRouter } from './tournaments/router';
-import { groupRouter } from './groups/router';
+import { divisionRouter } from './divisions/router';
 import { bracketRouter, matchRouter } from './matches/router';
 import { athleteProfileRouter } from './athlete-profiles/router';
 import { tournamentAthleteRouter } from './tournament-athletes/router';
@@ -10,7 +10,7 @@ import { deviceLastSelectionRouter } from './device-last-selection/router';
 
 export default {
   tournament: tournamentRouter,
-  group: groupRouter,
+  division: divisionRouter,
   match: matchRouter,
   bracket: bracketRouter,
   athleteProfile: athleteProfileRouter,

@@ -12,9 +12,9 @@ export const TOURNAMENT_ACTIVITY_EVENT_TYPES = [
   'match.swap_participants',
   'match.create_custom',
   'match.delete_custom',
-  'group.athlete_assigned',
-  'group.athlete_unassigned',
-  'group.auto_assign',
+  'division.athlete_assigned',
+  'division.athlete_unassigned',
+  'division.auto_assign',
 ] as const;
 
 export type TournamentActivityEventType =

@@ -1,8 +1,8 @@
 import type {
   EnsureArenaSlotCommand,
-  MoveGroupArenaCommand,
+  MoveDivisionArenaCommand,
   RetireArenaCommand,
-  SetArenaGroupOrderCommand,
+  SetArenaDivisionOrderCommand,
 } from './arena-order-commands';
 import type {
   ArenaOrderTournament,
@@ -21,55 +21,61 @@ async function loadTournament(
   return tournament;
 }
 
-function assertSameArenaGroupList(
+function assertSameArenaDivisionList(
   tournament: ArenaOrderTournament,
   arenaIndex: number,
-  groupIds: Array<string>
+  divisionIds: Array<string>
 ) {
-  const onArena = tournament.groups.filter((g) => g.arenaIndex === arenaIndex);
+  const onArena = tournament.divisions.filter(
+    (g) => g.arenaIndex === arenaIndex
+  );
   const expected = new Set(onArena.map((g) => g.id));
 
-  if (groupIds.length !== expected.size) {
+  if (divisionIds.length !== expected.size) {
     throw new BadRequestError(
-      'Group list must include every group on this arena exactly once'
+      'Division list must include every division on this arena exactly once'
     );
   }
 
-  for (const gid of groupIds) {
+  for (const gid of divisionIds) {
     if (!expected.has(gid)) {
       throw new BadRequestError(
-        'Group list must include every group on this arena exactly once'
+        'Division list must include every division on this arena exactly once'
       );
     }
   }
 }
 
-export async function setArenaGroupOrder(
-  command: SetArenaGroupOrderCommand,
+export async function setArenaDivisionOrder(
+  command: SetArenaDivisionOrderCommand,
   store: TournamentArenaOrderStore
 ) {
   const tournament = await loadTournament(command.tournamentId, store);
-  assertSameArenaGroupList(tournament, command.arenaIndex, command.groupIds);
-  return store.setArenaGroupOrder(command, tournament);
+  assertSameArenaDivisionList(
+    tournament,
+    command.arenaIndex,
+    command.divisionIds
+  );
+  return store.setArenaDivisionOrder(command, tournament);
 }
 
-export async function moveGroupBetweenArenas(
-  command: MoveGroupArenaCommand,
+export async function moveDivisionBetweenArenas(
+  command: MoveDivisionArenaCommand,
   store: TournamentArenaOrderStore
 ) {
   if (command.fromArena === command.toArena) {
-    throw new BadRequestError('Same-arena reorder uses setArenaGroupOrder');
+    throw new BadRequestError('Same-arena reorder uses setArenaDivisionOrder');
   }
 
   const tournament = await loadTournament(command.tournamentId, store);
 
-  const group = tournament.groups.find((g) => g.id === command.groupId);
-  if (!group) throw new NotFoundError('Group not found on this tournament');
+  const group = tournament.divisions.find((g) => g.id === command.divisionId);
+  if (!group) throw new NotFoundError('Division not found on this tournament');
   if (group.arenaIndex !== command.fromArena) {
-    throw new BadRequestError('Group is not on the source arena');
+    throw new BadRequestError('Division is not on the source arena');
   }
 
-  const onToAll = tournament.groups.filter(
+  const onToAll = tournament.divisions.filter(
     (g) => g.arenaIndex === command.toArena
   );
   const maxInsert = onToAll.length;
@@ -77,7 +83,7 @@ export async function moveGroupBetweenArenas(
     throw new BadRequestError('Invalid insert index');
   }
 
-  return store.moveGroupBetweenArenas(command, tournament);
+  return store.moveDivisionBetweenArenas(command, tournament);
 }
 
 export async function ensureArenaSlot(
@@ -90,11 +96,11 @@ export async function ensureArenaSlot(
 
   const tournament = await loadTournament(command.tournamentId, store);
 
-  const onArena = tournament.groups.filter(
+  const onArena = tournament.divisions.filter(
     (g) => g.arenaIndex === command.arenaIndex
   );
   if (onArena.length > 0) {
-    throw new BadRequestError('That arena already has groups');
+    throw new BadRequestError('That arena already has divisions');
   }
 
   return store.ensureArenaSlot(command, tournament);

@@ -3,9 +3,9 @@ import {
   CreateTournamentSchema,
   EnsureArenaSlotSchema,
   ListTournamentsSchema,
-  MoveGroupArenaSchema,
+  MoveDivisionArenaSchema,
   RetireArenaSchema,
-  SetArenaGroupOrderSchema,
+  SetArenaDivisionOrderSchema,
   SetTournamentStatusSchema,
   UpdateTournamentSchema,
 } from './dto';
@@ -20,9 +20,9 @@ import {
 } from '@/server/application/tournaments/use-cases/lifecycle';
 import {
   ensureArenaSlot as runEnsureArenaSlot,
-  moveGroupBetweenArenas as runMoveGroupBetweenArenas,
+  moveDivisionBetweenArenas as runMoveDivisionBetweenArenas,
   retireArena as runRetireArena,
-  setArenaGroupOrder as runSetArenaGroupOrder,
+  setArenaDivisionOrder as runSetArenaDivisionOrder,
 } from '@/server/application/tournaments/use-cases/arena-order';
 
 export const listTournaments = authorized
@@ -69,18 +69,21 @@ export const setTournamentStatus = authorized
     );
   });
 
-export const setArenaGroupOrder = authorized
-  .input(SetArenaGroupOrderSchema)
+export const setArenaDivisionOrder = authorized
+  .input(SetArenaDivisionOrderSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
-    return runSetArenaGroupOrder(input, context.repos.tournamentArenaOrder);
+    return runSetArenaDivisionOrder(input, context.repos.tournamentArenaOrder);
   });
 
-export const moveGroupArena = authorized
-  .input(MoveGroupArenaSchema)
+export const moveDivisionArena = authorized
+  .input(MoveDivisionArenaSchema)
   .handler(async ({ input, context }) => {
     assertSystemAdmin(context.user);
-    return runMoveGroupBetweenArenas(input, context.repos.tournamentArenaOrder);
+    return runMoveDivisionBetweenArenas(
+      input,
+      context.repos.tournamentArenaOrder
+    );
   });
 
 export const ensureArenaSlot = authorized

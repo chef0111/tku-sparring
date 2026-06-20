@@ -7,12 +7,12 @@ export type SetLastSelectionCommand = {
   userId: string;
   deviceId: string;
   tournamentId?: string | null;
-  groupId?: string | null;
+  divisionId?: string | null;
   matchId?: string | null;
 };
 
 export type LastSelectionPayload = {
   tournamentId: string | null;
-  groupId: string | null;
+  divisionId: string | null;
   matchId: string | null;
 };

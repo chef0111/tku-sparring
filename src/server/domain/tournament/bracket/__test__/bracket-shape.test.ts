@@ -5,7 +5,7 @@ import { planBracketShell, planRound0Placements } from '../bracket-shape';
 describe('planBracketShell', () => {
   it('creates one round-0 match for two athletes', () => {
     const plan = planBracketShell({
-      groupId: 'g1',
+      divisionId: 'g1',
       tournamentId: 't1',
       athleteCount: 2,
       thirdPlaceMatch: false,
@@ -16,7 +16,7 @@ describe('planBracketShell', () => {
       expect.objectContaining({
         round: 0,
         matchIndex: 0,
-        groupId: 'g1',
+        divisionId: 'g1',
         tournamentId: 't1',
       }),
     ]);
@@ -24,13 +24,13 @@ describe('planBracketShell', () => {
 
   it('adds a Third-Place Match only when enabled and athlete count is at least four', () => {
     const withoutEnoughAthletes = planBracketShell({
-      groupId: 'g1',
+      divisionId: 'g1',
       tournamentId: 't1',
       athleteCount: 3,
       thirdPlaceMatch: true,
     });
     const withEnoughAthletes = planBracketShell({
-      groupId: 'g1',
+      divisionId: 'g1',
       tournamentId: 't1',
       athleteCount: 4,
       thirdPlaceMatch: true,

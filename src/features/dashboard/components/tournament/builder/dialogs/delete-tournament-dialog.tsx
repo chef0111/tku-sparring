@@ -39,7 +39,7 @@ export function DeleteTournamentDialog({
               <b>&quot;{tournamentName}&quot;</b>?
             </p>
             <p>
-              This will permanently remove all groups, athletes, and matches.
+              This will permanently remove all divisions, athletes, and matches.
               This action cannot be undone.
             </p>
           </DialogDescription>

@@ -49,7 +49,7 @@ describe('matchTransitionStore', () => {
     const match = {
       id: 'm1',
       tournamentId: 't-1',
-      groupId: 'g-1',
+      divisionId: 'g-1',
       round: 0,
       matchIndex: 0,
       tournamentWinnerId: 'ta-red',

@@ -43,7 +43,7 @@ export function DeleteTournamentDialog({
               Delete <span className="font-semibold">{tournament?.name}</span>?
             </p>
             <p>
-              This removes all of its groups, matches, and athlete
+              This removes all of its divisions, matches, and athlete
               participations. This action cannot be undone.
             </p>
           </DialogDescription>

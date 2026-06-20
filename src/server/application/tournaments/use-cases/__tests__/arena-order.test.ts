@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { moveGroupBetweenArenas, setArenaGroupOrder } from '../arena-order';
+import {
+  moveDivisionBetweenArenas,
+  setArenaDivisionOrder,
+} from '../arena-order';
 import type { TournamentArenaOrderStore } from '../../repositories/arena-order';
 import {
   BadRequestError,
@@ -11,8 +14,8 @@ import {
 const draftTournament = {
   id: 't1',
   status: 'draft',
-  arenaGroupOrder: { '1': ['g1', 'g2'], '2': ['g3'] },
-  groups: [
+  arenaDivisionOrder: { '1': ['g1', 'g2'], '2': ['g3'] },
+  divisions: [
     { id: 'g1', arenaIndex: 1 },
     { id: 'g2', arenaIndex: 1 },
     { id: 'g3', arenaIndex: 2 },
@@ -31,11 +34,11 @@ function fakeStore(
         tournament?.id === tournamentId ? tournament : null
       );
     },
-    setArenaGroupOrder(command, loaded) {
+    setArenaDivisionOrder(command, loaded) {
       setOrder = { command, loaded };
       return Promise.resolve({ id: loaded.id });
     },
-    moveGroupBetweenArenas(command, loaded) {
+    moveDivisionBetweenArenas(command, loaded) {
       moved = { command, loaded };
       return Promise.resolve({ id: loaded.id });
     },
@@ -59,12 +62,12 @@ function fakeStore(
 }
 
 describe('tournament arena order use cases', () => {
-  it('setArenaGroupOrder throws NotFoundError when tournament is missing', async () => {
+  it('setArenaDivisionOrder throws NotFoundError when tournament is missing', async () => {
     const fixture = fakeStore(null);
 
     await expect(
-      setArenaGroupOrder(
-        { tournamentId: 't1', arenaIndex: 1, groupIds: ['g1', 'g2'] },
+      setArenaDivisionOrder(
+        { tournamentId: 't1', arenaIndex: 1, divisionIds: ['g1', 'g2'] },
         fixture.store
       )
     ).rejects.toThrow(NotFoundError);
@@ -72,12 +75,12 @@ describe('tournament arena order use cases', () => {
     expect(fixture.setOrder).toBeNull();
   });
 
-  it('setArenaGroupOrder rejects non-draft tournaments', async () => {
+  it('setArenaDivisionOrder rejects non-draft tournaments', async () => {
     const fixture = fakeStore({ ...draftTournament, status: 'active' });
 
     await expect(
-      setArenaGroupOrder(
-        { tournamentId: 't1', arenaIndex: 1, groupIds: ['g1', 'g2'] },
+      setArenaDivisionOrder(
+        { tournamentId: 't1', arenaIndex: 1, divisionIds: ['g1', 'g2'] },
         fixture.store
       )
     ).rejects.toThrow(PolicyViolationError);
@@ -85,19 +88,19 @@ describe('tournament arena order use cases', () => {
     expect(fixture.setOrder).toBeNull();
   });
 
-  it('setArenaGroupOrder requires every group on the arena exactly once', async () => {
+  it('setArenaDivisionOrder requires every group on the arena exactly once', async () => {
     const fixture = fakeStore();
 
     await expect(
-      setArenaGroupOrder(
-        { tournamentId: 't1', arenaIndex: 1, groupIds: ['g1'] },
+      setArenaDivisionOrder(
+        { tournamentId: 't1', arenaIndex: 1, divisionIds: ['g1'] },
         fixture.store
       )
     ).rejects.toThrow(BadRequestError);
 
     await expect(
-      setArenaGroupOrder(
-        { tournamentId: 't1', arenaIndex: 1, groupIds: ['g1', 'g3'] },
+      setArenaDivisionOrder(
+        { tournamentId: 't1', arenaIndex: 1, divisionIds: ['g1', 'g3'] },
         fixture.store
       )
     ).rejects.toThrow(/exactly once/);
@@ -105,11 +108,11 @@ describe('tournament arena order use cases', () => {
     expect(fixture.setOrder).toBeNull();
   });
 
-  it('setArenaGroupOrder delegates to the store after validation', async () => {
+  it('setArenaDivisionOrder delegates to the store after validation', async () => {
     const fixture = fakeStore();
 
-    await setArenaGroupOrder(
-      { tournamentId: 't1', arenaIndex: 1, groupIds: ['g2', 'g1'] },
+    await setArenaDivisionOrder(
+      { tournamentId: 't1', arenaIndex: 1, divisionIds: ['g2', 'g1'] },
       fixture.store
     );
 
@@ -117,19 +120,19 @@ describe('tournament arena order use cases', () => {
       command: {
         tournamentId: 't1',
         arenaIndex: 1,
-        groupIds: ['g2', 'g1'],
+        divisionIds: ['g2', 'g1'],
       },
     });
   });
 
-  it('moveGroupBetweenArenas rejects same-arena moves', async () => {
+  it('moveDivisionBetweenArenas rejects same-arena moves', async () => {
     const fixture = fakeStore();
 
     await expect(
-      moveGroupBetweenArenas(
+      moveDivisionBetweenArenas(
         {
           tournamentId: 't1',
-          groupId: 'g2',
+          divisionId: 'g2',
           fromArena: 1,
           toArena: 1,
           insertIndex: 0,
@@ -141,13 +144,13 @@ describe('tournament arena order use cases', () => {
     expect(fixture.moved).toBeNull();
   });
 
-  it('moveGroupBetweenArenas delegates to the store after validation', async () => {
+  it('moveDivisionBetweenArenas delegates to the store after validation', async () => {
     const fixture = fakeStore();
 
-    await moveGroupBetweenArenas(
+    await moveDivisionBetweenArenas(
       {
         tournamentId: 't1',
-        groupId: 'g2',
+        divisionId: 'g2',
         fromArena: 1,
         toArena: 2,
         insertIndex: 1,
@@ -157,7 +160,7 @@ describe('tournament arena order use cases', () => {
 
     expect(fixture.moved).toMatchObject({
       command: {
-        groupId: 'g2',
+        divisionId: 'g2',
         fromArena: 1,
         toArena: 2,
         insertIndex: 1,

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { createCustomMatch, deleteCustomMatch } from '../custom';
 import type {
   CustomMatchDeleteContext,
-  CustomMatchGroupContext,
+  CustomMatchDivisionContext,
   CustomMatchResult,
   CustomMatchStore,
 } from '../../repositories/custom';
@@ -16,7 +16,7 @@ import {
 type CreateInput = Parameters<CustomMatchStore['create']>[0];
 type DeleteInput = Parameters<CustomMatchStore['delete']>[0];
 
-const baseGroup: CustomMatchGroupContext = {
+const baseGroup: CustomMatchDivisionContext = {
   id: 'g1',
   tournamentId: 't1',
   tournamentStatus: 'active',
@@ -26,7 +26,7 @@ const baseDeleteContext: CustomMatchDeleteContext = {
   id: 'm1',
   kind: 'custom',
   displayLabel: 'Exhibition',
-  groupId: 'g1',
+  divisionId: 'g1',
   tournamentId: 't1',
   tournamentStatus: 'active',
 };
@@ -35,7 +35,7 @@ const baseResult: CustomMatchResult = {
   id: 'm1',
   kind: 'custom',
   displayLabel: 'Exhibition',
-  groupId: 'g1',
+  divisionId: 'g1',
   tournamentId: 't1',
   round: 900,
   matchIndex: 0,
@@ -56,15 +56,15 @@ const baseResult: CustomMatchResult = {
 };
 
 function fakeStore(
-  group: CustomMatchGroupContext | null = baseGroup,
+  group: CustomMatchDivisionContext | null = baseGroup,
   deleteContext: CustomMatchDeleteContext | null = baseDeleteContext
 ) {
   let created: CreateInput | null = null;
   let deleted: DeleteInput | null = null;
 
   const store: CustomMatchStore = {
-    findGroup(groupId) {
-      return Promise.resolve(group?.id === groupId ? group : null);
+    findDivision(divisionId) {
+      return Promise.resolve(group?.id === divisionId ? group : null);
     },
     findForDelete(matchId) {
       return Promise.resolve(
@@ -99,7 +99,7 @@ describe('custom match use cases', () => {
     await expect(
       createCustomMatch(
         {
-          groupId: 'missing',
+          divisionId: 'missing',
           displayLabel: 'Exhibition',
           red: { mode: 'direct', tournamentAthleteId: 'ta-r' },
           blue: { mode: 'direct', tournamentAthleteId: 'ta-b' },
@@ -121,7 +121,7 @@ describe('custom match use cases', () => {
     await expect(
       createCustomMatch(
         {
-          groupId: 'g1',
+          divisionId: 'g1',
           displayLabel: 'Exhibition',
           red: { mode: 'direct', tournamentAthleteId: 'ta-r' },
           blue: { mode: 'direct', tournamentAthleteId: 'ta-b' },
@@ -139,7 +139,7 @@ describe('custom match use cases', () => {
 
     await createCustomMatch(
       {
-        groupId: 'g1',
+        divisionId: 'g1',
         displayLabel: ' Exhibition ',
         red: { mode: 'direct', tournamentAthleteId: 'ta-r' },
         blue: { mode: 'direct', tournamentAthleteId: 'ta-b' },
@@ -150,7 +150,7 @@ describe('custom match use cases', () => {
 
     expect(fixture.created).toMatchObject({
       command: expect.objectContaining({
-        groupId: 'g1',
+        divisionId: 'g1',
         displayLabel: ' Exhibition ',
         adminId: 'admin-1',
       }),
@@ -158,7 +158,7 @@ describe('custom match use cases', () => {
       activity: {
         eventType: 'match.create_custom',
         payload: {
-          groupId: 'g1',
+          divisionId: 'g1',
           displayLabel: 'Exhibition',
         },
       },
@@ -218,7 +218,7 @@ describe('custom match use cases', () => {
       activity: {
         eventType: 'match.delete_custom',
         payload: {
-          groupId: 'g1',
+          divisionId: 'g1',
           displayLabel: 'Exhibition',
         },
       },

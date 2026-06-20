@@ -1,5 +1,5 @@
 /** Advance Settings list rows shared by client, oRPC, and server. */
-export type SelectionGroupRow = {
+export type SelectionDivisionRow = {
   id: string;
   name: string;
   tournamentId: string;
@@ -13,7 +13,7 @@ export type MatchClaimStatus = 'none' | 'held_by_me' | 'held_by_other';
 export type SelectionMatchRow = {
   id: string;
   label: string;
-  groupId: string;
+  divisionId: string;
   status: string;
   redAthleteName: string | null;
   blueAthleteName: string | null;

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { MatchStatus } from '@/contracts/tournament/match';
-import type { TournamentAthleteData } from '@/contracts/tournament/group';
+import type { TournamentAthleteData } from '@/contracts/tournament/division';
 import { useTournamentBracket } from '@/features/dashboard/contexts/tournament-bracket/use-tournament-bracket';
 import {
   useAdminSetMatchStatus,
@@ -36,7 +36,7 @@ export function useMatchDetailPanel() {
     tournamentStatus,
     maxBracketRound,
     matches,
-    selectedGroup,
+    selectedDivision,
   } = useTournamentBracket();
 
   const [redWins, setRedWins] = React.useState(0);
@@ -100,13 +100,13 @@ export function useMatchDetailPanel() {
     : null;
 
   const isThirdPlace = React.useMemo(() => {
-    if (!match || !selectedGroup) return false;
+    if (!match || !selectedDivision) return false;
     return isThirdPlaceMatch(
       match,
       matches.filter((m) => m.kind === 'bracket'),
-      selectedGroup.thirdPlaceMatch
+      selectedDivision.thirdPlaceMatch
     );
-  }, [match, matches, selectedGroup]);
+  }, [match, matches, selectedDivision]);
 
   const canEdit = !!match && !readOnly && match.status !== 'complete';
   const canResetMatch =

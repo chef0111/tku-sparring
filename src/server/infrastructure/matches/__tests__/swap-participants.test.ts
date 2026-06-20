@@ -37,9 +37,9 @@ function upperMatch(over: Record<string, unknown> = {}) {
     redAthleteId: 'ap-red',
     blueAthleteId: null,
     tournamentId: 't-1',
-    groupId: 'g1',
+    divisionId: 'g1',
     tournament: { status: 'draft' },
-    group: {
+    division: {
       thirdPlaceMatch: false,
       tournament: { status: 'draft' },
     },
@@ -144,7 +144,7 @@ describe('swapParticipants', () => {
         round: 2,
         matchIndex: 1,
         tournament: { status: 'draft' },
-        group: {
+        division: {
           thirdPlaceMatch: true,
           tournament: { status: 'draft' },
         },

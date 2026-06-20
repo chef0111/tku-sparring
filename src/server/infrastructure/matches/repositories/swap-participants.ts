@@ -28,7 +28,7 @@ export const matchParticipantStore: MatchParticipantStore = {
     const result = await prisma.$transaction(async (tx) => {
       const match = await tx.match.findUnique({
         where: { id: command.matchId },
-        include: { group: { include: { tournament: true } } },
+        include: { division: { include: { tournament: true } } },
       });
       if (!match) throw new NotFoundError('Match not found');
 
@@ -48,7 +48,7 @@ export const matchParticipantStore: MatchParticipantStore = {
       }
 
       const bracketRows = await tx.match.findMany({
-        where: { groupId: match.groupId, kind: 'bracket' },
+        where: { divisionId: match.divisionId, kind: 'bracket' },
         select: { id: true, round: true, matchIndex: true, kind: true },
       });
       const bracketMatch = {
@@ -62,7 +62,7 @@ export const matchParticipantStore: MatchParticipantStore = {
         isThirdPlaceMatch(
           bracketMatch,
           bracketRows,
-          match.group.thirdPlaceMatch
+          match.division.thirdPlaceMatch
         )
       ) {
         throw new BadRequestError(

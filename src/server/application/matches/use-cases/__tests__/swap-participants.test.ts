@@ -12,7 +12,7 @@ const baseMatch = {
   id: 'm1',
   kind: 'bracket',
   displayLabel: null,
-  groupId: 'g1',
+  divisionId: 'g1',
   tournamentId: 't1',
   round: 1,
   matchIndex: 0,

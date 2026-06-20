@@ -11,9 +11,9 @@ function makeTournament(
     createdAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-01-01'),
     nameSortKey: 'test',
-    arenaGroupOrder: null,
+    arenaDivisionOrder: null,
     _count: {
-      groups: 0,
+      divisions: 0,
       matches: 0,
       tournamentAthletes: 0,
       actionableMatches: 0,
@@ -29,7 +29,7 @@ describe('computeDashboardStats', () => {
         id: '1',
         status: 'draft',
         _count: {
-          groups: 2,
+          divisions: 2,
           matches: 10,
           tournamentAthletes: 20,
           actionableMatches: 6,
@@ -39,7 +39,7 @@ describe('computeDashboardStats', () => {
         id: '2',
         status: 'active',
         _count: {
-          groups: 1,
+          divisions: 1,
           matches: 5,
           tournamentAthletes: 8,
           actionableMatches: 4,
@@ -52,7 +52,7 @@ describe('computeDashboardStats', () => {
     expect(result.kpis.totalTournaments).toBe(2);
     expect(result.kpis.byStatus).toEqual({ draft: 1, active: 1, completed: 0 });
     expect(result.kpis.totalAthletes).toBe(28);
-    expect(result.kpis.totalGroups).toBe(3);
+    expect(result.kpis.totalDivisions).toBe(3);
     expect(result.kpis.totalMatches).toBe(10);
   });
 
@@ -63,7 +63,7 @@ describe('computeDashboardStats', () => {
         name: 'Alpha Open',
         status: 'draft',
         _count: {
-          groups: 2,
+          divisions: 2,
           matches: 10,
           tournamentAthletes: 20,
           actionableMatches: 6,
@@ -74,7 +74,7 @@ describe('computeDashboardStats', () => {
         name: 'Beta Cup',
         status: 'active',
         _count: {
-          groups: 1,
+          divisions: 1,
           matches: 5,
           tournamentAthletes: 30,
           actionableMatches: 4,
@@ -85,7 +85,7 @@ describe('computeDashboardStats', () => {
         name: 'Gamma Classic',
         status: 'completed',
         _count: {
-          groups: 1,
+          divisions: 1,
           matches: 8,
           tournamentAthletes: 12,
           actionableMatches: 3,

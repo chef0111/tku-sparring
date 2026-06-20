@@ -251,9 +251,9 @@ export function sanitizeFilenamePart(value: string): string {
 
 export function bracketScreenshotFilename(
   tournamentName: string,
-  groupName: string
+  divisionName: string
 ): string {
   const tournament = sanitizeFilenamePart(tournamentName) || 'tournament';
-  const group = sanitizeFilenamePart(groupName) || 'group';
-  return `${tournament}-${group}-bracket.png`;
+  const division = sanitizeFilenamePart(divisionName) || 'division';
+  return `${tournament}-${division}-bracket.png`;
 }

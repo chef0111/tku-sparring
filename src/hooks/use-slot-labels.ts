@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { MatchData } from '@/contracts/tournament/match';
-import type { TournamentAthleteData } from '@/contracts/tournament/group';
+import type { TournamentAthleteData } from '@/contracts/tournament/division';
 import {
   formatFeederWinnerPlaceholder,
   getFeederMatch,
@@ -44,7 +44,7 @@ export function useSlotLabels(
     if (match.round === 0) return 'Open';
     const feeder = getFeederMatch(
       matches,
-      match.groupId,
+      match.divisionId,
       match.round,
       match.matchIndex,
       'red',
@@ -56,7 +56,7 @@ export function useSlotLabels(
     matchLabel,
     match.matchIndex,
     match.round,
-    match.groupId,
+    match.divisionId,
     matches,
     redAssignedName,
     resolveTaName,
@@ -68,7 +68,7 @@ export function useSlotLabels(
     if (match.round === 0) return 'Open';
     const feeder = getFeederMatch(
       matches,
-      match.groupId,
+      match.divisionId,
       match.round,
       match.matchIndex,
       'blue',
@@ -80,7 +80,7 @@ export function useSlotLabels(
     matchLabel,
     match.matchIndex,
     match.round,
-    match.groupId,
+    match.divisionId,
     matches,
     blueAssignedName,
     resolveTaName,

@@ -1,6 +1,6 @@
 export type ListTournamentAthletesQuery = {
   tournamentId: string;
-  groupId?: string;
+  divisionId?: string;
   unassignedOnly?: boolean;
   status?: 'selected' | 'assigned' | 'eliminated';
   page: number;
@@ -24,7 +24,7 @@ export type BulkAddAthletesCommand = {
 
 export type UpdateTournamentAthleteCommand = {
   id: string;
-  groupId?: string | null;
+  divisionId?: string | null;
   status?: 'selected' | 'assigned' | 'eliminated';
   seed?: number | null;
   locked?: boolean;

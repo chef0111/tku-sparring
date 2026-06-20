@@ -3,7 +3,7 @@ import { PlusIcon } from 'lucide-react';
 import type { CreateCustomMatchDTO } from '@/orpc/matches/dto';
 import type { CreateCustomMatchFormValues } from '@/lib/validations';
 import type { MatchData } from '@/contracts/tournament/match';
-import type { TournamentAthleteData } from '@/contracts/tournament/group';
+import type { TournamentAthleteData } from '@/contracts/tournament/division';
 import {
   AthleteSelectionSync,
   DedupeAthleteSelection,
@@ -40,7 +40,7 @@ export function CreateCustomMatchDialog({
   onOpenChange,
 }: CreateCustomMatchDialogProps) {
   const {
-    selectedGroupId: groupId,
+    selectedDivisionId: divisionId,
     matches,
     athletes,
     matchLabel,
@@ -53,7 +53,7 @@ export function CreateCustomMatchDialog({
 
   const blocked =
     readOnly ||
-    !groupId ||
+    !divisionId ||
     matchList.length === 0 ||
     tournamentStatus === 'completed';
 
@@ -101,12 +101,12 @@ export function CreateCustomMatchDialog({
       onSubmit: CreateCustomMatchFormSchema,
     },
     onSubmit: async ({ value }) => {
-      if (!groupId || blocked) return;
+      if (!divisionId || blocked) return;
       const red = buildSlot(value.redAthlete, value.redSelectionId);
       const blue = buildSlot(value.blueAthlete, value.blueSelectionId);
       if (!red || !blue) return;
       const payload: CreateCustomMatchDTO = {
-        groupId,
+        divisionId,
         displayLabel: value.displayLabel.trim(),
         red,
         blue,
@@ -124,7 +124,7 @@ export function CreateCustomMatchDialog({
   React.useEffect(() => {
     if (!open) return;
     form.reset(defaultValues);
-  }, [open, groupId, defaultValues, form]);
+  }, [open, divisionId, defaultValues, form]);
 
   return (
     <Dialog
@@ -146,7 +146,7 @@ export function CreateCustomMatchDialog({
           <DialogHeader className="gap-0">
             <DialogTitle className="text-lg">Custom match</DialogTitle>
             <DialogDescription>
-              Exhibition bout in this group. Does not advance the elimination
+              Exhibition bout in this division. Does not advance the elimination
               bracket.
             </DialogDescription>
           </DialogHeader>

@@ -10,8 +10,8 @@ const tournament = {
   createdAt: new Date(),
   updatedAt: new Date(),
   lifecycle: { canComplete: false },
-  groups: [],
-  _count: { groups: 1, matches: 4, tournamentAthletes: 8 },
+  divisions: [],
+  _count: { divisions: 1, matches: 4, tournamentAthletes: 8 },
 } satisfies TournamentData;
 
 describe('computeCommandCenter', () => {
@@ -20,7 +20,7 @@ describe('computeCommandCenter', () => {
 
     expect(result.setupSteps).toEqual([
       expect.objectContaining({ id: 'athletes', complete: true }),
-      expect.objectContaining({ id: 'groups', complete: true }),
+      expect.objectContaining({ id: 'divisions', complete: true }),
       expect.objectContaining({ id: 'brackets', complete: false }),
     ]);
   });
@@ -29,7 +29,7 @@ describe('computeCommandCenter', () => {
     const result = computeCommandCenter({
       tournament,
       matches: [
-        { id: 'm1', groupId: 'g1', status: 'pending', kind: 'bracket' },
+        { id: 'm1', divisionId: 'g1', status: 'pending', kind: 'bracket' },
       ] as Array<MatchData>,
     });
 
@@ -44,7 +44,7 @@ describe('computeCommandCenter', () => {
     const result = computeCommandCenter({
       tournament,
       matches: [
-        { id: 'c1', groupId: 'g1', status: 'pending', kind: 'custom' },
+        { id: 'c1', divisionId: 'g1', status: 'pending', kind: 'custom' },
       ] as Array<MatchData>,
     });
 

@@ -23,7 +23,7 @@ function baseMatch(over: Partial<MatchData>): MatchData {
     blueLocked: over.blueLocked ?? false,
     cornersSwapped: over.cornersSwapped ?? false,
     updatedAt: over.updatedAt ?? new Date(0),
-    groupId: over.groupId ?? 'g1',
+    divisionId: over.divisionId ?? 'g1',
     tournamentId: over.tournamentId ?? 't1',
   };
 }

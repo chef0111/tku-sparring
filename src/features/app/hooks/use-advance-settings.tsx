@@ -4,11 +4,11 @@ import { getTournamentFields } from '../components/settings/constant/form';
 import type { QueryClient, UseQueryResult } from '@tanstack/react-query';
 import type { AdvanceFormData } from '@/features/app/contexts/settings/context';
 import type {
-  SelectionGroupRow,
+  SelectionDivisionRow,
   SelectionMatchRow,
 } from '@/contracts/advance/selection';
 import { resolveMatchComboboxRow } from '@/features/app/lib/settings/match';
-import { resolveGroupComboboxStatus } from '@/features/app/lib/settings/group';
+import { resolveDivisionComboboxStatus } from '@/features/app/lib/settings/division';
 import {
   arenaSelectionCatalogQueryOptions,
   arenaSelectionMatchesQueryOptions,
@@ -17,7 +17,7 @@ import { Status, StatusIndicator, StatusLabel } from '@/components/ui/status';
 
 type ArenaSelectionCatalogData = {
   tournaments: Array<{ id: string; name: string }>;
-  groups: Array<SelectionGroupRow>;
+  divisions: Array<SelectionDivisionRow>;
 };
 
 type ArenaSelectionMatchesData = {
@@ -32,8 +32,8 @@ export type AdvanceSettingsComboboxFormHandle = {
   ) => void;
 };
 
-const GROUP_STATUS_TEXT: Record<
-  ReturnType<typeof resolveGroupComboboxStatus>,
+const DIVISION_STATUS_TEXT: Record<
+  ReturnType<typeof resolveDivisionComboboxStatus>,
   string
 > = {
   online: 'Selected',
@@ -166,28 +166,30 @@ export function useAdvanceSettings(args: {
     [tournamentRows]
   );
 
-  const groupOptions = useMemo(
+  const divisionOptions = useMemo(
     () =>
-      (catalogQuery.data?.groups ?? []).map((g) => {
-        const st = resolveGroupComboboxStatus(g, advance.group);
+      (catalogQuery.data?.divisions ?? []).map((division) => {
+        const st = resolveDivisionComboboxStatus(division, advance.division);
         return {
-          value: g.id,
-          triggerLabel: g.name,
+          value: division.id,
+          triggerLabel: division.name,
           label: (
             <span className="flex w-full min-w-0 items-center justify-between gap-2">
               <span className="min-w-0 truncate">
-                <span className="font-medium">{g.name}</span>
+                <span className="font-medium">{division.name}</span>
                 <span className="text-muted-foreground font-normal">
                   {' '}
-                  — {g.arenaLabel}
+                  — {division.arenaLabel}
                 </span>
               </span>
               <div className="flex items-center">
-                <span className="text-muted-foreground text-xs">{g.id}</span>
+                <span className="text-muted-foreground text-xs">
+                  {division.id}
+                </span>
                 <Status status={st} className="-mr-6">
                   <StatusIndicator />
                   <StatusLabel className="truncate">
-                    {GROUP_STATUS_TEXT[st]}
+                    {DIVISION_STATUS_TEXT[st]}
                   </StatusLabel>
                 </Status>
               </div>
@@ -195,7 +197,7 @@ export function useAdvanceSettings(args: {
           ),
         };
       }),
-    [advance.group, catalogQuery.data?.groups]
+    [advance.division, catalogQuery.data?.divisions]
   );
 
   const matchOptions = useMemo(
@@ -222,30 +224,30 @@ export function useAdvanceSettings(args: {
     [matchesQuery.data?.matches]
   );
 
-  const groupsDisabled = !advance.tournament;
-  const matchesDisabled = !advance.group;
+  const divisionsDisabled = !advance.tournament;
+  const matchesDisabled = !advance.division;
 
-  const groupComboboxPending =
+  const divisionComboboxPending =
     Boolean(advance.tournament) &&
     catalogQuery.isFetching &&
     !catalogQuery.data;
   const matchComboboxPending =
-    Boolean(advance.group) && matchesQuery.isFetching && !matchesQuery.data;
+    Boolean(advance.division) && matchesQuery.isFetching && !matchesQuery.data;
 
   const tournamentFields = useMemo(
     () =>
       getTournamentFields(
         tournamentOptions,
-        groupOptions,
+        divisionOptions,
         matchOptions,
-        groupsDisabled,
+        divisionsDisabled,
         matchesDisabled,
-        { group: groupComboboxPending, match: matchComboboxPending }
+        { division: divisionComboboxPending, match: matchComboboxPending }
       ),
     [
-      groupComboboxPending,
-      groupOptions,
-      groupsDisabled,
+      divisionComboboxPending,
+      divisionOptions,
+      divisionsDisabled,
       matchComboboxPending,
       matchOptions,
       matchesDisabled,
@@ -264,18 +266,18 @@ export function useAdvanceSettings(args: {
       deviceId &&
       advance.tournament &&
       advance.tournament.length > 0 &&
-      advance.group &&
-      advance.group.length > 0
+      advance.division &&
+      advance.division.length > 0
     ) {
       void queryClient.invalidateQueries({
         queryKey: arenaSelectionMatchesQueryOptions({
           deviceId,
           tournamentId: advance.tournament,
-          groupId: advance.group,
+          divisionId: advance.division,
         }).queryKey,
       });
     }
-  }, [advance.group, advance.tournament, deviceId, queryClient]);
+  }, [advance.division, advance.tournament, deviceId, queryClient]);
 
   return { tournamentFields, refetchSelection };
 }

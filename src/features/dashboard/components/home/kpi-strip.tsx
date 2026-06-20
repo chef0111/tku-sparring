@@ -39,8 +39,8 @@ export function KpiStrip({ stats }: KpiStripProps) {
     stats.totalAthletes,
     stats.totalTournaments
   );
-  const avgGroups = formatAvgPerTournament(
-    stats.totalGroups,
+  const avgDivisions = formatAvgPerTournament(
+    stats.totalDivisions,
     stats.totalTournaments
   );
   const avgMatches = formatAvgPerTournament(
@@ -82,14 +82,14 @@ export function KpiStrip({ stats }: KpiStripProps) {
       ),
     },
     {
-      key: 'groups',
-      label: 'Groups',
+      key: 'divisions',
+      label: 'Divisions',
       icon: Layers,
-      value: stats.totalGroups,
+      value: stats.totalDivisions,
       footer: (
         <HubMetricFooter
           status="maintenance"
-          value={`${avgGroups} avg`}
+          value={`${avgDivisions} avg`}
           label="division buckets in play"
         />
       ),

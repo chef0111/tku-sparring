@@ -10,8 +10,12 @@ const LS_KEY = 'tku-arena-last-selection';
 
 type Persisted = {
   tournamentId: string | null;
-  groupId: string | null;
+  divisionId: string | null;
   matchId: string | null;
+};
+
+type LegacyPersisted = Persisted & {
+  groupId?: string | null;
 };
 
 function readLocal(): Persisted | null {
@@ -23,7 +27,12 @@ function readLocal(): Persisted | null {
     if (!raw) {
       return null;
     }
-    return JSON.parse(raw) as Persisted;
+    const parsed = JSON.parse(raw) as LegacyPersisted;
+    return {
+      tournamentId: parsed.tournamentId ?? null,
+      divisionId: parsed.divisionId ?? parsed.groupId ?? null,
+      matchId: parsed.matchId ?? null,
+    };
   } catch {
     return null;
   }
@@ -72,10 +81,10 @@ export function useArenaLastSelection() {
       if (session?.user) {
         try {
           const row = await client.device.lastSelection.get({ deviceId });
-          if (row?.tournamentId || row?.groupId || row?.matchId) {
+          if (row?.tournamentId || row?.divisionId || row?.matchId) {
             updateAdvanceForm({
               tournament: row.tournamentId,
-              group: row.groupId,
+              division: row.divisionId,
               match: row.matchId,
             });
             return;
@@ -89,7 +98,7 @@ export function useArenaLastSelection() {
       if (local) {
         updateAdvanceForm({
           tournament: local.tournamentId,
-          group: local.groupId,
+          division: local.divisionId,
           match: local.matchId,
         });
       }
@@ -98,7 +107,7 @@ export function useArenaLastSelection() {
 
   const persistRef = React.useRef({
     tournament: advance.tournament,
-    group: advance.group,
+    division: advance.division,
     match: advance.match,
   });
 
@@ -106,13 +115,13 @@ export function useArenaLastSelection() {
     const prev = persistRef.current;
     const next = {
       tournament: advance.tournament,
-      group: advance.group,
+      division: advance.division,
       match: advance.match,
     };
 
     const changed =
       prev.tournament !== next.tournament ||
-      prev.group !== next.group ||
+      prev.division !== next.division ||
       prev.match !== next.match;
 
     persistRef.current = next;
@@ -122,29 +131,29 @@ export function useArenaLastSelection() {
     }
 
     const tournamentId = toPersistId(next.tournament);
-    const groupId = toPersistId(next.group);
+    const divisionId = toPersistId(next.division);
     const matchId = toPersistId(next.match);
 
     writeLocal({
       tournamentId,
-      groupId,
+      divisionId,
       matchId,
     });
 
-    // Server row is only meaningful once tournament + group are chosen (match optional).
-    if (session?.user && tournamentId && groupId) {
+    // Server row is only meaningful once tournament + division are chosen (match optional).
+    if (session?.user && tournamentId && divisionId) {
       void mutateAsync({
         kind: 'device.lastSelection.set',
         payload: {
           deviceId,
           tournamentId,
-          groupId,
+          divisionId,
           matchId,
         },
       }).catch(() => {});
     }
   }, [
-    advance.group,
+    advance.division,
     advance.match,
     advance.tournament,
     deviceId,

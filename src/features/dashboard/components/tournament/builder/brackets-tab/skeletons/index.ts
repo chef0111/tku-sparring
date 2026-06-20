@@ -1,2 +1,2 @@
-export { GroupsPanelSkeleton } from './groups-panel-skeleton';
+export { DivisionsPanelSkeleton } from './divisions-panel-skeleton';
 export { LoadingBracketState } from './loading-bracket-state';

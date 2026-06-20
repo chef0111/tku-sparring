@@ -1,9 +1,9 @@
 export type GenerateBracketCommand = {
-  groupId: string;
+  divisionId: string;
   adminId: string;
 };
 
 export type GroupBracketCommand = {
-  groupId: string;
+  divisionId: string;
   adminId: string;
 };

@@ -11,8 +11,8 @@ import type {
 } from '@/orpc/matches/dto';
 import { client } from '@/orpc/client';
 
-export function listMatchesByGroup(groupId: string) {
-  return client.match.list({ groupId });
+export function listMatchesByDivision(divisionId: string) {
+  return client.match.list({ divisionId });
 }
 
 export function listMatchesByTournament(tournamentId: string) {
@@ -23,15 +23,15 @@ export function generateBracket(data: GenerateBracketDTO) {
   return client.bracket.generate(data);
 }
 
-export function shuffleBracket(data: { groupId: string }) {
+export function shuffleBracket(data: { divisionId: string }) {
   return client.bracket.shuffle(data);
 }
 
-export function regenerateBracket(data: { groupId: string }) {
+export function regenerateBracket(data: { divisionId: string }) {
   return client.bracket.regenerate(data);
 }
 
-export function resetBracket(data: { groupId: string }) {
+export function resetBracket(data: { divisionId: string }) {
   return client.bracket.reset(data);
 }
 

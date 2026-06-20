@@ -14,7 +14,7 @@ import {
 import { getScoreTransition } from '@/lib/tournament/match-transition';
 import { matchKeys } from '@/queries/keys';
 
-export type MatchListQueryKey = ReturnType<typeof matchKeys.listByGroup>;
+export type MatchListQueryKey = ReturnType<typeof matchKeys.listByDivision>;
 
 export type BracketDnDMutationContext = {
   queryKey: MatchListQueryKey;
@@ -212,7 +212,7 @@ export function applyOptimisticUpdateScore(
   const next = out.find(
     (x) =>
       x.kind === 'bracket' &&
-      x.groupId === m.groupId &&
+      x.divisionId === m.divisionId &&
       x.round === successor.round &&
       x.matchIndex === successor.matchIndex
   );

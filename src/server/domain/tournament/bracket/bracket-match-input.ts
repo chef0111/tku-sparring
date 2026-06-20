@@ -11,6 +11,6 @@ export type BracketMatchInput = {
   blueAthleteId: string | null;
   redLocked: boolean;
   blueLocked: boolean;
-  groupId: string;
+  divisionId: string;
   tournamentId: string;
 };

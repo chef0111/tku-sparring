@@ -15,15 +15,17 @@ export function activityTypesQueryKeyPart(
 export const matchKeys = {
   all: ['match'] as const,
   lists: () => [...matchKeys.all, 'list'] as const,
-  listByGroup: (groupId: string) => [...matchKeys.lists(), groupId] as const,
+  listByDivision: (divisionId: string) =>
+    [...matchKeys.lists(), divisionId] as const,
   listByTournament: (tournamentId: string) =>
     [...matchKeys.lists(), 'tournament', tournamentId] as const,
 };
 
-export const groupKeys = {
-  all: ['group'] as const,
-  lists: () => [...groupKeys.all, 'list'] as const,
-  list: (tournamentId: string) => [...groupKeys.lists(), tournamentId] as const,
+export const divisionKeys = {
+  all: ['division'] as const,
+  lists: () => [...divisionKeys.all, 'list'] as const,
+  list: (tournamentId: string) =>
+    [...divisionKeys.lists(), tournamentId] as const,
 };
 
 export const tournamentKeys = {
@@ -82,13 +84,13 @@ export const advanceSettingsKeys = {
   selectionMatches: (
     deviceId: string | null,
     tournamentId: string | null,
-    groupId: string | null
+    divisionId: string | null
   ) =>
     [
       ...advanceSettingsKeys.all,
       'selectionMatches',
       deviceId,
       tournamentId,
-      groupId,
+      divisionId,
     ] as const,
 };

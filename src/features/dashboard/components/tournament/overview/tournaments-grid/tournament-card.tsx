@@ -56,7 +56,7 @@ export function TournamentCard({
             </CardDescription>
           </CardHeader>
           <p className="text-muted-foreground relative text-xs">
-            {tournament._count.groups} groups ·{' '}
+            {tournament._count.divisions} divisions ·{' '}
             {tournament._count.tournamentAthletes} athletes ·{' '}
             {tournament._count.matches} matches
           </p>

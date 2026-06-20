@@ -1,6 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { invalidateAthleteProfileQueries } from '@/queries/athlete-profile/invalidate-athlete-profile-cache';
-import { invalidateGroupListQueries } from '@/queries/group/invalidate-group-cache';
+import { invalidateDivisionListQueries } from '@/queries/division/invalidate-division-cache';
 import { tournamentAthleteKeys, tournamentKeys } from '@/queries/keys';
 
 export function invalidateTournamentAthleteQueries(queryClient: QueryClient) {
@@ -15,7 +15,7 @@ export function invalidateOnBulkAdd(
   invalidateTournamentAthleteQueries(queryClient);
   invalidateAthleteProfileQueries(queryClient);
   if (input.autoAssign) {
-    void invalidateGroupListQueries(queryClient, input.tournamentId);
+    void invalidateDivisionListQueries(queryClient, input.tournamentId);
   }
 }
 

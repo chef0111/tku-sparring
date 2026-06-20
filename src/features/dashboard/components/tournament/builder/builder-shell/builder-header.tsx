@@ -11,8 +11,8 @@ import { GithubIcon } from '@/components/icons/github';
 
 interface BuilderHeaderProps {
   tournament: TournamentData;
-  tab: 'groups' | 'brackets';
-  onTabChange: (value: 'groups' | 'brackets') => void;
+  tab: 'divisions' | 'brackets';
+  onTabChange: (value: 'divisions' | 'brackets') => void;
   user: User | null | undefined;
 }
 
@@ -39,10 +39,10 @@ export function BuilderHeader({
       >
         <TabsList className="bg-sidebar border-2 p-0">
           <TabsTrigger
-            value="groups"
+            value="divisions"
             className="w-32 rounded-r-none border-none px-4 text-lg"
           >
-            Groups
+            Divisions
           </TabsTrigger>
           <ButtonGroupSeparator />
           <TabsTrigger

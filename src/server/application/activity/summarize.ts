@@ -36,11 +36,11 @@ export function summarizeTournamentActivity(
       return `Custom match created (${String(p.displayLabel ?? '')})`;
     case 'match.delete_custom':
       return `Custom match deleted (${String(p.displayLabel ?? '')})`;
-    case 'group.athlete_assigned':
+    case 'division.athlete_assigned':
       return `Assigned ${String(p.name ?? 'athlete')} to a group`;
-    case 'group.athlete_unassigned':
+    case 'division.athlete_unassigned':
       return `Unassigned ${String(p.name ?? 'athlete')} from a group`;
-    case 'group.auto_assign':
+    case 'division.auto_assign':
       return `Auto-assigned ${String(p.count ?? 0)} athlete(s) to a group`;
     default:
       return eventType.replace(/\./g, ' ');

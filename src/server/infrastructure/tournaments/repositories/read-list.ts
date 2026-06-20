@@ -46,14 +46,14 @@ function toOrderBy(
 async function attachActionableMatchCounts<
   T extends {
     id: string;
-    _count: { groups: number; matches: number; tournamentAthletes: number };
+    _count: { divisions: number; matches: number; tournamentAthletes: number };
   },
 >(items: Array<T>) {
   if (items.length === 0) return items;
 
   const tournamentIds = items.map((item) => item.id);
-  const [groups, matches] = await Promise.all([
-    prisma.group.findMany({
+  const [divisions, matches] = await Promise.all([
+    prisma.division.findMany({
       where: { tournamentId: { in: tournamentIds } },
       select: {
         id: true,
@@ -68,7 +68,7 @@ async function attachActionableMatchCounts<
   ]);
 
   const actionableByTournamentId = countActionableMatchesByTournamentId(
-    groups,
+    divisions,
     matches.map(toMatchData)
   );
 
@@ -119,7 +119,7 @@ export async function listTournaments(
       take: perPage,
       include: {
         _count: {
-          select: { groups: true, matches: true, tournamentAthletes: true },
+          select: { divisions: true, matches: true, tournamentAthletes: true },
         },
       },
     }),

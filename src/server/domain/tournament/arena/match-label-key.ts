@@ -6,7 +6,7 @@ export function normalizeMatchLabelKey(label: string): string {
 
 export type MatchLabelContext = {
   arenaIndex: number;
-  groupIdsOnArena: Array<string>;
+  divisionIdsOnArena: Array<string>;
   allMatches: Array<MatchData>;
   numbers: Map<string, number | null>;
   assignedBracketTitleKeys: Set<string>;

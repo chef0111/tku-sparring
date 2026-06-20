@@ -21,7 +21,7 @@ export interface MatchData {
   blueLocked: boolean;
   cornersSwapped: boolean;
   updatedAt: Date;
-  groupId: string;
+  divisionId: string;
   tournamentId: string;
   arenaSequenceRank?: number | null;
 }

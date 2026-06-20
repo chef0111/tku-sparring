@@ -21,7 +21,7 @@ export function useArenaSelectionCatalog(args: {
 export function useArenaSelectionMatches(args: {
   deviceId: string | undefined;
   tournamentId: string | null;
-  groupId: string | null;
+  divisionId: string | null;
   enabled?: boolean;
   refetchInterval?: number | false;
 }) {
@@ -30,8 +30,8 @@ export function useArenaSelectionMatches(args: {
     rest.deviceId &&
     rest.tournamentId &&
     rest.tournamentId.length > 0 &&
-    rest.groupId &&
-    rest.groupId.length > 0
+    rest.divisionId &&
+    rest.divisionId.length > 0
   );
   const base = arenaSelectionMatchesQueryOptions(rest);
   const canRun = hasScope && enabled;

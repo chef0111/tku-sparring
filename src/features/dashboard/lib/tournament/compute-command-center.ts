@@ -2,12 +2,12 @@ import type { MatchData } from '@/contracts/tournament/match';
 import type { TournamentData } from '@/contracts/tournament/list';
 
 export interface SetupStep {
-  id: 'athletes' | 'groups' | 'brackets';
+  id: 'athletes' | 'divisions' | 'brackets';
   label: string;
   description: string;
   complete: boolean;
   metric: string;
-  builderTab: 'groups' | 'brackets';
+  builderTab: 'divisions' | 'brackets';
   ctaLabel: string;
 }
 
@@ -16,49 +16,49 @@ function getAthletesMetric(athleteCount: number) {
   return `${athleteCount} ${athleteCount === 1 ? 'athlete' : 'athletes'} registered`;
 }
 
-function getGroupsMetric(tournament: TournamentData) {
-  const groupCount = tournament._count.groups;
+function getDivisionsMetric(tournament: TournamentData) {
+  const divisionCount = tournament._count.divisions;
   const athleteCount = tournament._count.tournamentAthletes;
 
-  if (groupCount === 0) return 'No divisions yet';
+  if (divisionCount === 0) return 'No divisions yet';
 
-  const assigned = tournament.groups.reduce(
-    (sum, group) => sum + group._count.tournamentAthletes,
+  const assigned = tournament.divisions.reduce(
+    (sum, division) => sum + division._count.tournamentAthletes,
     0
   );
 
   if (athleteCount === 0) {
-    return `${groupCount} empty ${groupCount === 1 ? 'division' : 'divisions'}`;
+    return `${divisionCount} empty ${divisionCount === 1 ? 'division' : 'divisions'}`;
   }
 
   if (assigned < athleteCount) {
     return `${assigned} of ${athleteCount} athletes placed`;
   }
 
-  return `${groupCount} ${groupCount === 1 ? 'division' : 'divisions'} · all placed`;
+  return `${divisionCount} ${divisionCount === 1 ? 'division' : 'divisions'} · all placed`;
 }
 
 function getBracketsMetric(
   tournament: TournamentData,
   matches: Array<MatchData>
 ) {
-  const groupCount = tournament._count.groups;
+  const divisionCount = tournament._count.divisions;
 
-  if (groupCount === 0) return 'Create groups first';
+  if (divisionCount === 0) return 'Create divisions first';
 
-  const groupsWithBrackets = new Set(
+  const divisionsWithBrackets = new Set(
     matches
       .filter((match) => match.kind === 'bracket')
-      .map((match) => match.groupId)
+      .map((match) => match.divisionId)
   ).size;
 
-  if (groupsWithBrackets === 0) return 'Not generated yet';
+  if (divisionsWithBrackets === 0) return 'Not generated yet';
 
-  if (groupsWithBrackets === groupCount) {
-    return `${groupCount} ${groupCount === 1 ? 'group' : 'groups'} bracketed`;
+  if (divisionsWithBrackets === divisionCount) {
+    return `${divisionCount} ${divisionCount === 1 ? 'division' : 'divisions'} bracketed`;
   }
 
-  return `${groupsWithBrackets} of ${groupCount} groups bracketed`;
+  return `${divisionsWithBrackets} of ${divisionCount} divisions bracketed`;
 }
 
 export function computeCommandCenter(input: {
@@ -77,24 +77,24 @@ export function computeCommandCenter(input: {
               'Import or add competitors to the tournament pool before organizing divisions.',
             complete: tournament._count.tournamentAthletes > 0,
             metric: getAthletesMetric(tournament._count.tournamentAthletes),
-            builderTab: 'groups',
+            builderTab: 'divisions',
             ctaLabel: 'Add athletes',
           },
           {
-            id: 'groups',
-            label: 'Groups created',
+            id: 'divisions',
+            label: 'Divisions created',
             description:
               'Define weight and age divisions, then assign athletes from the pool.',
-            complete: tournament._count.groups > 0,
-            metric: getGroupsMetric(tournament),
-            builderTab: 'groups',
-            ctaLabel: 'Manage groups',
+            complete: tournament._count.divisions > 0,
+            metric: getDivisionsMetric(tournament),
+            builderTab: 'divisions',
+            ctaLabel: 'Manage divisions',
           },
           {
             id: 'brackets',
             label: 'Brackets generated',
             description:
-              'Generate match shells in each group so arenas can schedule bouts.',
+              'Generate match shells in each division so arenas can schedule bouts.',
             complete: matches.some((match) => match.kind === 'bracket'),
             metric: getBracketsMetric(tournament, matches),
             builderTab: 'brackets',

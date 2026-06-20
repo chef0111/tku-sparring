@@ -14,8 +14,8 @@ vi.mock('@/lib/db', () => ({
 describe('loadMatchLabelContext', () => {
   it('builds arena match numbers and assigned bracket title keys', async () => {
     vi.mocked(prisma.tournament.findUnique).mockResolvedValue({
-      arenaGroupOrder: null,
-      groups: [
+      arenaDivisionOrder: null,
+      divisions: [
         { id: 'g1', arenaIndex: 1, thirdPlaceMatch: false },
         { id: 'g2', arenaIndex: 1, thirdPlaceMatch: false },
       ],
@@ -25,7 +25,7 @@ describe('loadMatchLabelContext', () => {
       {
         id: 'm1',
         kind: 'bracket',
-        groupId: 'g1',
+        divisionId: 'g1',
         round: 0,
         matchIndex: 0,
         displayLabel: null,
@@ -47,17 +47,17 @@ describe('loadMatchLabelContext', () => {
     ] as never);
 
     vi.mocked(prisma.tournamentAthlete.groupBy).mockResolvedValue([
-      { groupId: 'g1', _count: { _all: 2 } },
-      { groupId: 'g2', _count: { _all: 2 } },
+      { divisionId: 'g1', _count: { _all: 2 } },
+      { divisionId: 'g2', _count: { _all: 2 } },
     ] as never);
 
     const ctx = await loadMatchLabelContext({
       tournamentId: 't1',
-      groupId: 'g1',
+      divisionId: 'g1',
     });
 
     expect(ctx.arenaIndex).toBe(1);
-    expect(ctx.groupIdsOnArena).toEqual(['g1', 'g2']);
+    expect(ctx.divisionIdsOnArena).toEqual(['g1', 'g2']);
     expect(ctx.numbers.get('m1')).toBe(101);
     expect(ctx.assignedBracketTitleKeys.has('match 101')).toBe(true);
   });

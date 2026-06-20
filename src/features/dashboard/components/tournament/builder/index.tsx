@@ -9,9 +9,9 @@ import { EditTournamentDialog } from './dialogs/edit-tournament-dialog';
 import { DeleteTournamentDialog } from './dialogs/delete-tournament-dialog';
 import { AutoAssignAllDialog } from './dialogs/auto-assign-all-dialog';
 import { TournamentStatusDialog } from './dialogs/tournament-status-dialog';
-import { GroupsTab } from './groups-tab';
+import { DivisionsTab } from './divisions-tab';
 import { BracketsTab } from './brackets-tab';
-import type { GroupData } from '@/contracts/tournament/group';
+import type { DivisionData } from '@/contracts/tournament/division';
 import type { TournamentData } from '@/contracts/tournament/list';
 import { TournamentBracketProvider } from '@/features/dashboard/contexts/tournament-bracket';
 import { useTournamentBuilder } from '@/features/dashboard/hooks/use-tournament-builder';
@@ -24,7 +24,7 @@ import LoadingScreen from '@/components/navigation/loading';
 import { Button } from '@/components/ui/button';
 import { useTournamentRealtimeStream } from '@/hooks/use-tournament-realtime-stream';
 import { useSetTournamentStatus, useTournament } from '@/queries/tournament';
-import { useGroups } from '@/queries/group';
+import { useDivisions } from '@/queries/division';
 
 interface TournamentBuilderProps {
   id: string;
@@ -34,7 +34,7 @@ export function TournamentBuilder({ id }: TournamentBuilderProps) {
   useTournamentRealtimeStream(id);
 
   const tournamentQuery = useTournament(id);
-  const groupsQuery = useGroups(id);
+  const divisionsQuery = useDivisions(id);
 
   if (tournamentQuery.isPending) {
     return <LoadingScreen title="Loading workspace..." />;
@@ -56,12 +56,12 @@ export function TournamentBuilder({ id }: TournamentBuilderProps) {
   }
 
   const tournament = tournamentQuery.data as TournamentData;
-  const groups = groupsQuery.data ?? [];
+  const divisions = divisionsQuery.data ?? [];
 
   return (
     <TournamentBuilderActive
       tournament={tournament}
-      groups={groups as Array<GroupData>}
+      divisions={divisions as Array<DivisionData>}
       tournamentId={id}
     />
   );
@@ -69,20 +69,20 @@ export function TournamentBuilder({ id }: TournamentBuilderProps) {
 
 interface TournamentBuilderActiveProps {
   tournament: TournamentData;
-  groups: Array<GroupData>;
+  divisions: Array<DivisionData>;
   tournamentId: string;
 }
 
 function TournamentBuilderActive({
   tournament,
-  groups,
+  divisions,
   tournamentId,
 }: TournamentBuilderActiveProps) {
   return (
     <BracketChromeProvider>
       <TournamentBuilderActiveBody
         tournament={tournament}
-        groups={groups}
+        divisions={divisions}
         tournamentId={tournamentId}
       />
     </BracketChromeProvider>
@@ -91,10 +91,10 @@ function TournamentBuilderActive({
 
 function TournamentBuilderActiveBody({
   tournament,
-  groups,
+  divisions,
   tournamentId,
 }: TournamentBuilderActiveProps) {
-  const b = useTournamentBuilder({ tournament, groups, tournamentId });
+  const b = useTournamentBuilder({ tournament, divisions, tournamentId });
   const { exitFullscreen } = useBracketChrome();
 
   React.useEffect(() => {
@@ -113,7 +113,7 @@ function TournamentBuilderActiveBody({
           tournament={tournament}
           tab={b.tab}
           onTabChange={(v) => {
-            if (v === 'groups') exitFullscreen();
+            if (v === 'divisions') exitFullscreen();
             void b.setTab(v);
           }}
           user={b.user}
@@ -140,16 +140,16 @@ function TournamentBuilderActiveBody({
     >
       <BuilderWorkspaceProvider
         tournamentId={tournamentId}
-        groups={groups}
+        divisions={divisions}
         readOnly={b.isReadOnly}
         tournamentStatus={tournament.status}
       >
         <div className="relative flex-1 overflow-hidden">
-          {b.tab === 'groups' ? (
-            <GroupsTab
+          {b.tab === 'divisions' ? (
+            <DivisionsTab
               tournamentId={tournamentId}
               tournamentName={tournament.name}
-              groups={groups}
+              divisions={divisions}
               readOnly={b.isReadOnly}
             />
           ) : (
@@ -181,7 +181,7 @@ function TournamentBuilderActiveBody({
         open={b.showAutoAssignAll}
         onOpenChange={b.setShowAutoAssignAll}
         tournamentId={tournamentId}
-        groups={groups}
+        divisions={divisions}
       />
       <TournamentStatusDialog
         open={b.pendingAdminStatus !== null}

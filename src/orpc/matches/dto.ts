@@ -26,7 +26,7 @@ export const MatchSchema = z.object({
   redLocked: z.boolean(),
   blueLocked: z.boolean(),
   cornersSwapped: z.boolean(),
-  groupId: z.string(),
+  divisionId: z.string(),
   tournamentId: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -57,19 +57,19 @@ export const SetLockSchema = z.object({
 });
 
 export const GenerateBracketSchema = z.object({
-  groupId: z.string(),
+  divisionId: z.string(),
 });
 
 export const ShuffleBracketSchema = z.object({
-  groupId: z.string(),
+  divisionId: z.string(),
 });
 
 export const RegenerateBracketSchema = z.object({
-  groupId: z.string(),
+  divisionId: z.string(),
 });
 
 export const ResetBracketSchema = z.object({
-  groupId: z.string(),
+  divisionId: z.string(),
 });
 
 export const AdminSetMatchStatusSchema = z.object({
@@ -100,7 +100,7 @@ export const CustomSlotSchema = z.discriminatedUnion('mode', [
 ]);
 
 export const CreateCustomMatchSchema = z.object({
-  groupId: z.string(),
+  divisionId: z.string(),
   displayLabel: z.string().trim().min(1).max(120),
   red: CustomSlotSchema,
   blue: CustomSlotSchema,

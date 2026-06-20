@@ -3,7 +3,7 @@ import type { CustomSlotInput } from '@/server/domain/tournament/custom/types';
 export type { CustomSlotInput as CustomSlotCommand };
 
 export type CreateCustomMatchCommand = {
-  groupId: string;
+  divisionId: string;
   displayLabel: string;
   red: CustomSlotInput;
   blue: CustomSlotInput;

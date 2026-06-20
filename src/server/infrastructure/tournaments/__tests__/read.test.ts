@@ -23,7 +23,7 @@ function tournamentRecord(overrides: Record<string, unknown> = {}) {
     status: 'draft',
     createdAt: NOW,
     updatedAt: NOW,
-    groups: [
+    divisions: [
       {
         id: 'group-1',
         name: 'Group A',
@@ -55,7 +55,7 @@ describe('tournaments DAL', () => {
     vi.mocked(prisma.tournament.findUnique).mockResolvedValue(
       tournamentRecord({
         status: 'active',
-        groups: [
+        divisions: [
           {
             id: 'group-1',
             name: 'Group A',
@@ -96,7 +96,7 @@ describe('tournaments DAL', () => {
     vi.mocked(prisma.tournament.findUnique).mockResolvedValue(
       tournamentRecord({
         status: 'active',
-        groups: [
+        divisions: [
           {
             id: 'group-1',
             name: 'Group A',

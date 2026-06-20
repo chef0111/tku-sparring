@@ -1,5 +1,5 @@
 import type {
-  SelectionGroupRow,
+  SelectionDivisionRow,
   SelectionMatchRow,
 } from '@/contracts/advance/selection';
 import type {
@@ -9,7 +9,7 @@ import type {
 
 export type SelectionCatalogResult = {
   tournaments: Array<{ id: string; name: string; status: string }>;
-  groups: Array<SelectionGroupRow>;
+  divisions: Array<SelectionDivisionRow>;
 };
 
 export type SelectionMatchesResult = {

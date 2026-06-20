@@ -14,7 +14,7 @@ describe('summarizeTournamentActivity', () => {
 
   it('describes auto-assign count', () => {
     expect(
-      summarizeTournamentActivity('group.auto_assign', { count: 5 })
+      summarizeTournamentActivity('division.auto_assign', { count: 5 })
     ).toContain('5');
   });
 });

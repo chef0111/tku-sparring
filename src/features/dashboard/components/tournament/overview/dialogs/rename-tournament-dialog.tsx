@@ -54,7 +54,7 @@ export function RenameTournamentDialog({
           <DialogHeader>
             <DialogTitle>Rename tournament</DialogTitle>
             <DialogDescription>
-              Choose a new name. Athletes, groups, and matches stay attached.
+              Choose a new name. Athletes, divisions, and matches stay attached.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">

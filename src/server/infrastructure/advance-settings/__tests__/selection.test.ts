@@ -8,7 +8,7 @@ import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/db', () => ({
   prisma: {
-    group: {
+    division: {
       findUnique: vi.fn(),
     },
     match: {
@@ -51,8 +51,8 @@ describe('advanceSelectionStore.selectionCatalog', () => {
     vi.mocked(prisma.tournament.findUnique).mockResolvedValue({
       id: 't1',
       status: 'active',
-      arenaGroupOrder: null,
-      groups: [
+      arenaDivisionOrder: null,
+      divisions: [
         {
           id: 'g1',
           name: 'Group 1',
@@ -70,8 +70,8 @@ describe('advanceSelectionStore.selectionCatalog', () => {
       ],
     } as never);
     vi.mocked(prisma.match.findMany).mockResolvedValue([
-      { groupId: 'g1', status: 'complete' },
-      { groupId: 'g2', status: 'pending' },
+      { divisionId: 'g1', status: 'complete' },
+      { divisionId: 'g2', status: 'pending' },
     ] as never);
 
     const result = await advanceSelectionStore.selectionCatalog({
@@ -79,8 +79,8 @@ describe('advanceSelectionStore.selectionCatalog', () => {
     });
 
     expect(result.tournaments.map((row) => row.id)).toEqual(['t2', 't1']);
-    expect(result.groups.map((row) => row.id)).toEqual(['g1', 'g2']);
-    expect(result.groups).toEqual([
+    expect(result.divisions.map((row) => row.id)).toEqual(['g1', 'g2']);
+    expect(result.divisions).toEqual([
       expect.objectContaining({
         id: 'g1',
         status: 'completed',
@@ -97,14 +97,14 @@ describe('advanceSelectionStore.selectionCatalog', () => {
 
 describe('advanceSelectionStore.selectionMatches', () => {
   it('includes claim status for this device and other devices', async () => {
-    vi.mocked(prisma.group.findUnique).mockResolvedValue({
+    vi.mocked(prisma.division.findUnique).mockResolvedValue({
       tournamentId: 't1',
     } as never);
     vi.mocked(prisma.tournament.findUnique).mockResolvedValue({
       id: 't1',
       status: 'active',
-      arenaGroupOrder: null,
-      groups: [
+      arenaDivisionOrder: null,
+      divisions: [
         {
           id: 'g1',
           name: 'Group 1',
@@ -116,13 +116,13 @@ describe('advanceSelectionStore.selectionMatches', () => {
     } as never);
     vi.mocked(loadMatchLabelContext).mockResolvedValue({
       arenaIndex: 1,
-      groupIdsOnArena: ['g1'],
+      divisionIdsOnArena: ['g1'],
       allMatches: [
         {
           id: 'm1',
           kind: 'bracket',
           displayLabel: null,
-          groupId: 'g1',
+          divisionId: 'g1',
           status: 'pending',
           redTournamentAthleteId: 'ta-red',
           blueTournamentAthleteId: 'ta-blue',
@@ -131,7 +131,7 @@ describe('advanceSelectionStore.selectionMatches', () => {
           id: 'm2',
           kind: 'custom',
           displayLabel: 'Custom final',
-          groupId: 'g1',
+          divisionId: 'g1',
           status: 'active',
           redTournamentAthleteId: 'ta-c',
           blueTournamentAthleteId: 'ta-d',
@@ -156,7 +156,7 @@ describe('advanceSelectionStore.selectionMatches', () => {
     const result = await advanceSelectionStore.selectionMatches({
       deviceId: 'd1',
       tournamentId: 't1',
-      groupId: 'g1',
+      divisionId: 'g1',
     });
 
     expect(result.matches).toEqual([

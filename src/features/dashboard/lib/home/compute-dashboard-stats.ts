@@ -8,7 +8,7 @@ export interface DashboardStats {
     totalTournaments: number;
     byStatus: Record<TournamentStatus, number>;
     totalAthletes: number;
-    totalGroups: number;
+    totalDivisions: number;
     totalMatches: number;
   };
   chartData: {
@@ -53,13 +53,13 @@ export function computeDashboardStats(
   };
 
   let totalAthletes = 0;
-  let totalGroups = 0;
+  let totalDivisions = 0;
   let totalMatches = 0;
 
   for (const t of tournaments) {
     byStatus[t.status] += 1;
     totalAthletes += t._count.tournamentAthletes;
-    totalGroups += t._count.groups;
+    totalDivisions += t._count.divisions;
     totalMatches += t._count.actionableMatches;
   }
 
@@ -99,7 +99,7 @@ export function computeDashboardStats(
       totalTournaments: tournaments.length,
       byStatus,
       totalAthletes,
-      totalGroups,
+      totalDivisions,
       totalMatches,
     },
     chartData: {

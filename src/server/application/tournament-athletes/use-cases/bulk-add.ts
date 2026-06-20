@@ -1,12 +1,12 @@
 import type { BulkAddAthletesCommand } from './roster-commands';
-import type { GroupAssignmentStore } from '@/server/application/groups/repositories/assign';
+import type { DivisionAssignmentStore } from '@/server/application/divisions/repositories/assign';
 import type { TournamentAthleteStore } from '../repositories/roster';
-import { autoAssignAllEligible } from '@/server/application/groups/use-cases/assign';
+import { autoAssignAllEligible } from '@/server/application/divisions/use-cases/assign';
 
 export async function bulkAddAthletes(
   command: BulkAddAthletesCommand,
   store: TournamentAthleteStore,
-  assignStore: GroupAssignmentStore
+  assignStore: DivisionAssignmentStore
 ) {
   const profiles = await store.findProfilesByIds(command.athleteProfileIds);
   const createdProfiles = await store.bulkCreate(

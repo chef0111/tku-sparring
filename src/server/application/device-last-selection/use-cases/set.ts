@@ -8,7 +8,7 @@ export async function setLastSelection(
 ) {
   let tournamentId =
     command.tournamentId === undefined ? null : command.tournamentId;
-  let groupId = command.groupId === undefined ? null : command.groupId;
+  let divisionId = command.divisionId === undefined ? null : command.divisionId;
   const matchId = command.matchId === undefined ? null : command.matchId;
 
   if (matchId) {
@@ -16,27 +16,27 @@ export async function setLastSelection(
     if (!match) {
       throw new NotFoundError('Match not found');
     }
-    if (groupId && match.groupId !== groupId) {
-      throw new BadRequestError('Match does not belong to the given group');
+    if (divisionId && match.divisionId !== divisionId) {
+      throw new BadRequestError('Match does not belong to the given division');
     }
     if (tournamentId && match.tournamentId !== tournamentId) {
       throw new BadRequestError(
         'Match does not belong to the given tournament'
       );
     }
-    groupId = match.groupId;
+    divisionId = match.divisionId;
     tournamentId = match.tournamentId;
-  } else if (groupId) {
-    const group = await store.findGroupContext(groupId);
-    if (!group) {
-      throw new NotFoundError('Group not found');
+  } else if (divisionId) {
+    const division = await store.findDivisionContext(divisionId);
+    if (!division) {
+      throw new NotFoundError('Division not found');
     }
-    if (tournamentId && group.tournamentId !== tournamentId) {
+    if (tournamentId && division.tournamentId !== tournamentId) {
       throw new BadRequestError(
-        'Group does not belong to the given tournament'
+        'Division does not belong to the given tournament'
       );
     }
-    tournamentId = group.tournamentId;
+    tournamentId = division.tournamentId;
   } else if (tournamentId) {
     const exists = await store.existsTournament(tournamentId);
     if (!exists) {
@@ -47,7 +47,7 @@ export async function setLastSelection(
   return store.upsert({
     ...command,
     tournamentId,
-    groupId,
+    divisionId,
     matchId,
   });
 }

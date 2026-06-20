@@ -48,7 +48,7 @@ export function CreateTournamentDialog({
             <DialogTitle>Create Tournament</DialogTitle>
             <DialogDescription>
               Enter a name for your new tournament. You'll be taken to the
-              builder to set up groups and matches.
+              builder to set up divisions and matches.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">

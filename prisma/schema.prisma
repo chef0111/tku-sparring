@@ -79,11 +79,11 @@ model Tournament {
   name            String
   nameSortKey     String   @default("")
   status          String   @default("draft")
-  arenaGroupOrder Json?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  arenaDivisionOrder Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  groups             Group[]
+  divisions          Division[]
   matches            Match[]
   activities         TournamentActivity[]
   tournamentAthletes TournamentAthlete[]
@@ -91,7 +91,7 @@ model Tournament {
   @@map("tournament")
 }
 
-model Group {
+model Division {
   id              String   @id @default(uuid()) @db.Uuid
   name            String
   tournamentId    String   @db.Uuid
@@ -111,13 +111,13 @@ model Group {
   tournamentAthletes TournamentAthlete[]
 
   @@index([tournamentId])
-  @@map("group")
+  @@map("division")
 }
 
 model ArenaMatchClaim {
   id           String   @id @default(uuid()) @db.Uuid
   matchId      String   @unique @db.Uuid
-  groupId      String   @db.Uuid
+  divisionId   String   @db.Uuid
   tournamentId String   @db.Uuid
   deviceId     String
   userId       String   @db.Uuid
@@ -127,7 +127,7 @@ model ArenaMatchClaim {
   match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
   @@index([tournamentId])
-  @@index([groupId])
+  @@index([divisionId])
   @@index([expiresAt])
   @@map("arena_match_claim")
 }
@@ -150,16 +150,16 @@ model Match {
   redLocked               Boolean  @default(false)
   blueLocked              Boolean  @default(false)
   cornersSwapped          Boolean  @default(false)
-  groupId                 String   @db.Uuid
+  divisionId              String   @db.Uuid
   tournamentId            String   @db.Uuid
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 
-  group           Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  division        Division         @relation(fields: [divisionId], references: [id], onDelete: Cascade)
   tournament      Tournament       @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   arenaMatchClaim ArenaMatchClaim?
 
-  @@index([groupId])
+  @@index([divisionId])
   @@index([tournamentId])
   @@index([tournamentId, displayLabel])
   @@map("match")
@@ -189,7 +189,7 @@ model TournamentAthlete {
   id               String  @id @default(uuid()) @db.Uuid
   tournamentId     String  @db.Uuid
   athleteProfileId String  @db.Uuid
-  groupId          String? @db.Uuid
+  divisionId       String? @db.Uuid
   seed             Int?
   locked           Boolean @default(false)
   status           String  @default("selected")
@@ -208,11 +208,11 @@ model TournamentAthlete {
 
   tournament     Tournament     @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   athleteProfile AthleteProfile @relation(fields: [athleteProfileId], references: [id], onDelete: Cascade)
-  group          Group?         @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  division       Division?      @relation(fields: [divisionId], references: [id], onDelete: SetNull)
 
   @@unique([tournamentId, athleteProfileId])
   @@index([tournamentId])
-  @@index([groupId])
+  @@index([divisionId])
   @@map("tournament_athlete")
 }
 
@@ -238,7 +238,7 @@ model DeviceLastSelection {
   userId       String   @db.Uuid
   deviceId     String
   tournamentId String?  @db.Uuid
-  groupId      String?  @db.Uuid
+  divisionId   String?  @db.Uuid
   matchId      String?  @db.Uuid
   updatedAt    DateTime @updatedAt
 

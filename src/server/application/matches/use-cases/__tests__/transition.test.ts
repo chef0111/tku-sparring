@@ -34,7 +34,7 @@ const baseMatch: MatchTransitionRow = {
   redLocked: false,
   blueLocked: false,
   cornersSwapped: false,
-  groupId: 'g1',
+  divisionId: 'g1',
   tournamentId: 't1',
   tournamentStatus: 'active',
   createdAt: new Date('2026-01-01T00:00:00Z'),

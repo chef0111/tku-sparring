@@ -10,8 +10,8 @@ export async function createCustomMatch(
   command: CreateCustomMatchCommand,
   store: CustomMatchStore
 ) {
-  const group = await store.findGroup(command.groupId);
-  if (!group) throw new NotFoundError('Group not found');
+  const group = await store.findDivision(command.divisionId);
+  if (!group) throw new NotFoundError('Division not found');
   assertTournamentAction(group.tournamentStatus, 'match.custom.create');
 
   return store.create({
@@ -20,7 +20,7 @@ export async function createCustomMatch(
     activity: {
       eventType: 'match.create_custom',
       payload: {
-        groupId: command.groupId,
+        divisionId: command.divisionId,
         displayLabel: command.displayLabel.trim(),
       },
     },
@@ -44,7 +44,7 @@ export async function deleteCustomMatch(
     activity: {
       eventType: 'match.delete_custom',
       payload: {
-        groupId: match.groupId,
+        divisionId: match.divisionId,
         displayLabel: match.displayLabel,
       },
     },

@@ -10,7 +10,7 @@ export function selectionCatalog(input: {
 export function selectionMatches(input: {
   deviceId: string;
   tournamentId: string;
-  groupId: string;
+  divisionId: string;
 }) {
   return client.advanceSettings.selectionMatches(input);
 }

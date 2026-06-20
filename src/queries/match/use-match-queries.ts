@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import {
-  matchesByGroupQueryOptions,
+  matchesByDivisionQueryOptions,
   tournamentMatchesQueryOptions,
 } from '@/queries/match/match-query-options';
 
-export function useMatches(groupId: string | null) {
+export function useMatches(divisionId: string | null) {
   return useQuery({
-    ...matchesByGroupQueryOptions(groupId ?? ''),
-    enabled: !!groupId,
+    ...matchesByDivisionQueryOptions(divisionId ?? ''),
+    enabled: !!divisionId,
   });
 }
 

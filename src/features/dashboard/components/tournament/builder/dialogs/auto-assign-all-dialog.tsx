@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
-import type { GroupData } from '@/contracts/tournament/group';
+import type { DivisionData } from '@/contracts/tournament/division';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -12,32 +12,32 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useAutoAssignAll } from '@/queries/group';
+import { useAutoAssignAll } from '@/queries/division';
 
 interface AutoAssignAllDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   tournamentId: string;
-  groups: Array<GroupData>;
+  divisions: Array<DivisionData>;
 }
 
 export function AutoAssignAllDialog({
   open,
   onOpenChange,
   tournamentId,
-  groups,
+  divisions,
 }: AutoAssignAllDialogProps) {
   const autoAssignAll = useAutoAssignAll();
 
   const { eligible, skipped } = React.useMemo(() => {
-    const eligibleList: Array<GroupData> = [];
-    const skippedList: Array<GroupData> = [];
-    for (const group of groups) {
-      if (group._count.matches === 0) eligibleList.push(group);
-      else skippedList.push(group);
+    const eligibleList: Array<DivisionData> = [];
+    const skippedList: Array<DivisionData> = [];
+    for (const division of divisions) {
+      if (division._count.matches === 0) eligibleList.push(division);
+      else skippedList.push(division);
     }
     return { eligible: eligibleList, skipped: skippedList };
-  }, [groups]);
+  }, [divisions]);
 
   const handleRun = () => {
     if (eligible.length === 0) return;
@@ -46,7 +46,7 @@ export function AutoAssignAllDialog({
       {
         onSuccess: (result) => {
           toast.success(
-            `Auto-assigned ${result.assigned} athletes across ${result.groupsRun} groups (skipped ${result.groupsSkipped})`
+            `Auto-assigned ${result.assigned} athletes across ${result.divisionsRun} divisions (skipped ${result.divisionsSkipped})`
           );
           onOpenChange(false);
         },
@@ -66,10 +66,10 @@ export function AutoAssignAllDialog({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Auto-assign all groups</DialogTitle>
+          <DialogTitle>Auto-assign all divisions</DialogTitle>
           <DialogDescription>
-            Distribute unassigned athletes into eligible groups based on their
-            constraints. Groups that already have matches are skipped.
+            Distribute unassigned athletes into eligible divisions based on
+            their constraints. Divisions that already have matches are skipped.
           </DialogDescription>
         </DialogHeader>
 
@@ -83,18 +83,18 @@ export function AutoAssignAllDialog({
             </h3>
             {eligible.length === 0 ? (
               <p className="text-muted-foreground text-sm">
-                No eligible groups.
+                No eligible divisions.
               </p>
             ) : (
               <ul className="divide-y rounded-md border">
-                {eligible.map((group) => (
+                {eligible.map((division) => (
                   <li
-                    key={group.id}
+                    key={division.id}
                     className="flex items-center justify-between px-3 py-2 text-sm"
                   >
-                    <span className="truncate">{group.name}</span>
+                    <span className="truncate">{division.name}</span>
                     <Badge variant="secondary" className="tabular-nums">
-                      {group._count.tournamentAthletes}
+                      {division._count.tournamentAthletes}
                     </Badge>
                   </li>
                 ))}
@@ -111,17 +111,17 @@ export function AutoAssignAllDialog({
                 </span>
               </h3>
               <ul className="divide-y rounded-md border">
-                {skipped.map((group) => (
+                {skipped.map((division) => (
                   <li
-                    key={group.id}
+                    key={division.id}
                     className="text-muted-foreground flex items-center justify-between px-3 py-2 text-sm"
                   >
                     <div className="flex min-w-0 flex-col">
-                      <span className="truncate">{group.name}</span>
+                      <span className="truncate">{division.name}</span>
                       <span className="text-xs">Already has matches</span>
                     </div>
                     <Badge variant="outline" className="tabular-nums">
-                      {group._count.tournamentAthletes}
+                      {division._count.tournamentAthletes}
                     </Badge>
                   </li>
                 ))}

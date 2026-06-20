@@ -7,10 +7,10 @@ import {
   round0SlotStore,
 } from '@/server/infrastructure/matches';
 import {
-  groupAssignmentStore,
-  groupLifecycleStore,
-  groupReadStore,
-} from '@/server/infrastructure/groups';
+  divisionAssignmentStore,
+  divisionLifecycleStore,
+  divisionReadStore,
+} from '@/server/infrastructure/divisions';
 import {
   tournamentArenaOrderStore,
   tournamentLifecycleStore,
@@ -29,9 +29,9 @@ export const serverRepos = {
   bracketLifecycle: bracketLifecycleStore,
   round0Slot: round0SlotStore,
   matchParticipant: matchParticipantStore,
-  groupLifecycle: groupLifecycleStore,
-  groupAssign: groupAssignmentStore,
-  groupRead: groupReadStore,
+  divisionLifecycle: divisionLifecycleStore,
+  divisionAssign: divisionAssignmentStore,
+  divisionRead: divisionReadStore,
   tournamentLifecycle: tournamentLifecycleStore,
   tournamentArenaOrder: tournamentArenaOrderStore,
   tournamentAthlete: tournamentAthleteStore,

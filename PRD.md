@@ -6,11 +6,11 @@
 
 ## Product Summary
 
-The TKU Sparring System is a full tournament operations platform that serves both arena-side clients and system admins. It includes an arena client for match execution and scoring, and an admin CRM for managing athletes, tournaments, groups, and brackets. The CRM provides a global athlete registry, a tournament builder with Groups and Brackets tabs, and a deterministic bracket canvas with manual overrides. The goal is to reduce setup time, improve accuracy in grouping and seeding, and provide a clean operational workflow from tournament creation through match completion.
+The TKU Sparring System is a full tournament operations platform that serves both arena-side clients and system admins. It includes an arena client for match execution and scoring, and an admin CRM for managing athletes, tournaments, divisions, and brackets. The CRM provides a global athlete registry, a tournament builder with Divisions and Brackets tabs, and a deterministic bracket canvas with manual overrides. The goal is to reduce setup time, improve accuracy in division placement and seeding, and provide a clean operational workflow from tournament creation through match completion.
 
 Target users:
 
-- System Admins who run TKU tournaments and manage athlete rosters, groups, and brackets.
+- System Admins who run TKU tournaments and manage athlete rosters, divisions, and brackets.
 - Arena Operators who run matches and record results on the arena client.
 
 Primary value:
@@ -18,7 +18,7 @@ Primary value:
 - One source of truth for athletes across tournaments.
 - Fast, auditable, and deterministic tournament setup.
 - Simple arena-side scoring that stays in sync with official records.
-- Clear operational control of groups, brackets, and match progression.
+- Clear operational control of divisions, brackets, and match progression.
 
 ## Goals
 
@@ -33,7 +33,7 @@ Primary value:
 - Multi-role permissions beyond System Admin.
 - Double-elimination, round robin, or Swiss brackets.
 - Public-facing bracket view or spectator UX.
-- Real-time collaborative editing of brackets or groups beyond per-match reservation (see **Arena match claim** in [CONTEXT.md](CONTEXT.md)).
+- Real-time collaborative editing of brackets or divisions beyond per-match reservation (see **Arena match claim** in [CONTEXT.md](CONTEXT.md)).
 - Automated tournament completion without admin confirmation.
 - Advanced hardware integration beyond existing scoring inputs.
 
@@ -42,7 +42,7 @@ Primary value:
 In scope:
 
 - Global athlete registry with CRUD and de-dup validation.
-- Tournament builder with two tabs: Groups and Brackets.
+- Tournament builder with two tabs: Divisions and Brackets.
 - Tournament athlete selection from global registry.
 - Group constraints and auto-assign, with manual drag-and-drop overrides.
 - Single-elimination brackets with optional third-place match per group.
@@ -283,7 +283,7 @@ UAC:
 
 - Frontend: Tanstack Start + React + TypeScript
 - Backend: oRPC + Tanstack Query
-- Data model: `tournament`, `group`, `match`, `athleteProfile`, `tournamentAthlete`
+- Data model: `tournament`, `division`, `match`, `athleteProfile`, `tournamentAthlete`
 - Storage: S3 bucket (planned for athlete images, but deferred for MVP)
 - Auth Model: System Admin only for MVP; arena-client access scoped to match execution.
 
@@ -291,7 +291,7 @@ UAC:
 
 - Phase 1: Admin CRM Foundation
   - Athlete registry + de-dup
-  - Tournament builder (Groups/Brackets)
+  - Tournament builder (Divisions/Brackets)
   - Bracket generation + audit log
 - Phase 2: Arena Client Integration
   - Advance Settings API integration

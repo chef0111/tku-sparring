@@ -28,7 +28,7 @@ export type TournamentAthleteRow = {
   affiliation: string;
   image: string | null;
   status: string;
-  groupId: string | null;
+  divisionId: string | null;
   seed: number | null;
   locked: boolean;
   notes: string | null;

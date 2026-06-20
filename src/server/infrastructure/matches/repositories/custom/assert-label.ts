@@ -7,7 +7,7 @@ type LabelDb = Pick<typeof prisma, 'match'>;
 export async function assertLabelAvailable(
   input: {
     tournamentId: string;
-    groupId: string;
+    divisionId: string;
     displayLabel: string;
     excludeMatchId?: string;
   },
@@ -24,7 +24,7 @@ export async function assertLabelAvailable(
 
   const { assignedBracketTitleKeys, allMatches } = await loadMatchLabelContext({
     tournamentId: input.tournamentId,
-    groupId: input.groupId,
+    divisionId: input.divisionId,
   });
 
   validateCustomMatchLabel(

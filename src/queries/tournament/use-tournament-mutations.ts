@@ -7,11 +7,11 @@ import type {
 } from '@/orpc/tournaments/dto';
 import type { TournamentStatus } from '@/contracts/tournament/list';
 import {
-  mergeArenaGroupOrderAfterCrossArenaMove,
-  mergeArenaGroupOrderAfterRetireArena,
-  patchArenaGroupOrderJson,
-} from '@/server/domain/tournament/arena/arena-group-order';
-import { groupListQueryOptions } from '@/queries/group/group-list-query-options';
+  mergeArenaDivisionOrderAfterCrossArenaMove,
+  mergeArenaDivisionOrderAfterRetireArena,
+  patchArenaDivisionOrderJson,
+} from '@/lib/tournament/arena/arena-division-order';
+import { divisionListQueryOptions } from '@/queries/division/division-list-query-options';
 import {
   invalidateAfterArenaLayoutChange,
   invalidateAfterTournamentStatusChange,
@@ -23,9 +23,9 @@ import {
   createTournament,
   deleteTournament,
   ensureArenaSlot,
-  moveGroupArena,
+  moveDivisionArena,
   retireArena,
-  setArenaGroupOrder,
+  setArenaDivisionOrder,
   setTournamentStatus,
   updateTournament,
 } from '@/queries/api/tournament-api';
@@ -64,11 +64,11 @@ export function useUpdateTournament(options?: { onSuccess?: () => void }) {
   });
 }
 
-export function useSetArenaGroupOrder() {
+export function useSetArenaDivisionOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: setArenaGroupOrder,
+    mutationFn: setArenaDivisionOrder,
     onMutate: async (variables) => {
       const key = tournamentQueryOptions(variables.tournamentId).queryKey;
       await queryClient.cancelQueries({ queryKey: key });
@@ -77,10 +77,10 @@ export function useSetArenaGroupOrder() {
         if (!old) return old;
         return {
           ...old,
-          arenaGroupOrder: patchArenaGroupOrderJson(
-            old.arenaGroupOrder,
+          arenaDivisionOrder: patchArenaDivisionOrderJson(
+            old.arenaDivisionOrder,
             variables.arenaIndex,
-            variables.groupIds
+            variables.divisionIds
           ),
         };
       });
@@ -101,42 +101,42 @@ export function useSetArenaGroupOrder() {
   });
 }
 
-export function useMoveGroupBetweenArenas() {
+export function useMoveDivisionBetweenArenas() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: moveGroupArena,
+    mutationFn: moveDivisionArena,
     onMutate: async (variables) => {
       const tKey = tournamentQueryOptions(variables.tournamentId).queryKey;
-      const gKey = groupListQueryOptions(variables.tournamentId).queryKey;
+      const dKey = divisionListQueryOptions(variables.tournamentId).queryKey;
 
       await queryClient.cancelQueries({ queryKey: tKey });
-      await queryClient.cancelQueries({ queryKey: gKey });
+      await queryClient.cancelQueries({ queryKey: dKey });
 
       const previousTournament = queryClient.getQueryData(tKey);
-      const previousGroups = queryClient.getQueryData(gKey);
+      const previousDivisions = queryClient.getQueryData(dKey);
 
       if (
         !previousTournament ||
         typeof previousTournament !== 'object' ||
-        !Array.isArray(previousGroups)
+        !Array.isArray(previousDivisions)
       ) {
-        return { tKey, gKey, previousTournament, previousGroups };
+        return { tKey, dKey, previousTournament, previousDivisions };
       }
 
-      const groups = previousGroups as Array<{
+      const divisions = previousDivisions as Array<{
         id: string;
         arenaIndex: number;
       }>;
       const tournament = previousTournament as
         | Record<string, unknown>
         | undefined;
-      const arenaGroupOrder = tournament?.arenaGroupOrder;
+      const arenaDivisionOrder = tournament?.arenaDivisionOrder;
 
-      const nextJson = mergeArenaGroupOrderAfterCrossArenaMove({
-        arenaGroupOrder,
-        groups,
-        groupId: variables.groupId,
+      const nextJson = mergeArenaDivisionOrderAfterCrossArenaMove({
+        arenaDivisionOrder,
+        divisions,
+        divisionId: variables.divisionId,
         fromArena: variables.fromArena,
         toArena: variables.toArena,
         insertIndex: variables.insertIndex,
@@ -146,37 +146,37 @@ export function useMoveGroupBetweenArenas() {
         if (!old) return old;
         return {
           ...old,
-          arenaGroupOrder: nextJson,
+          arenaDivisionOrder: nextJson,
         };
       });
 
-      queryClient.setQueryData(gKey, (old) => {
+      queryClient.setQueryData(dKey, (old) => {
         if (!Array.isArray(old)) return old;
-        return old.map((g) =>
-          g.id === variables.groupId
-            ? { ...g, arenaIndex: variables.toArena }
-            : g
+        return old.map((d) =>
+          d.id === variables.divisionId
+            ? { ...d, arenaIndex: variables.toArena }
+            : d
         );
       });
 
       return {
         previousTournament,
-        previousGroups,
+        previousDivisions,
         tKey,
-        gKey,
+        dKey,
       };
     },
     onError: (err, _variables, context) => {
       if (context?.previousTournament !== undefined) {
         queryClient.setQueryData(context.tKey, context.previousTournament);
       }
-      if (context?.previousGroups !== undefined) {
-        queryClient.setQueryData(context.gKey, context.previousGroups);
+      if (context?.previousDivisions !== undefined) {
+        queryClient.setQueryData(context.dKey, context.previousDivisions);
       }
       toast.error(
         err instanceof Error
           ? err.message
-          : 'Could not move group between arenas'
+          : 'Could not move division between arenas'
       );
     },
     onSettled: (_data, _err, variables) => {
@@ -198,8 +198,8 @@ export function useEnsureArenaSlot() {
         if (!old) return old;
         return {
           ...old,
-          arenaGroupOrder: patchArenaGroupOrderJson(
-            old.arenaGroupOrder,
+          arenaDivisionOrder: patchArenaDivisionOrderJson(
+            old.arenaDivisionOrder,
             variables.arenaIndex,
             []
           ),
@@ -228,34 +228,34 @@ export function useRetireArena() {
     mutationFn: (input: RetireArenaDTO) => retireArena(input),
     onMutate: async (variables) => {
       const tKey = tournamentQueryOptions(variables.tournamentId).queryKey;
-      const gKey = groupListQueryOptions(variables.tournamentId).queryKey;
+      const dKey = divisionListQueryOptions(variables.tournamentId).queryKey;
 
       await queryClient.cancelQueries({ queryKey: tKey });
-      await queryClient.cancelQueries({ queryKey: gKey });
+      await queryClient.cancelQueries({ queryKey: dKey });
 
       const previousTournament = queryClient.getQueryData(tKey);
-      const previousGroups = queryClient.getQueryData(gKey);
+      const previousDivisions = queryClient.getQueryData(dKey);
 
       if (
         !previousTournament ||
         typeof previousTournament !== 'object' ||
-        !Array.isArray(previousGroups)
+        !Array.isArray(previousDivisions)
       ) {
-        return { tKey, gKey, previousTournament, previousGroups };
+        return { tKey, dKey, previousTournament, previousDivisions };
       }
 
-      const groups = previousGroups as Array<{
+      const divisions = previousDivisions as Array<{
         id: string;
         arenaIndex: number;
       }>;
       const tournament = previousTournament as
         | Record<string, unknown>
         | undefined;
-      const arenaGroupOrder = tournament?.arenaGroupOrder;
+      const arenaDivisionOrder = tournament?.arenaDivisionOrder;
 
-      const nextJson = mergeArenaGroupOrderAfterRetireArena({
-        arenaGroupOrder,
-        groups,
+      const nextJson = mergeArenaDivisionOrderAfterRetireArena({
+        arenaDivisionOrder,
+        divisions,
         fromArena: variables.fromArena,
         toArena: variables.toArena,
       });
@@ -264,35 +264,35 @@ export function useRetireArena() {
         if (!old) return old;
         return {
           ...old,
-          arenaGroupOrder: nextJson,
+          arenaDivisionOrder: nextJson,
         };
       });
 
       queryClient.setQueryData<Array<{ id: string; arenaIndex: number }>>(
-        gKey,
+        dKey,
         (old) => {
           if (!Array.isArray(old)) return old;
-          return old.map((g) =>
-            g.arenaIndex === variables.fromArena
-              ? { ...g, arenaIndex: variables.toArena }
-              : g
+          return old.map((d) =>
+            d.arenaIndex === variables.fromArena
+              ? { ...d, arenaIndex: variables.toArena }
+              : d
           );
         }
       );
 
       return {
         previousTournament,
-        previousGroups,
+        previousDivisions,
         tKey,
-        gKey,
+        dKey,
       };
     },
     onError: (err, _variables, context) => {
       if (context?.previousTournament !== undefined) {
         queryClient.setQueryData(context.tKey, context.previousTournament);
       }
-      if (context?.previousGroups !== undefined) {
-        queryClient.setQueryData(context.gKey, context.previousGroups);
+      if (context?.previousDivisions !== undefined) {
+        queryClient.setQueryData(context.dKey, context.previousDivisions);
       }
       toast.error(
         err instanceof Error ? err.message : 'Could not remove arena'

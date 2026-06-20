@@ -56,7 +56,7 @@ describe('arenaMatchClaimStore.claim', () => {
 
     vi.mocked(tx.match.findUnique).mockResolvedValue({
       id: 'm1',
-      groupId: 'g1',
+      divisionId: 'g1',
       tournamentId: 't1',
       status: 'pending',
       tournament: { status: 'active' },
@@ -71,7 +71,7 @@ describe('arenaMatchClaimStore.claim', () => {
 
     await arenaMatchClaimStore.claim({
       matchId: 'm1',
-      groupId: 'g1',
+      divisionId: 'g1',
       tournamentId: 't1',
       deviceId: 'd1',
       userId: 'u1',
@@ -89,7 +89,7 @@ describe('arenaMatchClaimStore.claim', () => {
   it('rejects completed tournaments before claim writes', async () => {
     vi.mocked(tx.match.findUnique).mockResolvedValue({
       id: 'm1',
-      groupId: 'g1',
+      divisionId: 'g1',
       tournamentId: 't1',
       status: 'pending',
       tournament: { status: 'completed' },
@@ -98,7 +98,7 @@ describe('arenaMatchClaimStore.claim', () => {
     await expect(
       arenaMatchClaimStore.claim({
         matchId: 'm1',
-        groupId: 'g1',
+        divisionId: 'g1',
         tournamentId: 't1',
         deviceId: 'd1',
         userId: 'u1',

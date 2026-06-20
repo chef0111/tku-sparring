@@ -30,10 +30,10 @@ function buildSingleGroupBracketMeta(
   matches: ReadonlyArray<MatchData>,
   athleteCount: number
 ): ReadonlyMap<string, ArenaRound0BracketMeta> | undefined {
-  const gid = matches[0]?.groupId;
+  const gid = matches[0]?.divisionId;
   if (!gid || athleteCount < 1) return undefined;
   const round0 = matches.filter(
-    (x) => x.groupId === gid && x.kind !== 'custom' && x.round === 0
+    (x) => x.divisionId === gid && x.kind !== 'custom' && x.round === 0
   );
   const ta = new Set<string>();
   for (const x of round0) {
@@ -66,7 +66,7 @@ export function buildBracketActionQueue(
   });
   const out: Array<BracketActionQueueItem> = [];
 
-  const groupMeta =
+  const divisionMeta =
     options?.groupAthleteCount != null && options.groupAthleteCount >= 1
       ? buildSingleGroupBracketMeta(sorted, options.groupAthleteCount)
       : undefined;
@@ -76,7 +76,10 @@ export function buildBracketActionQueue(
     const emptyBlue = m.blueTournamentAthleteId == null;
     if (emptyRed && emptyBlue) continue;
 
-    if (m.kind !== 'custom' && isArenaSequenceEligible(m, groupMeta, sorted)) {
+    if (
+      m.kind !== 'custom' &&
+      isArenaSequenceEligible(m, divisionMeta, sorted)
+    ) {
       continue;
     }
 
@@ -103,11 +106,11 @@ function indexMatchesByGroupId(matches: ReadonlyArray<MatchData>) {
   const matchesByGroupId = new Map<string, Array<MatchData>>();
 
   for (const match of matches) {
-    const groupMatches = matchesByGroupId.get(match.groupId);
+    const groupMatches = matchesByGroupId.get(match.divisionId);
     if (groupMatches) {
       groupMatches.push(match);
     } else {
-      matchesByGroupId.set(match.groupId, [match]);
+      matchesByGroupId.set(match.divisionId, [match]);
     }
   }
 
@@ -115,13 +118,13 @@ function indexMatchesByGroupId(matches: ReadonlyArray<MatchData>) {
 }
 
 export function countActionableMatchesByGroupId(
-  groups: ReadonlyArray<ActionableMatchGroupInput>,
+  divisions: ReadonlyArray<ActionableMatchGroupInput>,
   matches: ReadonlyArray<MatchData>
 ) {
   const matchesByGroupId = indexMatchesByGroupId(matches);
 
   return new Map(
-    groups.map((group) => [
+    divisions.map((group) => [
       group.id,
       countActionableMatches(matchesByGroupId.get(group.id) ?? [], {
         groupAthleteCount: group._count.tournamentAthletes,
@@ -131,13 +134,13 @@ export function countActionableMatchesByGroupId(
 }
 
 export function countActionableMatchesForGroups(
-  groups: ReadonlyArray<ActionableMatchGroupInput>,
+  divisions: ReadonlyArray<ActionableMatchGroupInput>,
   matches: ReadonlyArray<MatchData>
 ): number {
   const matchesByGroupId = indexMatchesByGroupId(matches);
   let total = 0;
 
-  for (const group of groups) {
+  for (const group of divisions) {
     total += countActionableMatches(matchesByGroupId.get(group.id) ?? [], {
       groupAthleteCount: group._count.tournamentAthletes,
     });
@@ -151,7 +154,7 @@ export interface ActionableMatchTournamentGroupInput extends ActionableMatchGrou
 }
 
 export function countActionableMatchesByTournamentId(
-  groups: ReadonlyArray<ActionableMatchTournamentGroupInput>,
+  divisions: ReadonlyArray<ActionableMatchTournamentGroupInput>,
   matches: ReadonlyArray<MatchData>
 ) {
   const groupsByTournamentId = new Map<
@@ -160,7 +163,7 @@ export function countActionableMatchesByTournamentId(
   >();
   const matchesByTournamentId = new Map<string, Array<MatchData>>();
 
-  for (const group of groups) {
+  for (const group of divisions) {
     const tournamentGroups = groupsByTournamentId.get(group.tournamentId);
     if (tournamentGroups) {
       tournamentGroups.push(group);

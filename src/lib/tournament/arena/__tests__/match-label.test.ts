@@ -36,7 +36,7 @@ function m(
     blueLocked: false,
     cornersSwapped: false,
     updatedAt: new Date(0),
-    groupId: 'g',
+    divisionId: 'g',
     tournamentId: 't',
     ...over,
   };
@@ -108,9 +108,9 @@ describe('isArenaSequenceEligible', () => {
         },
       ],
     ]);
-    const phantom = m('phantom', 0, 1, { groupId: 'g' });
+    const phantom = m('phantom', 0, 1, { divisionId: 'g' });
     expect(isArenaSequenceEligible(phantom, meta)).toBe(true);
-    const real = m('real', 0, 0, { groupId: 'g' });
+    const real = m('real', 0, 0, { divisionId: 'g' });
     expect(isArenaSequenceEligible(real, meta)).toBe(false);
   });
 
@@ -192,7 +192,7 @@ describe('isArenaSequenceEligible', () => {
       ],
     ]);
     expect(
-      isArenaSequenceEligible(m('empty-mid', 0, 1, { groupId: 'g1' }), meta)
+      isArenaSequenceEligible(m('empty-mid', 0, 1, { divisionId: 'g1' }), meta)
     ).toBe(true);
   });
 
@@ -208,7 +208,7 @@ describe('isArenaSequenceEligible', () => {
       ],
     ]);
     expect(
-      isArenaSequenceEligible(m('empty-mid', 0, 1, { groupId: 'g1' }), meta)
+      isArenaSequenceEligible(m('empty-mid', 0, 1, { divisionId: 'g1' }), meta)
     ).toBe(false);
   });
 });
@@ -330,13 +330,13 @@ describe('buildArenaMatchNumberById', () => {
   it('skips numbering for round-0 BYE vs BYE when athleteCount is passed', () => {
     const gid = 'g1';
     const matches = [
-      m('r0-0', 0, 0, { groupId: gid }),
-      m('r0-1', 0, 1, { groupId: gid }),
-      m('r0-2', 0, 2, { groupId: gid }),
-      m('r0-3', 0, 3, { groupId: gid }),
-      m('r1-0', 1, 0, { groupId: gid }),
-      m('r1-1', 1, 1, { groupId: gid }),
-      m('fn', 2, 0, { groupId: gid }),
+      m('r0-0', 0, 0, { divisionId: gid }),
+      m('r0-1', 0, 1, { divisionId: gid }),
+      m('r0-2', 0, 2, { divisionId: gid }),
+      m('r0-3', 0, 3, { divisionId: gid }),
+      m('r1-0', 1, 0, { divisionId: gid }),
+      m('r1-1', 1, 1, { divisionId: gid }),
+      m('fn', 2, 0, { divisionId: gid }),
     ];
     const map = buildArenaMatchNumberById(matches, 1, false, 3);
     expect(map.get('r0-1')).toBeNull();
@@ -352,24 +352,24 @@ describe('buildArenaMatchNumberById', () => {
     const gid = 'g1';
     const matches = [
       m('r0-0', 0, 0, {
-        groupId: gid,
+        divisionId: gid,
         redTournamentAthleteId: 't1',
         blueTournamentAthleteId: 't2',
       }),
-      m('r0-1', 0, 1, { groupId: gid }),
+      m('r0-1', 0, 1, { divisionId: gid }),
       m('r0-2', 0, 2, {
-        groupId: gid,
+        divisionId: gid,
         redTournamentAthleteId: 't3',
         blueTournamentAthleteId: 't4',
       }),
       m('r0-3', 0, 3, {
-        groupId: gid,
+        divisionId: gid,
         redTournamentAthleteId: 't5',
         blueTournamentAthleteId: null,
       }),
-      m('r1-0', 1, 0, { groupId: gid }),
-      m('r1-1', 1, 1, { groupId: gid }),
-      m('fn', 2, 0, { groupId: gid }),
+      m('r1-0', 1, 0, { divisionId: gid }),
+      m('r1-1', 1, 1, { divisionId: gid }),
+      m('fn', 2, 0, { divisionId: gid }),
     ];
     const map = buildArenaMatchNumberById(matches, 1, false, 5);
     expect(map.get('r0-1')).toBeNull();
@@ -387,10 +387,10 @@ describe('buildMatchNumber', () => {
     id: string,
     round: number,
     matchIndex: number,
-    groupId: string,
+    divisionId: string,
     over: Partial<MatchData> = {}
   ): MatchData {
-    return m(id, round, matchIndex, { groupId, ...over });
+    return m(id, round, matchIndex, { divisionId, ...over });
   }
 
   it('interleaves rounds across groups A then B on the same arena', () => {
@@ -404,12 +404,12 @@ describe('buildMatchNumber', () => {
     ];
     const map = buildMatchNumber({
       arenaIndex: 1,
-      groups: [
+      divisions: [
         { id: 'ga', thirdPlaceMatch: false },
         { id: 'gb', thirdPlaceMatch: false },
       ],
       matches,
-      groupOrder: ['ga', 'gb'],
+      divisionOrder: ['ga', 'gb'],
     });
     expect(map.get('A-r0-0')).toBe(101);
     expect(map.get('A-r0-3')).toBe(104);
@@ -426,25 +426,25 @@ describe('buildMatchNumber', () => {
     }
   });
 
-  it('reverses per-round group priority when groupOrder is flipped', () => {
+  it('reverses per-round group priority when divisionOrder is flipped', () => {
     const matches = [mG('A0', 0, 0, 'ga'), mG('B0', 0, 0, 'gb')];
     const mapAB = buildMatchNumber({
       arenaIndex: 1,
-      groups: [
+      divisions: [
         { id: 'ga', thirdPlaceMatch: false },
         { id: 'gb', thirdPlaceMatch: false },
       ],
       matches,
-      groupOrder: ['ga', 'gb'],
+      divisionOrder: ['ga', 'gb'],
     });
     const mapBA = buildMatchNumber({
       arenaIndex: 1,
-      groups: [
+      divisions: [
         { id: 'ga', thirdPlaceMatch: false },
         { id: 'gb', thirdPlaceMatch: false },
       ],
       matches,
-      groupOrder: ['gb', 'ga'],
+      divisionOrder: ['gb', 'ga'],
     });
     expect(mapAB.get('A0')).toBe(101);
     expect(mapAB.get('B0')).toBe(102);
@@ -463,9 +463,9 @@ describe('buildMatchNumber', () => {
     ]);
     const map = buildMatchNumber({
       arenaIndex: 1,
-      groups: [{ id: 'g', thirdPlaceMatch: false }],
+      divisions: [{ id: 'g', thirdPlaceMatch: false }],
       matches,
-      groupOrder: ['g'],
+      divisionOrder: ['g'],
       manualRankByMatchId: manual,
     });
     expect(map.get('b')).toBe(101);
@@ -488,9 +488,9 @@ describe('getFeederMatch', () => {
 
   it('does not pick a feeder from another group with the same round and matchIndex', () => {
     const matches = [
-      m('g1-r0', 0, 0, { groupId: 'g1' }),
-      m('g2-r0', 0, 0, { groupId: 'g2' }),
-      m('g1-r1', 1, 0, { groupId: 'g1' }),
+      m('g1-r0', 0, 0, { divisionId: 'g1' }),
+      m('g2-r0', 0, 0, { divisionId: 'g2' }),
+      m('g1-r1', 1, 0, { divisionId: 'g1' }),
     ];
     expect(getFeederMatch(matches, 'g1', 1, 0, 'red')?.id).toBe('g1-r0');
     expect(getFeederMatch(matches, 'g1', 1, 0, 'blue')).toBeUndefined();
