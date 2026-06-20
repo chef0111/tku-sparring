@@ -1,21 +1,21 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
 import React from 'react';
-import type { AthleteDrawerMode } from '@/features/dashboard/athlete/components/athlete-drawer';
+import type { AthleteDrawerMode } from '@/features/dashboard/components/athlete/athlete-drawer';
 import type {
   AthleteProfileData,
   AthleteRow,
 } from '@/features/dashboard/types';
 import type { DataTableRowAction } from '@/types/data-table';
 import { FeatureFlagsProvider } from '@/contexts/feature-flags';
-import { AthleteDrawer } from '@/features/dashboard/athlete/components/athlete-drawer';
-import { AthleteTable } from '@/features/dashboard/athlete/components/athlete-table';
-import { AthleteEditSheet } from '@/features/dashboard/athlete/components/athlete-table/athlete-edit-sheet';
-import { getAthletesTableColumns } from '@/features/dashboard/athlete/components/athlete-table/athletes-table-columns';
-import { AthleteImportDialog } from '@/features/dashboard/athlete/components/dialogs/athlete-import-dialog';
-import { DeleteAthleteDialog } from '@/features/dashboard/athlete/components/dialogs/delete-athlete-dialog';
-import { athleteProfileToRow } from '@/features/dashboard/athlete/lib/athlete-profile-to-row';
-import { SiteHeader } from '@/features/dashboard/site-header';
+import { AthleteDrawer } from '@/features/dashboard/components/athlete/athlete-drawer';
+import { AthleteTable } from '@/features/dashboard/components/athlete/athlete-table';
+import { AthleteEditSheet } from '@/features/dashboard/components/athlete/athlete-table/athlete-edit-sheet';
+import { getAthletesTableColumns } from '@/features/dashboard/components/athlete/athlete-table/athletes-table-columns';
+import { AthleteImportDialog } from '@/features/dashboard/components/athlete/dialogs/athlete-import-dialog';
+import { DeleteAthleteDialog } from '@/features/dashboard/components/athlete/dialogs/delete-athlete-dialog';
+import { athleteProfileToRow } from '@/features/dashboard/lib/athlete/athlete-profile-to-row';
+import { SiteHeader } from '@/features/dashboard/components/sidebar/site-header';
 import {
   athleteProfilesDefaultListInput,
   athleteProfilesQueryOptions,

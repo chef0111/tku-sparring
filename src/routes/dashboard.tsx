@@ -1,5 +1,5 @@
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router';
-import { AppSidebar } from '@/features/dashboard/app-sidebar';
+import { AppSidebar } from '@/features/dashboard/components/sidebar/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import LoadingScreen from '@/components/navigation/loading';
 import { sessionQueryOptions } from '@/queries/session';
