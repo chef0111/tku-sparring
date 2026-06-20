@@ -1,4 +1,4 @@
-import type { MatchData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
 
 export function normalizeMatchLabelKey(label: string): string {
   return label.trim().toLowerCase();

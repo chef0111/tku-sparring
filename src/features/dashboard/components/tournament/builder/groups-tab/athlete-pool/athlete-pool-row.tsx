@@ -1,7 +1,7 @@
 import { Plus } from 'lucide-react';
 import { useDraggable } from '@dnd-kit/core';
 import { toast } from 'sonner';
-import type { TournamentAthleteData } from '@/features/dashboard/types';
+import type { TournamentAthleteData } from '@/contracts/tournament/group';
 import { getBeltLabel } from '@/config/athlete';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

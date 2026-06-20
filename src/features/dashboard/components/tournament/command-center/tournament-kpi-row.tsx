@@ -1,9 +1,7 @@
 import { Layers, LayoutGrid, Users } from 'lucide-react';
-import type {
-  GroupData,
-  MatchData,
-  TournamentData,
-} from '@/features/dashboard/types';
+import type { GroupData } from '@/contracts/tournament/group';
+import type { MatchData } from '@/contracts/tournament/match';
+import type { TournamentData } from '@/contracts/tournament/list';
 import {
   HubMetricCard,
   HubMetricFooter,

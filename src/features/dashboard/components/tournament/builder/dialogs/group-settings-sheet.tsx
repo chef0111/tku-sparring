@@ -1,5 +1,5 @@
 import { SaveIcon, Trash2 } from 'lucide-react';
-import type { GroupData } from '@/features/dashboard/types';
+import type { GroupData } from '@/contracts/tournament/group';
 import {
   SheetContent,
   SheetDescription,

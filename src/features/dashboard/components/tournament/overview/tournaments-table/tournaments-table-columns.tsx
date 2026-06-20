@@ -4,10 +4,8 @@ import { TournamentStatusPill } from '../../tournament-status-pill';
 import { TournamentsActionMenu } from './tournaments-action-menu';
 import type { ColumnDef } from '@tanstack/react-table';
 
-import type {
-  TournamentListItem,
-  TournamentRowActionOptions,
-} from '@/features/dashboard/types';
+import type { TournamentListItem } from '@/contracts/tournament/list';
+import type { TournamentRowActionOptions } from '@/features/dashboard/lib/tournament/row-action-options';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 
 function resolveRowData(

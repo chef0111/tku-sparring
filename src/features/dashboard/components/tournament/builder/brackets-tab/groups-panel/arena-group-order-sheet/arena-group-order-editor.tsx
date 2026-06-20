@@ -7,7 +7,7 @@ import {
 import { useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, MapPin, MinusIcon } from 'lucide-react';
-import type { GroupData } from '@/features/dashboard/types';
+import type { GroupData } from '@/contracts/tournament/group';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';

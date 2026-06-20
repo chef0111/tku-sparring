@@ -12,7 +12,7 @@ import {
   roundLabelPlacements,
   twoSidedMatchRowGap,
 } from '../bracket-layout';
-import type { MatchData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
 import {
   FINAL_FEEDER_EXTRA,
   MATCH_H,

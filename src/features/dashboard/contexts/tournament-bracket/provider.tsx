@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useBuilderWorkspace } from '../builder-workspace/use-builder-workspace';
 import { TournamentBracketContext } from './context';
-import type { MatchData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
 import type { TournamentBracketContextValue } from './context';
 import { useBuilderManagerQuery } from '@/features/dashboard/hooks/use-builder-manager-query';
 import { useBracketsTabDnd } from '@/features/dashboard/hooks/use-brackets-tab-dnd';

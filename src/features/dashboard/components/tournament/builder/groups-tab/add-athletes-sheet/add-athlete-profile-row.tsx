@@ -1,4 +1,4 @@
-import type { AthleteProfileData } from '@/features/dashboard/types';
+import type { AthleteProfileData } from '@/contracts/athlete/profile';
 import { getBeltLabel } from '@/config/athlete';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';

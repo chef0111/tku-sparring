@@ -1,4 +1,4 @@
-import type { TournamentData } from '@/features/dashboard/types';
+import type { TournamentData } from '@/contracts/tournament/list';
 import type { User } from '@/lib/auth';
 import { TournamentStatusPill } from '@/features/dashboard/components/tournament/tournament-status-pill';
 import { ThemeToggle } from '@/components/ui/theme-toggle';

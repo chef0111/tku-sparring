@@ -2,7 +2,7 @@ import * as React from 'react';
 import { MouseSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { toast } from 'sonner';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
-import type { TournamentAthleteData } from '@/features/dashboard/types';
+import type { TournamentAthleteData } from '@/contracts/tournament/group';
 import {
   useAssignSlot,
   useSwapParticipants,

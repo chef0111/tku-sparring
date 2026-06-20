@@ -1,7 +1,7 @@
 import type {
   AthleteProfileData,
   AthleteRow,
-} from '@/features/dashboard/types';
+} from '@/contracts/athlete/profile';
 
 export function athleteProfileToRow(profile: AthleteProfileData): AthleteRow {
   return {

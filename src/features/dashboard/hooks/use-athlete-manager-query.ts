@@ -5,7 +5,7 @@ import {
   parseAsStringEnum,
   useQueryState,
 } from 'nuqs';
-import type { AthleteProfileData } from '@/features/dashboard/types';
+import type { AthleteProfileData } from '@/contracts/athlete/profile';
 import {
   getFiltersStateParser,
   getSortingStateParser,

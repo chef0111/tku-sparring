@@ -4,10 +4,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { TournamentsActionMenu } from '../tournaments-table/tournaments-action-menu';
 import { TournamentStatusPill } from '../../tournament-status-pill';
 import type { Row } from '@tanstack/react-table';
-import type {
-  TournamentListItem,
-  TournamentRowActionOptions,
-} from '@/features/dashboard/types';
+import type { TournamentListItem } from '@/contracts/tournament/list';
+import type { TournamentRowActionOptions } from '@/features/dashboard/lib/tournament/row-action-options';
 import {
   Card,
   CardContent,

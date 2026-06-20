@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import type { MatchData, TournamentData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
+import type { TournamentData } from '@/contracts/tournament/list';
 import { computeCommandCenter } from '@/features/dashboard/lib/tournament/compute-command-center';
 
 export function useTournamentCommandCenter(input: {

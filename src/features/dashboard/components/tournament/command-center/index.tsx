@@ -23,11 +23,9 @@ import {
   TournamentKpiRowSkeleton,
 } from './loading';
 import type { TournamentStatus } from './tournament-status-dialog';
-import type {
-  GroupData,
-  MatchData,
-  TournamentData,
-} from '@/features/dashboard/types';
+import type { GroupData } from '@/contracts/tournament/group';
+import type { MatchData } from '@/contracts/tournament/match';
+import type { TournamentData } from '@/contracts/tournament/list';
 import { useTournamentCommandCenter } from '@/features/dashboard/hooks/use-tournament-command-center';
 import { SiteHeader } from '@/features/dashboard/components/sidebar/site-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';

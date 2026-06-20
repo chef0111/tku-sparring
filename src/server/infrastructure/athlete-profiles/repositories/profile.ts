@@ -5,7 +5,7 @@ import type {
   ListAthleteProfilesQuery,
   UpdateProfileData,
 } from '@/server/application/athlete-profiles/use-cases/profile-commands';
-import type { AthleteProfileData } from '@/features/dashboard/types';
+import type { AthleteProfileData } from '@/contracts/athlete/profile';
 import { prisma } from '@/lib/db';
 import { filterColumns } from '@/lib/data-table/filter-columns';
 import {

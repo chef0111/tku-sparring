@@ -3,10 +3,8 @@ import { BracketConnectors } from './bracket-connectors';
 import { BracketFinalMatchNode } from './bracket-final-match-node';
 import { BracketMatchNode } from './bracket-match-node';
 import { BracketRoundLabels } from './bracket-round-labels';
-import type {
-  MatchData,
-  TournamentAthleteData,
-} from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
+import type { TournamentAthleteData } from '@/contracts/tournament/group';
 import type {
   BracketCanvasLayout,
   BracketConnectorPath,

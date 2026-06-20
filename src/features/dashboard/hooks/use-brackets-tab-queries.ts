@@ -1,5 +1,6 @@
 import * as React from 'react';
-import type { GroupData, MatchData } from '@/features/dashboard/types';
+import type { GroupData } from '@/contracts/tournament/group';
+import type { MatchData } from '@/contracts/tournament/match';
 import {
   buildArenaMatchNumberById,
   buildManualRankMap,

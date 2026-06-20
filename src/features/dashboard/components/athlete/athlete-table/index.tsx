@@ -5,8 +5,7 @@ import { BulkAddAthletesDialog } from '../dialogs/bulk-add-athletes-dialog';
 import { BulkDeleteAthletesDialog } from '../dialogs/bulk-delete-athletes-dialog';
 import { AthletesActionBar } from './athletes-action-bar';
 import type { ColumnDef } from '@tanstack/react-table';
-import type { AthleteProfileData } from '@/features/dashboard/types';
-
+import type { AthleteProfileData } from '@/contracts/athlete/profile';
 import type { AthleteProfilesDTO } from '@/orpc/athlete-profiles/dto';
 import { exportAthletesTableToCSV } from '@/features/dashboard/lib/athlete/export-athletes-csv';
 import { useAthleteTableQuery } from '@/features/dashboard/hooks/use-athlete-manager-query';

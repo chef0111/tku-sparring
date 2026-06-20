@@ -1,5 +1,5 @@
 import { MoreHorizontal } from 'lucide-react';
-import type { GroupData } from '@/features/dashboard/types';
+import type { GroupData } from '@/contracts/tournament/group';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import {

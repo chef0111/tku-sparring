@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react';
 import { GroupRailRow } from './group-rail-row';
-import type { GroupData } from '@/features/dashboard/types';
+import type { GroupData } from '@/contracts/tournament/group';
 import { Button } from '@/components/ui/button';
 
 interface GroupsRailProps {

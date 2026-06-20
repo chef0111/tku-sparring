@@ -1,5 +1,5 @@
 import { Trash2 } from 'lucide-react';
-import type { AthleteProfileData } from '@/features/dashboard/types';
+import type { AthleteProfileData } from '@/contracts/athlete/profile';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

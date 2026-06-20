@@ -6,10 +6,8 @@ import {
 } from '@tanstack/react-table';
 import type { SortingState, VisibilityState } from '@tanstack/react-table';
 import type { DataTableControlledState } from '@/hooks/use-data-table';
-import type {
-  TournamentListItem,
-  TournamentRowActionOptions,
-} from '@/features/dashboard/types';
+import type { TournamentListItem } from '@/contracts/tournament/list';
+import type { TournamentRowActionOptions } from '@/features/dashboard/lib/tournament/row-action-options';
 import { getTournamentsTableColumns } from '@/features/dashboard/components/tournament/overview/tournaments-table/tournaments-table-columns';
 
 export function useRecentTournamentsTable(

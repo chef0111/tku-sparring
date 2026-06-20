@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { Link } from '@tanstack/react-router';
 import { Layers, LayoutGrid } from 'lucide-react';
-import type { GroupData, MatchData } from '@/features/dashboard/types';
+import type { GroupData } from '@/contracts/tournament/group';
+import type { MatchData } from '@/contracts/tournament/match';
 import {
   HubMetricCard,
   HubMetricFooter,

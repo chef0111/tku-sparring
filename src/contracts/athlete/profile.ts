@@ -1,5 +1,3 @@
-import type { DataTableRowAction } from '@/types/data-table';
-
 export interface AthleteProfileData {
   id: string;
   athleteCode: string;
@@ -22,9 +20,4 @@ export type AthleteRow = {
   weight: number;
   affiliation: string;
   image: string;
-};
-
-export type ColumnOptions = {
-  onRowAction: (action: DataTableRowAction<AthleteProfileData>) => void;
-  nameFilterQueryKey?: 'name' | 'query';
 };

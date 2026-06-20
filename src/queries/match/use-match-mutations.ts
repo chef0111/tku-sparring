@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import type { MatchData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
 import type { BracketDnDMutationContext } from '@/queries/optimistic-updates/match';
 import {
   applyOptimisticAssign,

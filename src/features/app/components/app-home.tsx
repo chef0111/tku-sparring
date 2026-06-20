@@ -1,8 +1,8 @@
 import { Activity } from 'react';
-import { AppArenaSideEffects } from './components/app-arena-side-effects';
-import { AppHUD } from './components/hud';
-import { ResultDialog } from './components/match-result';
-import { Scoreboard } from './components/scoreboard';
+import { AppArenaSideEffects } from './app-arena-side-effects';
+import { AppHUD } from './hud';
+import { ResultDialog } from './match-result';
+import { Scoreboard } from './scoreboard';
 import { useMatchResult } from '@/hooks/use-match-result';
 import { useFinishMatch } from '@/features/app/hooks/use-finish-match';
 import { Navbar } from '@/components/navigation/navbar';

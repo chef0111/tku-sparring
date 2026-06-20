@@ -1,10 +1,8 @@
 import * as React from 'react';
 import { BracketLayoutToggle } from './bracket-layout-toggle';
 import { BracketViewToolbar } from './bracket-view-toolbar';
-import type {
-  MatchData,
-  TournamentAthleteData,
-} from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
+import type { TournamentAthleteData } from '@/contracts/tournament/group';
 import { useBracketChrome } from '@/features/dashboard/contexts/bracket-chrome';
 import { useTournamentBracket } from '@/features/dashboard/contexts/tournament-bracket/use-tournament-bracket';
 import { useBracketCanvasLayout } from '@/features/dashboard/hooks/use-bracket-canvas-layout';

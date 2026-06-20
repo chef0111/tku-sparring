@@ -9,10 +9,8 @@ import {
 } from 'lucide-react';
 import * as React from 'react';
 import type { Row } from '@tanstack/react-table';
-import type {
-  AthleteProfileData,
-  ColumnOptions,
-} from '@/features/dashboard/types';
+import type { AthleteProfileData } from '@/contracts/athlete/profile';
+import type { ColumnOptions } from '@/features/dashboard/lib/athlete/column-options';
 import {
   DropdownMenu,
   DropdownMenuContent,

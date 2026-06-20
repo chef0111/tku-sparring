@@ -1,5 +1,5 @@
 import { ArrowRight, UserPlus } from 'lucide-react';
-import type { GroupData } from '@/features/dashboard/types';
+import type { GroupData } from '@/contracts/tournament/group';
 import { Button } from '@/components/ui/button';
 import { useAutoAssignGroup } from '@/queries/group';
 import { Spinner } from '@/components/ui/spinner';

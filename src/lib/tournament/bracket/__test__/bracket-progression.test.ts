@@ -6,7 +6,7 @@ import {
   isResettableMatch,
   isRound0ByeMatch,
 } from '../bracket-progression';
-import type { MatchData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
 
 function baseBracket(over: Partial<MatchData> = {}): MatchData {
   return {

@@ -6,7 +6,7 @@ import {
   IconX,
 } from '@tabler/icons-react';
 import type { Table } from '@tanstack/react-table';
-import type { AthleteProfileData } from '@/features/dashboard/types';
+import type { AthleteProfileData } from '@/contracts/athlete/profile';
 import type { DataTableControlledState } from '@/hooks/use-data-table';
 import { exportAthletesTableToCSV } from '@/features/dashboard/lib/athlete/export-athletes-csv';
 import {

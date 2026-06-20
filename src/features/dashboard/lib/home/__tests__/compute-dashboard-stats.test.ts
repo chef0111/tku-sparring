@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { computeDashboardStats } from '../compute-dashboard-stats';
-import type { TournamentListItem } from '@/features/dashboard/types';
+import type { TournamentListItem } from '@/contracts/tournament/list';
 
 function makeTournament(
   overrides: Partial<TournamentListItem> &

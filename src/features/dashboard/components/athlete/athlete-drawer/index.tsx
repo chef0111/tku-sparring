@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 import { PlusIcon, SaveIcon } from 'lucide-react';
 import { AthleteRowFields } from './athlete-row-fields';
-import type { AthleteRow } from '@/features/dashboard/types';
+import type { AthleteRow } from '@/contracts/athlete/profile';
 import { Button } from '@/components/ui/button';
 import {
   Drawer,

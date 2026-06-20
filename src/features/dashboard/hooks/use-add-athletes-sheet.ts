@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import type { AthleteProfileData } from '@/features/dashboard/types';
+import type { AthleteProfileData } from '@/contracts/athlete/profile';
 import { bulkAddAthleteResult } from '@/features/dashboard/lib/athlete/bulk-add-athletes';
 import { useBulkAddAthletes } from '@/queries/tournament-athlete';
 import {

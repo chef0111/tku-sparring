@@ -12,16 +12,16 @@ import type { Row } from '@tanstack/react-table';
 
 import type {
   TournamentListItem,
-  TournamentRowActionOptions,
   TournamentStatus,
-} from '@/features/dashboard/types';
+} from '@/contracts/tournament/list';
+import type { TournamentRowActionOptions } from '@/features/dashboard/lib/tournament/row-action-options';
 import {
   TOURNAMENT_STATUS_LABEL,
   forceSetTournamentStatus,
   isBackwardStatusTransition,
   tournamentStatusRiskNotes,
 } from '@/lib/tournament/tournament-status';
-import { TOURNAMENT_STATUSES } from '@/features/dashboard/types';
+import { TOURNAMENT_STATUSES } from '@/contracts/tournament/list';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,

@@ -1,4 +1,4 @@
-import type { MatchData, MatchStatus } from '@/features/dashboard/types';
+import type { MatchData, MatchStatus } from '@/contracts/tournament/match';
 
 export type BracketCanvasLayout = 'two-sided' | 'one-sided';
 

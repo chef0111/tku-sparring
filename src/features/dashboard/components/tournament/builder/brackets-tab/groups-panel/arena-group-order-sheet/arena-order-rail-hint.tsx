@@ -1,4 +1,4 @@
-import type { GroupData } from '@/features/dashboard/types';
+import type { GroupData } from '@/contracts/tournament/group';
 import {
   arenaIndicesForOrderPanel,
   shouldShowArenaOrderUi,

@@ -1,5 +1,5 @@
 import { ArenaGroupOrdersPanel } from './arena-group-orders-panel';
-import type { GroupData } from '@/features/dashboard/types';
+import type { GroupData } from '@/contracts/tournament/group';
 import { useBracketChrome } from '@/features/dashboard/contexts/bracket-chrome';
 import {
   Sheet,

@@ -1,6 +1,6 @@
 import { Settings } from 'lucide-react';
 import { useDroppable } from '@dnd-kit/core';
-import type { GroupData } from '@/features/dashboard/types';
+import type { GroupData } from '@/contracts/tournament/group';
 import { Button } from '@/components/ui/button';
 import { SheetTrigger } from '@/components/ui/sheet';
 import { Status, StatusIndicator } from '@/components/ui/status';

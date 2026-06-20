@@ -4,7 +4,7 @@ import type {
   TournamentListItem,
   TournamentSortField,
   TournamentStatus,
-} from '@/features/dashboard/types';
+} from '@/contracts/tournament/list';
 import { useTournamentList } from '@/queries/tournament';
 import { useDataTable } from '@/hooks/use-data-table';
 import { cn } from '@/lib/utils';

@@ -1,4 +1,4 @@
-import type { MatchData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
 import type { ArenaRound0BracketMeta } from '@/lib/tournament/match-eligibility';
 import { isArenaSequenceEligible } from '@/lib/tournament/match-eligibility';
 

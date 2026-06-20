@@ -1,5 +1,5 @@
 import type { Table } from '@tanstack/react-table';
-import type { AthleteProfileData } from '@/features/dashboard/types';
+import type { AthleteProfileData } from '@/contracts/athlete/profile';
 
 function csvCell(value: unknown): string {
   if (value === null || value === undefined) return '';

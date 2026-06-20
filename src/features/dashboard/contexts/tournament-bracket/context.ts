@@ -1,6 +1,7 @@
 import { createContext } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
-import type { GroupData, MatchData } from '@/features/dashboard/types';
+import type { GroupData } from '@/contracts/tournament/group';
+import type { MatchData } from '@/contracts/tournament/match';
 import type { BracketsTabDndSnapshot } from '@/features/dashboard/hooks/use-brackets-tab-dnd';
 import type { BracketsTabQueriesSnapshot } from '@/features/dashboard/hooks/use-brackets-tab-queries';
 

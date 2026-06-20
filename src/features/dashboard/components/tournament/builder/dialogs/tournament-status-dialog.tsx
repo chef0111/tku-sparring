@@ -1,4 +1,4 @@
-import type { TournamentStatus } from '@/features/dashboard/types';
+import type { TournamentStatus } from '@/contracts/tournament/list';
 import {
   TOURNAMENT_STATUS_LABEL,
   tournamentStatusRiskNotes,

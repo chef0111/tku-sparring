@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { AlertTriangle, SaveIcon } from 'lucide-react';
 import type z from 'zod';
-import type { AthleteProfileData } from '@/features/dashboard/types';
+import type { AthleteProfileData } from '@/contracts/athlete/profile';
 import { EditAthleteSchema } from '@/lib/validations';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';

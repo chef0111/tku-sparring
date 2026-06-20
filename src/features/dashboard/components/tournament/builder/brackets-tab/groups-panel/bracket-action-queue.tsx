@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { MatchSheetStatus } from '../match-detail-panel/match-sheet-status';
-import type { MatchData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
 import { useTournamentBracket } from '@/features/dashboard/contexts/tournament-bracket/use-tournament-bracket';
 import { buildBracketActionQueue } from '@/lib/tournament/bracket/bracket-action-queue';
 import { getBracketRoundLabel } from '@/lib/tournament/bracket/bracket-round-label';

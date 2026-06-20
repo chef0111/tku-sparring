@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { CustomSlotDTO } from '@/orpc/matches/dto';
-import type { MatchData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
 import type { CreateCustomMatchFormValues } from '@/lib/validations';
 import { formatArenaMatchTitle } from '@/lib/tournament/arena/match-label';
 import { customMatchCornersUseSameSource } from '@/lib/validations';

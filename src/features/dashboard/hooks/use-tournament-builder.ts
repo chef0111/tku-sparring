@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBuilderManagerQuery } from './use-builder-manager-query';
+import type { GroupData } from '@/contracts/tournament/group';
 import type {
-  GroupData,
   TournamentData,
   TournamentStatus,
-} from '@/features/dashboard/types';
+} from '@/contracts/tournament/list';
 import { invalidateGroupListQueries } from '@/queries/group';
 import { useTournamentReadOnly } from '@/hooks/use-tournament-read-only';
 import { authClient } from '@/lib/auth-client';

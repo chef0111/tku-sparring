@@ -1,7 +1,7 @@
 import type {
   TournamentListItem,
   TournamentStatus,
-} from '@/features/dashboard/types';
+} from '@/contracts/tournament/list';
 
 export interface DashboardStats {
   kpis: {

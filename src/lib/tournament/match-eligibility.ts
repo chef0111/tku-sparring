@@ -1,4 +1,4 @@
-import type { MatchData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
 import { buildSlotMap } from '@/lib/tournament/bracket/bracket-seeding';
 
 export type ArenaRound0BracketMeta = {

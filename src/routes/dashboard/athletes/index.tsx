@@ -5,7 +5,7 @@ import type { AthleteDrawerMode } from '@/features/dashboard/components/athlete/
 import type {
   AthleteProfileData,
   AthleteRow,
-} from '@/features/dashboard/types';
+} from '@/contracts/athlete/profile';
 import type { DataTableRowAction } from '@/types/data-table';
 import { FeatureFlagsProvider } from '@/contexts/feature-flags';
 import { AthleteDrawer } from '@/features/dashboard/components/athlete/athlete-drawer';

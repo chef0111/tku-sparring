@@ -11,8 +11,8 @@ import {
 import type {
   TournamentData,
   TournamentStatus,
-} from '@/features/dashboard/types';
-import { TOURNAMENT_STATUSES } from '@/features/dashboard/types';
+} from '@/contracts/tournament/list';
+import { TOURNAMENT_STATUSES } from '@/contracts/tournament/list';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { computeCommandCenter } from '../compute-command-center';
-import type { MatchData, TournamentData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
+import type { TournamentData } from '@/contracts/tournament/list';
 
 const tournament = {
   id: 't1',

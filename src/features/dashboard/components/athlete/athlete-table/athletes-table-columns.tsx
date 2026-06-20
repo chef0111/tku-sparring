@@ -1,9 +1,7 @@
 import { AthleteAvatar } from '../athlete-avatar';
 import AthletesActionMenu from './athletes-action-menu';
-import type {
-  AthleteProfileData,
-  ColumnOptions,
-} from '@/features/dashboard/types';
+import type { AthleteProfileData } from '@/contracts/athlete/profile';
+import type { ColumnOptions } from '@/features/dashboard/lib/athlete/column-options';
 import type { ColumnDef } from '@tanstack/react-table';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { Badge } from '@/components/ui/badge';

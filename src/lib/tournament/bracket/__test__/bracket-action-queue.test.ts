@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildBracketActionQueue } from '../bracket-action-queue';
 import type { BracketActionQueueItem } from '../bracket-action-queue';
-import type { MatchData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
 
 function baseMatch(over: Partial<MatchData>): MatchData {
   return {

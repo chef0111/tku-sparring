@@ -2,7 +2,7 @@ import { AlertTriangle } from 'lucide-react';
 import type {
   GroupData,
   TournamentAthleteData,
-} from '@/features/dashboard/types';
+} from '@/contracts/tournament/group';
 import { Badge } from '@/components/ui/badge';
 import {
   Tooltip,

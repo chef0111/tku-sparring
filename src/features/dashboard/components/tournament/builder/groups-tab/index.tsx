@@ -8,7 +8,7 @@ import { AthletePool } from './athlete-pool';
 import { GroupRosterTable } from './group-roster-table';
 import { GroupsRail } from './groups-rail';
 import type { DragEndEvent } from '@dnd-kit/core';
-import type { GroupData } from '@/features/dashboard/types';
+import type { GroupData } from '@/contracts/tournament/group';
 import { useBuilderManagerQuery } from '@/features/dashboard/hooks/use-builder-manager-query';
 import { useAssignAthlete } from '@/queries/group';
 import { Dialog } from '@/components/ui/dialog';

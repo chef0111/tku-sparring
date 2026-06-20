@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { MatchData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
 import { isArenaSequenceEligible } from '@/lib/tournament/match-eligibility';
 import {
   buildArenaMatchNumberById,

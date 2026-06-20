@@ -1,4 +1,5 @@
-import type { MatchData, TournamentData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
+import type { TournamentData } from '@/contracts/tournament/list';
 
 export interface SetupStep {
   id: 'athletes' | 'groups' | 'brackets';

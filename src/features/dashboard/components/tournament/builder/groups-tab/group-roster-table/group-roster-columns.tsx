@@ -4,7 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import type {
   GroupData,
   TournamentAthleteData,
-} from '@/features/dashboard/types';
+} from '@/contracts/tournament/group';
 import { AthleteAvatar } from '@/features/dashboard/components/athlete/athlete-avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

@@ -18,7 +18,7 @@ import type { DashboardStats } from '@/features/dashboard/lib/home/compute-dashb
 import type {
   TournamentListItem,
   TournamentStatus,
-} from '@/features/dashboard/types';
+} from '@/contracts/tournament/list';
 import type { StatusProps } from '@/components/ui/status';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

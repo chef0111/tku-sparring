@@ -21,7 +21,8 @@ import type {
   DragStartEvent,
 } from '@dnd-kit/core';
 import type { ArenaCrossInsertPreview } from './arena-group-order-editor';
-import type { GroupData, TournamentData } from '@/features/dashboard/types';
+import type { GroupData } from '@/contracts/tournament/group';
+import type { TournamentData } from '@/contracts/tournament/list';
 import {
   arenaIndicesForOrderPanel,
   nextArenaSlotToAdd,

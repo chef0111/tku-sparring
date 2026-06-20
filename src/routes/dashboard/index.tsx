@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import type { TournamentListItem } from '@/features/dashboard/types';
+import type { TournamentListItem } from '@/contracts/tournament/list';
 import type { DataTableRowAction } from '@/types/data-table';
 import { CreateTournamentDialog } from '@/features/dashboard/components/tournament/create-tournament-dialog';
 import { DeleteTournamentDialog } from '@/features/dashboard/components/tournament/overview/dialogs/delete-tournament-dialog';

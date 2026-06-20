@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { MatchData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
 import type {
   BracketCanvasLayout,
   BracketConnectorPath,

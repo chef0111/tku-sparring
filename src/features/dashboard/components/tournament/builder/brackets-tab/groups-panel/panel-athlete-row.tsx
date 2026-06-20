@@ -1,6 +1,6 @@
 import { useDraggable } from '@dnd-kit/core';
 import { GripVertical } from 'lucide-react';
-import type { TournamentAthleteData } from '@/features/dashboard/types';
+import type { TournamentAthleteData } from '@/contracts/tournament/group';
 import { cn } from '@/lib/utils';
 import { getBeltLabel } from '@/config/athlete';
 

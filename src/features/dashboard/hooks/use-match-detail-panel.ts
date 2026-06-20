@@ -1,8 +1,6 @@
 import * as React from 'react';
-import type {
-  MatchStatus,
-  TournamentAthleteData,
-} from '@/features/dashboard/types';
+import type { MatchStatus } from '@/contracts/tournament/match';
+import type { TournamentAthleteData } from '@/contracts/tournament/group';
 import { useTournamentBracket } from '@/features/dashboard/contexts/tournament-bracket/use-tournament-bracket';
 import {
   useAdminSetMatchStatus,

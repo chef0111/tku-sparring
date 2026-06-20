@@ -1,4 +1,3 @@
-import type { DataTableRowAction } from '@/types/data-table';
 import type {
   TournamentListItemDTO,
   TournamentStatusDTO,
@@ -18,11 +17,6 @@ export const TOURNAMENT_STATUSES: ReadonlyArray<TournamentStatus> = [
   'active',
   'completed',
 ];
-
-export interface TournamentRowActionOptions {
-  onRowAction: (action: DataTableRowAction<TournamentListItem>) => void;
-  resolveTournament?: (id: string) => TournamentListItem | undefined;
-}
 
 export interface TournamentData {
   id: string;

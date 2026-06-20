@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
-import type { GroupData } from '@/features/dashboard/types';
+import type { GroupData } from '@/contracts/tournament/group';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
