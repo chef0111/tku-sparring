@@ -14,7 +14,7 @@ import type { TournamentListItem } from '@/features/dashboard/types';
 import type { DataTableRowAction } from '@/types/data-table';
 import { SiteHeader } from '@/features/dashboard/site-header';
 
-export function TournamentsListManager() {
+export function TournamentsOverview() {
   const [createOpen, setCreateOpen] = React.useState(false);
   const [rowAction, setRowAction] =
     React.useState<DataTableRowAction<TournamentListItem> | null>(null);

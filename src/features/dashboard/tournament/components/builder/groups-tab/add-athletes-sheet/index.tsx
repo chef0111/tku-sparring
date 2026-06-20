@@ -1,5 +1,4 @@
 import { UserPlus } from 'lucide-react';
-import { useAddAthletesSheet } from 'src/features/dashboard/tournament/hooks/use-add-athletes-sheet';
 import {
   PoolBeltFilter,
   PoolGenderSelect,
@@ -7,6 +6,7 @@ import {
   PoolWeightFilter,
 } from '../athlete-pool/filters';
 import { AddAthletesList } from './add-athletes-list';
+import { useAddAthletesSheet } from '@/features/dashboard/tournament/hooks/use-add-athletes-sheet';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {

@@ -1,7 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import * as React from 'react';
 import { ArrowLeft, Trophy } from 'lucide-react';
-import { TournamentActivitySheet } from 'src/features/dashboard/tournament/components/tournament-activity-sheet';
 import {
   BracketChromeProvider,
   useBracketChrome,
@@ -9,6 +8,7 @@ import {
 import { BuilderWorkspaceProvider } from '../../contexts/builder-workspace';
 import { useTournamentBuilder } from '../../hooks/use-tournament-builder';
 import { TournamentBracketProvider } from '../../contexts/tournament-bracket';
+import { TournamentActivitySheet } from '../tournament-activity-sheet';
 import { BuilderShell } from './builder-shell';
 import { BuilderHeader } from './builder-shell/builder-header';
 import { BuilderFooter } from './builder-shell/builder-footer';
@@ -25,11 +25,11 @@ import { useTournamentRealtimeStream } from '@/hooks/use-tournament-realtime-str
 import { useSetTournamentStatus, useTournament } from '@/queries/tournament';
 import { useGroups } from '@/queries/group';
 
-interface TournamentBuilderPageProps {
+interface TournamentBuilderProps {
   id: string;
 }
 
-export function TournamentBuilderPage({ id }: TournamentBuilderPageProps) {
+export function TournamentBuilder({ id }: TournamentBuilderProps) {
   useTournamentRealtimeStream(id);
 
   const tournamentQuery = useTournament(id);

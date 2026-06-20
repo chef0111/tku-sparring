@@ -1,8 +1,8 @@
 import { Settings } from 'lucide-react';
-import { useGroupRosterTable } from 'src/features/dashboard/tournament/hooks/use-group-roster-table';
 import { GroupViolationCountBadge } from '../out-of-range-badge';
 import { GroupRosterEmptyState } from './group-roster-empty-state';
 import type { GroupData } from '@/features/dashboard/types';
+import { useGroupRosterTable } from '@/features/dashboard/tournament/hooks/use-group-roster-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Status, StatusIndicator, StatusLabel } from '@/components/ui/status';

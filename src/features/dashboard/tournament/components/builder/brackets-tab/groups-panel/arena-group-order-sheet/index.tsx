@@ -1,6 +1,6 @@
-import { useBracketChrome } from 'src/features/dashboard/tournament/contexts/bracket-chrome';
 import { ArenaGroupOrdersPanel } from './arena-group-orders-panel';
 import type { GroupData } from '@/features/dashboard/types';
+import { useBracketChrome } from '@/features/dashboard/tournament/contexts/bracket-chrome';
 import {
   Sheet,
   SheetContent,

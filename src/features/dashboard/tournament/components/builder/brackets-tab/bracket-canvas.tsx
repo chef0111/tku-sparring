@@ -1,14 +1,14 @@
 import * as React from 'react';
-import { useBracketChrome } from 'src/features/dashboard/tournament/contexts/bracket-chrome';
-import { useTournamentBracket } from 'src/features/dashboard/tournament/contexts/tournament-bracket/use-tournament-bracket';
-import { useBracketCanvasLayout } from 'src/features/dashboard/tournament/hooks/use-bracket-canvas-layout';
-import { usePanZoom } from 'src/features/dashboard/tournament/hooks/use-pan-zoom';
 import { BracketLayoutToggle } from './bracket-layout-toggle';
 import { BracketViewToolbar } from './bracket-view-toolbar';
 import type {
   MatchData,
   TournamentAthleteData,
 } from '@/features/dashboard/types';
+import { useBracketChrome } from '@/features/dashboard/tournament/contexts/bracket-chrome';
+import { useTournamentBracket } from '@/features/dashboard/tournament/contexts/tournament-bracket/use-tournament-bracket';
+import { useBracketCanvasLayout } from '@/features/dashboard/tournament/hooks/use-bracket-canvas-layout';
+import { usePanZoom } from '@/features/dashboard/tournament/hooks/use-pan-zoom';
 import { Bracket } from '@/components/tournament-bracket/bracket';
 import { useBracketLayout } from '@/hooks/use-bracket-layout';
 import { useSetLock } from '@/queries/match';

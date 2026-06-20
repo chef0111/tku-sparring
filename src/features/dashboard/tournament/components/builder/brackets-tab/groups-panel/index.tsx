@@ -1,11 +1,11 @@
 import { useDroppable } from '@dnd-kit/core';
 import { BetweenHorizonalEnd } from 'lucide-react';
-import { useTournamentBracket } from 'src/features/dashboard/tournament/contexts/tournament-bracket/use-tournament-bracket';
 import { GroupsPanelSkeleton } from '../skeletons';
 import { ArenaOrderRailHint } from './arena-group-order-sheet/arena-order-rail-hint';
 import { BracketActionQueue } from './bracket-action-queue';
 import { GroupsTabsHeader } from './groups-tabs-header';
 import { PanelAthleteRow } from './panel-athlete-row';
+import { useTournamentBracket } from '@/features/dashboard/tournament/contexts/tournament-bracket/use-tournament-bracket';
 import {
   Empty,
   EmptyDescription,

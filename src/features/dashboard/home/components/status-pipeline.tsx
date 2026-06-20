@@ -200,6 +200,16 @@ function PipelineStageEmpty({
   );
 }
 
+interface PipelineStageProps {
+  status: TournamentStatus;
+  label: string;
+  subtitle: string;
+  viewAllLabel: string;
+  icon: LucideIcon;
+  items: Array<TournamentListItem>;
+  count: number;
+}
+
 function PipelineStage({
   status,
   label,
@@ -208,17 +218,9 @@ function PipelineStage({
   icon,
   items,
   count,
-}: {
-  status: TournamentStatus;
-  label: string;
-  subtitle: string;
-  viewAllLabel: string;
-  icon: LucideIcon;
-  items: Array<TournamentListItem>;
-  count: number;
-}) {
+}: PipelineStageProps) {
   return (
-    <div className="flex h-full min-h-72 min-w-[78vw] shrink-0 snap-center flex-col sm:min-w-[52vw] xl:min-w-0">
+    <div className="flex h-full min-w-[78vw] shrink-0 snap-center flex-col sm:min-w-[52vw] xl:min-w-0">
       <div
         className={cn(
           'flex min-h-0 flex-1 flex-col border-l-2',

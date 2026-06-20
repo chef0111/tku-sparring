@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { ArrowRight, UserX, Users } from 'lucide-react';
 import { AddAthleteProfileRow } from './add-athlete-profile-row';
-import type { AddAthletesSheetState } from 'src/features/dashboard/tournament/hooks/use-add-athletes-sheet';
+import type { AddAthletesSheetState } from '@/features/dashboard/tournament/hooks/use-add-athletes-sheet';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';

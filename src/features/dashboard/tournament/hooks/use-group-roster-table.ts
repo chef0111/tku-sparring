@@ -2,11 +2,11 @@ import * as React from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { toast } from 'sonner';
-import { getViolations } from 'src/features/dashboard/tournament/components/builder/groups-tab/out-of-range-badge';
-import { getGroupRosterColumns } from 'src/features/dashboard/tournament/components/builder/groups-tab/group-roster-table/group-roster-columns';
 import type { PaginationState, SortingState } from '@tanstack/react-table';
 import type { GroupData } from '@/features/dashboard/types';
 import type { ListTournamentAthletesDTO } from '@/orpc/tournament-athletes/dto';
+import { getGroupRosterColumns } from '@/features/dashboard/tournament/components/builder/groups-tab/group-roster-table/group-roster-columns';
+import { getViolations } from '@/features/dashboard/tournament/components/builder/groups-tab/out-of-range-badge';
 import { useTournamentAthletes } from '@/queries/tournament-athlete';
 import { useAssignAthlete, useUnassignAthlete } from '@/queries/group';
 

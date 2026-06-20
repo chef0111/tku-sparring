@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { useTournamentBracket } from 'src/features/dashboard/tournament/contexts/tournament-bracket/use-tournament-bracket';
 import type {
   MatchStatus,
   TournamentAthleteData,
 } from '@/features/dashboard/types';
+import { useTournamentBracket } from '@/features/dashboard/tournament/contexts/tournament-bracket/use-tournament-bracket';
 import {
   useAdminSetMatchStatus,
   useDeleteMatch,

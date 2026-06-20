@@ -1,6 +1,6 @@
-import { isArenaSequenceEligible } from 'src/lib/tournament/match-eligibility';
 import type { MatchData } from '@/features/dashboard/types';
-import type { ArenaRound0BracketMeta } from 'src/lib/tournament/match-eligibility';
+import type { ArenaRound0BracketMeta } from '@/lib/tournament/match-eligibility';
+import { isArenaSequenceEligible } from '@/lib/tournament/match-eligibility';
 
 export interface BracketActionQueueItem {
   match: MatchData;

@@ -1,18 +1,18 @@
 import * as React from 'react';
 import { PlusIcon } from 'lucide-react';
-import { useTournamentBracket } from 'src/features/dashboard/tournament/contexts/tournament-bracket/use-tournament-bracket';
-import {
-  AthleteSelectionSync,
-  DedupeAthleteSelection,
-  buildSlot,
-  matchOptionLabel,
-} from 'src/features/dashboard/tournament/lib/custom-match';
 import type { CreateCustomMatchDTO } from '@/orpc/matches/dto';
 import type { CreateCustomMatchFormValues } from '@/lib/validations';
 import type {
   MatchData,
   TournamentAthleteData,
 } from '@/features/dashboard/types';
+import {
+  AthleteSelectionSync,
+  DedupeAthleteSelection,
+  buildSlot,
+  matchOptionLabel,
+} from '@/features/dashboard/tournament/lib/custom-match';
+import { useTournamentBracket } from '@/features/dashboard/tournament/contexts/tournament-bracket/use-tournament-bracket';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

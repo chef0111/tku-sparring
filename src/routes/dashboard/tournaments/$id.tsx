@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { TournamentCommandCenter } from 'src/features/dashboard/tournament/components/command-center';
-import { useTournamentRealtimeStream } from 'src/hooks/use-tournament-realtime-stream';
+import { TournamentCommandCenter } from '@/features/dashboard/tournament/components/command-center';
+import { useTournamentRealtimeStream } from '@/hooks/use-tournament-realtime-stream';
 import { groupListQueryOptions } from '@/queries/group/group-list-query-options';
 import { activityListInfiniteQueryOptions } from '@/queries/activity';
 import { tournamentMatchesQueryOptions } from '@/queries/match';
