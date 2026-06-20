@@ -6,7 +6,7 @@ import type {
   SwapSlotsDTO,
   UpdateScoreDTO,
 } from '@/orpc/matches/dto';
-import type { MatchData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
 import {
   getSuccessorSlot,
   resolveAdvanceSide,

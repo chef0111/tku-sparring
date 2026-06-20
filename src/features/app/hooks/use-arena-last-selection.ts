@@ -3,8 +3,8 @@ import * as React from 'react';
 import { authClient } from '@/lib/auth-client';
 import { client } from '@/orpc/client';
 import { useArenaMutation } from '@/features/app/hooks/use-arena-mutation';
-import { useDeviceId } from '@/hooks/use-device-id';
-import { useSettings } from '@/contexts/settings';
+import { useDeviceId } from '@/features/app/hooks/use-device-id';
+import { useSettings } from '@/features/app/contexts/settings';
 
 const LS_KEY = 'tku-arena-last-selection';
 

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { TournamentStatus } from '@/features/dashboard/types';
+import type { TournamentStatus } from '@/contracts/tournament/list';
 
 export const TournamentStatusSchema = z.enum(['draft', 'active', 'completed']);
 export type TournamentStatusValue = z.infer<typeof TournamentStatusSchema>;

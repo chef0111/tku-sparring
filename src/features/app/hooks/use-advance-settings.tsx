@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { getTournamentFields } from '../components/settings/constant/form';
-import { resolveGroupComboboxStatus } from '../components/settings/lib/group';
-import { resolveMatchComboboxRow } from '../components/settings/lib/match';
 import type { QueryClient, UseQueryResult } from '@tanstack/react-query';
-import type { AdvanceFormData } from '@/contexts/settings/context';
+import type { AdvanceFormData } from '@/features/app/contexts/settings/context';
 import type {
   SelectionGroupRow,
   SelectionMatchRow,
 } from '@/contracts/advance/selection';
+import { resolveMatchComboboxRow } from '@/features/app/lib/settings/match';
+import { resolveGroupComboboxStatus } from '@/features/app/lib/settings/group';
 import {
   arenaSelectionCatalogQueryOptions,
   arenaSelectionMatchesQueryOptions,

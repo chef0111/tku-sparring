@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { UserDropdown } from '../user/user-dropdown';
 import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth-client';
-import { useSettings } from '@/contexts/settings';
+import { useSettings } from '@/features/app/contexts/settings';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { AppSettings } from '@/features/app/components/settings';
 

@@ -5,11 +5,11 @@ import { Controller, ControllerContent, ScoreButtons } from './controller';
 import { CriticalButtons, NormalButtons } from './score-button';
 import { PenaltyBox } from './penalty-box';
 import { PlayerLabel } from './player-label';
-import type { HitType, Player } from '@/lib/scoreboard/hit-types';
-import { keyboardMappings } from '@/lib/scoreboard/hit-types';
-import { useTimerStore } from '@/stores/timer-store';
-import { usePlayerStore } from '@/stores/player-store';
-import { useSettings } from '@/contexts/settings';
+import type { HitType, Player } from '@/features/app/lib/scoreboard/hit-types';
+import { keyboardMappings } from '@/features/app/lib/scoreboard/hit-types';
+import { useTimerStore } from '@/features/app/stores/timer-store';
+import { usePlayerStore } from '@/features/app/stores/player-store';
+import { useSettings } from '@/features/app/contexts/settings';
 
 interface ControlsProps {
   side: 'red' | 'blue';

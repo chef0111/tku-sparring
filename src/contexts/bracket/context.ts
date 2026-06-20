@@ -1,8 +1,6 @@
 import { createContext } from 'react';
-import type {
-  MatchData,
-  TournamentAthleteData,
-} from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
+import type { TournamentAthleteData } from '@/contracts/tournament/group';
 
 export interface BracketContextValue {
   matches: Array<MatchData>;

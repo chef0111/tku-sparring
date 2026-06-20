@@ -3,11 +3,11 @@ import { useShallow } from 'zustand/react/shallow';
 import { HitIcon } from './hit-icon';
 import { Record, TotalWins } from './record';
 import { StatsCard } from './stats';
-import type { HitType } from '@/lib/scoreboard/hit-types';
+import type { HitType } from '@/features/app/lib/scoreboard/hit-types';
 import { cn } from '@/lib/utils';
-import { usePlayerStore } from '@/stores/player-store';
-import { useMatchStore } from '@/stores/match-store';
-import { useTimerStore } from '@/stores/timer-store';
+import { usePlayerStore } from '@/features/app/stores/player-store';
+import { useMatchStore } from '@/features/app/stores/match-store';
+import { useTimerStore } from '@/features/app/stores/timer-store';
 import { Card } from '@/components/ui/card';
 
 interface ScoreBoxProps {

@@ -1,12 +1,12 @@
 import { motion } from 'motion/react';
-import type { HitType, Player } from '@/lib/scoreboard/hit-types';
+import type { HitType, Player } from '@/features/app/lib/scoreboard/hit-types';
 import { cn } from '@/lib/utils';
 import {
   criticalHits,
   getButtonIconPath,
   keyboardMappings,
   normalHits,
-} from '@/lib/scoreboard/hit-types';
+} from '@/features/app/lib/scoreboard/hit-types';
 
 interface ButtonColumnProps {
   player: Player;

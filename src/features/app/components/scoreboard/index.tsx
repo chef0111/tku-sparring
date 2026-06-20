@@ -4,10 +4,10 @@ import { ScoreBox } from './score-box';
 import { Controls } from './controls';
 import type { TemporalState } from 'zundo';
 import type { StoreApi } from 'zustand';
-import type { PlayerStore } from '@/stores/player-store';
+import type { PlayerStore } from '@/features/app/stores/player-store';
 import { useMatchReset } from '@/features/app/hooks/use-match-reset';
-import { usePlayerStore } from '@/stores/player-store';
-import { useSettings } from '@/contexts/settings';
+import { usePlayerStore } from '@/features/app/stores/player-store';
+import { useSettings } from '@/features/app/contexts/settings';
 import { cn } from '@/lib/utils';
 
 interface ScoreboardProps {

@@ -14,7 +14,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { NotFound } from '@/components/not-found';
 import { cn } from '@/lib/utils';
-import { SettingsProvider } from '@/contexts/settings';
+import { SettingsProvider } from '@/features/app/contexts/settings';
 import { useResolvedTheme } from '@/contexts/themes/use-theme';
 
 interface MyRouterContext {

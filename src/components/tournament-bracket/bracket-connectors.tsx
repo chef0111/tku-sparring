@@ -1,5 +1,5 @@
 import type { BracketConnectorPath } from '@/lib/tournament/bracket/bracket-layout';
-import type { MatchStatus } from '@/features/dashboard/types';
+import type { MatchStatus } from '@/contracts/tournament/match';
 
 const statusStroke: Record<MatchStatus, string> = {
   pending: 'stroke-muted-foreground/40',

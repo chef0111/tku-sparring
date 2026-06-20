@@ -1,6 +1,6 @@
 import { buildOneSidedConnectors, buildTwoSidedConnectors } from './connectors';
 import { layoutCenterX, matchX, oneSidedMatchX } from './coords';
-import type { MatchData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
 import type {
   BracketCanvasLayout,
   BracketConnectorPath,

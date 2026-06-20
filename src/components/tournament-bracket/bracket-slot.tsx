@@ -1,10 +1,8 @@
 import * as React from 'react';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { Lock, LockOpen } from 'lucide-react';
-import type {
-  MatchData,
-  TournamentAthleteData,
-} from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
+import type { TournamentAthleteData } from '@/contracts/tournament/group';
 import { ATHLETE_ROW_H, MATCH_W } from '@/config/bracket';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';

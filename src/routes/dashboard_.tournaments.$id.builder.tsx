@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { TournamentBuilderPage } from 'src/features/dashboard/tournament/components/builder';
+import { TournamentBuilder } from '@/features/dashboard/components/tournament/builder';
 import LoadingScreen from '@/components/navigation/loading';
 import { groupListQueryOptions } from '@/queries/group/group-list-query-options';
 import { tournamentQueryOptions } from '@/queries/tournament';
@@ -13,15 +13,15 @@ export const Route = createFileRoute('/dashboard_/tournaments/$id/builder')({
   pendingComponent: () => <LoadingScreen title="Loading workspace..." />,
   pendingMs: 0,
   pendingMinMs: 0,
-  component: TournamentBuilder,
+  component: TournamentBuilderPage,
 });
 
-function TournamentBuilder() {
+function TournamentBuilderPage() {
   const { id } = Route.useParams();
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="start-theme">
-      <TournamentBuilderPage id={id} />
+      <TournamentBuilder id={id} />
     </ThemeProvider>
   );
 }

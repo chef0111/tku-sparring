@@ -5,7 +5,7 @@ import type {
   EnsureArenaSlotDTO,
   RetireArenaDTO,
 } from '@/orpc/tournaments/dto';
-import type { TournamentStatus } from '@/features/dashboard/types';
+import type { TournamentStatus } from '@/contracts/tournament/list';
 import {
   mergeArenaGroupOrderAfterCrossArenaMove,
   mergeArenaGroupOrderAfterRetireArena,

@@ -1,0 +1,46 @@
+import { HubSection, HubSectionContent } from './hub-panel';
+import type { TournamentListItem } from '@/contracts/tournament/list';
+import type { DataTableRowAction } from '@/types/data-table';
+import { useRecentTournamentsTable } from '@/features/dashboard/hooks/use-recent-tournaments-table';
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTableSkeleton } from '@/components/data-table/data-table-skeleton';
+
+interface RecentTournamentsSectionProps {
+  tournaments: Array<TournamentListItem>;
+  pending: boolean;
+  onRowAction: (action: DataTableRowAction<TournamentListItem>) => void;
+}
+
+export function RecentTournamentsSection({
+  tournaments,
+  pending,
+  onRowAction,
+}: RecentTournamentsSectionProps) {
+  const { table, tableState } = useRecentTournamentsTable(
+    tournaments,
+    onRowAction
+  );
+
+  return (
+    <HubSection title="Recent tournaments">
+      <HubSectionContent padded={false}>
+        {pending ? (
+          <DataTableSkeleton
+            columnCount={6}
+            rowCount={3}
+            withViewOptions={false}
+            withPagination={false}
+          />
+        ) : (
+          <DataTable
+            table={table}
+            state={tableState}
+            selectedRows={false}
+            pagination={false}
+            className="gap-0"
+          />
+        )}
+      </HubSectionContent>
+    </HubSection>
+  );
+}

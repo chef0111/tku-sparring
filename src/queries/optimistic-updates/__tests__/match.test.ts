@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { MatchData } from '@/features/dashboard/types';
+import type { MatchData } from '@/contracts/tournament/match';
 import { applyOptimisticUpdateScore } from '@/queries/optimistic-updates/match';
 
 function baseMatch(over: Partial<MatchData> = {}): MatchData {

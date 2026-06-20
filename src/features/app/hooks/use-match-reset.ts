@@ -1,5 +1,8 @@
 import { useCallback } from 'react';
-import { redoRound, replayMatch } from '@/stores/arena-scoring-actions';
+import {
+  redoRound,
+  replayMatch,
+} from '@/features/app/stores/arena-scoring-actions';
 
 export function useMatchReset() {
   const resetRound = useCallback(() => {

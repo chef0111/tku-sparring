@@ -5,13 +5,13 @@ import { SkipForward } from 'lucide-react';
 import { ClockSection } from './clock-section';
 import { MatchInfo, RoundInfo } from './match-info';
 import { cn } from '@/lib/utils';
-import { useTimerStore } from '@/stores/timer-store';
-import { useMatchStore } from '@/stores/match-store';
-import { useTimerTick } from '@/hooks/use-timer-tick';
-import { useRoundTransition } from '@/hooks/use-round-transition';
-import { useDeclareWinner } from '@/hooks/use-winner';
+import { useTimerStore } from '@/features/app/stores/timer-store';
+import { useMatchStore } from '@/features/app/stores/match-store';
+import { useTimerTick } from '@/features/app/hooks/use-timer-tick';
+import { useRoundTransition } from '@/features/app/hooks/use-round-transition';
+import { useDeclareWinner } from '@/features/app/hooks/use-winner';
 import { Button } from '@/components/ui/button';
-import { useSettings } from '@/contexts/settings';
+import { useSettings } from '@/features/app/contexts/settings';
 
 export const Timer = () => {
   const {
