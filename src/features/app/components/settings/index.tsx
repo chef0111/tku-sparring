@@ -1,6 +1,6 @@
 import { settingTabs } from './constant/tabs';
 import { Unauthorized } from './unauthorized';
-import { useSettings } from '@/contexts/settings';
+import { useSettings } from '@/features/app/contexts/settings';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import {

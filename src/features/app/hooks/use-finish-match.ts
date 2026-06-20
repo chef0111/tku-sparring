@@ -3,9 +3,9 @@ import { useShallow } from 'zustand/react/shallow';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { useArenaMutation } from '@/features/app/hooks/use-arena-mutation';
-import { useSettings } from '@/contexts/settings';
-import { useMatchStore } from '@/stores/match-store';
-import { afterFinish } from '@/stores/arena-scoring-actions';
+import { useSettings } from '@/features/app/contexts/settings';
+import { useMatchStore } from '@/features/app/stores/match-store';
+import { afterFinish } from '@/features/app/stores/arena-scoring-actions';
 import { invalidateAdvanceSettingsQueries } from '@/queries/advance-settings/invalidate-advance-settings-cache';
 import { advanceSettingsKeys } from '@/queries/keys';
 

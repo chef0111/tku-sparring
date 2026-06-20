@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useAnimate } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { computeHealthKeyframes } from '@/lib/hud/health-utils';
+import { computeHealthKeyframes } from '@/features/app/lib/hud/health-utils';
 
 interface HealthbarProps {
   health: number;

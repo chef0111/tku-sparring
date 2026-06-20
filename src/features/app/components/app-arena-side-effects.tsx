@@ -1,5 +1,5 @@
 import { authClient } from '@/lib/auth-client';
-import { useSettings } from '@/contexts/settings';
+import { useSettings } from '@/features/app/contexts/settings';
 import { useArenaLastSelection } from '@/features/app/hooks/use-arena-last-selection';
 import { useMatchSync } from '@/features/app/hooks/use-match-sync';
 import { useRoundSubmit } from '@/features/app/hooks/use-round-submit';

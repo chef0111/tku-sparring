@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { useTimerStore } from '@/stores/timer-store';
-import { useMatchStore } from '@/stores/match-store';
+import { useTimerStore } from '@/features/app/stores/timer-store';
+import { useMatchStore } from '@/features/app/stores/match-store';
 
 export const useRoundTransition = () => {
   const { isBreakTime, breakTimeLeft, roundDuration } = useTimerStore(

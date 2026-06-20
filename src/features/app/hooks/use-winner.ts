@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import type { PlayerData } from '@/stores/player-store';
-import { usePlayerStore } from '@/stores/player-store';
-import { useMatchStore } from '@/stores/match-store';
-import { useTimerStore } from '@/stores/timer-store';
+import type { PlayerData } from '@/features/app/stores/player-store';
+import { usePlayerStore } from '@/features/app/stores/player-store';
+import { useMatchStore } from '@/features/app/stores/match-store';
+import { useTimerStore } from '@/features/app/stores/timer-store';
 
 type WinResult = Player | 'tie';
 

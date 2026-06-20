@@ -1,8 +1,11 @@
 import { create } from 'zustand';
 import { temporal } from 'zundo';
 import type { StateCreator } from 'zustand';
-import type { HitType } from '@/lib/scoreboard/hit-types';
-import { hitCooldown, hitDamage } from '@/lib/scoreboard/hit-types';
+import type { HitType } from '@/features/app/lib/scoreboard/hit-types';
+import {
+  hitCooldown,
+  hitDamage,
+} from '@/features/app/lib/scoreboard/hit-types';
 
 export interface PlayerData {
   name: string;

@@ -2,8 +2,8 @@ import * as React from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { useArenaMutation } from '@/features/app/hooks/use-arena-mutation';
-import { useSettings } from '@/contexts/settings';
-import { useMatchStore } from '@/stores/match-store';
+import { useSettings } from '@/features/app/contexts/settings';
+import { useMatchStore } from '@/features/app/stores/match-store';
 
 export function useRoundSubmit() {
   const { mutateAsync } = useArenaMutation();

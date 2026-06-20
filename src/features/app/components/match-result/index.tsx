@@ -1,5 +1,5 @@
 import { useShallow } from 'zustand/react/shallow';
-import { usePlayerStore } from '@/stores/player-store';
+import { usePlayerStore } from '@/features/app/stores/player-store';
 import {
   DialogContent,
   DialogFooter,

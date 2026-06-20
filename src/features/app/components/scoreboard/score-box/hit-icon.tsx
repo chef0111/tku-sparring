@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { Transition } from 'motion/react';
-import type { HitType, Player } from '@/lib/scoreboard/hit-types';
+import type { HitType, Player } from '@/features/app/lib/scoreboard/hit-types';
 import { cn } from '@/lib/utils';
 import {
   getHitIconPath,
   isCriticalHit,
   isSuperCriticalHit,
-} from '@/lib/scoreboard/hit-types';
+} from '@/features/app/lib/scoreboard/hit-types';
 
 interface HitIconProps {
   player: Player;

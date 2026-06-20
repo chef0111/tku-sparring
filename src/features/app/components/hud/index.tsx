@@ -3,9 +3,9 @@ import { useShallow } from 'zustand/react/shallow';
 import { Healthbar } from './healthbar';
 import { Manabar } from './manabar';
 import { PlayerAvatar } from './player-avatar';
-import { usePlayerStore } from '@/stores/player-store';
-import { useDeclareWinner } from '@/hooks/use-winner';
-import { isCriticalHit } from '@/lib/scoreboard/hit-types';
+import { usePlayerStore } from '@/features/app/stores/player-store';
+import { useDeclareWinner } from '@/features/app/hooks/use-winner';
+import { isCriticalHit } from '@/features/app/lib/scoreboard/hit-types';
 import { cn } from '@/lib/utils';
 
 export const AppHUD = ({ className }: { className?: string }) => {

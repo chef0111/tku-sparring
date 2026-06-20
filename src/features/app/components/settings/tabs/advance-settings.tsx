@@ -7,13 +7,13 @@ import { advancePlayerGroup } from '../constant/form';
 import { CommonSettings } from './common-settings';
 import { useAdvanceSettingsComboboxState } from './use-advance-settings-combobox-state';
 import type { AdvanceSettingsComboboxFormHandle } from './use-advance-settings-combobox-state';
-import { useSettings } from '@/contexts/settings';
+import { useSettings } from '@/features/app/contexts/settings';
 import { useAppForm } from '@/components/form/hooks';
 import { AdvanceSettingsSchema } from '@/lib/validations';
 import { FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field';
 import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth-client';
-import { useDeviceId } from '@/hooks/use-device-id';
+import { useDeviceId } from '@/features/app/hooks/use-device-id';
 import {
   useArenaSelectionCatalog,
   useArenaSelectionMatches,

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { useMatchStore } from '@/stores/match-store';
+import { useMatchStore } from '@/features/app/stores/match-store';
 
 export const useMatchResult = () => {
   const { redWon, blueWon, isMatchOver, matchWinner } = useMatchStore(

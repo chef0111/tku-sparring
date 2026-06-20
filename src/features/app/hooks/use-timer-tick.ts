@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useTimerStore } from '@/stores/timer-store';
+import { useTimerStore } from '@/features/app/stores/timer-store';
 
 export const useTimerTick = () => {
   const isRunning = useTimerStore((s) => s.isRunning);

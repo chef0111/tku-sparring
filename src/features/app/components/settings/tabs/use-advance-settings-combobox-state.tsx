@@ -4,7 +4,7 @@ import { getTournamentFields } from '../constant/form';
 import { resolveGroupComboboxStatus } from '../lib/group';
 import { resolveMatchComboboxRow } from '../lib/match';
 import type { QueryClient, UseQueryResult } from '@tanstack/react-query';
-import type { AdvanceFormData } from '@/contexts/settings/context';
+import type { AdvanceFormData } from '@/features/app/contexts/settings/context';
 import type {
   SelectionGroupRow,
   SelectionMatchRow,

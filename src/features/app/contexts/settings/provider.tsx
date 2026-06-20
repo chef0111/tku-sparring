@@ -11,11 +11,11 @@ import type {
   FormState,
   StandardFormData,
 } from './context';
-import { usePlayerStore } from '@/stores/player-store';
-import { useTimerStore } from '@/stores/timer-store';
-import { useMatchStore } from '@/stores/match-store';
-import { prepArena } from '@/stores/arena-scoring-actions';
-import { useDeviceId } from '@/hooks/use-device-id';
+import { usePlayerStore } from '@/features/app/stores/player-store';
+import { useTimerStore } from '@/features/app/stores/timer-store';
+import { useMatchStore } from '@/features/app/stores/match-store';
+import { prepArena } from '@/features/app/stores/arena-scoring-actions';
+import { useDeviceId } from '@/features/app/hooks/use-device-id';
 import { arenaSelectionMatchesQueryOptions } from '@/queries/advance-settings/arena-selection-query-options';
 import { client } from '@/orpc/client';
 
